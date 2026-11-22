@@ -206,9 +206,6 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error "https://dislop.com/api/health" >/dev/null
           curl --fail --location --silent --show-error \
-            "https://github.com/modelcontextprotocol/registry/releases/download/v1.3.8/mcp-publisher_linux_amd64.tar.gz" \
-            -o mcp-publisher.tar.gz || \
-          curl --fail --location --silent --show-error \
             "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" \
             -o mcp-publisher.tar.gz
           tar -xzf mcp-publisher.tar.gz mcp-publisher
