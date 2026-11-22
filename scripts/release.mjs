@@ -627,7 +627,7 @@ async function main() {
 
   if (doCommit) {
     runStep("Stage release files", "git", ["add", "-A"]);
-    runStep(`Commit v${targetVer}`, "git", ["commit", "-m", `chore(release): v${targetVer}`]);
+    runStep(`Commit v${targetVer}`, "git", ["commit", "-s", "-m", `chore(release): v${targetVer}`]);
   }
 
   if (doTag) {

@@ -4,6 +4,13 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2026-11-22
+
+### Fixed
+
+- **MCP Registry CI & status check**: Updated `.github/workflows/release.yml` to fetch the latest `mcp-publisher` release for Official MCP Registry OIDC audience compatibility, and updated `scripts/release.mjs --status` to query the Registry `v0.1` `versions/latest` endpoint.
+- **npm OIDC Trusted Publishing & DCO**: Configured `publish-npm` in `.github/workflows/release.yml` for GitHub Actions OIDC Trusted Publishing with provenance and added DCO sign-off (`-s`) to automated release commits in `scripts/release.mjs`.
+
 ## [0.7.0] - 2026-11-22
 
 ### Changed

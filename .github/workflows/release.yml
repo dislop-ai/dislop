@@ -128,11 +128,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Node.js 22 with npm >= 11.5.1 for OIDC Trusted Publishing
+      - name: Set up Node.js 24 with npm >= 11.5.1 for OIDC Trusted Publishing
         uses: actions/setup-node@v7
         with:
-          node-version: "22"
-          registry-url: "https://registry.npmjs.org"
+          node-version: "24"
 
       - name: Upgrade npm CLI for OIDC Trusted Publishing
         run: npm install -g npm@latest
@@ -154,7 +153,7 @@ jobs:
           else
             rm -f "${NPM_CONFIG_USERCONFIG:-/nonexistent}" ~/.npmrc
             unset NODE_AUTH_TOKEN NPM_CONFIG_USERCONFIG
-            npm publish --access=public --provenance
+            npm publish --access=public --provenance --loglevel=verbose
           fi
 
   publish-pypi:
