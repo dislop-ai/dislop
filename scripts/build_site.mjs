@@ -1236,11 +1236,21 @@ version: ${VERSION}
 
 ## 1. Official Cloud HTTP MCP (Sign-In Required, Free 30 Credits/Month)
 
-Claim a free Bearer token (\`dslp_...\`) at \`${BASE_URL}/#cloud-token-box\` (paid-tier zero-training model endpoints, no draft logging; see [\`/privacy.md\`](../privacy.md)).
+Connect directly at \`${BASE_URL}/mcp\` via **OAuth 2.1** (Claude Code, Cursor, Antigravity, Codex) or sign in via 6-digit Email OTP / Google Sign-In at \`${BASE_URL}/#cloud-token-box\` to create scoped \`dslp_*\` API keys (paid-tier zero-training model endpoints, zero draft logging; see [\`/privacy.md\`](../privacy.md)).
 
-### Claude Code
+### OAuth 2.1 Direct URL
+
+\`\`\`text
+${BASE_URL}/mcp
+\`\`\`
+
+Metadata discovery: \`${BASE_URL}/.well-known/oauth-protected-resource/mcp\` and \`${BASE_URL}/.well-known/oauth-authorization-server\`.
+
+### Claude Code (API Key or OAuth)
 \`\`\`bash
-claude mcp add --transport http dislop ${BASE_URL}/mcp --header "Authorization: Bearer dslp_YOUR_FREE_TOKEN"
+claude mcp add --transport http dislop ${BASE_URL}/mcp
+# or with an API key created at ${BASE_URL}/#cloud-token-box:
+claude mcp add --transport http dislop ${BASE_URL}/mcp --header "Authorization: Bearer dslp_YOUR_KEY"
 \`\`\`
 
 ### Cursor / Windsurf / Antigravity (\`mcp.json\`)
@@ -1251,7 +1261,7 @@ claude mcp add --transport http dislop ${BASE_URL}/mcp --header "Authorization: 
       "type": "http",
       "url": "${BASE_URL}/mcp",
       "headers": {
-        "Authorization": "Bearer dslp_YOUR_FREE_TOKEN"
+        "Authorization": "Bearer dslp_YOUR_KEY"
       }
     }
   }
@@ -1262,25 +1272,27 @@ claude mcp add --transport http dislop ${BASE_URL}/mcp --header "Authorization: 
 \`\`\`toml
 [mcp_servers.dislop]
 url = "${BASE_URL}/mcp"
-http_headers = { Authorization = "Bearer dslp_YOUR_FREE_TOKEN" }
+http_headers = { Authorization = "Bearer dslp_YOUR_KEY" }
 \`\`\`
 
 ### Official Cloud MCP Tools
 
-- \`dislop_check\`, \`dislop_explain\`, \`dislop_packs\` (0 credits; note remote \`dislop_check\` accepts \`text\` only, not local filesystem \`path\`).
-- \`dislop_review\` (1 credit, requires Bearer token):
-  - Input: \`{ "text": "...", "pack"?: "business-brief", "lang"?: "en"|"zh" }\`
-  - Output: \`{ mode, model, deterministic, thirdOrderHits, llmReview: { summary, aiFlavorLevel, issues }, billing }\`
-- \`dislop_deslop\` (2 credits, requires Bearer token):
-  - Input: \`{ "text": "...", "pack"?: "business-brief", "lang"?: "en"|"zh", "voiceProfile"?: object }\`
-  - Output: \`{ mode, model, revised, changes, afterCheck, numericDiff, attempts, repaired, billing }\`
-- \`dislop_voice_extract\` (2 credits, requires Bearer token):
-  - Input: \`{ "samples": ["Sample 1...", "Sample 2..."], "lang"?: "en"|"zh" }\`
-  - Output: \`{ schema: "dislop.voice/1", stylometrics, profile }\` — pass \`output.profile\` as \`voiceProfile\` in \`dislop_deslop\`.
+- \`dislop_check\`, \`dislop_rules\`, \`dislop_explain\`, \`dislop_packs\` (0 credits; note remote \`dislop_check\` accepts \`text\` only, not local filesystem \`path\`).
+- \`dislop_review\` (1 credit, requires auth):
+  - Input: \`{ "text": "...", "pack"?: "auto"|"business-brief"|..., "lang"?: "en"|"zh", "minSeverity"?: "info"|"warning"|"error", "maxFindings"?: 1..25 }\`
+  - Output: \`dislop.findings/1\` structured review with exact code-point \`anchor\` spans, \`revision\` (\`edit\` / \`rewrite\` / \`ask\`), protected facts in \`keep\`, and telemetry.
+- \`dislop_deslop\` (2 credits, requires auth):
+  - Input: \`{ "text": "...", "pack"?: "auto"|"business-brief", "lang"?: "en"|"zh", "voiceProfile"?: object, "voiceProfileId"?: string, "output"?: "text"|"edits" }\`
+  - Output: \`{ mode, model, revised, changes, afterCheck, numericDiff, attempts, repaired, billing }\` (fails closed if protected facts or numbers drift).
+- \`dislop_office\` (2 credits review / 3 credits deslop, requires auth):
+  - Accepts extracted JSON \`segments\` for \`.docx\` / \`.pptx\` review or batched clean rewrites while guarding protected numbers and slide length.
+- \`dislop_visual_review\` (2 credits, requires auth): accepts an image screenshot, URL, or HTML snippet for visual anti-slop review.
+- \`dislop_voice_extract\` (2 credits, requires auth): builds a reusable \`dislop.voice/1\` profile from 1-5 writing samples and saves it to your account.
+- \`dislop_voice_manage\` and \`dislop_account\` (0 credits, requires auth): list/get/delete saved voice profiles and inspect quota balance.
 
 ## 2. Cloud HTTP API & JS Core Export
 
-- Same-origin HTTP endpoints: \`GET /api/health\`, \`POST /api/v1/check\`, \`POST /api/v1/review\`, \`POST /api/v1/deslop\`, \`POST /api/v1/voice/extract\`, \`POST /api/v1/auth/register\`, \`GET /api/v1/account/me\`, and \`POST /api/v1/waitlist\`.
+- Same-origin HTTP endpoints: \`GET /api/health\`, \`GET /api/v1/auth/session\`, \`POST /api/v1/auth/otp/request\`, \`POST /api/v1/auth/otp/verify\`, \`GET /api/v1/auth/google/start\`, \`GET/POST/DELETE /api/v1/account/{me,keys,apps,voices,usage}\`, \`DELETE /api/v1/account\`, \`POST /api/v1/check\`, \`POST /api/v1/review\`, \`POST /api/v1/deslop\`, \`POST /api/v1/office/{review,deslop}\` (including binary base64 \`.docx\` / \`.pptx\` round-trip and Word Track Changes), \`POST /api/v1/voice/extract\`, and \`POST /api/v1/waitlist\`.
 - \`package.json\` exports the zero-I/O pure ES module \`src/core.mjs\` (\`auditText\`, \`auditOoxmlEntries\`, \`resolveEffectivePack\`).
 - Note: existing local \`--mcp\` stdio code remains in the open-source CLI during real-world evaluation, while official manifests target \`${BASE_URL}/mcp\`.
 `,
@@ -1311,18 +1323,20 @@ snapshot: ${SNAPSHOT_DATE}
 
 - **Pure-Markdown Agent Skill (\`skills/dislop/\`, zero scripts)**, **Local CLI (\`dislop check\`, \`patterns\`, \`voice\`, \`explain\`, \`packs\`, \`catalog\`, \`resources\`)**, **Local Editor Plugins**, and the **local rule mode** in the browser workbench run 100% locally.
 - \`dislop check\`, \`dislop patterns\`, and \`dislop voice\` make zero network calls.
-- \`dislop.com\` loads zero third-party fonts, analytics, or external scripts (\`Content-Security-Policy: connect-src 'self'\`).
+- \`dislop.com\` loads zero third-party fonts, analytics, or external scripts (\`Content-Security-Policy: connect-src 'self'\`). When the sign-in area loads, the browser fetches same-origin \`/api/health\` (and \`/api/v1/auth/session\` when signed in or visiting \`#cloud-token-box\`); clicking Google Sign-In navigates only on explicit user action.
 
-## 2. Official Cloud MCP & Web AI (\`/api/v1/*\` & \`/mcp\`)
+## 2. Official Cloud MCP & Web AI (\`/api/v1/*\`, \`/mcp\`, \`/oauth/*\`)
 
-Data is sent to \`dislop.com\` **only** when you sign in and explicitly click a Cloud AI button in the workbench, claim a free token, submit the early-access waitlist, or call an authenticated Official Cloud MCP tool:
+Unauthenticated deterministic rule checks (\`POST /api/v1/check\` and MCP \`dislop_check\`) inspect submitted text transiently in memory and store nothing. All Cloud LLM endpoints require sign-in via Email 6-digit OTP (\`HttpOnly\` \`__Host-dslp_sid\` cookie session), Google Sign-In, OAuth 2.1 MCP authorization, or a scoped \`dslp_*\` API key:
 
 - **Upstream Model Providers**: Paid-tier zero-training model endpoints (prompts and outputs are not used for model training).
-- **Zero Draft Storage**: Draft text is processed in memory and never written to disk or server logs.
-- **Sign-In Gate & Account Records**:
-  - Cloud LLM endpoints require a registered \`dslp_*\` Bearer token (30 free monthly credits after email signup; no unauthenticated anonymous LLM trials).
-  - When you claim a free token (\`POST /api/v1/auth/register\`), we store your email, a one-way **SHA-256 hash** of your Bearer token (never the plaintext key), and your monthly credit counter.
-  - Re-registering with the same email rotates and invalidates the previous token immediately.
+- **Zero Draft Storage**: Draft text, uploaded \`.docx\`/\`.pptx\` files, and visual screenshots are processed in memory and never written to disk or server logs.
+- **What Is Stored (Account & Service Metadata Only)**:
+  - Account record: email address (for OTP login and notices), plan tier, monthly credit balance, and optional linked Google account subject ID (\`sub\`).
+  - Optional saved voice cards: when you opt in (\`save: true\`), your extracted \`dislop.voice/1\` style summary is saved until you delete it in Account Hub.
+  - Waitlist submissions: submitted email, selected plan, and optional note are saved to notify you at launch.
+  - Hashed credentials & usage metadata: session tokens, OAuth tokens, and API keys are stored only as one-way SHA-256 hashes (plaintext keys appear once at creation). Usage logs record tool name, credit delta, timestamp, and source tag, never drafts or filenames.
+  - Self-serve control: revoke API keys, disconnect OAuth apps, delete saved voice cards, or permanently delete your account via \`DELETE /api/v1/account\` from \`${BASE_URL}/#cloud-token-box\`.
 - **Confidential Drafts**: Never send confidential, regulated, or unreleased source documents to any hosted cloud endpoint; use the local offline CLI or pure-Markdown Skill instead.
 
 ## 3. Contact & Security Disclosures
@@ -1990,7 +2004,12 @@ version: ${VERSION}
 snapshot: ${SNAPSHOT_DATE}
 ---
 
-${canonicalRoadmapEn.replace("./ROADMAP.zh-CN.md", "./roadmap.zh-CN.md").replace(/\(\.\/(docs|scripts)\//g, "(https://github.com/dislop-ai/dislop/blob/main/$1/")}
+${canonicalRoadmapEn
+  .replace("./ROADMAP.zh-CN.md", "./roadmap.zh-CN.md")
+  .replace(/Market pricing benchmarks and unit economics live in \[docs\/research\/business-model-and-open-core\.zh-CN\.md\]\(\.\/docs\/research\/business-model-and-open-core\.zh-CN\.md\)\. /, "")
+  .replace(/in private `dislop-cloud`/g, "on the Official Cloud MCP backend")
+  .replace(/`dislop-cloud` live at/g, "Official Cloud MCP live at")
+  .replace(/\(\.\/(docs|scripts)\//g, "(https://github.com/dislop-ai/dislop/blob/main/$1/")}
 `,
 });
 writeCleanFile(
@@ -2001,7 +2020,12 @@ version: ${VERSION}
 snapshot: ${SNAPSHOT_DATE}
 ---
 
-${canonicalRoadmapZh.replace("./ROADMAP.md", "./roadmap.md").replace(/\(\.\/(docs|scripts)\//g, "(https://github.com/dislop-ai/dislop/blob/main/$1/")}
+${canonicalRoadmapZh
+  .replace("./ROADMAP.md", "./roadmap.md")
+  .replace(/完整定价与成本测算见 \[docs\/research\/business-model-and-open-core\.zh-CN\.md\]\(\.\/docs\/research\/business-model-and-open-core\.zh-CN\.md\)。/, "")
+  .replace(/在闭源 `dislop-cloud` 运营/g, "在官方云端服务运营")
+  .replace(/官方 `dislop-cloud` 已上线/g, "官方云端服务已上线")
+  .replace(/\(\.\/(docs|scripts)\//g, "(https://github.com/dislop-ai/dislop/blob/main/$1/")}
 `,
   { isAgentText: true }
 );

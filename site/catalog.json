@@ -821,13 +821,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 2418,
-      "approxTokens": 605,
+      "bytes": 3795,
+      "approxTokens": 949,
       "relatedTools": [
         "mcp",
         "cli"
       ],
-      "sha256": "9aa6bbe99921d48b3cd2862d846a09c1e3450dd9f3a79ed16d75c65da4f1bd24"
+      "sha256": "0e2dd89b044f11c70373b6e91e94e8fab2cde440a6ab952f1e2648079aa20bee"
     },
     {
       "id": "privacy-policy",
@@ -847,14 +847,14 @@
         "zh"
       ],
       "packs": [],
-      "bytes": 2121,
-      "approxTokens": 530,
+      "bytes": 2982,
+      "approxTokens": 746,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "08be32f5fef8675ce5c7c0599eb4d0959c0a065a9a8862104a116546bcb7962b"
+      "sha256": "6f20de2c4c78ad1d20a42e1b4404fbaaf416a3958b2aa778adab476d71861569"
     },
     {
       "id": "pack-core",
@@ -2552,15 +2552,15 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 13629,
-      "approxTokens": 3407,
+      "bytes": 13434,
+      "approxTokens": 3359,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp",
         "skill"
       ],
-      "sha256": "2bba8363f78550b94316beccb4d16f95f3bc762a3aac7fec6b8dcf7dfbbf6b9d"
+      "sha256": "d1bceba301cb192706c6173ab6eae64c143f063bed515ad21ea13587b85e2665"
     }
   ]
 }

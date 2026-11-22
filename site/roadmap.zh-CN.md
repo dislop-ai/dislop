@@ -73,9 +73,9 @@ snapshot: 2026-11-21
 
 ### 轨道 E — 真实评测驱动的智能审校与闭源云端能力（`v0.7.0+`）
 
-完整定价与成本测算见 [docs/research/business-model-and-open-core.zh-CN.md](https://github.com/dislop-ai/dislop/blob/main/docs/research/business-model-and-open-core.zh-CN.md)。**开源与闭源边界**：按 `PRODUCT.md` 收敛为三层产品形态——纯文档 `Skill`、零依赖本地 `CLI`（`dislop-ai/dislop`，Apache-2.0，含全部 7 套内置包 42 条规则、53 条反模式库、`14.6 KB` 集成模型、浏览器基础工作台、`Awesome Anti-Slop`、开源单步审校 Prompt 与 `dislop-bench v2`）保持开源；官方云端 MCP（`https://dislop.com/mcp`）与多模型流水线独立在闭源 `dislop-cloud` 运营。**先评测再精简代码**：在真实保留集完成评测对比前，保留既有离线规则、Pocket ML 与 Python 双端代码不删。
+**开源与闭源边界**：按 `PRODUCT.md` 收敛为三层产品形态——纯文档 `Skill`、零依赖本地 `CLI`（`dislop-ai/dislop`，Apache-2.0，含全部 7 套内置包 42 条规则、53 条反模式库、`14.6 KB` 集成模型、浏览器基础工作台、`Awesome Anti-Slop`、开源单步审校 Prompt 与 `dislop-bench v2`）保持开源；官方云端 MCP（`https://dislop.com/mcp`）与多模型流水线独立在官方云端服务运营。**先评测再精简代码**：在真实保留集完成评测对比前，保留既有离线规则、Pocket ML 与 Python 双端代码不删。
 
-- [x] **阶段 0（云端上线与登录试用收口）**：官方 `dislop-cloud` 已上线 `https://dislop.com/mcp` 与 `/api/v1/*`，启用登录领取每月 30 免费额度（关闭未登录云端白嫖）、全局日限额硬熔断与 Pro / 按量包 / Team 预约登记；`v0.7.0` 起 CLI 0 命中输出改为“未发现已知模式”并统一全部插件清单直连官方云端 MCP。
+- [x] **阶段 0（云端上线与登录试用收口）**：官方云端服务已上线 `https://dislop.com/mcp` 与 `/api/v1/*`，启用登录领取每月 30 免费额度（关闭未登录云端白嫖）、全局日限额硬熔断与 Pro / 按量包 / Team 预约登记；`v0.7.0` 起 CLI 0 命中输出改为“未发现已知模式”并统一全部插件清单直连官方云端 MCP。
 - [ ] **真实语料保留评测集与 4 臂盲评**：收集覆盖叙事随笔、思辨论述、公文简报与工程文档的真实中英文文章并人工标注，对比离线快检、单个开源 Prompt、纯云端大模型与混合流水线（离线规则 + 5 轴特征注入 + 分文体大模型审校 + 确定性护栏），用保留集结果决定后续代码取舍。
 - [ ] **分文体结构化审校协议（`revision` + `register`）与 CLI 自带密钥 `review`**：输出 `edit` / `rewrite` / `ask` 结构化问题清单与 `expressive` / `argumentative` / `official` 文体路由，让本地宿主 Agent 结合完整上下文改稿；允许开发者在 CLI 显式配置自有 OpenAI 兼容密钥。
 - [ ] **按地区多模型路由与保留原排版去味导出（`.docx` / `.pptx` Round-Trip）**：接入国内零训练模型与海外模型自动切换，拆解 OOXML、去掉 AI 味并复核数字与限定词后保留原样式导出。

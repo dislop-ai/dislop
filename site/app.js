@@ -86,12 +86,13 @@ const I18N = {
     "wb.jumpNotes": "看批注详情 ↓",
     "ai.reviewBtn": "云端深度审校 · MCP（1 额度）",
     "ai.deslopBtn": "云端改写 · MCP（2 额度）",
-    "ai.anonHint": "本地检查免登录零上传 · 云端审校与改写需登录（每月免费 30 额度）",
-    "ai.claimLink": "领免费密钥 →",
+    "ai.anonHint": "本地检查免登录零上传 · 登录后可使用云端审校与改写（每月 30 免费额度）",
+    "ai.claimLink": "登录领 30 额度 →",
     "voice.drawerTitle": "可选：提取个人文风（支持本地统计，或云端 AI 提炼）",
     "voice.drawerDesc": "贴入 1–3 段你自己写过的干净文字（用空行隔开）。点「本地统计文风」在当前标签页完成；也可登录免费密钥调用云端模型提炼并跨端同步。",
     "voice.offlineBtn": "本地统计文风（0 额度 · 不联网）",
     "voice.extractBtn": "云端 AI 提炼文风（2 额度）",
+    "voice.saveOpt": "保存到账号",
     "voice.clearBtn": "清除已保存文风",
     "wb.modeProof": "标出问题",
     "wb.modeEdit": "编辑原文",
@@ -139,24 +140,29 @@ const I18N = {
     "price.t1Cta": "安装 Skill / CLI ↑",
     "price.t2Name": "云端免费版（远程 MCP）",
     "price.t2Price": "$0 · 30 额度 / 月",
-    "price.t2Sub": "邮箱领取免费密钥，无需绑卡，立即在官网工作台或远程 MCP 使用。",
+    "price.t2Sub": "邮箱验证码或 Google 登录，无需绑卡，立即在官网工作台或远程 MCP 使用。",
     "price.t2F1": "直连 https://dislop.com/mcp，免本地装环境（单次最长 12,000 字）",
     "price.t2F2": "云增强审校（1 额度）：查出推销腔、官话与套话，给出具体改法",
     "price.t2F3": "云增强改写（2 额度）：自动改写后复检，核对原稿数字与限定词",
     "price.t2F4": "个人文风提取（2 额度）：1–3 篇旧稿提炼专属文风，工作台与远程 MCP 均可用",
-    "price.t2Cta": "下方 10 秒免费领密钥 ↓",
+    "price.t2Cta": "下方登录领免费额度 ↓",
     "price.t3Name": "Pro · 按量包 · Team（早鸟预约）",
     "price.t3Price": "$12/月 · $10 按量",
     "price.t3Sub": "高频写作选 Pro 更划算（比按量省 36%）；低频偶尔用可选永不过期的按量包。",
-    "price.t3F1": "Pro（$12/月）：1,500 额度/月（约 $0.008/额度），长文不限字数 + 10 份个人文风",
+    "price.t3F1": "Pro（$12/月）：1,500 额度/月（约 $0.008/额度），单次最长 50,000 字 + 20 份个人文风",
     "price.t3F2": "按量额度包（$10 / 800 额度）：一次购买永不过期，低频重度用户友好",
     "price.t3F3": "Team（$29/席位/月）：5,000 额度 + 团队共享品牌文风与 PR 审核",
     "price.t3F4": "统一使用 Google Gemini 付费级端点，不存草稿、绝不用于模型训练",
     "price.t3Cta": "预约开通通知 ↓",
 
-    "cloud.tokenTitle": "免费领取 30 额度 + 远程 MCP 密钥",
-    "cloud.tokenDesc": "输入邮箱立即生成专属密钥，自动同步到上方工作台，无需绑卡（服务端不存明文与草稿，详见页面底部隐私说明）。",
-    "cloud.tokenBtn": "领取免费密钥",
+    "cloud.tokenTitle": "登录领 30 免费额度 · 管理 MCP 密钥与账号",
+    "cloud.tokenDesc": "用邮箱 6 位验证码登录，或使用 Google 账号授权直连（无需绑卡，服务端不存明文密钥与草稿，详见页面底部隐私说明）。",
+    "cloud.googleBtn": "使用 Google 账号继续",
+    "cloud.orEmail": "或用邮箱验证码登录",
+    "cloud.sendOtpBtn": "发送验证码",
+    "cloud.changeEmailBtn": "换个邮箱",
+    "cloud.verifyOtpBtn": "验证并登录",
+    "cloud.resendBtn": "重新发送",
     "cloud.wlTitle": "预约 Pro / 按量包 / Team",
     "cloud.wlDesc": "自助支付即将上线。留下邮箱和需要的方案，上线第一时间通知并附赠早鸟体验额度。",
     "cloud.planPro": "Pro（$12/月 · 1,500 额度）",
@@ -340,16 +346,17 @@ const I18N = {
     "pack.ui": "Web UI & components",
     "wb.openFile": "Open a local file (.md / .html / .docx / .pptx)",
     "wb.specimensTitle": "Examples",
-    "wb.privacyNote": "Local checks run in this browser tab. Clicking Cloud MCP buttons below requires a free key and sends the draft to our paid-tier zero-training model endpoint with no draft storage.",
+    "wb.privacyNote": "Local checks run in this browser tab. Clicking Cloud MCP buttons below requires signing in (30 free credits/mo) and sends the draft to our paid-tier zero-training model endpoint with no draft storage.",
     "wb.jumpNotes": "Jump to margin notes ↓",
     "ai.reviewBtn": "Cloud Review · MCP (1 credit)",
     "ai.deslopBtn": "Cloud Rewrite · MCP (2 credits)",
     "ai.anonHint": "Local checks need no sign-in · Sign in for Cloud AI (30 free credits/mo)",
-    "ai.claimLink": "Get free key →",
+    "ai.claimLink": "Sign in (30 free/mo) →",
     "voice.drawerTitle": "Optional: extract personal style (local stats or Cloud AI)",
-    "voice.drawerDesc": "Paste 1-3 clean paragraphs you wrote (separated by blank lines). 'Local style stats' runs in this tab with zero uploads, or use a free key for Cloud AI extraction.",
+    "voice.drawerDesc": "Paste 1-3 clean paragraphs you wrote (separated by blank lines). 'Local style stats' runs in this tab with zero uploads, or sign in for Cloud AI extraction.",
     "voice.offlineBtn": "Local style stats (0 credits · offline)",
     "voice.extractBtn": "Cloud AI style extract (2 credits)",
+    "voice.saveOpt": "Save to account",
     "voice.clearBtn": "Clear saved style",
     "wb.modeProof": "Highlights",
     "wb.modeEdit": "Edit text",
@@ -397,24 +404,29 @@ const I18N = {
     "price.t1Cta": "Install Skill / CLI ↑",
     "price.t2Name": "Cloud Free (Remote MCP)",
     "price.t2Price": "$0 · 30 credits / mo",
-    "price.t2Sub": "Enter your email for a free key—no card required—for Remote MCP and the web workbench.",
+    "price.t2Sub": "Sign in with email code or Google—no card required—for Remote MCP and the web workbench.",
     "price.t2F1": "Direct https://dislop.com/mcp endpoint with zero local setup (up to 12,000 chars/call)",
     "price.t2F2": "Cloud Review (1 credit): catches pitch cadence, filler, and clichés with concrete edits",
     "price.t2F3": "Cloud Rewrite (2 credits): plain rewrite that re-checks rules, numbers, and qualifiers",
     "price.t2F4": "Style Extract (2 credits): build a reusable style profile in the workbench or Remote MCP",
-    "price.t2Cta": "Claim free key below ↓",
+    "price.t2Cta": "Sign in for free below ↓",
     "price.t3Name": "Pro · Credit Packs · Team (Early Access)",
     "price.t3Price": "$12/mo · $10 PAYGO",
     "price.t3Sub": "Regular writers save 36% with Pro; occasional heavy users can buy credits that never expire.",
-    "price.t3F1": "Pro ($12/mo): 1,500 monthly credits (~$0.008/cr), unlimited length + 10 voice profiles",
+    "price.t3F1": "Pro ($12/mo): 1,500 monthly credits (~$0.008/cr), up to 50,000 chars/call + 20 voice profiles",
     "price.t3F2": "PAYGO Pack ($10 / 800 credits): one-time credit top-up that never expires",
     "price.t3F3": "Team ($29/seat/mo): 5,000 credits, shared brand voice cards, and PR review tooling",
     "price.t3F4": "Paid-tier Google Gemini API only—no draft logging and never used for training",
     "price.t3Cta": "Join early access ↓",
 
-    "cloud.tokenTitle": "Claim 30 free credits + Remote MCP key",
-    "cloud.tokenDesc": "Enter your email to generate a free key immediately and unlock 30 monthly credits in the workbench above (no card, no draft storage—see Privacy in the footer).",
-    "cloud.tokenBtn": "Get free key",
+    "cloud.tokenTitle": "Sign in for 30 free credits + Remote MCP Hub",
+    "cloud.tokenDesc": "Verify via a 6-digit email code or Google Sign-In to manage API keys, OAuth clients, and quotas (no card, no draft storage).",
+    "cloud.googleBtn": "Continue with Google",
+    "cloud.orEmail": "or verify by email code",
+    "cloud.sendOtpBtn": "Send code",
+    "cloud.changeEmailBtn": "Change email",
+    "cloud.verifyOtpBtn": "Verify & sign in",
+    "cloud.resendBtn": "Resend",
     "cloud.wlTitle": "Join Pro / Credit Pack / Team waitlist",
     "cloud.wlDesc": "Self-serve billing opens shortly. Leave your email and preferred plan to get early access and bonus launch credits.",
     "cloud.planPro": "Pro ($12/mo · 1,500 credits)",
@@ -2600,10 +2612,14 @@ function applyI18n(isUserSwitch = false) {
   if (mainNavEl) {
     mainNavEl.setAttribute("aria-label", currentLang === "zh" ? "主导航" : "Main navigation");
   }
-  const tokEmailEl = document.getElementById("token-email-input");
-  if (tokEmailEl) {
-    tokEmailEl.placeholder =
-      currentLang === "zh" ? "输入你的常用邮箱，例如 you@company.com" : "Enter your email, e.g. you@company.com";
+  const otpEmailEl = document.getElementById("otp-email-input");
+  if (otpEmailEl) {
+    otpEmailEl.placeholder =
+      currentLang === "zh" ? "输入常用邮箱，例如 you@company.com" : "Enter your email, e.g. you@company.com";
+  }
+  const otpCodeEl = document.getElementById("otp-code-input");
+  if (otpCodeEl) {
+    otpCodeEl.placeholder = currentLang === "zh" ? "输入 6 位数字验证码" : "6-digit code";
   }
   const wlEmailEl = document.getElementById("wl-email-input");
   if (wlEmailEl) {
@@ -2658,6 +2674,7 @@ function applyI18n(isUserSwitch = false) {
   renderSnippet();
   renderRulesTable();
   renderCloudAccountState();
+  if (isUserSwitch && currentSessionAccount) mountAccountHub();
   renderSavedVoiceState(Boolean(isUserSwitch));
   syncAiButtonsForBinary();
 }
@@ -2666,18 +2683,25 @@ function syncAiButtonsForBinary() {
   const revBtn = document.getElementById("btn-ai-review");
   const desBtn = document.getElementById("btn-ai-deslop");
   const isBin = Boolean(binaryAuditResult);
+  const isOfficeZip = Boolean(isBin && lastUploadedFile && /\.(?:docx|pptx)$/i.test(lastUploadedFile.name));
+  const unsupportedBin = isBin && !isOfficeZip;
   const tip =
     currentLang === "zh"
-      ? "Word / PPT 文件仅在本地离线检查；请切换到文本或 HTML 样稿再使用云端 AI。"
-      : "Word/PowerPoint files run offline only; switch to a text or HTML draft to use Cloud AI.";
+      ? isOfficeZip
+        ? "支持云端保版式审校（2 额度）或一键修订去味（3 额度）"
+        : "该二进制文件仅支持本地检查；请切换到文本、HTML 或 .docx/.pptx。"
+      : isOfficeZip
+        ? "Supports Cloud layout-preserving Office review (2 cr) and rewrite (3 cr)"
+        : "This binary file runs locally only; switch to text, HTML, or .docx/.pptx.";
   for (const btn of [revBtn, desBtn]) {
     if (!btn) continue;
-    if (isBin) {
+    if (unsupportedBin) {
       btn.disabled = true;
       btn.title = tip;
     } else if (!cloudBusy) {
       btn.disabled = false;
-      btn.removeAttribute("title");
+      if (isOfficeZip) btn.title = tip;
+      else btn.removeAttribute("title");
     }
   }
 }
@@ -2775,19 +2799,60 @@ function handleVoiceOfflineClick() {
   renderSavedVoiceState();
 }
 
+let currentSessionAccount = null;
+let cloudHealthInfo = null;
+let cloudInitStarted = false;
+let otpPendingEmail = "";
+let otpResendTimer = null;
+let pendingGoogleLink = false;
+let pendingReturnNext = "";
+let accountModPromise = null;
+
+function sanitizeLocalReturn(raw) {
+  const s = String(raw || "").trim();
+  if (/[\x00-\x1f\x7f\\]/.test(s)) return "";
+  return s.startsWith("/") && !s.startsWith("//") ? s.slice(0, 2048) : "";
+}
+
+function hasSessionHintCookie() {
+  return String(document.cookie || "")
+    .split(";")
+    .some((c) => c.trim() === "dslp_hint=1");
+}
+
+function uint8ToBase64(bytes) {
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+function showAuthFeedback(msg, isError = false) {
+  const box = document.getElementById("cloud-auth-feedback");
+  if (!box) return;
+  if (!msg) {
+    box.hidden = true;
+    box.textContent = "";
+    return;
+  }
+  box.hidden = false;
+  box.innerHTML = isError ? `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(msg)}</p>` : escapeHtmlSafe(msg);
+}
+
 async function handleVoiceExtractClick() {
   const isZh = currentLang === "zh";
-  const savedAcct = loadSavedCloudAccount();
   const outBox = document.getElementById("voice-output-box");
   const btn = document.getElementById("btn-voice-extract");
   if (!outBox) return;
 
-  if (!savedAcct?.token) {
+  if (!currentSessionAccount) {
     outBox.hidden = false;
     outBox.innerHTML = `<p class="ai-error-msg" style="margin:0 0 8px;">${
-      isZh ? "云端 AI 提炼需要先领取免费 30 额度密钥（也可直接点旁边「离线统计声纹」0 联网提取）。" : "Claim a free 30-credit key for Cloud AI extraction, or click 'Offline voice stats' right beside it."
+      isZh ? "云端 AI 提炼需要先登录免费账号（也可直接点旁边「本地统计文风」0 联网提取）。" : "Sign in below for Cloud AI style extraction, or click 'Local style stats' right beside it."
     }</p><a href="#cloud-token-box" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${
-      isZh ? "去下方 10 秒免费领密钥 ↓" : "Claim free key below ↓"
+      isZh ? "去下方登录领 30 额度 ↓" : "Sign in below ↓"
     }</a>`;
     return;
   }
@@ -2805,10 +2870,13 @@ async function handleVoiceExtractClick() {
   outBox.textContent = isZh ? "正在分析句长习惯与文风特征…" : "Analyzing sentence rhythm and voice profile...";
 
   try {
+    const saveToggle = document.getElementById("voice-save-toggle");
+    const wantSave = saveToggle ? Boolean(saveToggle.checked) : true;
     const resp = await fetch("/api/v1/voice/extract", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${savedAcct.token}` },
-      body: JSON.stringify({ samples, lang: isZh ? "zh" : "en" }),
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ samples, lang: isZh ? "zh" : "en", save: wantSave }),
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
@@ -2819,9 +2887,18 @@ async function handleVoiceExtractClick() {
     saveVoiceProfile(data.profile);
     const habitsStr = formatVoiceHabits(data.profile?.sentenceHabits, isZh);
     outBox.hidden = false;
-    outBox.innerHTML = `<div><strong>${isZh ? "个人文风已保存，后续「AI 一键去味」将自动套用：" : "Personal voice saved and wired into AI Rewrite:"}</strong></div>
+    const saved = Boolean(data.savedVoice);
+    const headMsg = saved
+      ? isZh
+        ? "个人文风已保存到账号，后续「云端改写」将自动套用："
+        : "Personal voice saved to your account and wired into Cloud Rewrite:"
+      : isZh
+        ? "已提取个人文风（仅保存在当前浏览器），后续「云端改写」将自动套用："
+        : "Extracted personal voice (saved in this browser only) for Cloud Rewrite:";
+    outBox.innerHTML = `<div><strong>${headMsg}</strong></div>
       <div style="margin-top:4px;">${escapeHtmlSafe(data.profile?.tone || "")}${habitsStr ? ` · ${escapeHtmlSafe(habitsStr)}` : ""}</div>`;
     renderSavedVoiceState();
+    mountAccountHub();
   } catch (err) {
     outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
   } finally {
@@ -2830,26 +2907,16 @@ async function handleVoiceExtractClick() {
 }
 
 function loadSavedCloudAccount() {
-  try {
-    const raw = safeGetStorage(CLOUD_STORE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed && parsed.token ? parsed : null;
-  } catch {
-    return null;
-  }
+  return currentSessionAccount;
 }
 
 function saveCloudAccount(acct) {
-  if (!acct) {
-    try {
-      window.localStorage.removeItem(CLOUD_STORE_KEY);
-    } catch {
-      // ignore storage errors
-    }
-    return;
+  currentSessionAccount = acct || null;
+  try {
+    window.localStorage.removeItem(CLOUD_STORE_KEY);
+  } catch {
+    // ignore storage errors
   }
-  safeSetStorage(CLOUD_STORE_KEY, JSON.stringify(acct));
 }
 
 function escapeHtmlSafe(str) {
@@ -2857,93 +2924,153 @@ function escapeHtmlSafe(str) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+async function mountAccountHub() {
+  const hubEl = document.getElementById("cloud-account-hub");
+  const authPanel = document.getElementById("cloud-auth-panel");
+  if (!hubEl) return;
+  if (!currentSessionAccount) {
+    hubEl.hidden = true;
+    hubEl.innerHTML = "";
+    if (authPanel) authPanel.hidden = false;
+    return;
+  }
+  if (authPanel) authPanel.hidden = true;
+  hubEl.hidden = false;
+  if (!accountModPromise) {
+    accountModPromise = import("./account.js");
+  }
+  const mod = await accountModPromise;
+  await mod.renderAccountHub({
+    rootEl: hubEl,
+    account: currentSessionAccount,
+    lang: currentLang,
+    onAccountUpdated(nextAcc) {
+      currentSessionAccount = nextAcc;
+      renderCloudAccountState();
+      mountAccountHub();
+    },
+    onSignedOut() {
+      currentSessionAccount = null;
+      otpPendingEmail = "";
+      renderCloudAccountState();
+      mountAccountHub();
+    },
+    onUseVoice(voiceCard) {
+      saveVoiceProfile(voiceCard);
+      renderSavedVoiceState();
+      const drawer = document.getElementById("voice-drawer");
+      if (drawer) drawer.open = true;
+    },
+  });
 }
 
 function renderCloudAccountState() {
-  const saved = loadSavedCloudAccount();
   const quotaEl = document.getElementById("ai-quota-label");
   const tokenLinkEl = document.getElementById("ai-token-link");
-  const statusEl = document.getElementById("cloud-account-status");
   const isZh = currentLang === "zh";
 
-  if (saved) {
-    const rem = saved.remaining ?? saved.monthlyQuota ?? 30;
+  if (currentSessionAccount) {
+    const rem = currentSessionAccount.totalRemaining ?? currentSessionAccount.monthlyRemaining ?? currentSessionAccount.monthlyQuota ?? 30;
     if (quotaEl) {
       quotaEl.textContent = isZh
-        ? `已登录 ${saved.email} · 剩余 ${rem} 额度`
-        : `Signed in as ${saved.email} · ${rem} credits left`;
+        ? `已登录 ${currentSessionAccount.email} · 剩余 ${rem} 额度`
+        : `Signed in as ${currentSessionAccount.email} · ${rem} credits left`;
     }
     if (tokenLinkEl) {
-      tokenLinkEl.textContent = isZh ? "管理密钥 →" : "Manage key →";
-    }
-    if (statusEl) {
-      statusEl.hidden = false;
-      statusEl.innerHTML = isZh
-        ? `<span>当前浏览器已绑定 <strong>${escapeHtmlSafe(saved.email)}</strong>（${escapeHtmlSafe(saved.plan || "free")} · 剩余 ${escapeHtmlSafe(rem)} 额度）</span><span class="quick-actions"><button type="button" id="btn-refresh-cloud-token" class="ctrl-btn ctrl-btn-sm">刷新额度</button><button type="button" id="btn-clear-cloud-token" class="ctrl-btn ctrl-btn-sm">退出本地绑定</button></span>`
-        : `<span>Active key for <strong>${escapeHtmlSafe(saved.email)}</strong> (${escapeHtmlSafe(saved.plan || "free")} · ${escapeHtmlSafe(rem)} credits left)</span><span class="quick-actions"><button type="button" id="btn-refresh-cloud-token" class="ctrl-btn ctrl-btn-sm">Refresh</button><button type="button" id="btn-clear-cloud-token" class="ctrl-btn ctrl-btn-sm">Sign out</button></span>`;
-      document.getElementById("btn-refresh-cloud-token")?.addEventListener("click", async (ev) => {
-        const btn = ev.currentTarget;
-        btn.disabled = true;
-        try {
-          const resp = await fetch("/api/v1/account/me", { headers: { Authorization: `Bearer ${saved.token}` } });
-          const data = await resp.json().catch(() => ({}));
-          const stillSignedIn = loadSavedCloudAccount();
-          if (resp.ok && data.account && stillSignedIn && stillSignedIn.token === saved.token) {
-            saveCloudAccount({
-              ...stillSignedIn,
-              plan: data.account.plan,
-              remaining: data.account.totalRemaining,
-              monthlyQuota: data.account.monthlyQuota,
-            });
-            renderCloudAccountState();
-          }
-        } catch {
-          // keep cached state on transient error
-        } finally {
-          btn.disabled = false;
-        }
-      });
-      document.getElementById("btn-clear-cloud-token")?.addEventListener("click", () => {
-        saveCloudAccount(null);
-        const out = document.getElementById("token-output-box");
-        if (out) out.hidden = true;
-        renderCloudAccountState();
-      });
+      tokenLinkEl.textContent = isZh ? "账号与密钥面板 →" : "Account & keys →";
     }
   } else {
     if (quotaEl) {
       quotaEl.textContent = isZh
-        ? "本地检查免登录零上传 · 云端审校与改写需登录（每月免费 30 额度）"
+        ? "本地检查免登录零上传 · 登录后可使用云端审校与改写（每月 30 免费额度）"
         : "Local checks need no sign-in · Sign in for Cloud AI (30 free credits/mo)";
     }
     if (tokenLinkEl) {
-      tokenLinkEl.textContent = isZh ? "领免费密钥 →" : "Get free key →";
-    }
-    if (statusEl) {
-      statusEl.hidden = true;
-      statusEl.innerHTML = "";
+      tokenLinkEl.textContent = isZh ? "登录领 30 额度 →" : "Sign in (30 free/mo) →";
     }
   }
 }
 
 function updateCreditsFromBilling(billing) {
-  const saved = loadSavedCloudAccount();
-  if (billing?.mode === "account" && billing.account && saved) {
-    saveCloudAccount({
-      ...saved,
+  if (billing?.mode === "account" && billing.account && currentSessionAccount) {
+    currentSessionAccount = {
+      ...currentSessionAccount,
       plan: billing.account.plan,
-      remaining: billing.account.totalRemaining,
+      totalRemaining: billing.account.totalRemaining,
+      monthlyRemaining: billing.account.monthlyRemaining,
+      bonusCredits: billing.account.bonusCredits,
       monthlyQuota: billing.account.monthlyQuota,
-    });
+    };
     renderCloudAccountState();
-  } else if (billing?.mode === "anonymous" && billing.anon) {
-    const quotaEl = document.getElementById("ai-quota-label");
-    if (quotaEl) {
-      quotaEl.textContent =
+  }
+}
+
+async function initCloudHealthAndSession(forceSessionCheck = false) {
+  if (!cloudInitStarted) {
+    cloudInitStarted = true;
+    fetch("/api/health", { method: "GET" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((h) => {
+        if (!h) return;
+        cloudHealthInfo = h;
+        const gRow = document.getElementById("google-signin-row");
+        if (gRow) gRow.hidden = !h.googleAuthEnabled;
+      })
+      .catch(() => {});
+  }
+
+  const hash = String(window.location.hash || "");
+  const searchParams = new URLSearchParams(window.location.search || "");
+  const isLinkFlow = hash === "#auth-link" || searchParams.get("auth") === "link";
+  if (isLinkFlow) {
+    pendingGoogleLink = true;
+    pendingReturnNext = sanitizeLocalReturn(searchParams.get("next"));
+    const authPanel = document.getElementById("cloud-auth-panel");
+    const stepEmail = document.getElementById("otp-step-email");
+    if (authPanel) authPanel.hidden = false;
+    if (stepEmail) stepEmail.hidden = false;
+    const linkPanel = document.getElementById("google-link-panel");
+    if (linkPanel) {
+      linkPanel.hidden = false;
+      linkPanel.textContent =
         currentLang === "zh"
-          ? `今日匿名试用剩余 ${billing.anon.remaining} / ${billing.anon.limit} 额度 · 登录后每月 30 次`
-          : `Anonymous trial: ${billing.anon.remaining} / ${billing.anon.limit} credits left today · 30/mo with free token`;
+          ? "该邮箱尚未绑定 Google 登录。请先用下方邮箱 6 位验证码登录一次，即自动完成绑定。"
+          : "Verify your 6-digit email code below once to link Google Sign-In to this email address.";
+    }
+  } else if (hash.startsWith("#auth-error=")) {
+    let code = "";
+    try {
+      code = decodeURIComponent(hash.slice("#auth-error=".length));
+    } catch {
+      code = hash.slice("#auth-error=".length);
+    }
+    showAuthFeedback(
+      currentLang === "zh" ? `登录未完成（${code}），请改用邮箱验证码重试。` : `Sign-in did not complete (${code}). Try verifying with email code instead.`,
+      true
+    );
+  }
+
+  if (forceSessionCheck || hasSessionHintCookie() || hash === "#cloud-token-box") {
+    try {
+      const resp = await fetch("/api/v1/auth/session", { credentials: "same-origin" });
+      if (resp.ok) {
+        const data = await resp.json();
+        currentSessionAccount = data.authenticated ? data.account : null;
+        renderCloudAccountState();
+        await mountAccountHub();
+        if (isLinkFlow) {
+          const authPanel = document.getElementById("cloud-auth-panel");
+          const stepEmail = document.getElementById("otp-step-email");
+          if (authPanel) authPanel.hidden = false;
+          if (stepEmail) stepEmail.hidden = false;
+        }
+      }
+    } catch {
+      // ignore offline static preview errors
     }
   }
 }
@@ -2966,29 +3093,256 @@ function renderAiError(errCode, message) {
   if (!panel) return;
   panel.hidden = false;
   const isZh = currentLang === "zh";
-  const needsToken =
+  const signedIn = Boolean(currentSessionAccount);
+  let ctaHtml = "";
+  if (errCode === "daily_limit_reached") {
+    ctaHtml = "";
+  } else if (signedIn && (errCode === "insufficient_credits" || errCode === "key_limit_reached")) {
+    ctaHtml = `<div class="quick-actions"><a href="#cloud-waitlist-box" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${
+      isZh ? "每月 1 日重置额度 · 预约 Pro 扩容 ↓" : "Resets 1st UTC · Join Pro waitlist ↓"
+    }</a></div>`;
+  } else if (
     errCode === "auth_required" ||
     errCode === "anon_limit_reached" ||
     errCode === "anon_text_too_long" ||
-    errCode === "insufficient_credits";
-  const ctaHtml = needsToken
-    ? `<div class="quick-actions"><a href="#cloud-token-box" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${isZh ? "免费领取 30 额度密钥 ↓" : "Claim free 30-credit key ↓"}</a></div>`
-    : "";
+    (!signedIn && errCode === "insufficient_credits")
+  ) {
+    ctaHtml = `<div class="quick-actions"><a href="#cloud-token-box" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${
+      isZh ? "去下方登录（30 免费额度）↓" : "Sign in below (30 free/mo) ↓"
+    }</a></div>`;
+  }
   panel.innerHTML = `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>${ctaHtml}`;
+}
+
+function lensLabel(lens, isZh) {
+  const zhMap = {
+    artifact: "AI 残留",
+    cliche: "套话",
+    cooccurrence: "高频堆砌",
+    punctuation: "标点节奏",
+    structure: "结构模板",
+    rhythm: "句长单调",
+    register: "文体跑偏",
+    design: "版式提示",
+  };
+  const enMap = {
+    artifact: "Artifact",
+    cliche: "Cliché",
+    cooccurrence: "Buzzword cluster",
+    punctuation: "Punctuation",
+    structure: "Template structure",
+    rhythm: "Flat rhythm",
+    register: "Register shift",
+    design: "Design cue",
+  };
+  return (isZh ? zhMap : enMap)[lens] || lens;
+}
+
+function sevLabel(sev, isZh) {
+  if (sev === "error") return isZh ? "硬伤" : "Fix first";
+  if (sev === "warning") return isZh ? "建议改" : "Warning";
+  return isZh ? "参考" : "Note";
+}
+
+function renderFindingsReviewPanel(panel, data, isZh) {
+  const findings = Array.isArray(data.findings) ? data.findings : [];
+  const summaryText = data.llmReview?.summary || (isZh ? `共 ${findings.length} 条建议` : `${findings.length} finding(s)`);
+  const level = data.llmReview?.aiFlavorLevel || "medium";
+  const safeEdits = findings.filter((f) => f.revision?.kind === "edit" && f.revision.find && currentText.includes(f.revision.find));
+  let preBatchText = null;
+
+  const cardsHtml = findings.length
+    ? `<ul class="findings-card-list">${findings
+        .map((f, idx) => {
+          const sevCls = f.severity === "error" ? "finding-sev-error" : f.severity === "warning" ? "finding-sev-warning" : "";
+          const locBits = [];
+          if (f.anchor?.line) locBits.push(isZh ? `第 ${f.anchor.line} 行` : `Line ${f.anchor.line}`);
+          if (f.anchor?.slide) locBits.push(isZh ? `第 ${f.anchor.slide} 页` : `Slide ${f.anchor.slide}`);
+          if (f.anchor?.segmentId && !f.anchor?.slide) locBits.push(f.anchor.segmentId);
+          const locStr = locBits.length ? ` · ${locBits.join(" · ")}` : "";
+          const quoteHtml = f.anchor?.quote ? `<blockquote class="finding-quote">${escapeHtmlSafe(f.anchor.quote)}</blockquote>` : "";
+          const keepArr = Array.isArray(f.keep) ? f.keep : [];
+          const keepHtml = keepArr.length
+            ? `<div class="finding-keep-row">${keepArr.map((k) => `<span class="finding-keep-pill">${escapeHtmlSafe(k)}</span>`).join("")}</div>`
+            : "";
+          let actionHtml = "";
+          if (f.revision?.kind === "edit") {
+            const label = isZh ? "应用这一条" : "Apply edit";
+            actionHtml = `<div class="quick-actions" style="margin-top:6px;"><button type="button" class="ctrl-btn ctrl-btn-sm btn-finding-apply" data-finding-idx="${idx}">${label}</button></div>`;
+          } else if (f.revision?.kind === "rewrite") {
+            actionHtml = `<div class="finding-item-inst" style="margin-top:4px;font-size:0.78rem;color:var(--ink-2);">${escapeHtmlSafe(f.revision.instruction || "")}</div>`;
+          } else if (f.revision?.kind === "ask") {
+            actionHtml = `<div class="finding-item-inst" style="margin-top:4px;font-size:0.78rem;"><strong>${isZh ? "需要补充事实：" : "Missing detail: "}</strong>${escapeHtmlSafe(f.revision.question || f.why)}</div>`;
+          }
+          return `<li class="finding-card">
+            <div class="finding-card-head">
+              <span class="finding-sev-badge ${sevCls}">${escapeHtmlSafe(sevLabel(f.severity, isZh))}</span>
+              <strong>${escapeHtmlSafe(lensLabel(f.lens, isZh))}</strong>
+              <span class="ai-result-meta">${escapeHtmlSafe(locStr)}</span>
+            </div>
+            <div>${escapeHtmlSafe(f.why)}</div>
+            ${quoteHtml}
+            ${keepHtml}
+            ${actionHtml}
+          </li>`;
+        })
+        .join("")}</ul>`
+    : `<p style="margin:6px 0;">${isZh ? "未检出明显 AI 套话或硬伤。" : "No significant AI slop or artifacts found."}</p>`;
+
+  const applyAllBtn = safeEdits.length
+    ? `<button type="button" id="btn-finding-apply-all" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${isZh ? `应用全部确定修改 (${safeEdits.length})` : `Apply all safe edits (${safeEdits.length})`}</button>`
+    : "";
+
+  const shownCredits = data.meta?.creditWeight ?? data.creditWeight ?? data.billing?.creditWeight ?? data.billing?.credits ?? 1;
+  panel.innerHTML = `
+    <div class="ai-result-head">
+      <span class="ai-result-title">${isZh ? `云端审校（AI 味：${escapeHtmlSafe(level)}）` : `Cloud Review (slop: ${escapeHtmlSafe(level)})`}</span>
+      <span class="ai-result-meta">${escapeHtmlSafe(data.model || "")} · -${escapeHtmlSafe(shownCredits)} ${isZh ? "额度" : "cr"}</span>
+    </div>
+    <p style="margin:0 0 6px;">${escapeHtmlSafe(summaryText)}</p>
+    ${cardsHtml}
+    <div class="quick-actions" style="margin-top:10px;">
+      ${applyAllBtn}
+      <button type="button" id="btn-finding-undo" class="ctrl-btn ctrl-btn-sm" hidden>${isZh ? "撤销刚应用的修改" : "Undo applied edits"}</button>
+      <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
+    </div>`;
+
+  const applyEditText = (findStr, replStr) => {
+    if (!findStr || !currentText.includes(findStr)) return false;
+    if (preBatchText === null) preBatchText = currentText;
+    currentText = currentText.replace(findStr, () => replStr ?? "");
+    const ta = document.getElementById("edit-textarea");
+    if (ta) ta.value = currentText;
+    setViewMode("proof");
+    renderWorkbench();
+    const undoBtn = document.getElementById("btn-finding-undo");
+    if (undoBtn) undoBtn.hidden = false;
+    return true;
+  };
+
+  panel.querySelectorAll(".btn-finding-apply").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = Number(btn.getAttribute("data-finding-idx"));
+      const f = findings[idx];
+      if (f?.revision?.kind === "edit" && applyEditText(f.revision.find, f.revision.replace)) {
+        btn.disabled = true;
+        btn.textContent = isZh ? "已应用" : "Applied";
+      }
+    });
+  });
+
+  document.getElementById("btn-finding-apply-all")?.addEventListener("click", (ev) => {
+    let applied = 0;
+    for (const f of safeEdits) {
+      if (applyEditText(f.revision.find, f.revision.replace)) applied += 1;
+    }
+    if (applied > 0) {
+      ev.currentTarget.disabled = true;
+      ev.currentTarget.textContent = isZh ? `已应用 ${applied} 处` : `Applied ${applied}`;
+    }
+  });
+
+  document.getElementById("btn-finding-undo")?.addEventListener("click", (ev) => {
+    if (typeof preBatchText !== "string") return;
+    currentText = preBatchText;
+    preBatchText = null;
+    const ta = document.getElementById("edit-textarea");
+    if (ta) ta.value = currentText;
+    renderWorkbench();
+    ev.currentTarget.hidden = true;
+  });
+
+  document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
+    panel.hidden = true;
+  });
 }
 
 async function runCloudAction(kind) {
   if (cloudBusy) return;
   const isZh = currentLang === "zh";
-  if (binaryAuditResult) {
+  const isOfficeUpload = Boolean(binaryAuditResult && lastUploadedFile && /\.(?:docx|pptx)$/i.test(lastUploadedFile.name));
+
+  if (!currentSessionAccount) {
     renderAiError(
-      "binary_unsupported",
+      "auth_required",
       isZh
-        ? "网页 AI 审校和一键去味目前支持文本、Markdown 与 HTML。Word / PPT 可继续用左侧离线检查。"
-        : "Web AI review and rewrite currently support text, Markdown, and HTML. Word and PowerPoint files run offline above."
+        ? "云端深度审校与改写需要先在下方登录免费账号（无需绑卡，每月 30 额度；本地规则检查无需登录）。"
+        : "Sign in below to run Cloud Review or Rewrite (30 free credits/mo; local checks stay free without sign-in)."
     );
     return;
   }
+
+  const reqId = ++aiReqSeq;
+  if (isOfficeUpload) {
+    setAiButtonsBusy(
+      true,
+      kind === "review" ? "正在上传并审校文档段落（不存原文件）…" : "正在生成保版式修订版（含修订批注）…",
+      kind === "review" ? "Inspecting Office document segments (zero retention)..." : "Generating layout-preserving revised Office file..."
+    );
+    try {
+      const buf = new Uint8Array(await lastUploadedFile.arrayBuffer());
+      const fileBase64 = uint8ToBase64(buf);
+      const endpoint = kind === "review" ? "/api/v1/office/review" : "/api/v1/office/deslop";
+      const resp = await fetch(endpoint, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: lastUploadedFile.name,
+          fileBase64,
+          pack: currentPackId || "auto",
+          lang: isZh ? "zh" : "en",
+          trackChanges: true,
+        }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (reqId !== aiReqSeq) return;
+      if (!resp.ok) {
+        renderAiError(data.error || "request_failed", data.message || `HTTP ${resp.status}`);
+        return;
+      }
+      updateCreditsFromBilling(data.billing || data.meta?.billing);
+      const panel = document.getElementById("ai-result-panel");
+      if (!panel) return;
+      panel.hidden = false;
+      if (kind === "review") {
+        renderFindingsReviewPanel(panel, data, isZh);
+      } else if (data.fileBase64) {
+        const rawBin = atob(data.fileBase64);
+        const bytes = new Uint8Array(rawBin.length);
+        for (let i = 0; i < rawBin.length; i += 1) bytes[i] = rawBin.charCodeAt(i);
+        const blob = new Blob([bytes], { type: "application/octet-stream" });
+        const dlUrl = URL.createObjectURL(blob);
+        const outName = data.filename ? `clean-${data.filename}` : `clean-${lastUploadedFile.name}`;
+        const changedCount = (data.segmentOutcomes || []).filter((s) => s.status === "changed").length;
+        panel.innerHTML = `
+          <div class="ai-result-head">
+            <span class="ai-result-title">${isZh ? "文档保版式去味完成" : "Office Cleanup Complete"}</span>
+            <span class="ai-result-meta">${isZh ? `改写 ${changedCount} 处 · 保留原版式${data.trackChanges ? "与修订模式" : ""}` : `${changedCount} segment(s) revised`}</span>
+          </div>
+          <div class="quick-actions" style="margin-top:8px;">
+            <a href="${dlUrl}" download="${escapeHtmlSafe(outName)}" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;text-decoration:none;display:inline-flex;align-items:center;">${isZh ? `下载 ${escapeHtmlSafe(outName)}` : `Download ${escapeHtmlSafe(outName)}`}</a>
+            <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
+          </div>`;
+        document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
+          URL.revokeObjectURL(dlUrl);
+          panel.hidden = true;
+        });
+      }
+    } catch (err) {
+      renderAiError("network_error", err.message || "Network error");
+    } finally {
+      cloudBusy = false;
+      document.getElementById("btn-ai-review")?.removeAttribute("disabled");
+      document.getElementById("btn-ai-deslop")?.removeAttribute("disabled");
+      const rB = document.getElementById("btn-ai-review");
+      const dB = document.getElementById("btn-ai-deslop");
+      if (rB) rB.disabled = false;
+      if (dB) dB.disabled = false;
+    }
+    return;
+  }
+
   const text = String(currentText || "").trim();
   if (!text) {
     renderAiError("empty", isZh ? "请先粘贴或选择一段草稿。" : "Paste or pick a draft first.");
@@ -2996,18 +3350,6 @@ async function runCloudAction(kind) {
   }
 
   const endpoint = kind === "review" ? "/api/v1/review" : "/api/v1/deslop";
-  const saved = loadSavedCloudAccount();
-  if (!saved?.token) {
-    renderAiError(
-      "auth_required",
-      isZh
-        ? "云端深度审校与改写需要先在下方免费领取 30 额度密钥（无需绑卡，本地基础检查无需登录）。"
-        : "Claim a free 30-credit key below to run Cloud Review or Rewrite (no card required; local checks stay free without sign-in)."
-    );
-    return;
-  }
-  const headers = { "Content-Type": "application/json", Authorization: `Bearer ${saved.token}` };
-  const reqId = ++aiReqSeq;
   const sourceSnapshot = currentText;
   const localPack = resolveEffectivePack(currentPackId || "business-brief", PACKS_BY_ID);
   const localBeforeCount = (auditText(sourceSnapshot, { filename: currentFilename || "draft.md", modality: currentModality || "markdown", pack: localPack }).findings || []).length;
@@ -3022,7 +3364,8 @@ async function runCloudAction(kind) {
     const savedVoice = kind === "deslop" ? loadSavedVoiceProfile() : null;
     const resp = await fetch(endpoint, {
       method: "POST",
-      headers,
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         text,
         filename: currentFilename || "draft.md",
@@ -3039,36 +3382,13 @@ async function runCloudAction(kind) {
       return;
     }
 
-    updateCreditsFromBilling(data.billing);
+    updateCreditsFromBilling(data.billing || data.meta?.billing);
     const panel = document.getElementById("ai-result-panel");
     if (!panel) return;
     panel.hidden = false;
 
     if (kind === "review") {
-      const level = data.llmReview?.aiFlavorLevel || "medium";
-      const summary = data.llmReview?.summary || "";
-      const issues = Array.isArray(data.llmReview?.issues) ? data.llmReview.issues : [];
-      const itemsHtml = issues.length
-        ? `<ul class="ai-changes-list">${issues
-            .map(
-              (it) =>
-                `<li><strong>${escapeHtmlSafe(it.layer || it.category || (isZh ? "结构与文风" : "style"))}</strong>：${escapeHtmlSafe(it.why || "")}${it.fix ? ` → ${escapeHtmlSafe(it.fix)}` : ""}</li>`
-            )
-            .join("")}</ul>`
-        : "";
-      panel.innerHTML = `
-        <div class="ai-result-head">
-          <span class="ai-result-title">${isZh ? `AI 深度审校（AI 味等级：${escapeHtmlSafe(level)}）` : `AI Review (slop level: ${escapeHtmlSafe(level)})`}</span>
-          <span class="ai-result-meta">${escapeHtmlSafe(data.model || "")} · -${escapeHtmlSafe(data.creditWeight ?? 1)} ${isZh ? "额度" : "cr"}</span>
-        </div>
-        <p style="margin:0 0 8px;">${escapeHtmlSafe(summary)}</p>
-        ${itemsHtml}
-        <div class="quick-actions">
-          <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
-        </div>`;
-      document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
-        panel.hidden = true;
-      });
+      renderFindingsReviewPanel(panel, data, isZh);
     } else {
       const revised = String(data.revised || "");
       const localAfterCount = (auditText(revised, { filename: currentFilename || "draft.md", modality: currentModality || "markdown", pack: localPack }).findings || []).length;
@@ -3153,57 +3473,152 @@ async function runCloudAction(kind) {
   }
 }
 
-async function handleFreeTokenSubmit(e) {
+function startOtpCooldown(seconds = 60) {
+  const btn = document.getElementById("otp-resend-btn");
+  if (!btn) return;
+  if (otpResendTimer) clearInterval(otpResendTimer);
+  let left = seconds;
+  btn.disabled = true;
+  const tick = () => {
+    if (left <= 0) {
+      clearInterval(otpResendTimer);
+      otpResendTimer = null;
+      btn.disabled = false;
+      btn.textContent = currentLang === "zh" ? "重新发送" : "Resend";
+      return;
+    }
+    btn.textContent = currentLang === "zh" ? `${left} 秒后重发` : `Resend (${left}s)`;
+    left -= 1;
+  };
+  tick();
+  otpResendTimer = setInterval(tick, 1000);
+}
+
+async function handleOtpRequestSubmit(e) {
   e.preventDefault();
   const isZh = currentLang === "zh";
-  const emailInput = document.getElementById("token-email-input");
-  const submitBtn = document.getElementById("token-submit-btn");
-  const outBox = document.getElementById("token-output-box");
-  const email = String(emailInput?.value || "").trim();
-  if (!email || !outBox) return;
+  const emailInput = document.getElementById("otp-email-input");
+  const reqBtn = document.getElementById("otp-request-btn");
+  const email = String(emailInput?.value || otpPendingEmail || "").trim().toLowerCase();
+  if (!email) return;
 
-  if (submitBtn) submitBtn.disabled = true;
-  outBox.hidden = false;
-  outBox.textContent = isZh ? "正在生成专属密钥…" : "Generating API key...";
+  if (reqBtn) reqBtn.disabled = true;
+  showAuthFeedback("");
 
   try {
-    const resp = await fetch("/api/v1/auth/register", {
+    const resp = await fetch("/api/v1/auth/otp/request", {
       method: "POST",
+      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, lang: isZh ? "zh" : "en" }),
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
-      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
+      showAuthFeedback(data.message || `HTTP ${resp.status}`, true);
+      return;
+    }
+    otpPendingEmail = email;
+    const stepEmail = document.getElementById("otp-step-email");
+    const stepCode = document.getElementById("otp-step-code");
+    const label = document.getElementById("otp-target-label");
+    if (stepEmail) stepEmail.hidden = true;
+    if (stepCode) stepCode.hidden = false;
+    if (label) {
+      label.textContent = isZh ? `验证码已发至 ${email}（10 分钟内有效）` : `Sent 6-digit code to ${email} (valid 10 min)`;
+    }
+    startOtpCooldown(60);
+    document.getElementById("otp-code-input")?.focus();
+  } catch (err) {
+    showAuthFeedback(err.message || "Network error", true);
+  } finally {
+    if (reqBtn) reqBtn.disabled = false;
+  }
+}
+
+async function handleOtpVerifySubmit(e) {
+  e.preventDefault();
+  const isZh = currentLang === "zh";
+  const codeInput = document.getElementById("otp-code-input");
+  const verifyBtn = document.getElementById("otp-verify-btn");
+  const code = String(codeInput?.value || "").trim();
+  if (!otpPendingEmail || !/^\d{6}$/.test(code)) {
+    showAuthFeedback(isZh ? "请输入 6 位数字验证码。" : "Enter the 6-digit verification code.", true);
+    return;
+  }
+  if (verifyBtn) verifyBtn.disabled = true;
+  showAuthFeedback("");
+
+  try {
+    const resp = await fetch("/api/v1/auth/otp/verify", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: otpPendingEmail, code }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      showAuthFeedback(data.message || `HTTP ${resp.status}`, true);
       return;
     }
 
-    saveCloudAccount({
-      token: data.apiKey,
-      email: data.account.email,
-      plan: data.account.plan,
-      remaining: data.account.totalRemaining,
-      monthlyQuota: data.account.monthlyQuota,
-    });
+    saveCloudAccount(data.account);
+    if (codeInput) codeInput.value = "";
     renderCloudAccountState();
+    await mountAccountHub();
 
-    const mcpJsonStr = JSON.stringify(data.mcpConfig, null, 2);
-    outBox.innerHTML = `
-      <div><strong>${isZh ? "已自动绑定到本页工作台（每月 30 额度）" : "Saved to this browser (30 monthly credits active)"}</strong></div>
-      <div style="margin-top:6px;">${isZh ? "专属密钥：" : "API key:"} <code>${escapeHtmlSafe(data.apiKey)}</code></div>
-      <div style="margin-top:6px;font-size:0.78rem;color:var(--ink-2);">${isZh ? "远程 HTTP MCP 配置（粘进 Claude Code / Cursor / Codex）：" : "Remote HTTP MCP config (paste into Claude Code / Cursor / Codex):"}</div>
-      <pre class="cloud-output-pre" id="generated-mcp-config">${escapeHtmlSafe(mcpJsonStr)}</pre>
-      <div class="quick-actions" style="margin-top:8px;">
-        <a href="#workbench" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${isZh ? "返回工作台立即试用 ↑" : "Back to workbench ↑"}</a>
-        <button type="button" id="btn-copy-mcp-cfg" class="ctrl-btn ctrl-btn-sm">${isZh ? "复制远程 MCP 配置" : "Copy Remote MCP JSON"}</button>
-      </div>`;
-    document.getElementById("btn-copy-mcp-cfg")?.addEventListener("click", async (ev) => {
-      await copyTextWithFeedback(ev.currentTarget, mcpJsonStr);
-    });
+    if (pendingGoogleLink) {
+      await attemptGoogleLinkConfirm(isZh);
+    }
   } catch (err) {
-    outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
+    showAuthFeedback(err.message || "Network error", true);
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    if (verifyBtn) verifyBtn.disabled = false;
+  }
+}
+
+async function attemptGoogleLinkConfirm(isZh) {
+  const lp = document.getElementById("google-link-panel");
+  const showLinkErr = (msgText, allowRetry) => {
+    if (!lp) return;
+    lp.hidden = false;
+    lp.innerHTML = `<p class="ai-error-msg" style="margin:0 0 8px;">${escapeHtmlSafe(msgText)}</p>
+      <div class="quick-actions">
+        ${allowRetry ? `<button type="button" id="btn-retry-google-link" class="ctrl-btn ctrl-btn-sm">${isZh ? "重试绑定" : "Retry linking"}</button>` : ""}
+        <a href="/api/v1/auth/google/start?return=%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;">${isZh ? "重新发起 Google 登录" : "Restart Google Sign-In"}</a>
+      </div>`;
+    lp.querySelector("#btn-retry-google-link")?.addEventListener("click", () => {
+      attemptGoogleLinkConfirm(isZh);
+    });
+  };
+  try {
+    const linkResp = await fetch("/api/v1/auth/google/link-confirm", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    const linkData = await linkResp.json().catch(() => ({}));
+    if (!linkResp.ok) {
+      const msg =
+        linkData.message ||
+        (isZh ? `绑定 Google 账号失败（HTTP ${linkResp.status}），请重试。` : `Failed to link Google account (HTTP ${linkResp.status}). Please retry.`);
+      showLinkErr(msg, linkResp.status >= 500);
+      return;
+    }
+    pendingGoogleLink = false;
+    if (lp) lp.hidden = true;
+    if (linkData.account) {
+      saveCloudAccount(linkData.account);
+      renderCloudAccountState();
+      await mountAccountHub();
+    }
+    if (pendingReturnNext) {
+      const nextUrl = pendingReturnNext;
+      pendingReturnNext = "";
+      window.location.assign(nextUrl);
+    }
+  } catch (err) {
+    showLinkErr(err?.message || (isZh ? "网络异常，绑定未完成。" : "Network error while linking Google account."), true);
   }
 }
 
@@ -3255,6 +3670,11 @@ function applyTheme(theme) {
 // ---------- Wire Events ----------
 
 function init() {
+  try {
+    window.localStorage.removeItem(CLOUD_STORE_KEY);
+  } catch {
+    // ignore storage errors
+  }
   const savedTheme = safeGetStorage("dislop-theme");
   const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
@@ -3670,10 +4090,49 @@ function init() {
     saveVoiceProfile(null);
     renderSavedVoiceState();
   });
-  document.getElementById("free-token-form")?.addEventListener("submit", handleFreeTokenSubmit);
+  document.getElementById("otp-request-form")?.addEventListener("submit", handleOtpRequestSubmit);
+  document.getElementById("otp-verify-form")?.addEventListener("submit", handleOtpVerifySubmit);
+  document.getElementById("otp-resend-btn")?.addEventListener("click", handleOtpRequestSubmit);
+  document.getElementById("otp-change-email-btn")?.addEventListener("click", () => {
+    const sEmail = document.getElementById("otp-step-email");
+    const sCode = document.getElementById("otp-step-code");
+    if (sEmail) sEmail.hidden = false;
+    if (sCode) sCode.hidden = true;
+    showAuthFeedback("");
+  });
   document.getElementById("waitlist-form")?.addEventListener("submit", handleWaitlistSubmit);
 
-  window.addEventListener("hashchange", handleRuleHash);
+  const tokenBox = document.getElementById("cloud-token-box");
+  const initHash = String(window.location.hash || "");
+  const initParams = new URLSearchParams(window.location.search || "");
+  if (
+    hasSessionHintCookie() ||
+    initHash === "#auth-link" ||
+    initParams.get("auth") === "link" ||
+    initHash === "#cloud-token-box" ||
+    initHash.startsWith("#auth-error=")
+  ) {
+    initCloudHealthAndSession(false);
+  } else if (tokenBox && typeof IntersectionObserver === "function") {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          obs.disconnect();
+          initCloudHealthAndSession(false);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    obs.observe(tokenBox);
+  }
+
+  window.addEventListener("hashchange", () => {
+    const h = String(window.location.hash || "");
+    if (h === "#cloud-token-box" || h === "#auth-link" || h.startsWith("#auth-error=")) {
+      initCloudHealthAndSession(false);
+    }
+    handleRuleHash();
+  });
 
   applyI18n(false);
   handleRuleHash();
