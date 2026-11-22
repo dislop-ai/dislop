@@ -12,9 +12,14 @@
 ### 用户
 第一批是 Coding Agent 用户，第二批是办公 Agent 用户，最后是所有用 AI 交付成果的人。
 
+### 产品形态
+1. **Skill（开源，纯文档）**：按文体整理的写作与界面避坑参考卡，不带可执行脚本。Agent 动笔前按需读取，写完后可调用 CLI 自检。
+2. **CLI 与本地插件（开源，本地运行）**：零依赖本地检查工具，快速标出文档、网页和 Word/PPT 里的 AI 残留硬伤与常见套话，适合终端、编辑器、Git 钩子与 CI。开发者也可以配自有模型密钥做深度审校。
+3. **官方 MCP 与网页工作台（云端服务）**：不用配本地环境，登录就能在办公或编码 Agent 里接入远程 MCP，或者直接在网页工作台使用。云端按文体做多模型深度审校，返回具体问题和改法建议，交给你的 Agent 结合本地上下文去改，也支持保留原排版的 Word/PPT 处理。
+
 ### 卖点
 1. **集成社区优质成果**：整合经过核验的开源去味项目、语料经验与工具清单，覆盖文稿、网页和 Word/PPT，不用自己到处搜集拼凑。
-2. **多端与多场景兼容**：内置研发、商务、前端与演示等场景包，提供 Skill、Plugin、CLI 与 MCP，一行命令接入主流 Agent 和编辑器。
+2. **多端与多场景兼容**：内置研发、商务、前端与演示等场景包，提供 Skill、Plugin、CLI 与官方 MCP，快速接入主流 Agent 和编辑器。
 3. **本地离线保护隐私**：CLI 与本地插件支持纯本地运行、零上传，私密文稿与代码不出本机。
 
 ### 一句话介绍
@@ -30,9 +35,14 @@
 ### Users
 First coding agent users, then office agent users, and finally everyone who delivers work with AI.
 
+### Product Form
+1. **Skill (open-source, Markdown only)**: Genre-specific writing and UI reference cards with no bundled scripts. Your agent reads the matching card before drafting and can run the CLI afterward to check its work.
+2. **CLI & Local Plugins (open-source, local)**: Zero-dependency local checker that flags AI leftovers and stock templates across docs, web UI, Word, and PowerPoint in terminals, editors, Git hooks, and CI. Developers can also plug in their own model API key for deeper review.
+3. **Official MCP & Web Workbench (cloud service)**: Sign in to connect office or coding agents to the remote MCP with no local setup, or use the web workbench directly. The cloud service runs multi-model review by genre, returns structured issues and edit guidance for your local agent to apply in context, and handles Word and PowerPoint files while keeping their layout.
+
 ### Selling Points
 1. **Curated community work**: Combines vetted open-source rules, corpus findings, and an indexed tool directory across docs, web UI, Word, and PowerPoint, without hunting down scattered prompts.
-2. **Broad host and scenario fit**: Ships domain packs for engineering, business, UI, and decks across Skill, Plugin, CLI, and MCP, connecting to major agents and editors in one command.
+2. **Broad host and scenario fit**: Ships domain packs for engineering, business, UI, and decks across Skill, Plugin, CLI, and Cloud MCP, connecting to major agents and editors in seconds.
 3. **Local, offline, private**: The CLI and local plugins run on your machine with zero uploads, keeping private drafts and source code local.
 
 ### One-Sentence Pitch

@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 0.6.2
+version: 0.7.0
 snapshot: 2026-11-21
 ---
 
@@ -9,9 +9,9 @@ snapshot: 2026-11-21
 A dedicated linter for AI slop. It brings together vetted community rules, corpus findings, and 87 curated tools to help you (and your agent) catch and fix AI-sounding text and template layouts in docs, web UI, and slides. Connects in one command to coding agents (Codex, Claude Code, Antigravity, Cursor), office agents (Claude Cowork, WorkBuddy, Qwen), and editors, and can run completely offline locally.
 
 - Product brief (EN/ZH): https://dislop.com/methodology/product-brief.md
-- Runtime dependencies: 0 (CLI and local plugins run offline with zero uploads)
-- Live browser workbench: https://dislop.com/#workbench (switches between local rule checks and Cloud MCP mode, `CSP: connect-src 'self'`)
-- Hosted Remote HTTP MCP: https://dislop.com/mcp (30 free monthly credits via https://dislop.com/#pricing)
+- Runtime dependencies: 0 (pure-Markdown Skill and local CLI run offline with zero uploads)
+- Live browser workbench: https://dislop.com/#workbench (offline local checks + sign-in Cloud MCP mode, `CSP: connect-src 'self'`)
+- Official Cloud MCP: https://dislop.com/mcp (sign in for 30 free monthly credits via https://dislop.com/#pricing)
 - Agent routing index: https://dislop.com/llms.txt
 - Machine-readable catalog: https://dislop.com/catalog.json
 - Awesome Anti-Slop (87 curated entries): https://dislop.com/awesome/
@@ -20,11 +20,11 @@ A dedicated linter for AI slop. It brings together vetted community rules, corpu
 
 | Target | Formats / Scope | Status |
 |---|---|---|
-| Writing, Specs, RFCs & Copy | `.md`, `.mdx`, `.txt` (EN & ZH, 7 built-in packs, 53 patterns across 6 dimensions) | LIVE `v0.6.2` |
-| Word & PowerPoint | `.docx`, `.pptx` (incl. layout monotony & conclusion titles) | LIVE `v0.6.2` |
-| Web UI & Components | `.html`, `.css`, `.jsx`, `.tsx` | LIVE `v0.6.2` |
-| Offline Voice & Pocket ML | `dislop voice` (`dislop.voice/1`) & 14.6 KB `--ml` stealth-vapor scorer | LIVE `v0.6.2` |
-| Optional Local Small Models | `dislop model` hardware-aware advisor (`0.6B` / `1.7B` / `4B`) | LIVE `v0.6.2` |
+| Writing, Specs, RFCs & Copy | `.md`, `.mdx`, `.txt` (EN & ZH, 7 built-in packs, 53 patterns across 6 dimensions) | LIVE `v0.7.0` |
+| Word & PowerPoint | `.docx`, `.pptx` (incl. layout monotony & conclusion titles) | LIVE `v0.7.0` |
+| Web UI & Components | `.html`, `.css`, `.jsx`, `.tsx` | LIVE `v0.7.0` |
+| Offline Voice & Pocket ML | `dislop voice` (`dislop.voice/1`) & 14.6 KB `--ml` stealth-vapor scorer | LIVE `v0.7.0` |
+| Optional Local Small Models | `dislop model` hardware-aware advisor (`0.6B` / `1.7B` / `4B`) | LIVE `v0.7.0` |
 | Git Diffs & PRs | `--changed` / `--staged` & SARIF 2.1.0 | LIVE (diff check) · Roadmap (code AST) |
 
 ## Rule Layers

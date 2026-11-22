@@ -16,7 +16,7 @@
   <a href="./LICENSE">Apache-2.0</a>
 </p>
 
-`dislop` is a dedicated **Linter for AI Slop**. It combines vetted community anti-slop rules, corpus findings, and 87 curated tools so you (and your agent) can catch and fix AI-sounding text and template layouts before sharing docs, web pages, or slides. Connects in one command to coding agents (Codex, Claude Code, Antigravity, Cursor), office agents (Claude Cowork, WorkBuddy, Qwen), and editors, and can run completely offline locally.
+`dislop` is a dedicated **Linter for AI Slop**. It combines vetted community anti-slop rules, corpus findings, and 87 curated tools so you (and your agent) can catch and fix AI-sounding text and template layouts before sharing docs, web pages, or slides. It ships in three clean layers: a **pure-Markdown Skill** (genre reference cards with zero scripts), an **open-source local CLI & editor plugins** (zero-dependency offline checking across docs, web UI, Word, and PowerPoint), and **Official Cloud MCP & Web Workbench** (`https://dislop.com/mcp`, zero-setup genre-aware multi-model review and layout-preserving Office handling).
 
 Here is a short launch note straight from a model:
 
@@ -38,7 +38,7 @@ If you rewrite it into a second-order AI slogan (`This isn't just an upgrade —
   <img src="./assets/demos/proof-cycle-en-v1.gif" alt="dislop checking a launch note across 3 states: flagging chatbot artifact and filler, catching a second-order slogan, and passing with exit 0" width="840">
 </p>
 
-That's it. It inspects Markdown, plain text, HTML/CSS/JSX, Word (`.docx`), and PowerPoint (`.pptx`). The CLI and local plugins run completely offline with zero uploads. They share the same **7 built-in packs (`42` rules)**, 5-axis rhythm telemetry, offline style extraction, extended pattern probes (`--patterns`), bundled `14.6 KB` Pocket ML (`--ml`), and hardware-aware optional local models (`dislop model`). At [dislop.com](https://dislop.com/?lang=en), the browser workbench switches between local rule checks and Cloud MCP mode, and you can connect Hosted Cloud MCP (`https://dislop.com/mcp`) whenever no local shell is available.
+That's it. It inspects Markdown, plain text, HTML/CSS/JSX, Word (`.docx`), and PowerPoint (`.pptx`). The open-source CLI and local plugins run completely offline with zero uploads, bundling all **7 built-in packs (`42` rules)**, 5-axis rhythm telemetry, extended pattern probes (`--patterns`), and the `14.6 KB` Pocket ML scorer (`--ml`). Zero offline hits only means no known surface or structural pattern matched—it does not prove deep content quality. Sign in at [dislop.com](https://dislop.com/?lang=en) or connect Official Cloud MCP (`https://dislop.com/mcp`) for multi-model genre-aware review (`dislop_review` returns structured issues and edit guidance for your local agent to revise in project context).
 
 ## Quick start
 
@@ -51,15 +51,12 @@ npx --yes dislop check .
 # Auto-route domain pack and enable 5-axis telemetry, 14.6 KB Pocket ML, and extended pattern probes
 npx --yes dislop check draft.md --pack auto --profile --ml --patterns
 
-# Extract a deterministic personal voice profile offline or inspect hardware for optional local models
+# Extract a deterministic personal voice profile offline or inspect a rule's examples
 npx --yes dislop voice my-notes.md
-npx --yes dislop model
+npx --yes dislop explain negation-pivot-frame
 
 # Check only lines changed against main and emit GitHub PR annotations
 npx --yes dislop check --changed origin/main --format github
-
-# Explain a rule's check question and before / overcorrected / after examples
-npx --yes dislop explain negation-pivot-frame
 ```
 
 ### Python 3.10+ (published on PyPI, zero dependencies)
@@ -116,28 +113,31 @@ Looking for other tools, style guides, design rules, PR policies, and papers in 
 | Surface | One-liner or 1-click install | What you get |
 |---|---|---|
 | **Any AI chat** | Paste: `Read https://dislop.com/llms.txt and apply its anti-slop rules and checks before delivering my next draft.` | Zero install; reads the `~2.4 KB` index, task guides (`/tasks/*.md`), or atomic rule cards (`/rules/<id>.md`) |
-| **Agent Skill (75+ hosts)** | `npx skills add dislop-ai/dislop` | Installs [skills/dislop/SKILL.md](./skills/dislop/SKILL.md) + 4 local reference cards in Claude Code, Codex, Cursor, Windsurf, Antigravity, and OpenCode (`0` network calls) |
-| **Claude Code Plugin** | `/plugin marketplace add dislop-ai/dislop` then `/plugin install dislop@dislop-ai` | Bundles Skill + local stdio MCP (`~130` always-on tokens) |
+| **Agent Skill (75+ hosts)** | `npx skills add dislop-ai/dislop` | Installs pure-Markdown [skills/dislop/SKILL.md](./skills/dislop/SKILL.md) + 4 local reference cards (`0` bundled scripts, `0` network calls); guides local CLI checks when a shell exists |
+| **Claude Code Plugin** | `/plugin marketplace add dislop-ai/dislop` then `/plugin install dislop@dislop-ai` | Bundles pure-doc Skill + Official Cloud MCP connection (`~130` always-on tokens) |
 | **OpenAI Codex Plugin** | `codex plugin marketplace add dislop-ai/dislop` then `codex plugin add dislop@dislop-ai` | Ships native UI card metadata ([openai.yaml](./skills/dislop/agents/openai.yaml)) and `$dislop` trigger |
-| **Gemini CLI Extension** | `gemini extensions install https://github.com/dislop-ai/dislop` | Mounts local `bin/dislop-mcp.mjs` directly via [gemini-extension.json](./gemini-extension.json) |
-| **Official MCP Registry** | Search `io.github.dislop-ai/dislop` on `registry.modelcontextprotocol.io` | Lists local `npx` / `uvx` `stdio` packages and remote `https://dislop.com/mcp` |
-| **VS Code / Cursor 1-Click MCP** | [Install in VS Code (Local Offline)](https://vscode.dev/redirect/mcp/install?name=dislop&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22--yes%22%2C%22dislop%22%2C%22--mcp%22%5D%7D) · [Install in VS Code (Cloud)](https://vscode.dev/redirect/mcp/install?name=dislop-cloud&config=%7B%22url%22%3A%22https%3A%2F%2Fdislop.com%2Fmcp%22%7D) · [Install in Cursor (Local)](cursor://anysphere.cursor-deeplink/mcp/install?name=dislop&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyItLXllcyIsImRpc2xvcCIsIi0tbWNwIl19) | Opens the editor's native confirmation dialog without manual JSON edits |
+| **Gemini CLI Extension** | `gemini extensions install https://github.com/dislop-ai/dislop` | Connects Official Cloud MCP `https://dislop.com/mcp` via [gemini-extension.json](./gemini-extension.json) |
+| **Official MCP Registry** | Search `io.github.dislop-ai/dislop` on `registry.modelcontextprotocol.io` | Lists the Official Cloud MCP endpoint `https://dislop.com/mcp` (Streamable HTTP) |
+| **VS Code / Cursor 1-Click MCP** | [Install in VS Code (Cloud MCP)](https://vscode.dev/redirect/mcp/install?name=dislop&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fdislop.com%2Fmcp%22%7D) · [Install in Cursor (Cloud MCP)](cursor://anysphere.cursor-deeplink/mcp/install?name=dislop&config=eyJ0eXBlIjoiaHR0cCIsInVybCI6Imh0dHBzOi8vZGlzbG9wLmNvbS9tY3AifQ==) | Opens the editor's native confirmation dialog without manual JSON edits |
 | **GitHub Action / `pre-commit`** | Reference `uses: dislop-ai/dislop@main` ([action.yml](./action.yml) and [.pre-commit-hooks.yaml](./.pre-commit-hooks.yaml)) | Gates modified lines in PRs with inline annotations or SARIF 2.1.0 |
 
-### Manual MCP config (`Claude Code`, `Codex`, `Cursor`, `Windsurf`)
+### Connect Official Cloud MCP (`Claude Code`, `Codex`, `Cursor`, `WorkBuddy`, `Claude Cowork`)
 
 ```json
 {
   "mcpServers": {
     "dislop": {
-      "command": "npx",
-      "args": ["--yes", "dislop", "--mcp"]
+      "type": "http",
+      "url": "https://dislop.com/mcp",
+      "headers": {
+        "Authorization": "Bearer dslp_your_token_here"
+      }
     }
   }
 }
 ```
 
-Exposed local MCP tools (`7` offline tools, `verbosity: "compact"` by default, with negative fixtures stripped): `dislop_check` (supports `pack` including `"auto"`, `profile`, `ml`, and `patterns`), `dislop_voice_extract_offline`, `dislop_model_score`, `dislop_model_status`, `dislop_explain`, `dislop_packs`, and `dislop_catalog`.
+Official Cloud MCP (`https://dislop.com/mcp`) exposes `dislop_review` (1 credit, genre-aware multi-model review returning structured issues and edit guidance for your local agent to apply in context), `dislop_deslop` (2 credits, re-checked rewrite), `dislop_voice_extract` (2 credits), and 0-credit deterministic checks. Sign in at [dislop.com](https://dislop.com/?lang=en#cloud-token-box) for a free 30-credit/month key.
 
 ## Configure it, or overrule it
 
@@ -177,10 +177,10 @@ pip install dislop
 dislop check .
 ```
 
-### Open-Source Local (`Skill` + `CLI`) vs. Hosted Cloud (`dislop.com/mcp`)
+### Open-Source Local (`Skill` + `CLI`) vs. Official Cloud (`dislop.com/mcp`)
 
-- **Open Source (`dislop-ai/dislop`, Apache-2.0)**: `SKILL.md` + bundled local `./references/*.md`, Node/Python CLI (`dislop check [--pack <id|auto>] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|sarif|github|md]`, `dislop patterns`, `dislop voice`, `dislop model [status|score|install|import|remove|deslop]`, `dislop setup`, `dislop deslop --local`, `dislop explain`, `dislop packs`, `dislop catalog`, `dislop resources`), 7-tool local stdio MCP (`--mcp`), all 7 built-in packs (`42` rules) + 53-pattern catalog (`patterns/`), bundled `14.6 KB` gzip (`49.0 KB` raw) Pocket ML ensemble (`models/pocket-slop-v1.json`, `< 0.5 ms`, `100.0%` F1 / `0.0%` Clean FPR on `stealth-vapor-v1`), `Awesome Anti-Slop`, and `dislop-bench v2`. Zero third-party packages, zero API keys, and `0` network calls during `check` / `patterns` / `voice` / `model score` so private drafts never leave your machine. For heavier local neural rewrites, `dislop setup` and `dislop model install` inspect RAM/disk budgets and let you optionally install `0.6B` (`~520 MB`), `1.7B` (`~1.3 GB`), or `4B` (`~2.5 GB`) local models (or import offline `.gguf`/`.onnx` weights with SHA-256 verification) protected by an internal numeric and qualifier retention guard during automated local rewrites.
-- **Hosted Cloud Remote MCP & Web AI (`https://dislop.com/mcp`, `https://dislop.com/?lang=en#pricing`)**: Optional closed-source cloud backend powered by a paid-tier zero-training Google Gemini endpoint (no draft logging; see [privacy.md](https://dislop.com/privacy.md)). Exposes `dislop_review` (1 credit, deeper cadence and prose review), `dislop_deslop` (2 credits, re-checked rewrite verifying numbers and qualifiers), and `dislop_voice_extract` (2 credits, `dislop.voice/1`). Includes 5 free anonymous web demo credits/day, **30 free monthly credits** after email key signup, and early-access waitlists for Pro (`$12/mo`, 1,500 credits), PAYGO (`$10 / 800 credits`), and Team (`$29/seat/mo`).
+- **Open Source (`dislop-ai/dislop`, Apache-2.0)**: Pure-Markdown `SKILL.md` + local `./references/*.md` (no bundled scripts), zero-dependency Node/Python CLI (`dislop check [--pack <id|auto>] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|sarif|github|md]`, `dislop patterns`, `dislop voice`, `dislop explain`, `dislop packs`, `dislop catalog`, `dislop resources`), all 7 built-in packs (`42` rules) + 53-pattern catalog (`patterns/`), bundled `14.6 KB` gzip (`49.0 KB` raw) Pocket ML ensemble (`models/pocket-slop-v1.json`, `< 0.5 ms`, `100.0%` F1 / `0.0%` Clean FPR on `stealth-vapor-v1`), `Awesome Anti-Slop`, and `dislop-bench v2`. `check` / `patterns` / `voice` make `0` network calls so private drafts never leave your machine (existing `--mcp` and optional local-model modules stay in-repo during real-world evaluation).
+- **Official Cloud MCP & Web Workbench (`https://dislop.com/mcp`, `https://dislop.com/?lang=en#pricing`)**: Closed-source hosted backend running paid-tier zero-training model endpoints (no draft logging; see [privacy.md](https://dislop.com/privacy.md)). Exposes `dislop_review` (1 credit, multi-model genre-aware review returning structured issues and edit guidance), `dislop_deslop` (2 credits, re-checked rewrite verifying numbers and qualifiers), and `dislop_voice_extract` (2 credits, `dislop.voice/1`). Sign-in required for cloud AI: claim a free key for **30 monthly credits**, with early-access waitlists for Pro (`$12/mo`, 1,500 credits), PAYGO (`$10 / 800 credits`), and Team (`$29/seat/mo`).
 
 ## Anti-slop benchmark (`dislop-bench v2`)
 
@@ -213,15 +213,15 @@ GitHub Actions CI runs `dislop pack-test` (164 fixture assertions in both Node a
 ```text
 dislop/
 ├── .agents/plugins/   # OpenAI Codex marketplace manifest (marketplace.json)
-├── .claude-plugin/    # Claude Code plugin & marketplace manifests (Skill + local MCP)
+├── .claude-plugin/    # Claude Code plugin & marketplace manifests (pure-doc Skill + Official Cloud MCP)
 ├── .codex-plugin/     # OpenAI Codex native plugin manifest & UI card metadata
 ├── plugin.json        # Agent Plugins 1.0 portable manifest (paired with root mcp.json)
 ├── gemini-extension.json # Gemini CLI Extension Gallery manifest
-├── server.json        # Official MCP Registry manifest (local stdio + remote HTTP)
+├── server.json        # Official MCP Registry manifest (Official Cloud HTTP MCP)
 ├── action.yml         # Reusable GitHub Marketplace incremental check Action
 ├── awesome/           # Awesome Anti-Slop (README.md & README.zh-CN.md, 87 entries)
 ├── benchmarks/        # Offline anti-slop benchmark datasets (CC0-1.0) & reproducible reports
-├── bin/               # Node.js CLI (dislop.mjs) & local stdio MCP launcher (dislop-mcp.mjs)
+├── bin/               # Node.js CLI (dislop.mjs) and compatibility launcher (dislop-mcp.mjs)
 ├── src/
 │   ├── core.mjs       # Zero-dep ES module shared by Node CLI, MCP, and browser workbench
 │   ├── pattern-engine.mjs # Multi-angle 11-probe extended pattern-bank scanner

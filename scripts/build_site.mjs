@@ -624,9 +624,9 @@ snapshot: ${SNAPSHOT_DATE}
 A dedicated linter for AI slop. It brings together vetted community rules, corpus findings, and 87 curated tools to help you (and your agent) catch and fix AI-sounding text and template layouts in docs, web UI, and slides. Connects in one command to coding agents (Codex, Claude Code, Antigravity, Cursor), office agents (Claude Cowork, WorkBuddy, Qwen), and editors, and can run completely offline locally.
 
 - Product brief (EN/ZH): ${BASE_URL}/methodology/product-brief.md
-- Runtime dependencies: 0 (CLI and local plugins run offline with zero uploads)
-- Live browser workbench: ${BASE_URL}/#workbench (switches between local rule checks and Cloud MCP mode, \`CSP: connect-src 'self'\`)
-- Hosted Remote HTTP MCP: ${BASE_URL}/mcp (30 free monthly credits via ${BASE_URL}/#pricing)
+- Runtime dependencies: 0 (pure-Markdown Skill and local CLI run offline with zero uploads)
+- Live browser workbench: ${BASE_URL}/#workbench (offline local checks + sign-in Cloud MCP mode, \`CSP: connect-src 'self'\`)
+- Official Cloud MCP: ${BASE_URL}/mcp (sign in for 30 free monthly credits via ${BASE_URL}/#pricing)
 - Agent routing index: ${BASE_URL}/llms.txt
 - Machine-readable catalog: ${BASE_URL}/catalog.json
 - Awesome Anti-Slop (87 curated entries): ${BASE_URL}/awesome/
@@ -1043,13 +1043,13 @@ Pick the lightest surface that fits your workflow:
 | Surface | Status | How to start |
 |---|---|---|
 | Zero-Install Prompt & Static Pages | Live | Hand [\`/llms.txt\`](../llms.txt) or [\`/catalog.json\`](../catalog.json) to any web-capable AI, or test drafts offline in the [Browser Workbench](${BASE_URL}/#workbench). |
-| Agent Skill (Local Progressive References) | Live | Install [\`SKILL.md\`](./skill.md) + bundled \`references/*.md\` with \`npx skills add dislop-ai/dislop\` in Claude Code, Codex, Cursor, Windsurf, or Antigravity (0 network calls). |
-| CLI, Offline Voice & Local Models | Live | See [\`/tools/cli-and-hooks.md\`](./cli-and-hooks.md) for zero-network Node (\`npx\`), Python (\`uvx\`), all 7 built-in packs, 53 patterns, 14.6 KB \`--ml\`, \`dislop voice\`, and \`dislop model\`. |
-| Hosted Remote HTTP MCP (Cloud) | Live | Connect \`${BASE_URL}/mcp\` with a free 30-credit/month Bearer key from [\`/#pricing\`](${BASE_URL}/#pricing) for \`dislop_review\`, re-checked \`dislop_deslop\`, and \`dislop_voice_extract\`. |
-| Claude Code Plugin | Live | Install Skill + local offline stdio MCP in one step using \`.claude-plugin/marketplace.json\` (\`/plugin marketplace add dislop-ai/dislop\` then \`/plugin install dislop@dislop-ai\`; ~130 always-on tokens). |
+| Agent Skill (Pure-Markdown References) | Live | Install [\`SKILL.md\`](./skill.md) + bundled \`references/*.md\` (0 scripts, 0 network calls) with \`npx skills add dislop-ai/dislop\` in Claude Code, Codex, Cursor, Windsurf, or Antigravity. |
+| Local CLI & Offline Voice | Live | See [\`/tools/cli-and-hooks.md\`](./cli-and-hooks.md) for zero-network Node (\`npx\`), Python (\`uvx\`), all 7 built-in packs, 53 patterns, 14.6 KB \`--ml\`, and \`dislop voice\`. |
+| Official Cloud MCP | Live | Connect \`${BASE_URL}/mcp\` with a free 30-credit/month Bearer key from [\`/#pricing\`](${BASE_URL}/#pricing) for \`dislop_review\` (genre-aware structured edits), \`dislop_deslop\`, and \`dislop_voice_extract\`. |
+| Claude Code Plugin | Live | Install pure-Markdown Skill + Official Cloud MCP in one step using \`.claude-plugin/marketplace.json\` (\`/plugin marketplace add dislop-ai/dislop\` then \`/plugin install dislop@dislop-ai\`; ~130 always-on tokens). |
 | OpenAI Codex Plugin & Gemini CLI Extension | Live | Codex: \`codex plugin marketplace add dislop-ai/dislop\` then \`codex plugin add dislop@dislop-ai\`; Gemini CLI: \`gemini extensions install https://github.com/dislop-ai/dislop\`. |
 | GitHub Action & pre-commit | Live | Gate modified PR lines with \`uses: dislop-ai/dislop@main\` (\`action.yml\`) or \`.pre-commit-hooks.yaml\`. |
-| Local MCP, Remote MCP & JS Export | Live | See [\`/tools/mcp-sdk-api.md\`](./mcp-sdk-api.md) for compact local stdio MCP, hosted Remote HTTP MCP, HTTP API, and \`src/core.mjs\`. |
+| Official Cloud MCP, HTTP API & JS Export | Live | See [\`/tools/mcp-sdk-api.md\`](./mcp-sdk-api.md) for Official Cloud HTTP MCP, HTTP API, and \`src/core.mjs\`. |
 `,
 });
 
@@ -1220,8 +1220,8 @@ registerResource({
   id: "tools-mcp-sdk-api",
   pillar: "tools",
   kind: "guide",
-  titleEn: "Local MCP, Hosted Remote MCP & HTTP API",
-  titleZh: "本地 MCP、托管远程 MCP 与 HTTP API",
+  titleEn: "Official Cloud MCP, HTTP API & JS Core",
+  titleZh: "官方云端 MCP、HTTP API 与 JS 核心",
   relPath: "tools/mcp-sdk-api.md",
   modalities: ["markdown", "text", "html", "css", "jsx", "svg", "docx", "pptx", "pdf"],
   languages: ["en", "zh"],
@@ -1232,57 +1232,23 @@ content-type: reference-data
 version: ${VERSION}
 ---
 
-# Local MCP, Hosted Remote MCP & HTTP API
+# Official Cloud MCP, HTTP API & JS Core
 
-## 1. Local Offline Stdio MCP (Open Source, Zero LLM, Zero Upload)
+## 1. Official Cloud HTTP MCP (Sign-In Required, Free 30 Credits/Month)
 
-Node.js 20+:
-\`\`\`json
-{
-  "mcpServers": {
-    "dislop": {
-      "command": "npx",
-      "args": ["--yes", "dislop", "--mcp"]
-    }
-  }
-}
-\`\`\`
-
-Python 3.10+ (PyPI, zero external deps):
-\`\`\`json
-{
-  "mcpServers": {
-    "dislop": {
-      "command": "uvx",
-      "args": ["dislop", "--mcp"]
-    }
-  }
-}
-\`\`\`
-
-Local deterministic tools (7 offline tools, \`verbosity: "compact"\` by default; zero negative fixtures leaked):
-- \`dislop_check\`: Arguments \`{ "text"?: string, "path"?: string, "filename"?: string, "pack"?: "auto"|"core"|"business-brief"|"engineering-spec"|"regulated-comms"|"literary-essay"|"deck-and-ui"|"executive-deck", "profile"?: boolean, "ml"?: boolean, "patterns"?: boolean, "verbosity"?: "compact"|"full", "lang"?: "en"|"zh" }\`. Returns \`{ pack, modality, count, findings, explainHint?, profile? }\` with 0 network calls.
-- \`dislop_voice_extract_offline\`: Arguments \`{ "samples": string[], "lang"?: "auto"|"en"|"zh" }\`. Computes deterministic \`dislop.voice/1\` offline with 0 network calls.
-- \`dislop_model_score\`: Runs bundled 14.6 KB \`pocket-slop-v1\` stealth-vapor scoring and pack routing offline.
-- \`dislop_model_status\`: Inspects hardware RAM/chip and optional local small-model tiers.
-- \`dislop_explain\`: Arguments \`{ "ruleId": string, "lang"?: "en"|"zh" }\`. Returns localized rationale and \`bad -> trap -> good\` examples without test fixtures.
-- \`dislop_packs\`: Lists all 7 bundled packs (42 built-in rules).
-- \`dislop_catalog\`: Searches all 53 structured patterns across 6 dimensions (42 built-in pack rules + 11 extended pattern-bank probes).
-
-## 2. Hosted Remote HTTP MCP (Cloud LLM, Free 30 Credits/Month)
-
-Claim a free Bearer token (\`dslp_...\`) at \`${BASE_URL}/#cloud-token-box\` (paid-tier zero-training Google Gemini endpoint, no draft logging; see [\`/privacy.md\`](../privacy.md)).
+Claim a free Bearer token (\`dslp_...\`) at \`${BASE_URL}/#cloud-token-box\` (paid-tier zero-training model endpoints, no draft logging; see [\`/privacy.md\`](../privacy.md)).
 
 ### Claude Code
 \`\`\`bash
-claude mcp add --transport http dislop-cloud ${BASE_URL}/mcp --header "Authorization: Bearer dslp_YOUR_FREE_TOKEN"
+claude mcp add --transport http dislop ${BASE_URL}/mcp --header "Authorization: Bearer dslp_YOUR_FREE_TOKEN"
 \`\`\`
 
-### Cursor / Windsurf (\`mcp.json\`)
+### Cursor / Windsurf / Antigravity (\`mcp.json\`)
 \`\`\`json
 {
   "mcpServers": {
-    "dislop-cloud": {
+    "dislop": {
+      "type": "http",
       "url": "${BASE_URL}/mcp",
       "headers": {
         "Authorization": "Bearer dslp_YOUR_FREE_TOKEN"
@@ -1294,14 +1260,14 @@ claude mcp add --transport http dislop-cloud ${BASE_URL}/mcp --header "Authoriza
 
 ### Codex (\`~/.codex/config.toml\`)
 \`\`\`toml
-[mcp_servers.dislop_cloud]
+[mcp_servers.dislop]
 url = "${BASE_URL}/mcp"
 http_headers = { Authorization = "Bearer dslp_YOUR_FREE_TOKEN" }
 \`\`\`
 
-### Remote MCP Tools & Example Payloads
+### Official Cloud MCP Tools
 
-- \`dislop_check\`, \`dislop_explain\`, \`dislop_packs\` (0 credits, no token required; note remote \`dislop_check\` accepts \`text\` only, not local filesystem \`path\`).
+- \`dislop_check\`, \`dislop_explain\`, \`dislop_packs\` (0 credits; note remote \`dislop_check\` accepts \`text\` only, not local filesystem \`path\`).
 - \`dislop_review\` (1 credit, requires Bearer token):
   - Input: \`{ "text": "...", "pack"?: "business-brief", "lang"?: "en"|"zh" }\`
   - Output: \`{ mode, model, deterministic, thirdOrderHits, llmReview: { summary, aiFlavorLevel, issues }, billing }\`
@@ -1312,10 +1278,11 @@ http_headers = { Authorization = "Bearer dslp_YOUR_FREE_TOKEN" }
   - Input: \`{ "samples": ["Sample 1...", "Sample 2..."], "lang"?: "en"|"zh" }\`
   - Output: \`{ schema: "dislop.voice/1", stylometrics, profile }\` — pass \`output.profile\` as \`voiceProfile\` in \`dislop_deslop\`.
 
-## 3. Cloud HTTP API & JS Core Export
+## 2. Cloud HTTP API & JS Core Export
 
 - Same-origin HTTP endpoints: \`GET /api/health\`, \`POST /api/v1/check\`, \`POST /api/v1/review\`, \`POST /api/v1/deslop\`, \`POST /api/v1/voice/extract\`, \`POST /api/v1/auth/register\`, \`GET /api/v1/account/me\`, and \`POST /api/v1/waitlist\`.
 - \`package.json\` exports the zero-I/O pure ES module \`src/core.mjs\` (\`auditText\`, \`auditOoxmlEntries\`, \`resolveEffectivePack\`).
+- Note: existing local \`--mcp\` stdio code remains in the open-source CLI during real-world evaluation, while official manifests target \`${BASE_URL}/mcp\`.
 `,
 });
 
@@ -1340,23 +1307,23 @@ snapshot: ${SNAPSHOT_DATE}
 
 \`dislop\` separates its **open-source offline tools** from its **optional hosted cloud service** so you always know whether text leaves your machine.
 
-## 1. Open-Source Offline Tools (Zero Uploads, Zero Telemetry)
+## 1. Open-Source Local Tools (Zero Uploads, Zero Telemetry)
 
-- **CLI (\`dislop check\`, \`patterns\`, \`voice\`, \`model --no-loopback\`, \`explain\`, \`packs\`, \`catalog\`, \`resources\`)**, **Agent Skill (\`SKILL.md\` + local \`references/*.md\`)**, **Local stdio MCP (\`--mcp\`, 7 offline tools)**, and the **local rule mode** in the browser workbench run 100% locally.
-- \`dislop check\`, \`dislop patterns\`, and \`dislop voice\` make zero network calls; \`dislop model\` only probes \`127.0.0.1\` loopback runners locally unless you choose to install an optional local runner yourself.
+- **Pure-Markdown Agent Skill (\`skills/dislop/\`, zero scripts)**, **Local CLI (\`dislop check\`, \`patterns\`, \`voice\`, \`explain\`, \`packs\`, \`catalog\`, \`resources\`)**, **Local Editor Plugins**, and the **local rule mode** in the browser workbench run 100% locally.
+- \`dislop check\`, \`dislop patterns\`, and \`dislop voice\` make zero network calls.
 - \`dislop.com\` loads zero third-party fonts, analytics, or external scripts (\`Content-Security-Policy: connect-src 'self'\`).
 
-## 2. Optional Hosted Cloud AI (\`/api/v1/*\` & \`/mcp\`)
+## 2. Official Cloud MCP & Web AI (\`/api/v1/*\` & \`/mcp\`)
 
-Data is sent to \`dislop.com\` **only** when you explicitly click an AI button in the workbench, claim a free token, submit the early-access waitlist, or call an authenticated Remote MCP tool:
+Data is sent to \`dislop.com\` **only** when you sign in and explicitly click a Cloud AI button in the workbench, claim a free token, submit the early-access waitlist, or call an authenticated Official Cloud MCP tool:
 
-- **Upstream Model Provider**: Google Gemini API on a **paid-tier key** (prompts and outputs are not used to train Google models under paid-tier terms).
+- **Upstream Model Providers**: Paid-tier zero-training model endpoints (prompts and outputs are not used for model training).
 - **Zero Draft Storage**: Draft text is processed in memory and never written to disk or server logs.
-- **Account & Abuse-Control Records**:
+- **Sign-In Gate & Account Records**:
+  - Cloud LLM endpoints require a registered \`dslp_*\` Bearer token (30 free monthly credits after email signup; no unauthenticated anonymous LLM trials).
   - When you claim a free token (\`POST /api/v1/auth/register\`), we store your email, a one-way **SHA-256 hash** of your Bearer token (never the plaintext key), and your monthly credit counter.
-  - For anonymous web demos (5 credits/day), we keep an in-memory/ephemeral daily counter keyed by \`YYYY-MM-DD:<client-ip>\` that is pruned after the day ends.
   - Re-registering with the same email rotates and invalidates the previous token immediately.
-- **Confidential Drafts**: Never send confidential, regulated, or unreleased source documents to any hosted cloud endpoint; use the local offline CLI or local stdio MCP instead.
+- **Confidential Drafts**: Never send confidential, regulated, or unreleased source documents to any hosted cloud endpoint; use the local offline CLI or pure-Markdown Skill instead.
 
 ## 3. Contact & Security Disclosures
 
@@ -2058,17 +2025,17 @@ Read the task page matching your work. If \`skills/dislop/\` is installed locall
 - [Product Brief](${BASE_URL}/methodology/product-brief.md): Core positioning, target users, selling points, and pitch.
 - [Methodology & Voice Guide](${BASE_URL}/methodology/index.md): Plain writing guide, anti-pattern notes, and visual tokens.
 - [Examples & References](${BASE_URL}/cases/index.md): Before / overcorrected / after contrasts and 31 print/type design references.
-- [Install & Integrations](${BASE_URL}/tools/index.md): Local Skill, Plugin, CLI (\`check\`/\`patterns\`/\`voice\`/\`model\`), and MCP.
+- [Install & Integrations](${BASE_URL}/tools/index.md): Pure-doc Skill, local CLI (\`check\`/\`patterns\`/\`voice\`), Plugin, and Cloud MCP.
 - [Awesome Anti-Slop](${BASE_URL}/awesome/index.md): ${radarData.entries.length} checked tools, guides, and papers (\`dislop.radar/2\`, JSON at \`/awesome/index.json\`).
 - [Roadmap & Open Questions](${BASE_URL}/roadmap.md): Active tracks and collaboration guide.
 
 ## Machine index & packs
 - [JSON Catalog](${BASE_URL}/catalog.json): Versioned manifest (\`dislop.catalog/1\`) with sha256 and token estimates.
 - [Agent Skill](${BASE_URL}/tools/skill.md): Mirror of \`skills/dislop/SKILL.md\` (\`v${VERSION}\`); skip if loaded locally.
-- [Hosted Remote MCP](${BASE_URL}/tools/mcp-sdk-api.md): Optional \`${BASE_URL}/mcp\` (\`dislop_review\`, \`dislop_deslop\`, \`dislop_voice_extract\`; 30 free credits/mo).
+- [Official Cloud MCP](${BASE_URL}/tools/mcp-sdk-api.md): \`${BASE_URL}/mcp\` (sign in for 30 free credits/mo; \`dislop_review\`, \`dislop_deslop\`).
 - [Rule Packs](${BASE_URL}/packs/core.md): 7 packs & ${allRules.length} \`/rules/<id>.md\` cards.
 - [Single-Fetch Bundle](${BASE_URL}/llms-full.txt): All ${allRules.length} rules compiled without test fixtures.
-- [Privacy & Data Boundaries](${BASE_URL}/privacy.md): Offline CLI/plugins vs. optional zero-training Cloud MCP.
+- [Privacy & Data Boundaries](${BASE_URL}/privacy.md): Offline Skill/CLI vs. zero-training Cloud MCP.
 `,
   { isAgentText: true }
 );

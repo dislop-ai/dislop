@@ -286,17 +286,17 @@ assert.equal(marketplaceJson.plugins?.[0]?.name, "dislop", "marketplace.json sho
 assert.equal(portablePluginJson.$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
 assert.equal("skills" in portablePluginJson, false, "portable plugin.json must not include top-level skills");
 assert.equal("mcpServers" in portablePluginJson, false, "portable plugin.json must not include top-level mcpServers");
-assert.ok(portableMcpJson.mcpServers?.dislop?.command, "mcp.json should define dislop stdio MCP command");
+assert.equal(portableMcpJson.mcpServers?.dislop?.url, "https://dislop.com/mcp", "mcp.json should point to Official Cloud MCP");
 assert.equal(codexPluginJson.name, "dislop", ".codex-plugin/plugin.json name should be dislop");
 assert.equal(codexMarketplaceJson.plugins?.[0]?.name, "dislop", ".agents/plugins/marketplace.json should list dislop");
 assert.equal(geminiExtensionJson.name, "dislop", "gemini-extension.json name should be dislop");
-assert.ok(serverJson.packages?.length >= 2, "server.json should declare npm and pypi packages");
+assert.equal(geminiExtensionJson.mcpServers?.dislop?.httpUrl, "https://dislop.com/mcp", "gemini-extension.json should point to Official Cloud MCP");
 assert.equal(serverJson.remotes?.[0]?.type, "streamable-http", "server.json should declare remote streamable-http MCP");
 assert.equal(serverJson.remotes?.[0]?.url, "https://dislop.com/mcp", "server.json remote URL should point to dislop.com/mcp");
 assert.ok(fs.existsSync(path.join(ROOT, "skills", "dislop", "agents", "openai.yaml")), "Missing skills/dislop/agents/openai.yaml");
 assert.ok(fs.existsSync(path.join(ROOT, "action.yml")), "Missing root GitHub Action action.yml");
 assert.ok(fs.existsSync(path.join(ROOT, ".pre-commit-hooks.yaml")), "Missing .pre-commit-hooks.yaml");
-assert.ok(mcpJson.mcpServers?.dislop?.command, ".mcp.json should define dislop stdio MCP command");
+assert.equal(mcpJson.mcpServers?.dislop?.url, "https://dislop.com/mcp", ".mcp.json should point to Official Cloud MCP");
 for (const refFile of ["business-and-rfc.md", "editorial-and-essay.md", "web-ui-and-deck.md", "regulated-and-precision.md"]) {
   assert.ok(fs.existsSync(path.join(ROOT, "skills", "dislop", "references", refFile)), `Missing local Skill reference ${refFile}`);
   assert.ok(fs.existsSync(path.join(SITE_DIR, "tools", "references", refFile)), `Missing compiled site Skill reference ${refFile}`);

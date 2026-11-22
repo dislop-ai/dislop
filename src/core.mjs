@@ -3,7 +3,7 @@
  * Shared identically by Node CLI, Node MCP server, and Browser Workbench (`site/`).
  */
 
-export const ENGINE_VERSION = "0.6.2";
+export const ENGINE_VERSION = "0.7.0";
 
 export const SEVERITY_RANK = {
   info: 1,
@@ -1835,7 +1835,11 @@ export function formatReport(report, format = "text", lang = "en") {
   const out = [];
   const skipNote = skipped.length > 0 ? `, ${skipped.length} skipped` : "";
   if (findings.length === 0 && unusedSuppressions.length === 0) {
-    out.push(`dislop: ok (${checkedCount} checked${skipNote}, 0 findings)`);
+    out.push(
+      lang === "zh"
+        ? `dislop: 未发现已知模式（已检 ${checkedCount} 项${skipped.length > 0 ? `，跳过 ${skipped.length} 项` : ""}，0 处命中）`
+        : `dislop: no known patterns found (${checkedCount} checked${skipNote}, 0 findings)`
+    );
   } else {
     out.push(`dislop: ${findings.length} finding(s) across ${checkedCount} checked file(s)${skipNote}`);
     for (const f of findings) {

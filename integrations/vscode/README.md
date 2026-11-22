@@ -11,7 +11,7 @@ Linter for AI Slop built on `src/core.mjs` — helps you (and your agent) catch 
 - Checks `.md`, `.mdx`, `.txt`, `.html`, `.css`, `.jsx`, and `.tsx` offline with 7 built-in packs (42 rules).
 - Marks AI delivery artifacts (`error`) and cliché/template patterns (`warning`) with hover examples (`Original` / `Overcorrected` / `Clean`).
 - Quick Fix (`Cmd+.`) inserts a documented `dislop-ignore-next-line` comment.
-- Registers the local `dislop` stdio MCP server (`dislop.mcp`) and `dislop_check_document` language model tool automatically.
+- Registers the Official Cloud MCP server (`https://dislop.com/mcp`) and offline `dislop_check_document` language model tool automatically.
 
 ## Build & Test
 

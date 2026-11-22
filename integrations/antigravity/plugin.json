@@ -1,8 +1,8 @@
 {
   "name": "dislop",
   "displayName": "dislop",
-  "version": "0.6.2",
-  "description": "Linter for AI Slop. Combines vetted community rules (7 packs, 42 rules, 53 patterns) across Skill, CLI, and MCP so your agent catches and fixes AI slop in docs, Word/PPT, and web UI.",
+  "version": "0.7.0",
+  "description": "Linter for AI Slop. Combines vetted community rules (7 packs, 42 rules, 53 patterns) across pure-doc Skill, local offline CLI, and Official Cloud MCP.",
   "logo": "assets/logo.svg",
   "author": {
     "name": "dislop-ai",

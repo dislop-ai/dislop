@@ -57,9 +57,9 @@ const META = {
   license: "Apache-2.0",
   brandColor: "#F04438",
   shortSubtitle: "Linter for AI Slop",
-  serverDescription: "Linter for AI Slop in docs, web UI, and slides — offline stdio & Cloud MCP.",
+  serverDescription: "Linter for AI Slop in docs, web UI, and slides — Official Cloud MCP.",
   pluginDescription:
-    "Linter for AI Slop. Combines vetted community rules (7 packs, 42 rules, 53 patterns) across Skill, CLI, and MCP so your agent catches and fixes AI slop in docs, Word/PPT, and web UI.",
+    "Linter for AI Slop. Combines vetted community rules (7 packs, 42 rules, 53 patterns) across pure-doc Skill, local offline CLI, and Official Cloud MCP.",
   keywords: [
     "anti-slop",
     "de-slop",
@@ -89,9 +89,9 @@ assert.ok(
   `OpenAI interface.shortDescription exceeds 30-char cap (${META.shortSubtitle.length} chars)`
 );
 
-const stdioServerEntry = {
-  command: "npx",
-  args: ["--yes", npxPackageSpec, "--mcp"],
+const remoteHttpServerEntry = {
+  type: "http",
+  url: META.remoteMcpUrl,
 };
 
 const targets = [
@@ -101,7 +101,7 @@ const targets = [
       JSON.stringify(
         {
           mcpServers: {
-            dislop: stdioServerEntry,
+            dislop: remoteHttpServerEntry,
           },
         },
         null,
@@ -115,7 +115,7 @@ const targets = [
         {
           $schema: "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
           mcpServers: {
-            dislop: stdioServerEntry,
+            dislop: remoteHttpServerEntry,
           },
         },
         null,
@@ -229,6 +229,7 @@ const targets = [
           description: META.pluginDescription,
           author: META.author,
           homepage: META.homepage,
+          privacyPolicyUrl: META.privacyUrl,
           repository: META.repoUrl,
           license: META.license,
           keywords: ["anti-slop", "de-slop", "writing", "linter", "mcp", "skill"],
@@ -250,7 +251,7 @@ const targets = [
             url: "https://github.com/dislop-ai",
           },
           metadata: {
-            description: "Official dislop plugin marketplace: anti-slop Agent Skill and local stdio MCP linter.",
+            description: "Official dislop plugin marketplace: pure-doc Agent Skill and Official Cloud MCP.",
             version: META.version,
           },
           plugins: [
@@ -281,8 +282,7 @@ const targets = [
           description: META.pluginDescription,
           mcpServers: {
             dislop: {
-              command: "node",
-              args: ["${extensionPath}/bin/dislop-mcp.mjs"],
+              httpUrl: META.remoteMcpUrl,
             },
           },
         },
@@ -305,38 +305,6 @@ const targets = [
             url: META.repoUrl,
             source: "github",
           },
-          packages: [
-            {
-              registryType: "npm",
-              identifier: META.name,
-              version: META.version,
-              runtimeHint: "npx",
-              packageArguments: [
-                {
-                  type: "positional",
-                  value: "--mcp",
-                },
-              ],
-              transport: {
-                type: "stdio",
-              },
-            },
-            {
-              registryType: "pypi",
-              identifier: META.name,
-              version: META.version,
-              runtimeHint: "uvx",
-              packageArguments: [
-                {
-                  type: "positional",
-                  value: "--mcp",
-                },
-              ],
-              transport: {
-                type: "stdio",
-              },
-            },
-          ],
           remotes: [
             {
               type: "streamable-http",
@@ -406,7 +374,9 @@ const targets = [
       JSON.stringify(
         {
           mcpServers: {
-            dislop: stdioServerEntry,
+            dislop: {
+              serverUrl: META.remoteMcpUrl,
+            },
           },
         },
         null,

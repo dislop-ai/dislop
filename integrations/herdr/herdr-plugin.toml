@@ -1,5 +1,5 @@
 name = "dislop"
-version = "0.6.2"
+version = "0.7.0"
 description = "Linter for AI Slop — check changed docs, slides, and web UI in this pane offline."
 
 [[actions]]

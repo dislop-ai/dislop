@@ -1,6 +1,6 @@
 {
   "schema": "dislop.catalog/1",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "snapshotDate": "2026-11-21",
   "baseUrl": "https://dislop.com",
   "pillars": [
@@ -11,8 +11,8 @@
   "entryPoints": {
     "llmsTxt": {
       "path": "/llms.txt",
-      "bytes": 2427,
-      "approxTokens": 607
+      "bytes": 2403,
+      "approxTokens": 601
     },
     "llmsFullTxt": {
       "path": "/llms-full.txt",
@@ -58,8 +58,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 2939,
-      "approxTokens": 735,
+      "bytes": 2951,
+      "approxTokens": 738,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -67,7 +67,7 @@
         "mcp",
         "cli"
       ],
-      "sha256": "a7ae8948fe5dcae7b53f493f1153922da236e1bd1e537cfc7c1e52e47204cba8"
+      "sha256": "32d0ad64eb6b290c9c24c840830ad668b428ad88e3279d480989ca7ad18406f4"
     },
     {
       "id": "methodology-index",
@@ -108,7 +108,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "7e6c12e38fd288e97507edb7749179cf1dfc041c5b8c6fdfdd9b49dff4f536b2"
+      "sha256": "dcf2b0d3453818009f3974872e738913c977e1193c3fb931cee42fac5e4a4110"
     },
     {
       "id": "methodology-deletion-test",
@@ -142,7 +142,7 @@
         "mcp",
         "browser-workbench"
       ],
-      "sha256": "2dec464e09e3831aa1b23ec8d78040ade77bbb9175f9bea2adc10cac204cec99"
+      "sha256": "f35a055f1d85efd847021d2a87e9750b03c9a7b83feb734c85a53d09f33ed3c4"
     },
     {
       "id": "methodology-anti-pattern-map",
@@ -182,7 +182,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "c8cce7345783e79884c05d50c7c5c95e59148fe6e08277628bd3a7e35707ccc6"
+      "sha256": "2a6ff9fb505d2cbc0a5803a27123b0967429985881da279ea9a525ed271b674f"
     },
     {
       "id": "methodology-positive-divergence",
@@ -216,7 +216,7 @@
         "browser-workbench",
         "skill"
       ],
-      "sha256": "2d8047fc548f13ce1818eac3eda3653ed5d083dbeaada91bb9c91a0645ca13c0"
+      "sha256": "45eef4742be4f8c60d2fc9ef6c4649ee1a40272f414642b72dfab6f4ac74ecca"
     },
     {
       "id": "methodology-product-brief",
@@ -249,8 +249,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 2366,
-      "approxTokens": 592,
+      "bytes": 4070,
+      "approxTokens": 1018,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -258,7 +258,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "18389d7de33a99d82bc6f0f2502b1ef64454f5a02d523dea8e28963701a07f6a"
+      "sha256": "fc7860cdebd5ff1d82e0805ffc022ebb0eb0af5aff6f0c7269d30f0e669fc32e"
     },
     {
       "id": "methodology-brand-voice",
@@ -295,7 +295,7 @@
         "browser-workbench",
         "cli"
       ],
-      "sha256": "bfbaab3000b1e9952f48e9dc7fb2161e8e404332b90f725d0b4d8a9163a0603a"
+      "sha256": "f4880d3d2d3e34a1ea45e93b8e29ef028b3503a50237ff9af8bc17e9233e4000"
     },
     {
       "id": "methodology-design-system",
@@ -326,7 +326,7 @@
         "browser-workbench",
         "cli"
       ],
-      "sha256": "94c5a1ebb35cbe4c386516d02eab1e53744f0c1bf4b384a43ce4e0341269a92a"
+      "sha256": "af5f7c012e09dcbfed149372d06f6045acdea808acfdb62881028658d7dbd9c2"
     },
     {
       "id": "cases-index",
@@ -367,7 +367,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "95af6669cc0f51dff13c64c64a65ece405e667c43092c228f3ce1084518f06cb"
+      "sha256": "7b7254f089c5d56dc5c0b1be18db3b8305051c03641798ce4541c33ab8917627"
     },
     {
       "id": "cases-copy-contrasts",
@@ -408,7 +408,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "8dfb1533d7a70974944483dafb2c94466b7d92680473c628fc193384108f19e5"
+      "sha256": "1acebc118b27a0a56b392edabb821ed3f43ffeefb42d5ba47c3c3bab71b81fb3"
     },
     {
       "id": "cases-dogfood-audit",
@@ -440,7 +440,7 @@
         "cli",
         "browser-workbench"
       ],
-      "sha256": "4cacee198b445a5b964c9454b507a5d896de9efa12d3f44447f51c6253022267"
+      "sha256": "9bfea0978ea3973d62769ae924e315cc0484bd4ea73421333e641e826ce0b0c8"
     },
     {
       "id": "cases-ui-specimens",
@@ -469,7 +469,7 @@
       "relatedTools": [
         "browser-workbench"
       ],
-      "sha256": "a8abd4c8ba324324f38485e33f5fb8feb268e455f89434d434af8d2ffac4bdbf"
+      "sha256": "6175330cd05f4a0515a4e7afef78d203e513e50f3e4cc3877541bb128421be1d"
     },
     {
       "id": "tools-index",
@@ -503,8 +503,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 1898,
-      "approxTokens": 475,
+      "bytes": 1881,
+      "approxTokens": 470,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -512,7 +512,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "4a62c472e00d39281e7431198a03df25813e21ea3429f7f2c4f54adc7aca6d5a"
+      "sha256": "e6da67e651d8fffe2973f9f33be32503ef5d3892a74b5887f5de7a9500b99335"
     },
     {
       "id": "tools-skill",
@@ -547,14 +547,14 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 2710,
-      "approxTokens": 678,
+      "bytes": 2831,
+      "approxTokens": 708,
       "relatedTools": [
         "skill",
         "cli",
         "mcp"
       ],
-      "sha256": "c23ec4c0a7193cc676bb0a5cb105273ad4b8525ff81a1e3f3bb6db42d723f947"
+      "sha256": "0cdde70dcff971a41aa0c3019412a0fc84434333ee7d51ad5fa34f2a9113ac3e"
     },
     {
       "id": "tools-skill-ref-business-and-rfc",
@@ -747,7 +747,7 @@
         "browser-workbench",
         "skill"
       ],
-      "sha256": "9f692f60b3e8bf0df9b86c99478f1163e4f55dafb8417e79014268292f9e9e41"
+      "sha256": "8706c1bef8a9571992ff9c1566133e7aba9fa3fd85c57d9f4393e5ffcc613b1d"
     },
     {
       "id": "tools-cli-hooks",
@@ -786,15 +786,15 @@
       "relatedTools": [
         "cli"
       ],
-      "sha256": "422de179a40542c07dc9005c711e54d44845662f5c2d2b552184c088879c45e0"
+      "sha256": "8e9435c098451aa64fc114df18d163eb34cb837771c68f55d22c2f126e082a17"
     },
     {
       "id": "tools-mcp-sdk-api",
       "pillar": "tools",
       "kind": "guide",
       "title": {
-        "en": "Local MCP, Hosted Remote MCP & HTTP API",
-        "zh": "本地 MCP、托管远程 MCP 与 HTTP API"
+        "en": "Official Cloud MCP, HTTP API & JS Core",
+        "zh": "官方云端 MCP、HTTP API 与 JS 核心"
       },
       "path": "/tools/mcp-sdk-api.md",
       "modalities": [
@@ -821,13 +821,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 3897,
-      "approxTokens": 974,
+      "bytes": 2418,
+      "approxTokens": 605,
       "relatedTools": [
         "mcp",
         "cli"
       ],
-      "sha256": "632d50d88b2d6e7b3563795a0c314a99aa6ba558dc14a355a035e4816b19ab28"
+      "sha256": "5456b86c9a1228683905f1688f1789def20d2e0a2b703df6b5d20f934df906be"
     },
     {
       "id": "privacy-policy",
@@ -847,14 +847,14 @@
         "zh"
       ],
       "packs": [],
-      "bytes": 2282,
-      "approxTokens": 571,
+      "bytes": 2121,
+      "approxTokens": 530,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "acc6b4480c93d6b25cb2c6d7c0bc6e36efeefbd5670978d7e479c2282d901c4b"
+      "sha256": "c102f597753e33bf66155af3028fd7ac2c78d90b1e7b7c86de0c5680fab434e2"
     },
     {
       "id": "pack-core",
@@ -2387,7 +2387,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "ed51c9c3efc744187c3a0b5afe189d9e666aa2635c68ae39bb57aea0d2a542d0"
+      "sha256": "1924a00f987a14b590d857f097e6ea7e72493cb64422df6c2ce2e5d9eb536b16"
     },
     {
       "id": "task-web-and-deck",
@@ -2421,7 +2421,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "42e9175dd7839e00c3ebce0510ec646090249bb7bcaa89340b6f60e1e97f04bc"
+      "sha256": "fc1ff6845e72d725839031187bd3053d7245f5b3b7ae054e2890caa2b5d7b81a"
     },
     {
       "id": "task-editorial-writing",
@@ -2454,7 +2454,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "b56fe9f08ed6c601deb51fc09bdad1dd872e8dba9825e47197907897cb4f78c4"
+      "sha256": "3eb8e1a18d7f6d2d4a4e5849b71f2e9e2856fc04ec8f324ee2258fff1df71b22"
     },
     {
       "id": "task-pre-release-gate",
@@ -2489,7 +2489,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "d55bafa249e08733b15dbffe78569da32c5201d13bd1fb1f97f307c0cf832a54"
+      "sha256": "7f15268f9946dc37fb39758d2aae6ae6e683cea293931b8832bd526534be42e0"
     },
     {
       "id": "awesome-anti-slop-md",
@@ -2552,15 +2552,15 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 12761,
-      "approxTokens": 3190,
+      "bytes": 13629,
+      "approxTokens": 3407,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp",
         "skill"
       ],
-      "sha256": "10f9e742c8a8090ee1f66f4d850339aebdb820f125be896beb9c0f2922ab3567"
+      "sha256": "4472a260291070cb0a2da785766b4d3f0ed4a722d79be9d1d822f7c635bc0cde"
     }
   ]
 }

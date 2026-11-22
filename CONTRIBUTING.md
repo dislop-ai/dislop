@@ -19,10 +19,12 @@ Every new or updated rule in `packs/<pack-id>/pack.json` must include:
 4. **Automated Positive & Negative Fixtures**:
    - Add at least one triggering string in `fixtures.hit` and at least one realistic near-miss in `fixtures.clean`.
 
-## 2. Privacy & Sample Licensing
+## 2. Licensing, DCO & Official Service Boundary
 
-- Never include real workstation usernames, internal hostnames, private repository references, or proprietary customer material in code, fixtures, or commit messages.
-- All fixtures and exemplars must be original constructions or explicitly licensed open/public-domain text.
+- **Original & Licensed Material**: Never include real workstation usernames, internal hostnames, private repository references, or proprietary customer material in code, fixtures, prompts, or commit messages. All fixtures, prompts, and exemplars must be original work or explicitly licensed open/public-domain material.
+- **Developer Certificate of Origin (DCO)**: Sign off commits with `git commit -s` (`Signed-off-by: Name <email>`) to confirm you have the right to submit the contribution under the repository's [Apache-2.0 License](./LICENSE).
+- **Use in the Official Service**: Under Apache-2.0, merged rules, references, and prompts may also be evaluated and deployed in the official hosted `dislop.com` service once they pass evaluation checks.
+- **Name & Official Service Notice**: You are free to fork, modify, and self-host this open-source repository under Apache-2.0, which does not grant trademark rights. Third-party forks or hosted deployments must not present themselves as the official `dislop` service.
 
 ## 3. GitHub Workflow & Collaboration
 

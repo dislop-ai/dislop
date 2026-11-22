@@ -219,7 +219,7 @@
               <button type="button" id="btn-ai-deslop" class="btn-primary ai-deslop-btn" data-i18n="ai.deslopBtn">云增强一键改写 · MCP（2 额度）</button>
             </div>
             <div class="ai-assist-meta">
-              <span id="ai-quota-label" data-i18n="ai.anonHint">免登录每天 5 试用额度 · 登录后每月 30 额度（同源远程 MCP）</span>
+              <span id="ai-quota-label" data-i18n="ai.anonHint">本地检查免登录零上传 · 云端审校与改写需登录（每月免费 30 额度）</span>
               <a href="#cloud-token-box" id="ai-token-link" data-i18n="ai.claimLink">领免费密钥 →</a>
             </div>
           </div>
@@ -410,20 +410,20 @@
 
       <div class="where-grid">
         <div class="where-item">
-          <h3 data-i18n="surf.w1Title">1. 跨工具 Agent Skill（本地渐进参考）</h3>
-          <p data-i18n="surf.w1Desc">一行命令装进 Claude Code、Codex、Cursor、Windsurf 或 Antigravity。自带 4 张本地场景参考卡按需读取，全程 0 联网不弹外网审批框，并引导调用本地 CLI。</p>
+          <h3 data-i18n="surf.w1Title">1. 开源纯文档 Skill（动笔前防呆）</h3>
+          <p data-i18n="surf.w1Desc">按文体整理的写作与界面避坑参考卡，不含可执行脚本。装进 Claude Code、Codex、Cursor 或 Antigravity 后，动笔前读取，写完调用本地 CLI 自检。</p>
         </div>
         <div class="where-item">
-          <h3 data-i18n="surf.w2Title">2. 开源 CLI 与本地 MCP（全内置 + 按需小模型）</h3>
-          <p data-i18n="surf.w2Desc">&lt; 250 KB 零依赖直接内置全部 7 套规则与行业包，断网秒查目录、Word、PPT 与 Git 改动；支持 dislop voice 离线提取个人文风和 dislop model 选装本地小模型。</p>
+          <h3 data-i18n="surf.w2Title">2. 开源本地 CLI 与插件（零依赖快检）</h3>
+          <p data-i18n="surf.w2Desc">&lt; 250 KB 零依赖直接内置全部 7 套规则包，断网毫秒级查文档、Word、PPT 与 Git 改动；适合终端、编辑器与 CI，开发者也可配自有密钥做深度审校。</p>
         </div>
         <div class="where-item">
-          <h3 data-i18n="surf.w3Title">3. 官方云端远程 MCP（办公 Agent 与网页直连）</h3>
-          <p data-i18n="surf.w3Desc">在 WorkBuddy、千问、Claude Cowork 或自动化工作流里直连 https://dislop.com/mcp，调用云端深层审校、复检改写与跨端同步个人文风（每月 30 次免费）。</p>
+          <h3 data-i18n="surf.w3Title">3. 官方云端 MCP（办公与编码 Agent 直连）</h3>
+          <p data-i18n="surf.w3Desc">在 WorkBuddy、千问、Claude Cowork 或编辑器里直连 https://dislop.com/mcp，登录领每月 30 免费额度，做多模型分文体审校并返回结构化改法。</p>
         </div>
         <div class="where-item">
-          <h3 data-i18n="surf.w4Title">4. 免装聊天框一句话（/llms.txt）</h3>
-          <p data-i18n="surf.w4Desc">不装任何工具时，复制一句话发给 ChatGPT、Claude 或 Kimi 等联网对话，让它先读 dislop.com/llms.txt 再帮你过稿。</p>
+          <h3 data-i18n="surf.w4Title">4. 网页工作台与一句话读规则</h3>
+          <p data-i18n="surf.w4Desc">浏览器工作台可先看对比样例和做本地基础检查，登录后使用云端审校；不装任何工具时，也可让联网对话先读 dislop.com/llms.txt。</p>
         </div>
       </div>
 
@@ -433,9 +433,8 @@
           <div class="mode-tabs" id="snippet-tabs" role="tablist" aria-label="用法与安装示例">
             <button type="button" id="tab-prompt" role="tab" aria-selected="true" aria-controls="snippet-panel" tabindex="0" class="ctrl-btn is-active" data-snippet="prompt" data-i18n="snip.prompt">发给 AI</button>
             <button type="button" id="tab-skill" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="skill">Skill</button>
-            <button type="button" id="tab-cloud" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cloud" data-i18n="snip.cloud">远程 MCP（云端）</button>
+            <button type="button" id="tab-cloud" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cloud" data-i18n="snip.cloud">官方 MCP（云端）</button>
             <button type="button" id="tab-plugin" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="plugin">Plugin</button>
-            <button type="button" id="tab-mcp" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="mcp" data-i18n="snip.localMcp">本地 MCP</button>
             <button type="button" id="tab-cli" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cli" data-i18n="snip.cli">命令行</button>
             <button type="button" id="tab-ci" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="ci">GitHub Actions</button>
             <button type="button" id="tab-config" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="config">.dislop.json</button>
@@ -472,7 +471,7 @@
               <a class="endpoint-path" href="./llms.txt">/llms.txt</a>
               <div class="endpoint-desc" data-i18n="ep.llms">Agent 入口索引</div>
             </div>
-            <span class="endpoint-meta">2.4 KB · ~607 tok</span>
+            <span class="endpoint-meta">2.3 KB · ~601 tok</span>
           </div>
           <div class="endpoint-row">
             <div class="endpoint-main">
@@ -514,7 +513,7 @@
               <a class="endpoint-path" href="./tools/skill.md">/tools/skill.md</a>
               <div class="endpoint-desc" data-i18n="ep.skill">跨宿主 Agent Skill</div>
             </div>
-            <span class="endpoint-meta">2.6 KB · ~678 tok</span>
+            <span class="endpoint-meta">2.8 KB · ~708 tok</span>
           </div>
           <div class="endpoint-row">
             <div class="endpoint-main">
@@ -528,7 +527,7 @@
               <a class="endpoint-path" href="./methodology/product-brief.md">/methodology/product-brief.md</a>
               <div class="endpoint-desc" data-i18n="ep.brief">产品定义（定位 / 用户 / 卖点）</div>
             </div>
-            <span class="endpoint-meta">2.3 KB · ~592 tok</span>
+            <span class="endpoint-meta">4.0 KB · ~1018 tok</span>
           </div>
           <div class="endpoint-row">
             <div class="endpoint-main">
@@ -571,10 +570,10 @@
           </div>
           <p class="pricing-sub" data-i18n="price.t1Sub">适合重视数据隐私的个人与开发团队，规则与代码全部开源透明。</p>
           <ul class="pricing-list">
-            <li data-i18n="price.t1F1">Agent Skill（含本地参考卡）、命令行与本地 MCP（Apache-2.0）</li>
+            <li data-i18n="price.t1F1">纯文档 Agent Skill（不含脚本）与开源本地 CLI（Apache-2.0）</li>
             <li data-i18n="price.t1F2">全量内置 7 套场景与行业包（42 条规则），离线查文档、Word、PPT 与 PR</li>
             <li data-i18n="price.t1F3">内置 5 轴节奏体检、14.6 KB 轻量本地模型（--ml）与 dislop voice 离线个人文风</li>
-            <li data-i18n="price.t1F4">零联网零上传；支持按本机内存与芯片选装可选本地小模型</li>
+            <li data-i18n="price.t1F4">零联网零上传；开发者也可配自有密钥做单步审校</li>
           </ul>
           <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
             <a href="#surfaces" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" data-i18n="price.t1Cta">安装 Skill / CLI ↑</a>
@@ -730,7 +729,7 @@
         </div>
         <div class="share-col">
           <h3 data-i18n="share.c2Title">去 GitHub 收藏仓库</h3>
-          <p data-i18n="share.c2Desc">检查引擎、Agent Skill、Plugin、本地 MCP 和 Awesome Anti-Slop 清单都在同一个仓库，点个 Star 方便以后找。</p>
+          <p data-i18n="share.c2Desc">检查引擎、纯文档 Skill、Plugin、命令行和 Awesome Anti-Slop 清单都在同一个仓库，点个 Star 方便以后找。</p>
           <div class="quick-actions">
             <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="btn-primary" style="min-height:32px;padding:6px 14px;font-size:0.82rem;" data-i18n="share.starCta">GitHub 点 Star ★</a>
           </div>
@@ -794,9 +793,9 @@
               <td data-i18n="status.partial">改动检查可用，AST 未做</td>
             </tr>
             <tr>
-              <td><strong data-i18n="cov.r6Name">个人文风、轻量模型与按需本地小模型</strong></td>
-              <td><code>voice</code>, <code>--ml</code>, <code>model</code></td>
-              <td data-i18n="cov.r6Scope">本地 CLI 与工作台支持离线统计个人文风、内置 14.6 KB 轻量空话识别（--ml），并可按本机硬件内存选装本地小模型；云端同步提供远程文风提炼。</td>
+              <td><strong data-i18n="cov.r6Name">个人文风、轻量模型与云端深度审校</strong></td>
+              <td><code>voice</code>, <code>--ml</code>, <code>MCP</code></td>
+              <td data-i18n="cov.r6Scope">本地 CLI 与工作台支持离线统计个人文风、内置 14.6 KB 轻量空话识别（--ml）；登录后可通过官方云端 MCP 按文体做多模型深度审校与提炼个人文风。</td>
               <td data-i18n="status.live">可用</td>
             </tr>
           </tbody>

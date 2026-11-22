@@ -1,25 +1,25 @@
-# 系统架构说明（`v0.6.2`）
+# 系统架构说明（`v0.7.0`）
 
 [English](./architecture.md) · [产品定义](../PRODUCT.md)
 
 `dislop` 是面向文档、网页和 PPT 的 **AI 味检查工具（Linter for AI Slop）**，基于统一的规则包清单协议（`schema: "dislop.pack/2"`）。它整合社区核验过的去味规则与语料经验，帮你（的 Agent）在本地挑出并改掉 AI 寒暄与未填占位符、模板套话与反转口号、句式节奏异常，以及 PPT 和网页模板味；不做通用安全路径扫描、WCAG 无障碍审计或 PDF 印前检查。
 
-## 1. 本地优先与云增强（MCP）分层架构
+## 1. 三层产品形态与边界架构
 
 ```text
-第 1 层：本地 Agent Skill（`skills/dislop/SKILL.md` + 内置 `./references/*.md`，0 联网）
-   └── 按需读取本地分场景参考卡，动笔前先避开套词、口号与默认模板，不弹外网抓取审批框
+第 1 层：开源纯文档 Skill（`skills/dislop/SKILL.md` + `./references/*.md`，不含脚本，0 联网）
+   └── 按文体加载避坑参考卡，动笔前先避开套词、口号与默认模板
    │
    ▼
-第 2 层：开源离线 CLI 与本地 MCP（`< 250 KB` 压缩包，零依赖内置 7 套规则包 + 14.6 KB 传统集成模型，0 上传）
+第 2 层：开源本地 CLI 与编辑器插件（`< 250 KB` 压缩包，零依赖内置 7 套规则包 + 14.6 KB 传统集成模型，0 上传）
    ├── `dislop check [--pack <id|auto>] [--profile] [--ml] [--patterns]` -> AI 硬伤 + 6 套场景包 + 11 条模式库探针 + 隐蔽温吞水模型检查
    ├── `dislop patterns`                                                 -> 6 维度多角度扩展模式库扫描
    ├── `dislop voice`                                                    -> 本地确定性提取个人句长与标点文风（`dislop.voice/1`）
-   └── `dislop model` / `setup` / `deslop --local`                       -> 随包 14.6 KB 模型评分 + 按硬件预算选装 0.6B / 1.7B / 4B 本地小模型
+   └── （注：仓内保留既有 `--mcp` 与 `dislop model` 选装模块，待真实语料盲评后再定保留范围）
    │
    ▼
-第 3 层：可选官方托管云端与远程 MCP（`https://dislop.com/mcp`、`/api/v1/*`）
-   └── 免本地环境直连、自动复检改写 `dislop_deslop`（改后核对原稿数字与限定词）与跨端同步个人文风
+第 3 层：闭源官方 MCP 与网页工作台（`https://dislop.com/mcp`、`/api/v1/*`）
+   └── 免本地环境接入，登录后多模型按文体深度审校并返回结构化修改建议（供本地 Agent 结合上下文改稿），兼顾保留排版 Word/PPT 处理
 ```
 
 `check` 只读不改稿。引擎通过等长空格掩码构造 `raw`、`prose` 与 `ui-text` 三层视图：代码块、行内代码、URL、HTML 标签/注释与引用样本不会触发正文误报，同时所有命中的行号与 Unicode 码点列号均与源文件严格对齐。
@@ -35,7 +35,7 @@
 | Node 二进制解析层 | `src/binary-node.mjs` | 基于标准库 `zlib.inflateRawSync` 解析 `.docx`/`.pptx` ZIP 中央目录 |
 | Node CLI 与 MCP | `bin/dislop.mjs`, `bin/dislop-mcp.mjs` | 离线命令行（`check [--pack <id|auto>] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|sarif|github|md]`、`patterns`、`voice`、`model`、`setup`、`deslop --local`、`explain`、`packs`、`catalog`、`resources`、`pack-test`、`init`）与 7 工具本地 stdio MCP（`dislop_check`、`dislop_voice_extract_offline`、`dislop_model_score`、`dislop_model_status`、`dislop_explain`、`dislop_packs`、`dislop_catalog`） |
 | Python 核心与接口 | `src/dislop/{engine,pattern_engine,pocket_model,local_model,cli,mcp_server}.py` | 纯 Python 3.10+ 标准库实现，通过 4 个测试模块共 26 项 Python `unittest`（`test_conformance`、`test_engine`、`test_pattern_library`、`test_pocket_and_local_models`）与 Node 保持一致 |
-| 多平台清单与编辑器集成 | `scripts/sync_manifests.mjs`, `plugin.json`, `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/`, `gemini-extension.json`, `integrations/{antigravity,vscode,orca,herdr,hooks}/`, `server.json`, `action.yml`, `.pre-commit-hooks.yaml` | 由同一份元数据配置生成并校验 npm、PyPI、双通道官方 MCP Registry、Agent Plugins 1.0、Claude Code、Codex、Cursor、Antigravity、VS Code / Open VSX 与 GitHub Action 清单，消除跨市场版本与 Schema 漂移 |
+| 多平台清单与编辑器集成 | `scripts/sync_manifests.mjs`, `plugin.json`, `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/`, `gemini-extension.json`, `integrations/{antigravity,vscode,orca,herdr,hooks}/`, `server.json`, `action.yml`, `.pre-commit-hooks.yaml` | 由同一份元数据配置生成并校验 npm、PyPI、Official MCP Registry（`https://dislop.com/mcp`）、Agent Plugins 1.0、Claude Code、Codex、Cursor、Antigravity、VS Code / Open VSX 与 GitHub Action 清单，消除跨市场版本与 Schema 漂移 |
 | 规则包与反模式库 | `packs/*/pack.json`, `patterns/dimensions/*.json` | 7 套内置 `dislop.pack/2` 规则包（`core`、`business-brief`、`engineering-spec`、`regulated-comms`、`literary-essay`、`deck-and-ui`、`executive-deck`，共 42 条活跃规则、160 项样本断言：83 命中 + 77 干净）与 6 维度 7 角度 53 条结构化反模式库（42 条规则映射 + 11 条扩展模式库规则） |
 | 官方托管云端与远程 MCP | 独立闭源 `dislop-cloud`（`https://dislop.com/mcp`、`/api/v1/*`） | 付费级零训练模型分层路由、哈希 `dslp_*` 账号密钥、每月 30 免费额度、带数字与限定词复核的 `dislop_deslop`、`dislop_review` 与 `dislop_voice_extract` |
 | 离线效果基准评测（`dislop-bench v2`） | `benchmarks/`、`scripts/run_benchmark.mjs`、`scripts/pattern_lab.mjs`、`scripts/run_text_paradigm_experiments.py` | 112 份核心检测样本 + 154 份多角度反模式样本（准确率/召回率/F1 均为 `100.0%`、干净误报 `0.0%`、Node/Python 一致率 `100.0%`）+ 18 组端到端改稿任务（`D1=45 / D2=20 / D3=25 / D4=10`）、`--eval` 与盲评表导出 |

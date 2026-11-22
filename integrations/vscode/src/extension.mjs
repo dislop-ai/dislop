@@ -168,12 +168,12 @@ export function activate(context) {
     })
   );
 
-  if (!IS_WEB && vscode.lm?.registerMcpServerDefinitionProvider && typeof vscode.McpStdioServerDefinition === "function") {
+  if (vscode.lm?.registerMcpServerDefinitionProvider && typeof vscode.McpHttpServerDefinition === "function" && vscode.Uri?.parse) {
     context.subscriptions.push(
       vscode.lm.registerMcpServerDefinitionProvider("dislop.mcp", {
         provideMcpServerDefinitions() {
           return [
-            new vscode.McpStdioServerDefinition("dislop", "npx", ["--yes", "dislop", "--mcp"]),
+            new vscode.McpHttpServerDefinition("dislop", vscode.Uri.parse("https://dislop.com/mcp")),
           ];
         },
       })

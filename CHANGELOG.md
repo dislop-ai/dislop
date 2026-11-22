@@ -4,6 +4,15 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-11-22
+
+### Changed
+
+- **Three-layer product form alignment (`PRODUCT.md`)**: Clarified `dislop` into three non-overlapping layers: (1) an open-source pure-Markdown `Skill` (`skills/dislop/`, zero bundled scripts), (2) an open-source zero-dependency local `CLI` & editor plugins for fast deterministic checks in terminals, hooks, and CI, and (3) Official Cloud MCP (`https://dislop.com/mcp`) & Web Workbench for sign-in-gated multi-model genre review (`dislop_review` returning structured diagnostics for local agents to revise in project context).
+- **Official Cloud MCP manifest consolidation**: Pointed `.mcp.json`, `mcp.json`, `gemini-extension.json`, `integrations/antigravity/mcp_config.json`, `server.json`, and the VS Code / Open VSX extension (`McpHttpServerDefinition`) cleanly to Official Cloud MCP (`https://dislop.com/mcp`), while keeping existing offline code intact until held-out evaluation completes.
+- **Honest CLI zero-finding output**: Updated Node and Python CLI zero-hit text output from `dislop: ok` to `dislop: no known patterns found` (`dislop: 未发现已知模式` under `--lang zh`).
+- **Contributor licensing & service notice (`CONTRIBUTING.md`)**: Added DCO sign-off (`git commit -s`) and explicit Apache-2.0 / official-service naming notice.
+
 ## [0.6.2] - 2026-11-22
 
 ### Added

@@ -16,7 +16,7 @@
   <a href="./LICENSE">Apache-2.0</a>
 </p>
 
-`dislop` 是专用的 **AI 味检查工具（Linter for AI Slop）**。整合社区验证过的去味规则、语料经验与 87 条精选工具，帮你（的 Agent）在文档、网页和 PPT 发出前，挑出并改掉里面的 AI 味。一行命令接入 Codex、Claude Code、Antigravity、Cursor、WorkBuddy、千问、Claude Cowork 等主流 Agent 与编辑器，CLI 与本地插件可纯本地离线运行。
+`dislop` 是专用的 **AI 味检查工具（Linter for AI Slop）**。整合社区验证过的去味规则、语料经验与 87 条精选工具，帮你（的 Agent）在文档、网页和 PPT 发出前，挑出并改掉里面的 AI 味。产品分为三层：**纯文档 Skill**（按文体避坑，不含可执行脚本）、**开源本地 CLI 与编辑器插件**（零依赖毫秒级扫出 AI 硬伤与常见套话，支持开发者配置自有密钥做深度审校）、**官方云端 MCP 与网页工作台**（`https://dislop.com/mcp`，免装本地环境，按文体多模型深度审校并返回结构化问题清单，也支持保留原排版的 Word/PPT 处理）。
 
 拿一段模型刚写完的上线说明来举个例子：
 
@@ -39,7 +39,7 @@
   <img src="./assets/demos/proof-cycle-zh-v1.gif" alt="dislop 检查上线说明三步对照：标出 AI 寒暄与空话、拦下二阶口号、改干净后退出码 0" width="840">
 </p>
 
-大致就做这些。Markdown、纯文本、HTML/CSS/JSX、Word（`.docx`）和 PPT（`.pptx`）都能查。CLI 与本地插件默认离线运行、零上传，共用同一套 **7 套场景包（`42` 条规则）**、5 轴节奏统计和离线个人文风提取，同时内置扩展模式库扫描（`--patterns`）、随包 `14.6 KB` 轻量集成模型（`--ml`）与按本机硬件选装的本地小模型（`dislop model`）。[dislop.com](https://dislop.com) 网页工作台支持随时切换本地检查与云增强（MCP）模式；没有本地终端或需要跨端云端改写时，也可直接连官方托管云端 MCP（`https://dislop.com/mcp`）。
+大致就做这些。Markdown、纯文本、HTML/CSS/JSX、Word（`.docx`）和 PPT（`.pptx`）都能查。开源本地 CLI 与编辑器插件默认离线运行、零上传，内置 **7 套场景包（`42` 条规则）**、5 轴节奏统计、扩展模式库扫描（`--patterns`）与随包 `14.6 KB` 轻量集成模型（`--ml`）；未命中规则时仅说明未发现已知模式，不代表深度内容质量无误。在 [dislop.com](https://dislop.com) 网页工作台与官方托管云端 MCP（`https://dislop.com/mcp`）登录后，可调用多模型深度审校（`dislop_review` 返回具体问题与改法建议，交给本地 Agent 结合上下文改稿）与复检改写。
 
 ## 上手
 
@@ -52,15 +52,12 @@ npx --yes dislop check .
 # 自动路由文体包，同时开启 5 轴节奏统计、14.6 KB 轻量模型与扩展模式库扫描
 npx --yes dislop check draft.md --pack auto --profile --ml --patterns
 
-# 离线提取你自己的句长与标点个人文风，或按本机内存查看选装本地小模型建议
+# 离线提取你自己的句长与标点个人文风，或查看某条规则的判断方法和示例
 npx --yes dislop voice my-notes.md
-npx --yes dislop model --lang zh
+npx --yes dislop explain negation-pivot-frame --lang zh
 
 # 只查相对 main 新改的行，并输出 GitHub PR 行内批注
 npx --yes dislop check --changed origin/main --format github
-
-# 查看某条规则的判断方法和改前/改后示例
-npx --yes dislop explain negation-pivot-frame --lang zh
 ```
 
 ### Python 3.10+（已上架 PyPI，零外部依赖）
@@ -117,28 +114,31 @@ Node.js 版（`bin/dislop.mjs`）和 Python 版（`src/dislop/`）都零外部�
 | 接入环境 | 一行命令或一键唤起 | 说明 |
 |---|---|---|
 | **任意联网 AI 对话** | 发一句：`先读 https://dislop.com/llms.txt，按里面的规矩和检查方法把接下来这份稿子过一遍。` | 免安装，直接读约 `2.4 KB` 索引、任务卡（`/tasks/*.md`）或单条规则页（`/rules/<id>.md`） |
-| **跨宿主 Agent Skill** | `npx skills add dislop-ai/dislop` | 把 [skills/dislop/SKILL.md](./skills/dislop/SKILL.md) 与 4 张本地参考卡装进 Claude Code、Codex、Cursor、Windsurf、Antigravity、OpenCode（全程 `0` 联网） |
-| **Claude Code 插件** | `/plugin marketplace add dislop-ai/dislop` 后执行 `/plugin install dislop@dislop-ai` | 一键装好 Skill 与本地离线 MCP（常驻上下文仅约 `130` tokens） |
+| **跨宿主 Agent Skill** | `npx skills add dislop-ai/dislop` | 安装纯 Markdown 的 [skills/dislop/SKILL.md](./skills/dislop/SKILL.md) 与 4 张本地参考卡（不含脚本，全程 `0` 联网），动笔前避坑并在有 Shell 时调用 CLI 自检 |
+| **Claude Code 插件** | `/plugin marketplace add dislop-ai/dislop` 后执行 `/plugin install dislop@dislop-ai` | 一键装好纯文档 Skill 与官方远程 MCP 连接（常驻上下文仅约 `130` tokens） |
 | **OpenAI Codex 插件** | `codex plugin marketplace add dislop-ai/dislop` 后执行 `codex plugin add dislop@dislop-ai` | 附带 [openai.yaml](./skills/dislop/agents/openai.yaml) 原生应用卡片与 `$dislop` 快捷指令 |
-| **Gemini CLI 扩展** | `gemini extensions install https://github.com/dislop-ai/dislop` | 基于根目录 [gemini-extension.json](./gemini-extension.json) 直接挂载本地 `bin/dislop-mcp.mjs` |
-| **官方 MCP 注册表** | 在 `registry.modelcontextprotocol.io` 检索 `io.github.dislop-ai/dislop` | 同时提供本地 `npx` / `uvx` 离线包与远程 `https://dislop.com/mcp` |
-| **VS Code / Cursor 一键装 MCP** | [装进 VS Code（本地离线）](https://vscode.dev/redirect/mcp/install?name=dislop&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22--yes%22%2C%22dislop%22%2C%22--mcp%22%5D%7D) · [装进 VS Code（云端免环境）](https://vscode.dev/redirect/mcp/install?name=dislop-cloud&config=%7B%22url%22%3A%22https%3A%2F%2Fdislop.com%2Fmcp%22%7D) · [装进 Cursor（本地离线）](cursor://anysphere.cursor-deeplink/mcp/install?name=dislop&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyItLXllcyIsImRpc2xvcCIsIi0tbWNwIl19) | 浏览器点击直接拉起编辑器确认框，不用手改 JSON |
+| **Gemini CLI 扩展** | `gemini extensions install https://github.com/dislop-ai/dislop` | 基于根目录 [gemini-extension.json](./gemini-extension.json) 直连官方远程 MCP `https://dislop.com/mcp` |
+| **官方 MCP 注册表** | 在 `registry.modelcontextprotocol.io` 检索 `io.github.dislop-ai/dislop` | 登记官方托管远程 MCP 端点 `https://dislop.com/mcp`（Streamable HTTP） |
+| **VS Code / Cursor 一键装 MCP** | [装进 VS Code（官方云端）](https://vscode.dev/redirect/mcp/install?name=dislop&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fdislop.com%2Fmcp%22%7D) · [装进 Cursor（官方云端）](cursor://anysphere.cursor-deeplink/mcp/install?name=dislop&config=eyJ0eXBlIjoiaHR0cCIsInVybCI6Imh0dHBzOi8vZGlzbG9wLmNvbS9tY3AifQ==) | 浏览器点击直接拉起编辑器确认框，不用手改 JSON |
 | **GitHub Action / `pre-commit`** | 在工作流里引用 `uses: dislop-ai/dislop@main`（见 [action.yml](./action.yml) 与 [.pre-commit-hooks.yaml](./.pre-commit-hooks.yaml)） | PR 只查本次改动行并输出行内批注或 SARIF 2.1.0 |
 
-### 手动接入本地 MCP（`Claude Code`、`Codex`、`Cursor`、`Windsurf`）
+### 接入官方云端 MCP（`Claude Code`、`Codex`、`Cursor`、`WorkBuddy`、`Claude Cowork`）
 
 ```json
 {
   "mcpServers": {
     "dislop": {
-      "command": "npx",
-      "args": ["--yes", "dislop", "--mcp"]
+      "type": "http",
+      "url": "https://dislop.com/mcp",
+      "headers": {
+        "Authorization": "Bearer dslp_your_token_here"
+      }
     }
   }
 }
 ```
 
-提供 **7 个**本地离线工具（默认启用紧凑输出 `verbosity: "compact"` 节省上下文，且剥离负例样本）：`dislop_check`（支持 `pack` 含 `"auto"`、`profile`、`ml`、`patterns`）、`dislop_voice_extract_offline`、`dislop_model_score`、`dislop_model_status`、`dislop_explain`、`dislop_packs`、`dislop_catalog`。
+官方远程 MCP 端点（`https://dislop.com/mcp`）提供云端大模型审校与改稿工具：`dislop_review`（1 额度，返回分文体结构化问题清单与改法建议，供本地 Agent 结合项目上下文改稿）、`dislop_deslop`（2 额度，自动复检改写）、`dislop_voice_extract`（2 额度）及 0 额度基础检查。需要先在 [dislop.com](https://dislop.com/#cloud-token-box) 登录领取免费密钥。
 
 ## 配置，以及什么时候不听它的
 
@@ -177,8 +177,8 @@ dislop check .
 
 ### 开源本地（`Skill` + `CLI`）vs. 官方托管云端（`dislop.com/mcp`）
 
-- **开源本地（`dislop-ai/dislop`，Apache-2.0）**：`SKILL.md` 与本地 `./references/*.md` 参考卡、Node/Python 命令行（`dislop check [--pack <id|auto>] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|sarif|github|md]`、`dislop patterns`、`dislop voice`、`dislop model [status|score|install|import|remove|deslop]`、`dislop setup`、`dislop deslop --local`、`dislop explain`、`dislop packs`、`dislop catalog`、`dislop resources`）、7 工具本地 stdio MCP（`--mcp`）、全部 7 套内置规则包（42 条规则）、53 条反模式库（`patterns/`）、随包内置的 `14.6 KB` gzip（原始 `49.0 KB`）传统集成模型（`models/pocket-slop-v1.json`，`< 0.5 ms`，在 `stealth-vapor-v1` 上 F1 `100.0%`、干净误报 `0.0%`）、`Awesome Anti-Slop` 及 `dislop-bench v2`。零第三方依赖、不需要 API Key，`check` / `patterns` / `voice` / `model score` 全程零联网，私密文档绝不离开本机；需要本地小模型改写时，可通过 `dislop setup` 或 `dislop model install` 按内存与磁盘预算选装 `0.6B`（约 `520 MB`）、`1.7B`（约 `1.3 GB`）或 `4B`（约 `2.5 GB`）小模型（也支持 `dislop model import` 离线校验导入 `.gguf`/`.onnx` 权重），改写时自动核对原稿数字与部分限定词。
-- **官方托管云端与远程 HTTP MCP（`https://dislop.com/mcp` · [开源与云端方案](https://dislop.com/#pricing)）**：独立闭源云端后台，使用付费级零训练 Google Gemini 模型端点（不落盘留存草稿；详见 [隐私说明](https://dislop.com/privacy.md)）。提供 `dislop_review`（1 额度，深层文风审校 + 规则联查）、`dislop_deslop`（2 额度，自动复检改写，改完核对原稿数字与限定词，对不上自动重改）与 `dislop_voice_extract`（2 额度，提取 `dislop.voice/1` 个人文风）。网页免登录每天 5 试用额度，邮箱领取免费密钥即享 **每月 30 免费额度**；Pro（`$12/月` · 1,500 额度）、按量包（`$10 / 800 额度`）与 Team（`$29/席位/月`）已开放早鸟预约。
+- **开源本地（`dislop-ai/dislop`，Apache-2.0）**：纯文档 `SKILL.md` 与 `./references/*.md` 参考卡（不含可执行脚本）、Node/Python 零依赖命令行（`dislop check [--pack <id|auto>] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|sarif|github|md]`、`dislop patterns`、`dislop voice`、`dislop explain`、`dislop packs`、`dislop catalog`、`dislop resources`）、全部 7 套内置规则包（42 条规则）、53 条反模式库（`patterns/`）、随包内置的 `14.6 KB` gzip（原始 `49.0 KB`）传统集成模型（`models/pocket-slop-v1.json`，`< 0.5 ms`，在 `stealth-vapor-v1` 上 F1 `100.0%`、干净误报 `0.0%`）、`Awesome Anti-Slop` 及 `dislop-bench v2`。`check` / `patterns` / `voice` 全程零联网，私密文档绝不离开本机（源码亦保留既有 `--mcp` 与可选本地小模型工具链，供真实语料对比评测期间向后兼容）。
+- **官方托管云端与远程 HTTP MCP（`https://dislop.com/mcp` · [开源与云端方案](https://dislop.com/#pricing)）**：独立闭源云端后台，使用付费级零训练模型端点（不落盘留存草稿；详见 [隐私说明](https://dislop.com/privacy.md)）。提供 `dislop_review`（1 额度，多模型分文体深层审校，返回结构化问题与改法建议）、`dislop_deslop`（2 额度，自动复检改写，改完核对原稿数字与限定词，对不上自动重改）与 `dislop_voice_extract`（2 额度，提取 `dislop.voice/1` 个人文风）。云端 AI 功能需登录使用，邮箱领取免费密钥即享 **每月 30 免费额度**；Pro（`$12/月` · 1,500 额度）、按量包（`$10 / 800 额度`）与 Team（`$29/席位/月`）已开放早鸟预约。
 
 ## 去 AI 味效果基准测试（`dislop-bench v2`）
 
@@ -211,15 +211,15 @@ GitHub Actions CI 在每次提交时跑完双端 `dislop pack-test`（164 项样
 ```text
 dislop/
 ├── .agents/plugins/   # OpenAI Codex 市场清单（marketplace.json）
-├── .claude-plugin/    # Claude Code 插件与市场清单（打包 Skill + 本地 MCP）
+├── .claude-plugin/    # Claude Code 插件与市场清单（纯文档 Skill + 官方云端 MCP）
 ├── .codex-plugin/     # OpenAI Codex 原生插件清单与卡片配置
 ├── plugin.json        # Agent Plugins 1.0 跨平台标准清单（配根目录 mcp.json）
 ├── gemini-extension.json # Gemini CLI 扩展画廊清单
-├── server.json        # 官方 MCP Registry 清单（同时声明本地 stdio 与远程 HTTP）
+├── server.json        # 官方 MCP Registry 清单（官方云端 HTTP MCP）
 ├── action.yml         # 可复用的 GitHub Marketplace 增量检查 Action
 ├── awesome/           # Awesome Anti-Slop 中英文工具清单（87 条）
 ├── benchmarks/        # 去 AI 味效果基准测试数据集（CC0-1.0）与离线实测报告
-├── bin/               # Node.js CLI（dislop.mjs）与本地 stdio MCP（dislop-mcp.mjs）
+├── bin/               # Node.js CLI（dislop.mjs）与兼容入口（dislop-mcp.mjs）
 ├── src/
 │   ├── core.mjs       # 零依赖纯 ES 模块内核，由 Node CLI、MCP 与浏览器工作台共用
 │   ├── pattern-engine.mjs # 多角度 11 条扩展模式库扫描器

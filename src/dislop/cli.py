@@ -225,7 +225,11 @@ def format_report(report: dict[str, Any], fmt: str = "text", lang: str = "en") -
     skip_note = f", {len(skipped)} skipped" if skipped else ""
     out: list[str] = []
     if not findings and not unused:
-        out.append(f"dislop: ok ({checked_count} checked{skip_note}, 0 findings)")
+        if lang == "zh":
+            zh_skip = f"，跳过 {len(skipped)} 项" if skipped else ""
+            out.append(f"dislop: 未发现已知模式（已检 {checked_count} 项{zh_skip}，0 处命中）")
+        else:
+            out.append(f"dislop: no known patterns found ({checked_count} checked{skip_note}, 0 findings)")
     else:
         out.append(f"dislop: {len(findings)} finding(s) across {checked_count} checked file(s){skip_note}")
         for f in findings:

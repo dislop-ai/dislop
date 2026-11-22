@@ -88,11 +88,10 @@ function createMockVscode(initialText) {
       this.edits.push({ uri, pos, text });
     }
   }
-  class McpStdioServerDefinition {
-    constructor(label, command, args) {
+  class McpHttpServerDefinition {
+    constructor(label, uri) {
       this.label = label;
-      this.command = command;
-      this.args = args;
+      this.uri = uri;
     }
   }
   class LanguageModelTextPart {
@@ -120,6 +119,9 @@ function createMockVscode(initialText) {
   };
 
   const api = {
+    Uri: {
+      parse: (v) => ({ toString: () => String(v), value: String(v) }),
+    },
     Position,
     Range,
     Diagnostic,
@@ -127,7 +129,7 @@ function createMockVscode(initialText) {
     Hover,
     CodeAction,
     WorkspaceEdit,
-    McpStdioServerDefinition,
+    McpHttpServerDefinition,
     LanguageModelTextPart,
     LanguageModelToolResult,
     DiagnosticSeverity: { Error: 0, Warning: 1, Information: 2, Hint: 3 },
@@ -263,7 +265,7 @@ async function main() {
 
   assert.ok(mockDesktop.registeredMcp.has("dislop.mcp"), "Desktop extension should register MCP provider");
   const mcpDefs = mockDesktop.registeredMcp.get("dislop.mcp").provideMcpServerDefinitions();
-  assert.equal(mcpDefs[0].command, "npx");
+  assert.equal(mcpDefs[0].uri.toString(), "https://dislop.com/mcp");
 
   const lmTool = mockDesktop.registeredTools.get("dislop_check_document");
   assert.ok(lmTool, "Desktop extension should register dislop_check_document LM tool");
@@ -271,11 +273,11 @@ async function main() {
   const parsed = JSON.parse(toolResult.content[0].value);
   assert.ok(parsed.findings.length >= 2);
 
-  // Web bundle check (must not register stdio MCP provider, must still audit & register LM tool)
+  // Web bundle check (must register remote HTTP MCP provider, audit offline & register LM tool)
   const mockWeb = createMockVscode(sampleText);
   const webExt = loadBundledExtension(path.join(__dirname, "dist", "web", "extension.js"), mockWeb.api);
   webExt.activate({ subscriptions: [] });
-  assert.equal(mockWeb.registeredMcp.size, 0, "Web bundle must skip stdio MCP provider");
+  assert.ok(mockWeb.registeredMcp.has("dislop.mcp"), "Web bundle should register remote HTTP MCP provider");
   assert.ok(mockWeb.registeredTools.has("dislop_check_document"), "Web bundle must register LM tool");
 
   console.log("VS Code & Open VSX extension tests: ALL PASSED");

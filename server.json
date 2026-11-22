@@ -2,45 +2,13 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.dislop-ai/dislop",
   "title": "dislop",
-  "description": "Linter for AI Slop in docs, web UI, and slides — offline stdio & Cloud MCP.",
-  "version": "0.6.2",
+  "description": "Linter for AI Slop in docs, web UI, and slides — Official Cloud MCP.",
+  "version": "0.7.0",
   "websiteUrl": "https://dislop.com",
   "repository": {
     "url": "https://github.com/dislop-ai/dislop",
     "source": "github"
   },
-  "packages": [
-    {
-      "registryType": "npm",
-      "identifier": "dislop",
-      "version": "0.6.2",
-      "runtimeHint": "npx",
-      "packageArguments": [
-        {
-          "type": "positional",
-          "value": "--mcp"
-        }
-      ],
-      "transport": {
-        "type": "stdio"
-      }
-    },
-    {
-      "registryType": "pypi",
-      "identifier": "dislop",
-      "version": "0.6.2",
-      "runtimeHint": "uvx",
-      "packageArguments": [
-        {
-          "type": "positional",
-          "value": "--mcp"
-        }
-      ],
-      "transport": {
-        "type": "stdio"
-      }
-    }
-  ],
   "remotes": [
     {
       "type": "streamable-http",

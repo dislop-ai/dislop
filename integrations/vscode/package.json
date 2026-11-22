@@ -2,7 +2,7 @@
   "name": "dislop",
   "displayName": "dislop",
   "description": "Linter for AI Slop — helps you (and your agent) catch and fix AI-sounding text and layouts in docs and web UI (7 packs, 42 rules, offline).",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "publisher": "dislop-ai",
   "license": "Apache-2.0",
   "homepage": "https://dislop.com",

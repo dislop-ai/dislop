@@ -1,14 +1,14 @@
 ---
 name: dislop
-version: 0.6.2
-description: Linter for AI Slop. Helps coding and office agents catch and fix AI-sounding text and template layouts in docs, web UI, and slides using local references, offline CLI (7 packs, 42 rules), or optional Cloud MCP.
+version: 0.7.0
+description: Linter for AI Slop. Helps coding and office agents catch and fix AI-sounding text and template layouts in docs, web UI, and slides using pure-Markdown references, local offline CLI, or Official Cloud MCP.
 ---
 
 # dislop
 
-- **Local Skill (`0` network)**: Apply the rules below; read only the matching local file under `./references/`.
-- **Offline CLI & 7-tool stdio MCP (`< 250 KB`, `0` uploads)**: 7 packs (`42` rules), `14.6 KB` Pocket ML (`--ml`), 11 bank probes (`--patterns`), and offline voice (`dislop voice`).
-- **Optional Cloud MCP (`https://dislop.com/mcp`)**: Non-confidential text when no local shell exists (`30` free credits/mo).
+- **Skill (Markdown only, `0` scripts, `0` network)**: Read only the matching local file under `./references/` before drafting.
+- **Local CLI (`< 250 KB`, `0` uploads)**: Offline deterministic checker (`7` packs, `42` rules, `14.6 KB` Pocket ML, `11` extended probes) for terminals, hooks, and CI. Zero hits clears known surface and structural patterns, not deep content hollowness.
+- **Official Cloud MCP (`https://dislop.com/mcp`)**: Sign in for multi-model genre-aware review (`dislop_review` returns structured issues and edit guidance so you revise in local context) and optional `dislop_deslop` / `dislop_voice_extract` (`30` free credits/mo).
 
 ## Local References
 
@@ -28,28 +28,26 @@ description: Linter for AI Slop. Helps coding and office agents catch and fix AI
 5. Keep languages separate while keeping exact identifiers and units (`Q4`, `TPS`, `P99`, `42ms`).
 6. Avoid `href="#"`, unexplained `<button disabled>`, purple-pink gradients, pill walls (`> 6`), and `"Overview"` slide titles.
 
-## 2. Run Offline CLI or Local MCP
+## 2. Run Local CLI Check (When Shell Is Available)
 
 Packs (`core` errors always on, or `--pack auto`): `business-brief`, `engineering-spec`, `regulated-comms`, `literary-essay`, `deck-and-ui`, `executive-deck`.
 
 ```bash
 npx --yes dislop check <path> --pack auto --profile --ml --patterns --format json
-npx --yes dislop voice <sample.md> -o .dislop.local/voice.json
-npx --yes dislop model status
+npx --yes dislop explain <rule-id>
 ```
 
-Local stdio MCP (7 tools): `dislop_check`, `dislop_voice_extract_offline`, `dislop_model_score`, `dislop_model_status`, `dislop_explain`, `dislop_packs`, `dislop_catalog`.
+## 3. Revise in Context & Re-Check
 
-## 3. Edit & Re-Check
+Fix `core` `error` items first. If Official Cloud MCP (`dislop_review`) is connected, use its structured issues and guidance to revise with full project context. Keep numbers, qualifiers (`"up to"`, `"at least"`), URLs, and code spans exact, then re-run `dislop check`.
 
-Fix `core` `error` items first, inspect `dislop explain <rule-id>` as needed, keep numbers, qualifiers (`"up to"`, `"at least"`), URLs, and code spans exact, then re-run `dislop check`.
-
-## Optional Cloud MCP
+## Official Cloud MCP
 
 ```json
 {
   "mcpServers": {
-    "dislop-cloud": {
+    "dislop": {
+      "type": "http",
       "url": "https://dislop.com/mcp",
       "headers": {
         "Authorization": "Bearer dslp_your_token_here"

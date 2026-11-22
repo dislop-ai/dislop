@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 0.6.2
+version: 0.7.0
 snapshot: 2026-11-21
 ---
 
@@ -8,7 +8,7 @@ snapshot: 2026-11-21
 
 [简体中文](./roadmap.zh-CN.md) · [Product Brief](./PRODUCT.md)
 
-Last updated: `2026-11-22` · Current baseline: `v0.6.2` (`dislop.com` live)
+Last updated: `2026-11-22` · Current baseline: `v0.7.0` (`dislop.com` live)
 
 This roadmap tracks what `dislop` ships today, how we expand from coding agent users to office agent users (Claude Cowork, WorkBuddy, Qwen) and everyone delivering work with AI, and the open design questions we want to decide together. To pick up a track, push back on a rule threshold, or propose a new idea, start a thread in [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) or claim an [Issue](https://github.com/dislop-ai/dislop/issues).
 
@@ -23,7 +23,7 @@ This roadmap tracks what `dislop` ships today, how we expand from coding agent u
 | Formats | `.md`, `.mdx`, `.txt`, `.html`, `.css`, `.jsx`, `.tsx`, `.svg`, `.docx`, `.pptx` | `src/binary-node.mjs`, `src/dislop/engine.py` |
 | Website & Workbench | Default-Chinese `dislop.com` with native English toggle, 2 proof marks (red solid `error` + blue dashed `warning`/`info`), 5-cell rhythm gauges, offline + cloud voice profile drawer, and `/llms.txt` endpoints | `scripts/build_site.mjs`, `site/` |
 | Awesome Anti-Slop | 87 checked bilingual entries (`dislop.radar/2`), pure English `awesome/README.md`, pure Chinese `awesome/README.zh-CN.md`, and offline filter at `dislop.com/awesome/` | `docs/research/anti-slop-radar-index.json`, `awesome/` |
-| Multi-surface manifests & editor bundles | CI-locked manifests and bundles across npm (`dislop`), PyPI (`dislop`), Official MCP Registry (`io.github.dislop-ai/dislop` declaring local `stdio` + remote `https://dislop.com/mcp`), Agent Skill (`skills/dislop/` with 4 local reference cards + `agents/openai.yaml`), Claude Code (`.claude-plugin/`, ~130 always-on tokens), Codex (`.codex-plugin/` + `.agents/plugins/marketplace.json`), Cursor (`.cursor-plugin/`), Antigravity (`integrations/antigravity/`), VS Code / Open VSX Web extension (`integrations/vscode/`), GitHub Action (`action.yml`), and `.pre-commit-hooks.yaml` | `scripts/sync_manifests.mjs`, `integrations/`, `server.json`, `action.yml` |
+| Multi-surface manifests & editor bundles | CI-locked manifests and bundles across npm (`dislop`), PyPI (`dislop`), Official MCP Registry (`io.github.dislop-ai/dislop` pointing to Official Cloud MCP `https://dislop.com/mcp`), pure-doc Agent Skill (`skills/dislop/` with 4 local reference cards + `agents/openai.yaml`), Claude Code (`.claude-plugin/`, ~130 always-on tokens), Codex (`.codex-plugin/` + `.agents/plugins/marketplace.json`), Cursor (`.cursor-plugin/`), Antigravity (`integrations/antigravity/`), VS Code / Open VSX Web extension (`integrations/vscode/`), GitHub Action (`action.yml`), and `.pre-commit-hooks.yaml` | `scripts/sync_manifests.mjs`, `integrations/`, `server.json`, `action.yml` |
 
 ---
 
@@ -40,7 +40,7 @@ Goal: finish account-side publishing so every install command resolves from publ
 - [x] Publish `dislop` on npm and PyPI, flip default package coordinates via `node scripts/sync_manifests.mjs --channel registry`, and publish `server.json` live to `registry.modelcontextprotocol.io` (`io.github.dislop-ai/dislop`).
 - [ ] Verify automatic indexing on `skills.sh` and `geminicli.com/extensions`, claim Smithery and Glama listings, and complete deferred manual store reviews for Anthropic (`claude.ai/directory/manage`) and OpenAI.
 
-**Done when**: `npx dislop check .`, `uvx dislop check .`, and `gemini extensions install` work straight from public registries, and the Official MCP Registry lists both local `stdio` and remote `streamable-http` transports.
+**Done when**: `npx dislop check .`, `uvx dislop check .`, and `gemini extensions install` work straight from public registries, and the Official MCP Registry lists `io.github.dislop-ai/dislop` Official Cloud MCP (`https://dislop.com/mcp`).
 
 ### Track B — Dual-Published Editor Extension & Multi-Agent Fleet Orchestrators (Next)
 
@@ -71,15 +71,15 @@ Goal: keep the 87-entry directory accurate, neutral, and easy to filter in both 
 - [ ] Keep `awesome/README.md`, `awesome/README.zh-CN.md`, and `https://dislop.com/awesome/` inside `dislop-ai/dislop` during early growth.
 - [ ] **Split threshold**: spin out a standalone CC0-1.0 `dislop-ai/awesome-anti-slop` repository (`dislop.radar/3`) only once sustained external directory PRs reach `>= 5/month`, keeping `https://dislop.com/awesome/` canonical permanently.
 
-### Track E — Open-Core Cloud Value-Adds & Longer-Term (`v0.6.0+`)
+### Track E — Eval-Driven Genre Review & Closed-Source Cloud Capabilities (`v0.7.0+`)
 
-Market pricing benchmarks and unit economics live in [docs/research/business-model-and-open-core.zh-CN.md](https://github.com/dislop-ai/dislop/blob/main/docs/research/business-model-and-open-core.zh-CN.md). **Open-source boundary**: `SKILL.md`, Node/Python CLI, local plugins, 7-tool local stdio MCP, all 7 built-in packs (`42` rules), 53-pattern catalog, bundled `14.6 KB` Pocket ML, offline browser workbench, `Awesome Anti-Slop`, and `dislop-bench v2` remain Apache-2.0 open source (`dislop-ai/dislop`). Hosted LLM endpoints and Remote HTTP MCP run in private `dislop-cloud`:
+Market pricing benchmarks and unit economics live in [docs/research/business-model-and-open-core.zh-CN.md](https://github.com/dislop-ai/dislop/blob/main/docs/research/business-model-and-open-core.zh-CN.md). **Open-source boundary**: aligned to the three-layer Product Form in `PRODUCT.md` — pure-Markdown `SKILL.md`, zero-dependency local `CLI` (`dislop-ai/dislop`, Apache-2.0, with all 7 built-in packs / `42` rules, 53-pattern catalog, `14.6 KB` Pocket ML, offline browser workbench, `Awesome Anti-Slop`, open single-step prompts, and `dislop-bench v2`) stay open source; Official Cloud MCP (`https://dislop.com/mcp`) and multi-model pipelines run in private `dislop-cloud`. **Evaluate before deleting**: existing offline rules, Pocket ML, and Python engine stay intact until the real-world held-out eval decides what to trim.
 
-- [x] **Phase 0 (Live Hosted Cloud & Demand Validation)**: `dislop-cloud` live at `https://dislop.com/mcp` and `/api/v1/*` with 5 anonymous web demo credits/day, 30 free monthly credits after email signup, global daily budget cap, and Pro / PAYGO / Team waitlist.
-- [ ] **Format-Preserving `.docx` / `.pptx` Round-Trip Rewrite**: Clean prose and slides while keeping native Office styles, masters, numbers, and bounding qualifiers intact.
-- [ ] **Visual Multimodal Audit**: Headless screenshot rendering + VLM layout critique for web pages and slide decks.
-- [ ] **Team Brand Voice Libraries & GitHub App PR Reviewer**: Shared `dislop.voice/1` profiles across teams and single-comment sticky PR summaries.
-- [ ] Typed JS/TS (`.d.ts`) and Python (`py.typed`) in-memory byte-stream SDK facades.
+- [x] **Phase 0 (Live Hosted Cloud & Sign-In Gate)**: `dislop-cloud` live at `https://dislop.com/mcp` and `/api/v1/*` with sign-in-gated 30 free monthly credits (no unauthenticated cloud burn), global daily budget cap, and Pro / PAYGO / Team waitlist; `v0.7.0` updates CLI zero-hit output to `"no known patterns found"` and points all MCP manifests to Official Cloud MCP.
+- [ ] **Real-World Held-Out Eval Set & 4-Arm Blind Comparison**: Collect and label real Chinese/English passages across narrative, argumentative, official, and engineering prose, comparing offline checks, single open prompts, pure cloud LLM, and hybrid (deterministic priors + genre LLM + guardrails) pipelines before removing any code.
+- [ ] **Structured `revision` + Genre `register` Protocol & CLI BYOK `review`**: Emit structured `edit` / `rewrite` / `ask` diagnostics across `expressive` / `argumentative` / `official` registers so local agents revise in context; allow explicit developer-supplied API keys in the CLI.
+- [ ] **Regional Multi-Provider Routing & Format-Preserving `.docx` / `.pptx` Cleanup**: Route across regional zero-training endpoints and preserve Office styles, masters, numbers, and bounding qualifiers.
+- [ ] **Visual Multimodal Audit & Team Brand Voice Libraries**: Headless screenshot rendering + VLM layout critique alongside shared `dislop.voice/1` team profiles.
 
 ---
 

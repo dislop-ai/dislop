@@ -2,12 +2,8 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
     "dislop": {
-      "command": "npx",
-      "args": [
-        "--yes",
-        "dislop@0.6.2",
-        "--mcp"
-      ]
+      "type": "http",
+      "url": "https://dislop.com/mcp"
     }
   }
 }

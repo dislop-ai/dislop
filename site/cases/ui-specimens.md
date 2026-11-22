@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 0.6.2
+version: 0.7.0
 snapshot: 2026-11-21
 ---
 

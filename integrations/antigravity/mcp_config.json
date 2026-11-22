@@ -1,12 +1,7 @@
 {
   "mcpServers": {
     "dislop": {
-      "command": "npx",
-      "args": [
-        "--yes",
-        "dislop@0.6.2",
-        "--mcp"
-      ]
+      "serverUrl": "https://dislop.com/mcp"
     }
   }
 }
