@@ -441,13 +441,13 @@ async function runLiveStatusAudit({ asJson = false, strict = false } = {}) {
     fetchJsonSafe("https://dislop.com/api/health"),
     fetchJsonSafe("https://registry.npmjs.org/dislop/latest"),
     fetchJsonSafe("https://pypi.org/pypi/dislop/json"),
-    fetchJsonSafe("https://registry.modelcontextprotocol.io/v0/servers?search=io.github.dislop-ai/dislop"),
+    fetchJsonSafe("https://registry.modelcontextprotocol.io/v0.1/servers/io.github.dislop-ai%2Fdislop/versions/latest"),
     fetchJsonSafe("https://api.github.com/repos/dislop-ai/dislop"),
     fetchJsonSafe("https://api.github.com/repos/dislop-ai/dislop/releases/latest"),
     fetchJsonSafe("https://api.github.com/repos/dislop-ai/.github/contents/profile/README.md"),
   ]);
 
-  const mcpEntry = (mcpReg.data?.servers || []).find((s) => s?.server?.name === "io.github.dislop-ai/dislop");
+  const mcpEntry = mcpReg.data?.server?.name === "io.github.dislop-ai/dislop" ? mcpReg.data : null;
   const mcpVer = mcpEntry?.server?.version || null;
   const mcpState = mcpEntry?._meta?.["io.modelcontextprotocol.registry/official"]?.status || null;
 
