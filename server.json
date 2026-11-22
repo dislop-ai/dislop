@@ -3,7 +3,7 @@
   "name": "io.github.dislop-ai/dislop",
   "title": "dislop",
   "description": "Linter for AI Slop in docs, web UI, and slides — Official Cloud MCP.",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "websiteUrl": "https://dislop.com",
   "repository": {
     "url": "https://github.com/dislop-ai/dislop",

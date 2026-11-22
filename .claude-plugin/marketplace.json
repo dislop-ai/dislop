@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Official dislop plugin marketplace: pure-doc Agent Skill and Official Cloud MCP.",
-    "version": "0.7.0"
+    "version": "0.7.1"
   },
   "plugins": [
     {
       "name": "dislop",
       "source": "./",
       "description": "Linter for AI Slop. Combines vetted community rules (7 packs, 42 rules, 53 patterns) across pure-doc Skill, local offline CLI, and Official Cloud MCP.",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "author": {
         "name": "dislop-ai",
         "url": "https://dislop.com"

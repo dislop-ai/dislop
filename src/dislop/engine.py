@@ -14,7 +14,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-ENGINE_VERSION = "0.7.0"
+ENGINE_VERSION = "0.7.1"
 
 SEVERITY_RANK = {
     "info": 1,

@@ -20,7 +20,7 @@ Read the task page matching your work. If `skills/dislop/` is installed locally,
 
 ## Machine index & packs
 - [JSON Catalog](https://dislop.com/catalog.json): Versioned manifest (`dislop.catalog/1`) with sha256 and token estimates.
-- [Agent Skill](https://dislop.com/tools/skill.md): Mirror of `skills/dislop/SKILL.md` (`v0.7.0`); skip if loaded locally.
+- [Agent Skill](https://dislop.com/tools/skill.md): Mirror of `skills/dislop/SKILL.md` (`v0.7.1`); skip if loaded locally.
 - [Official Cloud MCP](https://dislop.com/tools/mcp-sdk-api.md): `https://dislop.com/mcp` (sign in for 30 free credits/mo; `dislop_review`, `dislop_deslop`).
 - [Rule Packs](https://dislop.com/packs/core.md): 7 packs & 42 `/rules/<id>.md` cards.
 - [Single-Fetch Bundle](https://dislop.com/llms-full.txt): All 42 rules compiled without test fixtures.

@@ -2,7 +2,7 @@
 
 [English](./ROADMAP.md) · [产品定义](./PRODUCT.md)
 
-最后更新：`2026-11-22` · 当前基线：`v0.7.0`（`dislop.com` 已上线）
+最后更新：`2026-11-22` · 当前基线：`v0.7.1`（`dislop.com` 已上线）
 
 这份路线图记录 `dislop` 现在已经做到哪一步、接下来按什么顺序覆盖 Coding Agent 用户、办公 Agent（WorkBuddy、千问、Claude Cowork 等）用户与日常办公人群，以及还没写死、欢迎团队一起拍板的开放问题。认领任务、反馈误报，或者聊新点子，直接在 [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) 开帖，或建一个 [Issue](https://github.com/dislop-ai/dislop/issues) 即可。
 

@@ -1,7 +1,7 @@
 ---
 content-type: reference-data
 task: business-doc
-version: 0.7.0
+version: 0.7.1
 ---
 
 # Task Bundle: Business Brief & Technical Proposal

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "dislop",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Linter for AI Slop. Combines vetted community rules (7 packs, 42 rules, 53 patterns) across pure-doc Skill, local offline CLI, and Official Cloud MCP.",
   "author": {
     "name": "dislop-ai",

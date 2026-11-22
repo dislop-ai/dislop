@@ -1,6 +1,6 @@
 ---
 name: dislop
-version: 0.7.0
+version: 0.7.1
 description: Linter for AI Slop. Helps coding and office agents catch and fix AI-sounding text and template layouts in docs, web UI, and slides using pure-Markdown references, local offline CLI, or Official Cloud MCP.
 ---
 

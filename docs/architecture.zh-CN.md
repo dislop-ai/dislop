@@ -1,4 +1,4 @@
-# 系统架构说明（`v0.7.0`）
+# 系统架构说明（`v0.7.1`）
 
 [English](./architecture.md) · [产品定义](../PRODUCT.md)
 
