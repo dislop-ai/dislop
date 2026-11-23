@@ -65,12 +65,13 @@ npx --yes dislop check --changed origin/main --format github
 <summary>更多命令（深度检查、交叉审校、防退化校验、个人文风、Python 版）</summary>
 
 ```bash
-# 开启 5 轴节奏统计、轻量模型与扩展模式库深查，输出去重 JSON
-npx --yes dislop check draft.md --pack auto --deep --profile --compact --json
+# 开启 5 轴节奏统计、写作场景策略与扩展模式库深查，输出去重 JSON
+npx --yes dislop check draft.md --pack auto --register argumentative --deep --profile --compact --json
 
-# 多信号交叉审校、改后校验与离线提取个人文风卡
-npx --yes dislop review draft.md
-npx --yes dislop verify --git HEAD draft.md
+# 多信号交叉审校、分场景改后防漂移校验、三层接入体检与离线个人文风卡
+npx --yes dislop review draft.md --register casual
+npx --yes dislop verify --git HEAD draft.md --register casual
+npx --yes dislop doctor
 npx --yes dislop voice my-notes.md
 
 # Python 3.10+（已上架 PyPI，零外部依赖）

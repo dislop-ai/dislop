@@ -2,20 +2,20 @@
 
 [English](./ROADMAP.md) · [产品定义](./PRODUCT.md)
 
-最后更新：`2026-11-22` · 当前基线：`v0.7.1`（`dislop.com` 已上线）
+最后更新：`2026-11-23` · 当前基线：`v0.8.0`（`dislop.com` 已上线）
 
 这份路线图记录 `dislop` 现在已经做到哪一步、接下来按什么顺序覆盖 Coding Agent 用户、办公 Agent（WorkBuddy、千问、Claude Cowork 等）用户与日常办公人群，以及还没写死、欢迎团队一起拍板的开放问题。认领任务、反馈误报，或者聊新点子，直接在 [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) 开帖，或建一个 [Issue](https://github.com/dislop-ai/dislop/issues) 即可。
 
 ---
 
-## 1. 当前进度（`v0.7.1` 已落地）
+## 1. 当前进度（`v0.8.0` 已落地）
 
 | 模块 | 现已实现 | 核心目录 |
 |---|---|---|
-| 双端零依赖内核 | Node.js 20+ 与 Python 3.10+ 双端零外部依赖，通过 214 项规则样本断言、65 条反模式库核验、离线个人文风提取及 Python `unittest` 跨运行时一致性与引擎单测 | `src/core.mjs`、`src/dislop/engine.py`、`tests/test_conformance.py` |
+| 双端零依赖内核 | Node.js 20+ 与 Python 3.10+ 双端零外部依赖，通过 230 项规则与语体样本断言、分场景策略路由（`getScenarioStrategy` / `registerOverrides`）、65 条反模式库核验、离线个人文风提取及 66 项 Python `unittest` 跨运行时一致性、CLI 与安全单测 | `src/core.mjs`、`src/dislop/engine.py`、`src/review-client.mjs`、`tests/` |
 | 全内置规则包与轻量模型 | 全部 7 套场景与行业包（53 条规则）直接内置离线运行：`core`、`business-brief`、`engineering-spec`、`regulated-comms`、`literary-essay`、`deck-and-ui`、`executive-deck`；附 12 条扩展模式库探针（`--patterns`）、随包 `14.6 KB` gzip 零依赖集成模型（`pocket-slop-v1`）与本机内存/芯片小模型选装向导（`dislop model`） | `packs/*/pack.json`、`patterns/`、`models/`、`src/local-model.mjs` |
 | 支持格式 | `.md`、`.mdx`、`.txt`、`.html`、`.css`、`.jsx`、`.tsx`、`.svg`、`.docx`、`.pptx`、`.pdf`、`.png`、`.jpg`、`.jpeg`、`.webp` | `src/binary-node.mjs`、`src/dislop/engine.py` |
-| 官网与在线工作台 | 默认简体中文的 `dislop.com`（一键切原生英文、严格零混排），采用两种标线（红实线硬伤 / 蓝虚线套话提醒）、5 格白话节奏条、本地检查与云增强（MCP）双模式文风抽屉及 `/llms.txt` 端点 | `scripts/build_site.mjs`、`site/` |
+| 官网与在线工作台 | 按浏览器语言自动匹配中文或原生英文的 `dislop.com`，支持场景包 + 语体选择器与分场景改稿提示、两种标线（红实线硬伤 / 蓝虚线套话提醒）、5 格白话节奏条、离线 `#share=v1.*` 分享链接与 `#try=<ruleId>` 直达、双语指南与规则图鉴、`/llms.txt` 端点 | `scripts/build_site.mjs`、`site/` |
 | Awesome Anti-Slop | 90 条双语核验清单（`dislop.radar/2`），同源生成纯英文 `awesome/README.md`、纯中文 `awesome/README.zh-CN.md` 与 `dislop.com/awesome/` 网页筛选页 | `docs/research/anti-slop-radar-index.json`、`awesome/` |
 | 多平台清单与编辑器集成 | 同源生成并受 CI 校验的分发清单与集成包：npm（`dislop`）、PyPI（`dislop`）、官方 MCP Registry（`io.github.dislop-ai/dislop`，直连官方云端 `https://dislop.com/mcp`）、纯文档 Agent Skill（`skills/dislop/` 含 4 张本地参考卡与 `agents/openai.yaml`）、Claude Code 插件（`.claude-plugin/`，常驻仅约 130 tokens）、Codex 插件（`.codex-plugin/` 与 `.agents/plugins/marketplace.json`）、Cursor 插件（`.cursor-plugin/`）、Antigravity 插件包（`integrations/antigravity/`）、VS Code / Open VSX 轻量 Web 扩展（`integrations/vscode/`）、可复用 GitHub Action（`action.yml`）与 `.pre-commit-hooks.yaml` | `scripts/sync_manifests.mjs`、`integrations/`、`server.json`、`action.yml` |
 
@@ -67,17 +67,18 @@
 
 ### 轨道 E — 真实评测驱动的智能审校与闭源云端能力（`v0.7.0+`）
 
-完整定价与成本测算见 [docs/research/business-model-and-open-core.zh-CN.md](./docs/research/business-model-and-open-core.zh-CN.md)。**先评测再精简代码**：在真实保留集完成评测对比前，保留既有离线规则、Pocket ML 与 Python 双端代码不删。
+完整定价、成本测算与防改坏边界见 [docs/research/business-model-and-open-core.zh-CN.md](./docs/research/business-model-and-open-core.zh-CN.md) 与 [docs/research/agent-repair-boundaries-eval-and-dehedging.zh-CN.md](./docs/research/agent-repair-boundaries-eval-and-dehedging.zh-CN.md)。**先评测再精简代码**：在真实保留集完成评测对比前，保留既有离线规则、Pocket ML 与 Python 双端代码不删。
 
 - **开源部分（`dislop-ai/dislop`，Apache-2.0）**：
   - 纯文档 `SKILL.md` 与 `./references/*.md`
   - 零依赖本地 `CLI`，内置全部 7 套规则包（53 条规则）、65 条反模式库与 `14.6 KB` 轻量集成模型
   - 浏览器基础工作台、`Awesome Anti-Slop`、开源单步审校 Prompt 与 `dislop-bench v2`
-- **闭源部分（`dislop-cloud`）**：官方云端 MCP（`https://dislop.com/mcp`）与多模型流水线。
+- **闭源部分（`dislop-cloud`）**：官方云端 MCP（`https://dislop.com/mcp`）、多模型流水线与防改坏净增益评估服务（`dislop_eval` / `dislop_verify_edit`）。
 
 - [x] **阶段 0（云端上线与登录试用收口）**：官方 `dislop-cloud` 已上线 `https://dislop.com/mcp` 与 `/api/v1/*`，启用登录领取每月 30 免费额度，并开放 Pro / 按量包 / Team 预约；`v0.7.0` 起 CLI 0 命中输出改为“未发现已知模式”并统一全部插件清单直连官方云端 MCP。
 - [ ] **真实语料保留评测集与 4 臂盲评**：收集覆盖叙事随笔、思辨论述、公文简报与工程文档的真实中英文文章并人工标注，对比离线快检、单个开源 Prompt、纯云端大模型与混合流水线（离线规则 + 5 轴特征注入 + 分文体大模型审校 + 确定性护栏），用保留集结果决定后续代码取舍。
-- [ ] **分文体结构化审校协议（`revision` + `register`）与 CLI 自带密钥 `review`**：输出 `edit` / `rewrite` / `ask` 结构化问题清单与 `expressive` / `argumentative` / `official` 文体路由，让本地宿主 Agent 结合完整上下文改稿；允许开发者在 CLI 显式配置自有 OpenAI 兼容密钥。
+- [x] **分场景语体策略、结构化 `revision` 与 CLI 自备密钥 `review` + `doctor`**：双端落地 `--register`（`technical` / `official` / `argumentative` / `narrative` / `casual` / `marketing`）、`getScenarioStrategy`、`registerOverrides`、带保护锚点的 `edit`/`rewrite`/`ask` 改法建议、`verify` 口语/书面语域防漂移护栏、`--format agent` 紧凑输出、零联网 `dislop doctor` 与显式授权 BYOK `dislop review`。
+- [ ] **闭源云端防改坏净增益评估（`dislop_eval` / `dislop_verify_edit`）与零训练校准飞轮**：对 `Before vs. After` 改写执行原子事实精确度/召回率与跨厂商换序盲测；全档位坚持用户稿件零训练，仅利用闭源对抗基准、脱敏合成改坏集、Opt-in 纠错反馈与人工金标 Kappa 持续校准评估器。
 - [ ] **按地区多模型路由与保留原排版去味导出（`.docx` / `.pptx` Round-Trip）**：按地区切换不拿稿子训练的付费模型接口，拆解 OOXML、去掉 AI 味并复核数字与限定词后保留原样式导出。
 - [ ] **网页与 PPT 视觉多模态审查（Visual Anti-Slop）与团队共享文风库**：无头渲染真实截图 + VLM 审校版式拥挤度、模板审美与连续同版式，并支持跨成员复用 `dislop.voice/1`。
 

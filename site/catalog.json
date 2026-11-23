@@ -555,14 +555,14 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 4385,
-      "approxTokens": 1096,
+      "bytes": 5862,
+      "approxTokens": 1466,
       "relatedTools": [
         "skill",
         "cli",
         "mcp"
       ],
-      "sha256": "96cbe4e71befbf83d5f2ad9263361458cc459677dd6de47b4784b6704363c3b0"
+      "sha256": "e45f87fef2c031ee4e71061f56ffffa56e5157a641fc7a14a2c82d9c916c6054"
     },
     {
       "id": "tools-skill-ref-work-docs",
@@ -3415,15 +3415,15 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 13506,
-      "approxTokens": 3377,
+      "bytes": 14638,
+      "approxTokens": 3660,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp",
         "skill"
       ],
-      "sha256": "c943128c298b19f2542b7c7c9404990e9576d8348d2e7bc99f640ed909140c38"
+      "sha256": "1227f8bae4f2d84a133065ffa3dc22b64bf4d2b302f750acc29e9d2a34af4b75"
     }
   ]
 }

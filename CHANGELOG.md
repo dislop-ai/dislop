@@ -4,15 +4,17 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.0] - 2026-11-23
 
 ### Added
-- Bilingual static rule catalog pages (`/rules/<id>/` and `/en/rules/<id>/`) and 6 bilingual editorial anti-slop guides (`/guides/` and `/en/guides/`) compiled into `site/` with `llms.txt`, Atom feeds, JSON-LD, and reciprocal `hreflang`.
-- Offline workbench shareable result links (`#share=v1.<base64url>` via `CompressionStream` with `v0.` fallback) and direct rule deep-links (`#try=<ruleId>`), keeping draft contents strictly in the URL fragment with zero server upload.
-- GitHub Issue Form template (`.github/ISSUE_TEMPLATE/slop_sample.yml`) for redacted community slop sample submissions.
+- **Scenario-aware anti-slop strategies (`--register`, `getScenarioStrategy`)**: Tailored cleanup, protection rules, and over-editing guardrails per writing scenario (`technical`, `official`, `argumentative`, `narrative`, `casual`, `marketing`, `deck-ui`) across `src/core.mjs`, `src/dislop/engine.py`, `dislop check/verify/review/deslop`, local stdio & hosted Cloud MCP, `skills/dislop/SKILL.md`, and the `dislop.com` workbench (`#register-select` + live strategy banner).
+- **Opt-in BYOK `dislop review` & zero-network `dislop doctor`**: Added zero-dependency BYOK review clients (`src/review-client.mjs`, `src/dislop/review_client.py`) supporting OpenAI, Gemini, OpenRouter, custom endpoints, and loopback local servers with explicit `--yes` / `DISLOP_ALLOW_REMOTE=1` consent, `.dislop.local.json` `forbid` enforcement, quote grounding, and fact-invention filtering, plus `dislop doctor` to inspect CLI/Skill/MCP readiness offline.
+- **Structured revisions, `--format agent`, & strict CLI ergonomics**: Added per-finding `confidence` and `revision` (`kind`, `scope`, `instruction`, `keep`, `avoid`), `--rule`, `--deep`, `-q/--quiet`, `--changed` disambiguation, unknown-flag spelling suggestions, `.gitignore` automation in `dislop init`, and compact deterministic `--format agent` output in Node and Python.
+- **Bilingual static site, rule encyclopedia & GIF v2 visual suite**: Added static rule encyclopedia pages (`/rules/<id>/` and `/en/rules/<id>/`), 6 bilingual guides (`/guides/`, `/en/guides/`), offline workbench shareable links (`#share=v1.*`), direct `#try=<ruleId>` deep-links, GitHub slop-sample issue template, zero-dependency GIF87a/GIF89a LZW inspection, and 12 audited demo GIFs/WebPs/posters (`assets/demos/*-v2.*`).
 
 ### Changed
-- Pointed SARIF `helpUri`, `catalog` `anchorUrl`, and `--format github` annotation messages directly to language-specific rule documentation URLs (`https://dislop.com/en/rules/<id>/` or `https://dislop.com/rules/<id>/`, with index fallbacks for `pattern-library` and `pocket-model` findings) across both Node and Python runtimes.
+- **Scenario calibration & anti-degradation guardrails**: Skipped `template-skeleton-echo` and `cadence-flattened` on structured `technical`/`official` specs, downgraded `template-skeleton-echo` to `info` for `casual` notes and `low-burstiness-vapor` to `info` for `official` notices, added deterministic `register-drift` detection in `verifyRevisionBundle`, and tightened `chatbot-artifact`, `zh-bureaucratic-padding`, `unsourced-attribution`, `semicolon-tricolon`, and `literary-negation-pivot`.
+- **Direct rule documentation links & Python speedup**: Pointed SARIF `helpUri`, `catalog` `anchorUrl`, and `--format github` annotations directly to `/rules/<id>/` or `/en/rules/<id>/`, and cached compiled rule regexes in `src/dislop/engine.py`.
 
 ## [0.7.1] - 2026-11-22
 

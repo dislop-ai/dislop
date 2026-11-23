@@ -8,20 +8,20 @@ snapshot: 2026-11-21
 
 [简体中文](./roadmap.zh-CN.md) · [Product Brief](./PRODUCT.md)
 
-Last updated: `2026-11-22` · Current baseline: `v0.7.1` (`dislop.com` live)
+Last updated: `2026-11-23` · Current baseline: `v0.8.0` (`dislop.com` live)
 
 This roadmap tracks what `dislop` ships today, how we expand from coding agent users to office agent users (Claude Cowork, WorkBuddy, Qwen) and everyone delivering work with AI, and the open design questions we want to decide together. To pick up a track, push back on a rule threshold, or propose a new idea, start a thread in [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) or claim an [Issue](https://github.com/dislop-ai/dislop/issues).
 
 ---
 
-## 1. Where We Are (`v0.7.1` Shipped)
+## 1. Where We Are (`v0.8.0` Shipped)
 
 | Area | Shipped today | Key files |
 |---|---|---|
-| Core engine & parity | Zero-dependency Node.js 20+ and Python 3.10+ engines passing 214 rule fixtures, 65-pattern catalog checks, offline `extractVoiceProfileOffline`, and Python `unittest` conformance and engine tests | `src/core.mjs`, `src/dislop/engine.py`, `tests/test_conformance.py` |
+| Core engine & parity | Zero-dependency Node.js 20+ and Python 3.10+ engines passing 230 rule & register fixtures, scenario-aware strategies (`getScenarioStrategy` / `registerOverrides`), 65-pattern catalog checks, offline `extractVoiceProfileOffline`, and 66 Python `unittest` conformance, ergonomics, and security tests | `src/core.mjs`, `src/dislop/engine.py`, `src/review-client.mjs`, `tests/` |
 | Built-in packs & local model advisor | All 7 scenario and vertical packs (`53` rules) bundled offline (`core`, `business-brief`, `engineering-spec`, `regulated-comms`, `literary-essay`, `deck-and-ui`, `executive-deck`), plus 12 extended pattern-bank probes (`--patterns`), a bundled `14.6 KB` gzip Pocket ML ensemble (`pocket-slop-v1`), and hardware-aware local model advisor (`dislop model`) | `packs/*/pack.json`, `patterns/`, `models/`, `src/local-model.mjs` |
 | Formats | `.md`, `.mdx`, `.txt`, `.html`, `.css`, `.jsx`, `.tsx`, `.svg`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.docx`, `.pptx`, `.pdf` | `src/binary-node.mjs`, `src/dislop/engine.py` |
-| Website & Workbench | Default-Chinese `dislop.com` with native English toggle, 2 proof marks (red solid `error` + blue dashed `warning`/`info`), 5-cell rhythm gauges, offline + cloud voice profile drawer, and `/llms.txt` endpoints | `scripts/build_site.mjs`, `site/` |
+| Website & Workbench | Browser-language-matched `dislop.com` (`zh` & native `en`), 2 proof marks (red solid `error` + blue dashed `warning`/`info`), pack + register selectors with live scenario strategy guidance, 5-cell rhythm gauges, offline `#share=v1.*` links & `#try=<ruleId>` deep-links, bilingual guides & rule encyclopedia pages, and `/llms.txt` endpoints | `scripts/build_site.mjs`, `site/` |
 | Awesome Anti-Slop | 90 checked bilingual entries (`dislop.radar/2`), pure English `awesome/README.md`, pure Chinese `awesome/README.zh-CN.md`, and browser filter at `dislop.com/awesome/` | `docs/research/anti-slop-radar-index.json`, `awesome/` |
 | Multi-surface manifests & editor bundles | CI-locked manifests and bundles across npm (`dislop`), PyPI (`dislop`), Official MCP Registry (`io.github.dislop-ai/dislop` pointing to Official Cloud MCP `https://dislop.com/mcp`), pure-doc Agent Skill (`skills/dislop/` with 4 local reference cards + `agents/openai.yaml`), Claude Code (`.claude-plugin/`, ~130 always-on tokens), Codex (`.codex-plugin/` + `.agents/plugins/marketplace.json`), Cursor (`.cursor-plugin/`), Antigravity (`integrations/antigravity/`), VS Code / Open VSX Web extension (`integrations/vscode/`), GitHub Action (`action.yml`), and `.pre-commit-hooks.yaml` | `scripts/sync_manifests.mjs`, `integrations/`, `server.json`, `action.yml` |
 
@@ -73,17 +73,18 @@ Goal: keep the 90-entry directory accurate, neutral, and easy to filter in both 
 
 ### Track E — Eval-Driven Genre Review & Closed-Source Cloud Capabilities (`v0.7.0+`)
 
-Market pricing benchmarks and unit economics live in [docs/research/business-model-and-open-core.zh-CN.md](https://github.com/dislop-ai/dislop/blob/main/docs/research/business-model-and-open-core.zh-CN.md). **Evaluate before deleting**: existing offline rules, Pocket ML, and the Python engine stay intact until the real-world held-out eval decides what to trim.
+Market pricing benchmarks, unit economics, and repair safety boundaries live in [docs/research/business-model-and-open-core.zh-CN.md](https://github.com/dislop-ai/dislop/blob/main/docs/research/business-model-and-open-core.zh-CN.md) and [docs/research/agent-repair-boundaries-eval-and-dehedging.zh-CN.md](https://github.com/dislop-ai/dislop/blob/main/docs/research/agent-repair-boundaries-eval-and-dehedging.zh-CN.md). **Evaluate before deleting**: existing offline rules, Pocket ML, and the Python engine stay intact until the real-world held-out eval decides what to trim.
 
 - **Open source (`dislop-ai/dislop`, Apache-2.0)**:
   - Markdown `SKILL.md` and local `./references/*.md`
   - Zero-dependency CLI with 7 built-in packs (`53` rules), 65-pattern catalog, and `14.6 KB` Pocket ML
   - Offline workbench, `Awesome Anti-Slop`, open single-step prompts, and `dislop-bench v2`
-- **Closed source (`dislop-cloud`)**: Official Cloud MCP (`https://dislop.com/mcp`) and multi-model pipelines.
+- **Closed source (`dislop-cloud`)**: Official Cloud MCP (`https://dislop.com/mcp`), multi-model pipelines, and closed-source net-gain edit evaluation (`dislop_eval` / `dislop_verify_edit`).
 
 - [x] **Phase 0 (Live Hosted Cloud & Sign-In Gate)**: `dislop-cloud` live at `https://dislop.com/mcp` and `/api/v1/*` with sign-in-gated 30 free monthly credits and Pro / PAYGO / Team waitlist; `v0.7.0` updates CLI zero-hit output to `"no known patterns found"` and points all MCP manifests to Official Cloud MCP.
 - [ ] **Real-World Held-Out Eval Set & 4-Arm Blind Comparison**: Collect and label real Chinese/English passages across narrative, argumentative, official, and engineering prose, comparing offline checks, single open prompts, pure cloud LLM, and hybrid (deterministic priors + genre LLM + guardrails) pipelines before removing any code.
-- [ ] **Structured `revision` + Genre `register` Protocol & CLI BYOK `review`**: Emit structured `edit` / `rewrite` / `ask` diagnostics across `expressive` / `argumentative` / `official` registers so local agents revise in context; allow explicit developer-supplied API keys in the CLI.
+- [x] **Scenario-Aware `register` Routing + Structured `revision` + CLI BYOK `review` & `doctor`**: Shipped explicit `--register` (`technical`, `official`, `argumentative`, `narrative`, `casual`, `marketing`), `getScenarioStrategy`, `registerOverrides`, structured `edit`/`rewrite`/`ask` revision guidance with fact anchors and `register-drift` guards in `verify`, strict `--format agent` output, zero-network `dislop doctor`, and opt-in BYOK `dislop review` across Node and Python.
+- [ ] **Closed-Source Cloud Net-Gain Edit Eval (`dislop_eval` / `dislop_verify_edit`) & Zero-Training Calibration**: Score `Before vs. After` edits on atomic fact precision/recall and swapped-order cross-provider pairwise checks, calibrating exclusively on private adversarial sets, synthetic damage fixtures, opt-in user error reports, and human gold-standard Kappa while keeping user drafts 0-training.
 - [ ] **Regional Multi-Provider Routing & Format-Preserving `.docx` / `.pptx` Cleanup**: Route across regional paid model APIs that do not train on your text, and preserve Office styles, masters, numbers, and bounding qualifiers.
 - [ ] **Visual Multimodal Audit & Team Brand Voice Libraries**: Headless screenshot rendering + VLM layout critique alongside shared `dislop.voice/1` team profiles.
 

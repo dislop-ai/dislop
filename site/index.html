@@ -260,12 +260,24 @@
             <option value="deck-and-ui" data-i18n="pack.ui">PPT 和网页</option>
           </select>
 
+          <label for="register-select" style="font-size:0.82rem;color:var(--ink-2);" data-i18n="wb.registerLabel">语体：</label>
+          <select id="register-select" class="pack-select" aria-label="选择语体">
+            <option value="auto" data-i18n="reg.auto">自动</option>
+            <option value="technical" data-i18n="reg.technical">工程技术</option>
+            <option value="argumentative" data-i18n="reg.argumentative">商业论证</option>
+            <option value="official" data-i18n="reg.official">公文合规</option>
+            <option value="narrative" data-i18n="reg.narrative">随笔叙事</option>
+            <option value="casual" data-i18n="reg.casual">日常口语</option>
+            <option value="marketing" data-i18n="reg.marketing">宣传推广</option>
+          </select>
+
           <label class="ctrl-btn file-upload-label">
             <span data-i18n="wb.openFile">打开本地文件</span>
             <input type="file" id="file-picker" accept=".md,.mdx,.txt,.html,.css,.jsx,.tsx,.svg,.docx,.pptx,.pdf,.png,.jpg,.jpeg,.webp">
           </label>
         </div>
       </div>
+      <div id="wb-scenario-hint" class="workbench-scenario-hint" aria-live="polite"></div>
 
       <div class="workbench-grid">
         <!-- Left Specimen Index -->
@@ -735,7 +747,7 @@
               <a class="endpoint-path" href="./tools/skill.md">/tools/skill.md</a>
               <div class="endpoint-desc" data-i18n="ep.skill">跨宿主 Agent Skill</div>
             </div>
-            <span class="endpoint-meta">4.3 KB · ~1096 tok</span>
+            <span class="endpoint-meta">5.7 KB · ~1466 tok</span>
           </div>
           <div class="endpoint-row">
             <div class="endpoint-main">

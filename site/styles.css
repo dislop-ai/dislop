@@ -845,6 +845,23 @@ html[lang^="zh"] .lead-heading {
   gap: 8px;
 }
 
+.workbench-scenario-hint {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: baseline;
+  padding: 8px 0 10px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.79rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.workbench-scenario-hint strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 .pack-select,
 .filter-select,
 .search-input {

@@ -1,4 +1,4 @@
-# Architecture (`v0.7.1`)
+# Architecture (`v0.8.0`)
 
 [简体中文](./architecture.zh-CN.md) · [Product Brief](../PRODUCT.md)
 
@@ -8,13 +8,14 @@
 
 ```text
 Layer 1: Open-Source Pure-Markdown Skill (`skills/dislop/SKILL.md` + `./references/*.md`, 0 scripts, 0 network)
-   └── Loads genre reference cards before drafting to prevent clichés, slogans, and template chrome
+   └── Loads genre reference cards + scenario strategy table before drafting to prevent clichés, slogans, and register drift
    │
    ▼
-Layer 2: Open-Source Local CLI & Editor Plugins (`< 250 KB` tarball, 7 packs + 14.6 KB Pocket ML bundled, 0 uploads)
-   ├── `dislop check [--pack <id|auto>] [--profile] [--ml] [--patterns]` -> AI artifacts + 6 vertical packs + 12 bank probes + stealth-vapor ML
-   ├── `dislop patterns`                                                 -> Multi-angle extended pattern-bank scanner across 6 dimensions
-   ├── `dislop voice`                                                    -> Deterministic offline personal style profile (`dislop.voice/1`)
+Layer 2: Open-Source Local CLI & Editor Plugins (`< 380 KB` tarball, 7 packs + 14.6 KB Pocket ML bundled, 0 uploads)
+   ├── `dislop check [--pack <id|auto>] [--register <name>] [--deep] [--format text|json|agent|sarif|github|md]` -> Scenario-calibrated findings + structured revision advice + 5-axis telemetry
+   ├── `dislop review`                                                   -> Opt-in BYOK or offline rubric review with quote grounding & injected scenario strategy
+   ├── `dislop verify`                                                   -> Protected fact ledger, keep terms, cadence guard, and spoken/formal register-drift checks
+   ├── `dislop patterns` / `voice` / `doctor`                            -> Extended pattern probes, personal style profile (`dislop.voice/1`), and zero-network setup audit
    └── (Existing `--mcp` and optional `dislop model` modules remain in-repo pending real-world evaluation)
    │
    ▼
@@ -28,15 +29,15 @@ Layer 3: Closed-Source Official Cloud MCP & Web Workbench (`https://dislop.com/m
 
 | Component | Path | Role |
 |---|---|---|
-| Shared JS Core | `src/core.mjs` | Pure ES module with zero `node:*` or DOM globals (`auditText`, `auditOoxmlEntries`, `auditImageDocument`, `auditPdfDocument`, `analyzeTextProfile`, `extractVoiceProfileOffline`); shared by CLI, MCP, and `site/` |
+| Shared JS Core | `src/core.mjs` | Pure ES module with zero `node:*` or DOM globals (`auditText`, `auditOoxmlEntries`, `auditImageDocument`, `auditPdfDocument`, `analyzeTextProfile`, `getScenarioStrategy`, `resolveRegister`, `verifyRevisionBundle`, `extractVoiceProfileOffline`); shared by CLI, MCP, and `site/` |
 | Extended Pattern Engine | `src/pattern-engine.mjs`, `src/dislop/pattern_engine.py`, `patterns/banks/*.json` | Multi-angle scanner executing 12 extended pattern-bank probes (`dislop patterns`, `dislop check --patterns`) with 100% Node/Python parity |
 | Bundled Pocket ML Suite | `models/pocket-slop-v1.json`, `src/pocket-model.mjs`, `src/dislop/pocket_model.py` | Zero-dependency de-lexicalized INT8 N-gram LM + calibrated 24-feature linear attribution + 45-tree shallow GBDT + 5-domain pack router (`14.6 KB` gzip / `49.0 KB` raw, `< 0.5 ms` offline, `100.0%` F1 / `0.0%` Clean FPR on `stealth-vapor-v1`) |
-| Hardware & Optional Local Models | `models/manifest.json`, `src/local-model.mjs`, `src/dislop/local_model.py` | Inspects RAM/disk budgets, manages optional `fast` (`0.6B`) / `balanced` (`1.7B`) / `quality` (`4B`) weights (`install` / SHA-256 `import` / `remove`), and runs loopback-only `deslop --local` with an internal numeric and qualifier retention guard during automated local rewrites |
-| Node Binary Reader | `src/binary-node.mjs` | Zero-dependency ZIP central-directory (`zlib.inflateRawSync`), PNG/JPEG/WebP/GIF, and PDF (`zlib.inflateSync`) binary parser for Node.js |
-| Node CLI & MCP | `bin/dislop.mjs`, `bin/dislop-mcp.mjs` | Offline CLI (`check [--pack <id|auto>] [--deep] [--compact] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|sarif|github|md] [--json]`, `verify`, `review`, `patterns`, `voice`, `model`, `setup`, `deslop --local`, `explain`, `packs`, `catalog`, `resources`, `pack-test`, `init`), layered user/project config (`~/.config/dislop/config.json` + `voice.json`), and 6-tool local stdio MCP (`dislop_check`, `dislop_verify`, `dislop_rules`, `dislop_voice_extract`, `dislop_model_score`, `dislop_model_status`, plus legacy aliases in `tools/call`); SARIF `helpUri`, `catalog` `anchorUrl`, and `--format github` link directly to language-matched `/rules/<id>/` or `/en/rules/<id>/` pages |
-| Python Core, CLI & MCP | `src/dislop/{engine,pattern_engine,pocket_model,local_model,cli,mcp_server}.py` | Pure Python 3.10+ stdlib implementation kept in lockstep via Python `unittest` conformance and engine suites (`test_conformance`, `test_engine`, `test_pattern_library`, `test_pocket_and_local_models`) |
+| Hardware & Optional Local Models | `models/manifest.json`, `src/local-model.mjs`, `src/dislop/local_model.py` | Inspects RAM/disk budgets, manages optional `fast` (`0.6B`) / `balanced` (`1.7B`) / `quality` (`4B`) weights (`install` / SHA-256 `import` / `remove`), and runs loopback-only `deslop --local` with scenario-aware prompts and fact/unit retention guards |
+| Node Binary Reader & BYOK Review | `src/binary-node.mjs`, `src/review-client.mjs` | Zero-dependency ZIP (`zlib.inflateRawSync`), PNG/JPEG/WebP/GIF (including LZW frame metrics), and PDF parsers, plus opt-in BYOK `dislop.review/1` client with secret scrubbing, quote grounding, and scenario strategies |
+| Node CLI & MCP | `bin/dislop.mjs`, `bin/dislop-mcp.mjs` | Strict-validated offline CLI (`check [--pack <id|auto>] [--register <name>] [--rule <ids>] [-q] [--deep] [--compact] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|agent|sarif|github|md]`, `verify [--register <name>]`, `review`, `doctor`, `patterns`, `voice`, `model`, `setup`, `deslop --local`, `explain`, `packs`, `catalog`, `resources`, `pack-test`, `init`), layered config (`~/.config/dislop/config.json` + `voice.json`), and local stdio MCP |
+| Python Core, CLI & MCP | `src/dislop/{engine,pattern_engine,pocket_model,local_model,review_client,cli,mcp_server}.py` | Pure Python 3.10+ stdlib implementation kept in lockstep via 66 Python `unittest` conformance, ergonomics, register, BYOK security, and engine parity tests |
 | Multi-Surface Manifests & Editor Bundles | `scripts/sync_manifests.mjs`, `plugin.json`, `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/`, `gemini-extension.json`, `integrations/{antigravity,vscode,orca,herdr,hooks}/`, `server.json`, `action.yml`, `.pre-commit-hooks.yaml` | Shared manifest generator and validator locking npm, PyPI, Official MCP Registry (`https://dislop.com/mcp`), Agent Plugins 1.0, Claude Code, Codex, Cursor, Antigravity, VS Code / Open VSX, and GitHub Action schemas |
-| Rule Manifests & Pattern Library | `packs/*/pack.json`, `patterns/dimensions/*.json`, `patterns/ai-tic-rubric.json` | 7 built-in `dislop.pack/2` manifests (`core`, `business-brief`, `engineering-spec`, `regulated-comms`, `literary-essay`, `deck-and-ui`, `executive-deck` — 53 active rules, 215 fixtures) backed by 65 structured patterns across 6 dimensions & 7 angles (`53` pack-mapped + `12` extended pattern-bank rules) and the 5-layer AI-tic rubric |
+| Rule Manifests & Pattern Library | `packs/*/pack.json`, `patterns/dimensions/*.json`, `patterns/ai-tic-rubric.json` | 7 built-in `dislop.pack/2` manifests (`core`, `business-brief`, `engineering-spec`, `regulated-comms`, `literary-essay`, `deck-and-ui`, `executive-deck` — 53 active rules, 230 fixtures with per-register overrides) backed by 65 structured patterns across 6 dimensions & 7 angles (`53` pack-mapped + `12` extended pattern-bank rules) and the 5-layer AI-tic rubric |
 | Hosted Cloud Backend & Remote MCP | Private `dislop-cloud` (`https://dislop.com/mcp`, `/api/v1/*`) | Closed-source hosted MCP v2 service exposing 10 tools (`dislop_check`, `dislop_verify`, `dislop_rules` at 0 credits without login; OAuth 2.1 or free `dslp_*` key for 30 free monthly credits on `dislop_review`, `dislop_deslop`, `dislop_office`, `dislop_visual_review`, `dislop_voice_extract`, `dislop_voice_manage`, `dislop_account`) backed by paid-tier Google Gemini API that does not train on user drafts |
 | Anti-Slop Benchmark (`dislop-bench v2` + `visual-design-v1`) | `benchmarks/`, `scripts/run_benchmark.mjs`, `scripts/run_visual_benchmark.mjs`, `scripts/pattern_lab.mjs` | 112 core detection samples + 154 multi-angle pattern samples + 60 visual/UI/SVG/image/PDF samples (`100.0%` P/R/F1, `0.0%` Clean FPR, `100.0%` Node/Python parity) + 18 end-to-end revision tasks (`D1=45 / D2=20 / D3=25 / D4=10`), `--eval`, and blind A/B sheet export |
 | Static Site Compiler & Content Layer | `scripts/build_site.mjs`, `scripts/lib/site_content.mjs`, `content/guides/*.md` | Zero-dependency compiler turning `src/core.mjs`, `packs/`, `skills/`, `content/guides/`, `docs/research/content-kb/sources.json`, `docs/brand*`, `ROADMAP*.md`, and `anti-slop-radar-index.json` into 119 static HTML pages (`/`, `/en/`, `/guides/`, `/en/guides/`, `/rules/`, `/en/rules/`, `/awesome/`, `/en/awesome/`), Atom feeds (`/feed.xml`, `/en/feed.xml`), JSON-LD `@graph`, reciprocal `hreflang`, explicit AI-search `robots.txt`, and `awesome/README*.md` |

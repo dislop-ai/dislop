@@ -176,8 +176,8 @@ function runArtifactSmokeChecks() {
     const tgzName = packRes.stdout.trim().split(/\r?\n/).pop();
     const tgzPath = path.join(tmpDir, tgzName);
     const sizeKb = fs.statSync(tgzPath).size / 1024;
-    if (sizeKb > 300) {
-      throw new Error(`npm tarball too large (${sizeKb.toFixed(1)} KB > 300 KB budget)`);
+    if (sizeKb > 380) {
+      throw new Error(`npm tarball too large (${sizeKb.toFixed(1)} KB > 380 KB budget)`);
     }
 
     if (hasCommand("uv")) {

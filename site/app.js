@@ -7,7 +7,9 @@ import {
   defaultPackForModality,
   detectModality,
   extractVoiceProfileOffline,
+  getScenarioStrategy,
   resolveEffectivePack,
+  resolveRegister,
 } from "./engine/core.mjs";
 import { auditPatterns } from "./engine/pattern-engine.mjs";
 import { PATTERN_BANKS } from "./engine/patterns-data.mjs";
@@ -126,6 +128,14 @@ const I18N = {
     "pack.exec": "管理汇报",
     "pack.essay": "随笔长文",
     "pack.ui": "PPT 和网页",
+    "wb.registerLabel": "语体：",
+    "reg.auto": "自动",
+    "reg.technical": "工程技术",
+    "reg.argumentative": "商业论证",
+    "reg.official": "公文合规",
+    "reg.narrative": "随笔叙事",
+    "reg.casual": "日常口语",
+    "reg.marketing": "宣传推广",
     "wb.openFile": "打开本地文件",
     "wb.specimensTitle": "示例",
     "wb.privacyNote": "本地检查在当前标签页完成。点下方云端按钮（审校、改写、提炼文风）并登录后，才会经我们的服务端发给付费版 Google Gemini 接口；Google 不拿它训练，我们不存草稿。",
@@ -422,6 +432,14 @@ const I18N = {
     "pack.exec": "Exec decks",
     "pack.essay": "Essays",
     "pack.ui": "Slides & UI",
+    "wb.registerLabel": "Register:",
+    "reg.auto": "Auto",
+    "reg.technical": "Technical",
+    "reg.argumentative": "Argumentative",
+    "reg.official": "Official",
+    "reg.narrative": "Narrative",
+    "reg.casual": "Casual",
+    "reg.marketing": "Marketing",
     "wb.openFile": "Open local file",
     "wb.specimensTitle": "Examples",
     "wb.privacyNote": "Local checks stay in this tab. Cloud buttons (review, rewrite, style extract) send your draft through our server to the paid Google Gemini API. Google does not train on it, and we do not store it.",
@@ -1513,6 +1531,7 @@ let currentText = activeSpecimen.bad;
 let currentFilename = activeSpecimen.filename;
 let currentModality = activeSpecimen.modality;
 let currentPackId = activeSpecimen.pack;
+let currentRegister = "auto";
 let lastResolvedPackInfo = { packId: activeSpecimen.pack, source: "specimen" };
 let viewMode = "proof";
 let focusedFindingIdx = -1;
@@ -1556,8 +1575,8 @@ function resolveWorkbenchPack(packSelection, text, modality) {
   return { packId: defaultPackForModality(modality || "markdown"), source: "auto-default" };
 }
 
-function collectUnifiedOfflineAudit(text, { filename, modality, packId, pack }) {
-  const baseRes = auditText(text, { filename, modality, pack });
+function collectUnifiedOfflineAudit(text, { filename, modality, packId, pack, register = null }) {
+  const baseRes = auditText(text, { filename, modality, pack, register });
   const rawFindings = withUtf16Spans(text, [...(baseRes.findings || [])]);
   const seenKeys = new Set(
     rawFindings.map((f) => `${f.ruleId}|${f.line || 1}|${String(f.match || "").slice(0, 32)}`)
@@ -1895,7 +1914,10 @@ function renderSpecimenRail() {
       baselineText = sp.bad;
       currentText = sp.bad;
       focusedFindingIdx = -1;
+      currentRegister = "auto";
       document.getElementById("pack-select").value = sp.pack;
+      const regSel = document.getElementById("register-select");
+      if (regSel) regSel.value = "auto";
       setViewMode("proof");
       updateSpecimenRailSelection();
       renderWorkbench();
@@ -2497,6 +2519,12 @@ function renderWorkbench() {
     : resolveWorkbenchPack(currentPackId, currentText, currentModality);
   lastResolvedPackInfo = packInfo;
   const pack = resolveEffectivePack(packInfo.packId, PACKS_BY_ID);
+  const regOverride = currentRegister && currentRegister !== "auto" ? currentRegister : null;
+  const regResolved = resolveRegister(binaryAuditResult ? "" : currentText || "", {
+    filename: currentFilename || "draft.md",
+    flagRegister: regOverride,
+  });
+  const strategy = getScenarioStrategy({ packId: packInfo.packId, register: regResolved.register });
   const t0 = performance.now();
   const auditRes = binaryAuditResult
     ? binaryAuditResult
@@ -2505,6 +2533,7 @@ function renderWorkbench() {
         modality: currentModality,
         packId: packInfo.packId,
         pack,
+        register: regOverride,
       });
   const elapsedMs = (performance.now() - t0).toFixed(1);
   const findings = auditRes.findings || [];
@@ -2525,6 +2554,14 @@ function renderWorkbench() {
   const docFileEl = document.getElementById("wb-doc-file");
   const docPackEl = document.getElementById("wb-doc-pack");
   const docStatsEl = document.getElementById("wb-doc-stats");
+  const scenarioHintEl = document.getElementById("wb-scenario-hint");
+  if (scenarioHintEl) {
+    const langTag = currentLang === "zh" ? "zh" : "en";
+    scenarioHintEl.innerHTML =
+      currentLang === "zh"
+        ? `<span><strong>当前策略 · ${escapeHtml(strategy.label[langTag])}</strong>：重点删 ${escapeHtml(strategy.cut[langTag])}</span><span><strong>保护</strong>：${escapeHtml(strategy.protect[langTag])}</span><span><strong>防改偏</strong>：${escapeHtml(strategy.avoid[langTag])}</span>`
+        : `<span><strong>Strategy · ${escapeHtml(strategy.label[langTag])}</strong>: Cut ${escapeHtml(strategy.cut[langTag])}</span><span><strong>Protect</strong>: ${escapeHtml(strategy.protect[langTag])}</span><span><strong>Avoid</strong>: ${escapeHtml(strategy.avoid[langTag])}</span>`;
+  }
 
   setViewMode(viewMode);
   const isCodeMod = UI_CODE_MODALITIES.has(currentModality);
@@ -2977,7 +3014,10 @@ function loadSpecimenById(specimenId) {
   baselineText = sp.bad;
   currentText = sp.bad;
   focusedFindingIdx = -1;
+  currentRegister = "auto";
   document.getElementById("pack-select").value = sp.pack;
+  const regSel = document.getElementById("register-select");
+  if (regSel) regSel.value = "auto";
   setViewMode("proof");
   updateSpecimenRailSelection();
   renderWorkbench();
@@ -3012,7 +3052,10 @@ function loadCaseIntoWorkbench(caseObj) {
     baselineText = badText;
     currentText = badText;
     focusedFindingIdx = -1;
+    currentRegister = "auto";
     document.getElementById("pack-select").value = "business-brief";
+    const regSel = document.getElementById("register-select");
+    if (regSel) regSel.value = "auto";
     setViewMode("proof");
     updateSpecimenRailSelection();
     renderWorkbench();
@@ -5527,7 +5570,8 @@ async function runCloudAction(kind) {
   const reqId = ++aiReqSeq;
   const sourceSnapshot = currentText;
   const localPack = resolveEffectivePack(currentPackId || "business-brief", PACKS_BY_ID);
-  const localBeforeCount = (auditText(sourceSnapshot, { filename: currentFilename || "draft.md", modality: currentModality || "markdown", pack: localPack }).findings || []).length;
+  const regOverride = currentRegister && currentRegister !== "auto" ? currentRegister : null;
+  const localBeforeCount = (auditText(sourceSnapshot, { filename: currentFilename || "draft.md", modality: currentModality || "markdown", pack: localPack, register: regOverride }).findings || []).length;
 
   setAiButtonsBusy(
     true,
@@ -5549,6 +5593,7 @@ async function runCloudAction(kind) {
           pack: currentPackId || "business-brief",
           lang: currentLang === "zh" ? "zh" : "en",
           source: getEntrySource(),
+          ...(regOverride ? { register: regOverride } : {}),
           ...(savedVoice ? { voiceProfile: savedVoice } : {}),
         },
       })
@@ -6066,6 +6111,18 @@ function init() {
     }
   });
 
+  const regSelectEl = document.getElementById("register-select");
+  if (regSelectEl) {
+    regSelectEl.addEventListener("change", async (e) => {
+      currentRegister = e.target.value || "auto";
+      if (lastUploadedFile && binaryAuditResult) {
+        await handleUploadedFile(lastUploadedFile, false);
+      } else {
+        renderWorkbench();
+      }
+    });
+  }
+
   document.getElementById("mode-proof-btn").addEventListener("click", () => {
     if (customRuleTitle === "user-draft" && !baselineText && currentText.trim()) {
       baselineText = currentText;
@@ -6255,7 +6312,8 @@ function init() {
               : "Missing or invalid ppt/presentation.xml or slide XML inside archive"
           );
         }
-        const res = auditOoxmlEntries(entries, { filename: file.name, modality: mod, pack });
+        const regOverride = currentRegister && currentRegister !== "auto" ? currentRegister : null;
+        const res = auditOoxmlEntries(entries, { filename: file.name, modality: mod, pack, register: regOverride });
         const slideCount = Object.keys(entries).filter((k) => /^ppt\/slides\/slide\d+\.xml$/i.test(k)).length;
         nextBinaryResult = {
           ...res,
@@ -6299,7 +6357,8 @@ function init() {
       } else if (mod === "pdf") {
         const buf = await file.arrayBuffer();
         const parsedPdf = await parseBrowserPdfBuffer(buf);
-        const res = auditPdfDocument(parsedPdf, { filename: file.name, pack });
+        const regOverride = currentRegister && currentRegister !== "auto" ? currentRegister : null;
+        const res = auditPdfDocument(parsedPdf, { filename: file.name, pack, register: regOverride });
         nextBinaryResult = {
           ...res,
           coverageWarnings: res.coverageWarnings || [],

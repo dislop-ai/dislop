@@ -68,12 +68,13 @@ npx --yes dislop check --changed origin/main --format github
 <summary>More CLI commands (deep checks, review, verify, personal style, Python)</summary>
 
 ```bash
-# Deep inspection (auto-routed pack + rhythm stats + lightweight local model + pattern banks, compact JSON)
-npx --yes dislop check draft.md --pack auto --deep --profile --compact --json
+# Deep inspection (auto-routed pack + scenario register + rhythm stats + Pocket ML + pattern banks, compact JSON)
+npx --yes dislop check draft.md --pack auto --register argumentative --deep --profile --compact --json
 
-# Multi-signal review, git anti-degradation check, and offline personal style card
-npx --yes dislop review draft.md
-npx --yes dislop verify --git HEAD draft.md
+# Multi-signal BYOK review, scenario-aware anti-degradation check, three-layer doctor, and offline voice card
+npx --yes dislop review draft.md --register casual
+npx --yes dislop verify --git HEAD draft.md --register casual
+npx --yes dislop doctor
 npx --yes dislop voice my-notes.md
 
 # Python 3.10+ (PyPI, zero dependencies)

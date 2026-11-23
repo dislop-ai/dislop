@@ -1,4 +1,4 @@
-# 系统架构说明（`v0.7.1`）
+# 系统架构说明（`v0.8.0`）
 
 [English](./architecture.md) · [产品定义](../PRODUCT.md)
 
@@ -8,13 +8,14 @@
 
 ```text
 第 1 层：开源纯文档 Skill（`skills/dislop/SKILL.md` + `./references/*.md`，不含脚本，0 联网）
-   └── 按文体加载避坑参考卡，动笔前先避开套词、口号与默认模板
+   └── 按文体与写作场景策略加载避坑参考卡，动笔前先避开套词、口号与过度润色漂移
    │
    ▼
-第 2 层：开源本地 CLI 与编辑器插件（`< 250 KB` 压缩包，零依赖内置 7 套规则包 + 14.6 KB 传统集成模型，0 上传）
-   ├── `dislop check [--pack <id|auto>] [--profile] [--ml] [--patterns]` -> AI 硬伤 + 6 套场景包 + 12 条模式库探针 + 隐蔽温吞水模型检查
-   ├── `dislop patterns`                                                 -> 6 维度多角度扩展模式库扫描
-   ├── `dislop voice`                                                    -> 本地确定性提取个人句长与标点文风（`dislop.voice/1`）
+第 2 层：开源本地 CLI 与编辑器插件（`< 380 KB` 压缩包，零依赖内置 7 套规则包 + 14.6 KB 传统集成模型，0 上传）
+   ├── `dislop check [--pack <id|auto>] [--register <name>] [--deep] [--format text|json|agent|sarif|github|md]` -> 分场景校准命中 + 结构化改法提示 + 5 轴节奏体检
+   ├── `dislop review`                                                   -> 显式授权的自备密钥 / 本地回环或离线多维审校（带场景策略与原文引用锁）
+   ├── `dislop verify`                                                   -> 事实账本、关键术语、节奏起伏与口语/书面语域防漂移核验
+   ├── `dislop patterns` / `voice` / `doctor`                            -> 6 维度模式库扫描、个人文风提取（`dislop.voice/1`）与零联网接入体检
    └── （注：仓内保留既有 `--mcp` 与 `dislop model` 选装模块，待真实语料盲评后再定保留范围）
    │
    ▼
@@ -28,15 +29,15 @@
 
 | 模块 | 路径 | 职责 |
 |---|---|---|
-| JS 共享核心 | `src/core.mjs` | 纯标准 ES 模块（零 `node:*` 与 DOM 依赖，含 `auditText`、`auditOoxmlEntries`、`auditImageDocument`、`auditPdfDocument`、`analyzeTextProfile`、`extractVoiceProfileOffline`），由 Node CLI、MCP 与浏览器工作台直接共用 |
+| JS 共享核心 | `src/core.mjs` | 纯标准 ES 模块（零 `node:*` 与 DOM 依赖，含 `auditText`、`auditOoxmlEntries`、`auditImageDocument`、`auditPdfDocument`、`analyzeTextProfile`、`getScenarioStrategy`、`resolveRegister`、`verifyRevisionBundle`、`extractVoiceProfileOffline`），由 Node CLI、MCP 与浏览器工作台直接共用 |
 | 扩展模式库引擎 | `src/pattern-engine.mjs`, `src/dislop/pattern_engine.py`, `patterns/banks/*.json` | 多角度执行 12 条扩展模式库探针（`dislop patterns`、`dislop check --patterns`），Node 与 Python 100% 一致 |
 | 随包内置传统集成模型 | `models/pocket-slop-v1.json`, `src/pocket-model.mjs`, `src/dislop/pocket_model.py` | 零依赖去词面化 INT8 N-gram 语言模型 + 24 维线性归因 + 45 棵浅层梯度提升树 + 5 场景自动路由（`14.6 KB` gzip / 原始 `49.0 KB`，离线 `< 0.5 ms`，在 `stealth-vapor-v1` 上 F1 `100.0%`、干净误报 `0.0%`） |
-| 硬件探测与选装小模型管理 | `models/manifest.json`, `src/local-model.mjs`, `src/dislop/local_model.py` | 检测本机内存与磁盘预算，按需选装 `fast`（`0.6B`）/ `balanced`（`1.7B`）/ `quality`（`4B`）权重（支持 `install`、离线 SHA-256 `import`、`remove`），并在本地自动改写 `deslop --local` 中内置数字与限定词核对 |
-| Node 二进制解析层 | `src/binary-node.mjs` | 基于标准库 `zlib` 解析 `.docx`/`.pptx` ZIP 中央目录、`.png`/`.jpg`/`.webp`/`.gif` 元数据与像素指标，以及 `.pdf` 页面版式与 AI 残留 |
-| Node CLI 与 MCP | `bin/dislop.mjs`, `bin/dislop-mcp.mjs` | 离线命令行（`check [--pack <id|auto>] [--deep] [--compact] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|sarif|github|md] [--json]`、`verify`、`review`、`patterns`、`voice`、`model`、`setup`、`deslop --local`、`explain`、`packs`、`catalog`、`resources`、`pack-test`、`init`）、用户级与项目级配置链（`~/.config/dislop/config.json` + `voice.json`）及 6 工具本地 stdio MCP（`dislop_check`、`dislop_verify`、`dislop_rules`、`dislop_voice_extract`、`dislop_model_score`、`dislop_model_status`，`tools/call` 兼容旧别名）；SARIF `helpUri`、`catalog` `anchorUrl` 与 `--format github` 注解统一指向按语种分流的 `/rules/<id>/` 或 `/en/rules/<id>/` |
-| Python 核心与接口 | `src/dislop/{engine,pattern_engine,pocket_model,local_model,cli,mcp_server}.py` | 纯 Python 3.10+ 标准库实现，通过 4 个测试模块 Python `unittest`（`test_conformance`、`test_engine`、`test_pattern_library`、`test_pocket_and_local_models`）与 Node 保持一致 |
+| 硬件探测与选装小模型管理 | `models/manifest.json`, `src/local-model.mjs`, `src/dislop/local_model.py` | 检测本机内存与磁盘预算，按需选装 `fast`（`0.6B`）/ `balanced`（`1.7B`）/ `quality`（`4B`）权重（支持 `install`、离线 SHA-256 `import`、`remove`），并在本地自动改写 `deslop --local` 中内置分场景策略、数字与限定词核对 |
+| Node 二进制解析与 BYOK 客户端 | `src/binary-node.mjs`, `src/review-client.mjs` | 基于标准库 `zlib` 解析 `.docx`/`.pptx` ZIP、`.png`/`.jpg`/`.webp`/`.gif`（含 LZW 首帧像素统计）及 `.pdf` 版式，并提供零外部依赖 `dislop.review/1` 自备密钥审校与脱敏引用核验 |
+| Node CLI 与 MCP | `bin/dislop.mjs`, `bin/dislop-mcp.mjs` | 严格参数校验命令行（`check [--pack <id|auto>] [--register <name>] [--rule <ids>] [-q] [--deep] [--compact] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|agent|sarif|github|md]`、`verify [--register <name>]`、`review`、`doctor`、`patterns`、`voice`、`model`、`setup`、`deslop --local`、`explain`、`packs`、`catalog`、`resources`、`pack-test`、`init`）、用户级与项目级配置链（`~/.config/dislop/config.json` + `voice.json`）及本地 stdio MCP |
+| Python 核心与接口 | `src/dislop/{engine,pattern_engine,pocket_model,local_model,review_client,cli,mcp_server}.py` | 纯 Python 3.10+ 标准库实现，通过 66 项 Python `unittest`（一致性、CLI 参数、语体与修订校验、BYOK 安全与引擎单测）与 Node 保持一致 |
 | 多平台清单与编辑器集成 | `scripts/sync_manifests.mjs`, `plugin.json`, `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/`, `gemini-extension.json`, `integrations/{antigravity,vscode,orca,herdr,hooks}/`, `server.json`, `action.yml`, `.pre-commit-hooks.yaml` | 由同一份元数据配置生成并校验 npm、PyPI、Official MCP Registry（`https://dislop.com/mcp`）、Agent Plugins 1.0、Claude Code、Codex、Cursor、Antigravity、VS Code / Open VSX 与 GitHub Action 清单，消除跨市场版本与 Schema 漂移 |
-| 规则包与反模式库 | `packs/*/pack.json`, `patterns/dimensions/*.json`, `patterns/ai-tic-rubric.json` | 7 套内置 `dislop.pack/2` 规则包（`core`、`business-brief`、`engineering-spec`、`regulated-comms`、`literary-essay`、`deck-and-ui`、`executive-deck`，共 53 条活跃规则、215 项正反样本断言）、6 维度 7 角度 65 条结构化反模式库（53 条规则映射 + 12 条扩展模式库规则）与五层 AI 口癖交叉准则 |
+| 规则包与反模式库 | `packs/*/pack.json`, `patterns/dimensions/*.json`, `patterns/ai-tic-rubric.json` | 7 套内置 `dislop.pack/2` 规则包（`core`、`business-brief`、`engineering-spec`、`regulated-comms`、`literary-essay`、`deck-and-ui`、`executive-deck`，共 53 条活跃规则、230 项正反样本与分场景语体断言）、6 维度 7 角度 65 条结构化反模式库（53 条规则映射 + 12 条扩展模式库规则）与五层 AI 口癖交叉准则 |
 | 官方托管云端与远程 MCP | 独立闭源 `dislop-cloud`（`https://dislop.com/mcp`、`/api/v1/*`） | 闭源托管 MCP v2 服务，提供 10 个工具（`dislop_check`、`dislop_verify`、`dislop_rules` 免登录 0 额度；OAuth 2.1 或免费 `dslp_*` 密钥每月 30 额度，用于 `dislop_review`、`dislop_deslop`、`dislop_office`、`dislop_visual_review`、`dislop_voice_extract`、`dislop_voice_manage`、`dislop_account`），后端调用付费版 Google Gemini 接口且不拿稿子训练 |
 | 离线效果基准评测（`dislop-bench v2`） | `benchmarks/`、`scripts/run_benchmark.mjs`、`scripts/run_visual_benchmark.mjs`、`scripts/pattern_lab.mjs`、`scripts/run_text_paradigm_experiments.py` | 112 份核心检测样本 + 154 份多角度反模式样本 + `visual-design-v1` 60 份视觉设计样本（Node/Python 一致率 `100.0%`）+ 18 组端到端改稿任务（`D1=45 / D2=20 / D3=25 / D4=10`）、`--eval` 与盲评表导出 |
 | 官网静态编译器与内容层 | `scripts/build_site.mjs`, `scripts/lib/site_content.mjs`, `content/guides/*.md` | 零依赖编译器，将 `src/core.mjs`、`packs/`、`skills/`、`content/guides/`、`docs/research/content-kb/sources.json`、`docs/brand*`、`ROADMAP*.md` 与 `anti-slop-radar-index.json` 同源编译为 119 个静态 HTML 页面（`/`、`/en/`、`/guides/`、`/en/guides/`、`/rules/`、`/en/rules/`、`/awesome/`、`/en/awesome/`）、Atom 订阅（`/feed.xml`、`/en/feed.xml`）、JSON-LD `@graph`、双向 `hreflang`、显式放行 AI 检索爬虫的 `robots.txt` 及 `awesome/README*.md` |

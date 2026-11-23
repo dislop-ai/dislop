@@ -54,6 +54,8 @@ export const PACKS_BY_ID = {
           "en": "Cut everything up to 'that' or the comma. Does the remaining clause already state the full observation or constraint?",
           "zh": "删掉前半句铺垫壳，看剩下的主干是否已经完整表达了事实或限制条件。"
         },
+        "revisionKind": "delete",
+        "revisionScope": "span",
         "exemplar": {
           "bad": "It is worth noting that CSV exports take up to 12 minutes for workspaces above 500,000 rows.",
           "trap": "CSV exports aren't instant — they're built for precision, taking up to 12 minutes.",
@@ -142,6 +144,25 @@ export const PACKS_BY_ID = {
           "en": "Ask 'who changed what, by how much, under what constraint?' and delete the abstract wrapper.",
           "zh": "追问“谁对什么做了哪项改动、指标变了多少”，删掉抽象包装词。"
         },
+        "revisionKind": "rewrite",
+        "revisionScope": "span",
+        "registerOverrides": {
+          "official": {
+            "severity": "info",
+            "message": {
+              "en": "Official register permits institutional phrasing, but replacing vague buzzwords with concrete actions and owners makes the notice clearer.",
+              "zh": "公文语体允许规范用语，但把抽象汇报套词换成具体动作、责任主体与指标会更扎实。"
+            },
+            "deletionTest": {
+              "en": "Keep the clause only if the actor, action, and scope or target metric are stated explicitly.",
+              "zh": "仅当句内或下文写清执行主体、具体动作与范围/指标时保留，否则改为直接动作描述。"
+            },
+            "revisionAvoid": {
+              "en": "Do not leave empty institutional buzzwords unsupported; name the concrete actor, action, or metric.",
+              "zh": "不要只留空洞公文套词，应在句内或下文补出具体执行主体、动作与指标。"
+            }
+          }
+        },
         "exemplar": {
           "bad": "值得注意的是，本次改造以工单分级为重要抓手，全面赋能一线客服团队形成服务闭环，将首响时间压缩至 45 秒内。",
           "trap": "这不是一次工单改造，而是客服体验的底气：首响压缩至 45 秒内。",
@@ -176,6 +197,19 @@ export const PACKS_BY_ID = {
         "deletionTest": {
           "en": "Delete the negated first half ('Not X,'). If the remaining clause ('Y') holds no measurement, mechanism, or real correction, rewrite or cut the whole sentence.",
           "zh": "删掉前半句否定铺垫，只看“而是 B”。如果 B 没有数值、机制或真实纠偏信息，整句删改。"
+        },
+        "registerOverrides": {
+          "argumentative": {
+            "severity": "info",
+            "message": {
+              "en": "Dialectic 'Not X, but Y' contrast is a valid rhetorical move in argumentative writing; keep it if Y carries a real premise or bound, not an empty slogan.",
+              "zh": "议论文中“不是 A，而是 B”常用于立论辨析；只要 B 给出真实前提、界定或论据即可保留，仅删空洞口号式对仗。"
+            },
+            "deletionTest": {
+              "en": "Check whether clause B states an explicit premise, boundary, or piece of evidence rather than a vague slogan.",
+              "zh": "确认“而是 B”是否给出了明确前提、概念边界或事实论据，而非拔高口号。"
+            }
+          }
         },
         "exemplar": {
           "bad": "这不是一款简单的文档检查工具，而是交付质量的底气。",
@@ -212,6 +246,22 @@ export const PACKS_BY_ID = {
           "en": "Combine the fragments into one factual sentence naming the cause and effect, or cut purely decorative rhythm beats.",
           "zh": "把零碎口号合并为一句交代因果与边界的完整陈述，删去纯节奏铺陈。"
         },
+        "registerOverrides": {
+          "marketing": {
+            "severity": "info",
+            "message": {
+              "en": "Short cadence bursts can work in punchy launch copy, but pair them with concrete product details rather than stacking vague slogans.",
+              "zh": "营销短文案可用短句制造节奏，但建议在下一句紧接具体功能或数字，避免整段只剩抽象口号。"
+            }
+          },
+          "narrative": {
+            "severity": "info",
+            "message": {
+              "en": "Short dramatic fragments can be intentional pacing in narrative prose; keep only when they carry concrete sensory beats.",
+              "zh": "叙事长文中短句断奏有时用于收紧节奏；确认每句都有具体动作或画面感，否则合并为自然长短句。"
+            }
+          }
+        },
         "exemplar": {
           "bad": "Signals drop. Photos vanish. Audits stall. Offline sync keeps all 120 inspection photos queued locally.",
           "trap": "Offline sync isn't a fallback — it's field resilience for 120 photos.",
@@ -246,6 +296,21 @@ export const PACKS_BY_ID = {
         "deletionTest": {
           "en": "Delete all three adjectives; keep only claims backed by a number, failure mode, or configuration option.",
           "zh": "删掉整组四字形容词，只保留有数字、故障边界或配置项支撑的具体事实。"
+        },
+        "revisionKind": "rewrite",
+        "revisionScope": "span",
+        "registerOverrides": {
+          "official": {
+            "severity": "info",
+            "message": {
+              "en": "Official register tolerates summarizing four-character phrases, though backing them with concrete targets strengthens the brief.",
+              "zh": "公文语体常见四字总结词组，但在方案中补出具体分工或指标更有说服力。"
+            },
+            "deletionTest": {
+              "en": "Verify that each summarizing four-character phrase maps to an explicit owner, metric, or deliverable in the same section.",
+              "zh": "确认每组四字总结都有同节的具体责任人、指标或交付物对应，避免空洞堆砌。"
+            }
+          }
         },
         "exemplar": {
           "bad": "新版网关具备精准高效、安全可靠、灵活易用的特性，单节点支持 8,000 QPS。",
@@ -419,6 +484,15 @@ export const PACKS_BY_ID = {
           "en": "Delete the staged question and state the cause-and-effect directly in one sentence.",
           "zh": "删掉摆拍式设问，直接在一句话里写出原因与结果。"
         },
+        "registerOverrides": {
+          "casual": {
+            "severity": "info",
+            "message": {
+              "en": "Conversational Q&A cadences fit informal notes when the answer gives concrete facts instead of sales hooks.",
+              "zh": "随笔或口语化笔记中可以用一问一答衔接，但回答部分仍应给出真实理由或细节，不做营销摆拍。"
+            }
+          }
+        },
         "exemplar": {
           "bad": "Why do internal dashboards collect dust after launch? Because they show vanity totals instead of next actions. The result? Teams export CSVs every Monday.",
           "trap": "Dashboards fail. Numbers pile up. Teams export CSVs.",
@@ -521,6 +595,22 @@ export const PACKS_BY_ID = {
           "en": "Merge related points into natural prose with varied openings, or use a compact table if you are listing parallel specs.",
           "zh": "把同构段落按因果或主次合并成自然段并变化句首；若是并列参数对照，直接改成简洁表格。"
         },
+        "registerOverrides": {
+          "technical": {
+            "action": "skip"
+          },
+          "casual": {
+            "severity": "info",
+            "message": {
+              "en": "Several personal/shop items open with the same phrase. Fixed recurring policy or origin lines are normal; only vary them if they feel machine-padded.",
+              "zh": "多条个人/闲置文案句首重复；若是固定交易规则或个人口头禅，保留原话即可，不必为了去重强行换词。"
+            },
+            "deletionTest": {
+              "en": "Keep recurring personal policy lines intact unless filler fluff was padded around them; never inflate spoken wording into stiff bookish synonyms.",
+              "zh": "固定交易或个人口头禅保持原样即可，绝不为了换写法把口语改成“仅出/旨在”等生硬书面词。"
+            }
+          }
+        },
         "exemplar": {
           "bad": "在数据采集方面，系统接入了业务日志。\n\n在模型训练方面，团队定期更新权重。\n\n在结果应用方面，业务方通过看板查看波动。",
           "trap": "采数据。训模型。看看板。",
@@ -552,6 +642,22 @@ export const PACKS_BY_ID = {
         "deletionTest": {
           "en": "Cut abstract summary sentences in half, vary sentence length naturally, and anchor every kept claim with a number, file, date, or concrete failure mode.",
           "zh": "砍掉一半抽象概括句，拉开长短句节奏，并为保留的每条判断补上数字、文件、时间或真实边界。"
+        },
+        "registerOverrides": {
+          "technical": {
+            "action": "skip"
+          },
+          "official": {
+            "severity": "info",
+            "message": {
+              "en": "Formal notice sentences are uniform in length without concrete identifiers; keep institutional structure intact, but add real document IDs, dates, or deadlines where a statement is purely abstract.",
+              "zh": "正式公文或通告句幅整齐偏抽象；应保留规范行文结构，仅对全无文号、日期或负责主体的空泛句子补实信息。"
+            },
+            "deletionTest": {
+              "en": "Add the missing clause reference, date, or accountable party while preserving formal notice tone.",
+              "zh": "仅补充缺失的文号、日期或责任主体，不破坏正式行文口气。"
+            }
+          }
         },
         "exemplar": {
           "bad": "该方案注重用户体验的全面改善。系统架构保持了良好的扩展能力。团队协作形成了清晰的责任分工。日常运维建立了规范的处理流程。产品迭代围绕核心需求稳步推进。业务指标呈现出健康的增长态势。",
@@ -802,7 +908,9 @@ export const PACKS_BY_ID = {
         "patterns": [
           "(?:^|\\n)\\s*(?:Certainly|Sure|Absolutely|Of course|Happy to help|Glad to help)[!,.]?\\s+(?:[Hh]ere(?:'s| is| are)|[Bb]elow is)\\b",
           "(?:^|\\n)\\s*Here\\s+(?:is|are)\\s+the\\s+(?:revised|updated|polished)\\s+",
-          "\\bAs an AI(?: language model| assistant)?\\b",
+          "(?:^|\\n|[.!?]\\s+)\\s*As an AI(?:\\s+(?:language model|assistant))?(?:\\s*,|\\s+(?:I|we|my|here)\\b|\\s*$)",
+          "\\bAs an AI (?:language model|assistant)\\b",
+          "\\bAs an AI\\s*,\\s*(?:I|we|my)\\b",
           "\\bI hope this helps[!.]?",
           "\\bFeel free to (?:reach out|let me know|ask) if you (?:need|have) (?:anything|any (?:other |further )?questions)[!.]?",
           "(?:^|\\n)\\s*(?:好的|当然可以|没问题)[，,！!]?\\s*(?:以下|下面)是",
@@ -1739,6 +1847,19 @@ export const PACKS_BY_ID = {
         "deletionTest": {
           "en": "Replace the abstract contrast with what the person actually did, said, or noticed.",
           "zh": "删掉抽象对比金句，改写人物实际做出的动作或看到的细节。"
+        },
+        "registerOverrides": {
+          "argumentative": {
+            "severity": "info",
+            "message": {
+              "en": "Dialectic 'Not X, but Y' contrast is a valid rhetorical move in argumentative writing; keep it if Y carries a real premise or bound, not an empty slogan.",
+              "zh": "议论文中“不是 A，而是 B”常用于立论辨析；只要 B 给出真实前提、界定或论据即可保留，仅删空洞口号式对仗。"
+            },
+            "deletionTest": {
+              "en": "Check whether clause B states an explicit premise, boundary, or piece of evidence rather than a vague slogan.",
+              "zh": "确认“而是 B”是否给出了明确前提、概念边界或事实论据，而非拔高口号。"
+            }
+          }
         },
         "exemplar": {
           "bad": "老周留下的那把旧刨子不是工具，而是手艺人的尊严。",
