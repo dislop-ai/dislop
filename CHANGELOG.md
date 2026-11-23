@@ -4,6 +4,10 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+- Added `review --interactive-apply` and `apply --review-file … --source-file …` to the Node and Python CLIs. The Vim picker and saved JSON reviews support selective edits to UTF-8 source files.
+
 ## [0.8.1] - 2026-11-23
 
 ### Fixed

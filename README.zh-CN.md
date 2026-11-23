@@ -85,6 +85,18 @@ pip install dislop && dislop check . --lang zh
   <img src="./assets/demos/cli-check-zh-v2.gif" alt="dislop CLI 本地离线检查：原稿退出码 1 与清理后退出码 0" width="840">
 </p>
 
+### 逐条采用审校建议
+
+可以在终端里用 Vim 查看原句和改写，也可以先保存审校结果，再按编号修改原文件。
+
+```sh
+dislop review draft.md --offline --interactive-apply
+dislop review draft.md --offline --json > review.json
+dislop apply --review-file review.json --source-file draft.md --include 2,5
+```
+
+编号取自报告中的 `edit.id`。要采用除第 3 条以外的所有可执行修改，用 `--all --exclude 3`。在 Vim 中按 `j`、`k` 或方向键切换，按 `y` 采纳，按 `n` 跳过。回车一次写入已选修改，按 `q` 放弃本次选择。需要补充来源或由作者判断的建议可在界面中查阅。批量修改无需安装 Vim。两种方式都适用于 Markdown、HTML 等受支持的 UTF-8 文本文件。原文有改动时，请重新生成审校报告。
+
 ## AI 残留硬伤和套话提醒分开查
 
 很多自动“去 AI 味”改写工具容易把旧套话换成另一种腔调，或者把你的语气全洗成同一种模版。单纯用黑名单也有毛病，容易误伤正常句子（比如「抓手机拍照」「北京大学、清华大学、复旦大学」）。

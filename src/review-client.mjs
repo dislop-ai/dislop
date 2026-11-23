@@ -354,7 +354,7 @@ export function buildReviewPrompt({
     "Do NOT output a full rewrite of the document.",
     langDirective,
     "Return ONLY valid JSON matching this exact schema (no markdown fences):",
-    '{"aiFlavorLevel":"low|medium|high","summary":"1-2 sentence plain summary","issues":[{"category":"framing|cliche|structure|evidence|rhythm","severity":"warning|info","quote":"exact verbatim substring from the draft","why":"specific defect explanation","fix":"concrete edit suggestion preserving facts"}]}',
+    '{"aiFlavorLevel":"low|medium|high","summary":"1-2 sentence plain summary","issues":[{"category":"framing|cliche|structure|evidence|rhythm","severity":"warning|info","quote":"exact verbatim substring from the draft","why":"specific defect explanation","fix":"concrete edit suggestion preserving facts","replacement":"optional literal replacement in the original language; empty string for intentional deletion; omit when advice requires judgment"}]}',
   ].join("\n");
 
   const userPrompt = [
@@ -572,7 +572,16 @@ export function validateAndNormalizeReviewResponse({
     const delObj = fix ? { en: fix, zh: fix } : { en: why, zh: why };
     const fp = `${ruleId}:${fnv1aHex(`${ruleId}|${clipMatch.toLowerCase()}|${line}:${col}`)}`;
 
+    // Normalized quotes are enough for advice. Writes need one exact occurrence in the reviewed chunk.
+    const index = chunkText.indexOf(quote);
+    const after = item.replacement;
+    let edit;
+    if (typeof after === "string" && index >= 0 && index === chunkText.lastIndexOf(quote) &&
+        safeQuote === quote && scrubSecrets(after, redactSecrets) === after) {
+      edit = { start: codepointCount(fullText.slice(0, chunkStartOffset + index)), before: quote, after };
+    }
     findings.push({
+      ...(edit ? { edit } : {}),
       fingerprint: fp,
       ruleId,
       tier: "taste",

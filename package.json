@@ -64,6 +64,8 @@
     "bin/",
     "src/core.mjs",
     "src/review-client.mjs",
+    "src/review-apply.mjs",
+    "src/dislop/review-picker.vim",
     "src/pattern-engine.mjs",
     "src/pocket-model.mjs",
     "src/local-model.mjs",

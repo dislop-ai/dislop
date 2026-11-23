@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -106,6 +107,7 @@ class _MockReviewServer:
                                 "quote": quote,
                                 "why": "Stock promotional phrase lacks verifiable measurement.",
                                 "fix": "State the actual latency delta without hype adjectives.",
+                                **({"replacement": "tool for telemetry"} if parent.mode == "edits" else {}),
                             },
                             {
                                 "category": "framing",
@@ -144,6 +146,152 @@ class _MockReviewServer:
 
 
 class ReviewAndDoctorTests(unittest.TestCase):
+    def test_saved_review_apply_cross_runtime(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            source = root / "notes.md"
+            report_file = root / "report.json"
+            original = "\ufeff😀\r\nCertainly! Here is one.\r\n\r\nCertainly! Here is two.\r\n"
+            apply = ["apply", "--source-file", source.name, "--review-file", report_file.name]
+            for reviewer, writer in ((run_node, run_py), (run_py, run_node)):
+                with self.subTest(reviewer=reviewer.__name__):
+                    source.write_bytes(original.encode())
+                    source.chmod(0o640)
+                    review = reviewer(["review", source.name, "--offline", "--json"], cwd=root)
+                    self.assertEqual(review.returncode, 0, review.stderr)
+                    report_file.write_text(review.stdout, encoding="utf-8")
+                    edits = [item["edit"] for item in json.loads(review.stdout)["issues"] if "edit" in item]
+                    self.assertEqual([edit["id"] for edit in edits], [1, 2])
+                    for selection in (["--include", "2"], ["--all", "--exclude", "1"]):
+                        source.write_bytes(original.encode())
+                        result = writer([*apply, *selection], cwd=root)
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                        self.assertEqual(source.read_bytes(), original.replace("Certainly! Here is two", " two").encode())
+                        self.assertEqual(source.stat().st_mode & 0o777, 0o640)
+                        retry = writer([*apply, *selection], cwd=root)
+                        self.assertEqual(retry.returncode, 2)
+                        self.assertIn("differs", retry.stderr)
+
+    def test_apply_refuses_invalid_selection_before_writing(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            source = root / "notes.md"
+            original = "Certainly! Here is the update.\n\nIt is worth noting that the update ships today.\n"
+            source.write_bytes(original.encode())
+            report = json.loads(run_node(["review", source.name, "--offline", "--json"], cwd=root).stdout)
+            saved = root / "review.json"
+            for fn in (run_py, run_node):
+                args = ["apply", "--review-file", saved.name, "--source-file", source.name]
+                saved.write_text(json.dumps(report), encoding="utf-8")
+                for selection in ([], ["--include", "2"], ["--include", "99"], ["--exclude", "1"],
+                                  ["--all", "--include", "1"], ["--include", "1,,2"]):
+                    self.assertEqual(fn([*args, *selection], cwd=root).returncode, 2, selection)
+                    self.assertEqual(source.read_bytes(), original.encode())
+                for extra, error in ((dict(report["issues"][0]["edit"], id=2), "overlapping"),
+                                     (dict(report["issues"][0]["edit"], id=2, start=12), "mismatch")):
+                    bad = dict(report, issues=[report["issues"][0], {"edit": extra}])
+                    saved.write_text(json.dumps(bad), encoding="utf-8")
+                    result = fn([*args, "--all"], cwd=root)
+                    self.assertEqual(result.returncode, 2)
+                    self.assertIn(error, result.stderr)
+                    self.assertEqual(source.read_bytes(), original.encode())
+                del_digest = dict(report)
+                del del_digest["sourceSha256"]
+                saved.write_text(json.dumps(del_digest), encoding="utf-8")
+                self.assertEqual(fn([*args, "--all"], cwd=root).returncode, 2)
+                self.assertEqual(fn(["review", source.name, "--offline", "--interactive-apply"], cwd=root).returncode, 2)
+                self.assertEqual(source.read_bytes(), original.encode())
+
+    @unittest.skipUnless(shutil.which("vim"), "Vim is optional")
+    def test_picker_revisit_confirm_and_cancel(self) -> None:
+        # Use real Vim mappings in Ex mode so the test also works without a TTY.
+        script = REPO_ROOT / "src" / "dislop" / "review-picker.vim"
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rows = [
+                dict(id=1, why="Trim opener.", before="Note: ", after="", prefix="", suffix="Done."),
+                dict(id=2, why="Provide a citation.", quote="Reported.", advice="Ask the author."),
+                dict(id=3, why="Trim filler.", before="Clearly ", after="", prefix="", suffix="ready."),
+            ]
+            (root / "items.json").write_text(json.dumps(rows), encoding="utf-8")
+            for keys, expected in ((r"yyykkn\<CR>", [3]), ("yq", None), (r"\<CR>", [])):
+                result = subprocess.run(
+                    ["vim", "-Nu", "NONE", "-i", "NONE", "-n", "-es", "-S", str(script),
+                     "-c", f'execute "normal {keys}"'],
+                    env={**os.environ, "DISLOP_PICKER_DIR": td}, capture_output=True, timeout=5)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                output = root / "selected"
+                if expected is None:
+                    self.assertFalse(output.exists())
+                else:
+                    self.assertEqual(json.loads(output.read_text(encoding="utf-8")), expected)
+                    output.unlink()
+
+    @unittest.skipUnless(shutil.which("vim"), "Vim is optional")
+    def test_picker_highlights_exact_spans_and_refreshes_on_navigation(self) -> None:
+        script = REPO_ROOT / "src" / "dislop" / "review-picker.vim"
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rows = [
+                dict(id=1, why="说明", before="旧\r\n词", after="新", prefix="😀旧 ", suffix=" 新"),
+                dict(id=2, why="核实来源", quote="- 原文", advice="+ 建议"),
+            ]
+            (root / "items.json").write_text(json.dumps(rows), encoding="utf-8")
+            snapshot = "call writefile([json_encode([getline(1,'$'), getmatches()])], $DISLOP_PICKER_DIR . '/screens', 'a')"
+            subprocess.run(
+                ["vim", "-Nu", "NONE", "-i", "NONE", "-n", "-es", "-S", str(script),
+                 "-c", snapshot, "-c", "normal y", "-c", snapshot, "-c", "normal k", "-c", snapshot, "-c", "qall!"],
+                env={**os.environ, "DISLOP_PICKER_DIR": td, "DISLOP_PICKER_LANG": "zh"}, check=True, timeout=5)
+            screens = []
+            for record in (root / "screens").read_text(encoding="utf-8").splitlines():
+                lines, matches = json.loads(record)
+                spans = {}
+                for match in matches:
+                    for key, pos in match.items():
+                        if key.startswith("pos"):
+                            text = lines[pos[0] - 1]
+                            if len(pos) == 3:
+                                start = pos[1] - 1
+                                text = text.encode()[start:start + pos[2]].decode()
+                            spans.setdefault(match["group"], []).append(text)
+                screens.append(spans)
+            edit, advice, accepted = screens
+            self.assertEqual(edit["DislopRemoved"], ["-", "旧", "-", "词"])
+            self.assertEqual(edit["DislopAdded"], ["+", "新"])
+            self.assertEqual(advice["DislopLabel"], ["[建议]", "原因", "原文", "建议"])
+            self.assertNotIn("DislopRemoved", advice)
+            self.assertNotIn("DislopAdded", advice)
+            self.assertIn("[已采纳]", accepted["DislopAdded"])
+
+    def test_provider_replacements_and_advice(self) -> None:
+        server = _MockReviewServer()
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                root = Path(td)
+                source = root / "notes.md"
+                quote = "game-changer for enterprise telemetry"
+                for fn in (run_py, run_node):
+                    for mode, original, applicable in (
+                        ("edits", "😀\r\nA " + quote + ".", True),
+                        ("edits", quote + " and " + quote + ".", False),
+                        ("ok", quote + ".", False),
+                    ):
+                        server.mode = mode
+                        source.write_bytes(original.encode())
+                        res = fn(["review", source.name, "--provider", "local", "--base-url", server.base_url,
+                                  "--json", "--fail-on", "never"], cwd=root)
+                        self.assertEqual(res.returncode, 0, res.stderr)
+                        report = json.loads(res.stdout)
+                        self.assertEqual("edit" in report["findings"][0], applicable)
+                        (root / "review.json").write_text(res.stdout, encoding="utf-8")
+                        result = fn(["apply", "--all", "--review-file", "review.json",
+                                     "--source-file", source.name], cwd=root)
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                        expected = original.replace(quote, "tool for telemetry") if applicable else original
+                        self.assertEqual(source.read_bytes(), expected.encode())
+        finally:
+            server.close()
+
     def test_security_and_consent_invariants(self) -> None:
         secret = "sk-test-secret-never-leak-98765"
         for fn in (run_node, run_py):

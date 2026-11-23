@@ -50,6 +50,7 @@ import {
   removeInstalledModel,
   runLocalDeslop,
 } from "../src/local-model.mjs";
+import { applyReview, prepareEdits, requirePicker } from "../src/review-apply.mjs";
 import { parseImageBuffer, parsePdfBuffer, readZipXmlEntries } from "../src/binary-node.mjs";
 import {
   resolveProviderConfig,
@@ -1120,8 +1121,18 @@ const COMMAND_SPECS = {
     summary: "Create starter .dislop.json config and ensure .dislop.local.json is gitignored.",
     examples: ["dislop init"],
   },
+  apply: {
+    bools: ["all", "help"],
+    strings: ["review-file", "source-file", "include", "exclude"],
+    optionalStrings: [],
+    shortBools: { h: "help" },
+    shortStrings: {},
+    usage: "dislop apply --review-file REPORT --source-file FILE (--include IDS | --all [--exclude IDS])",
+    summary: "Apply selected exact edits from a saved JSON review.",
+    examples: ["dislop apply --review-file review.json --source-file draft.md --include 2,5"],
+  },
   review: {
-    bools: ["offline", "compact", "dry-run", "print-prompt", "yes", "include-notes", "include-hidden", "json", "help", "version"],
+    bools: ["interactive-apply", "offline", "compact", "dry-run", "print-prompt", "yes", "include-notes", "include-hidden", "json", "help", "version"],
     strings: ["endpoint", "api-key-env", "provider", "model", "base-url", "pack", "register", "format", "lang", "fail-on", "timeout", "max-chunks", "stdin-filename", "config"],
     optionalStrings: [],
     shortBools: { y: "yes", h: "help", v: "version" },
@@ -1129,7 +1140,7 @@ const COMMAND_SPECS = {
     usage:
       "dislop review [file | -] [--offline | --endpoint <url> | --provider openai|gemini|openrouter|compatible|local]\n" +
       "             [--model <id>] [--base-url <url>] [--pack <id|auto>] [--register <id|auto>]\n" +
-      "             [--dry-run] [--print-prompt] [--yes] [--format text|json|agent] [--lang en|zh]",
+      "             [--interactive-apply] [--dry-run] [--print-prompt] [--yes] [--format text|json|agent] [--lang en|zh]",
     summary: "Multi-layer editorial review (offline rubric preflight or explicit opt-in BYOK LLM review).",
     examples: [
       "dislop review draft.md --offline --lang zh",
@@ -3559,7 +3570,7 @@ function findingsToReviewIssues(findings, lang = "en") {
     const action = strategy === "delete" ? "edit" : strategy === "need-source" ? "ask" : "rewrite";
     const why = (f.message?.[lang] || f.message?.en || f.ruleId || "").trim();
     const guidance = (f.deletionTest?.[lang] || f.deletionTest?.en || why).trim();
-    return {
+    const issue = {
       source: f.source || "rule",
       ruleId: f.ruleId,
       ticLayer: mapFindingToTicLayer(f),
@@ -3576,6 +3587,10 @@ function findingsToReviewIssues(findings, lang = "en") {
           ? { question: guidance }
           : { instruction: guidance }),
     };
+    if (action === "edit" && f.span && f.span.end - f.span.start === codePointLength(issue.quote)) {
+      issue.edit = { start: f.span.start, before: issue.quote, after: "" };
+    }
+    return issue;
   });
 }
 
@@ -3591,7 +3606,8 @@ function groundByokLlmIssues(rawIssues, sourceText, lineStarts) {
     if (idx === -1) continue;
     let action = ["edit", "replace", "delete", "rewrite", "ask"].includes(iss.action) ? iss.action : "rewrite";
     if (action === "replace" || action === "delete") action = "edit";
-    const rep = action === "edit" ? String(iss.replacement ?? "") : "";
+    if (action === "edit" && iss.action !== "delete" && typeof iss.replacement !== "string") action = "rewrite";
+    const rep = action === "edit" && iss.action !== "delete" ? iss.replacement : "";
     if (action === "edit" || iss.replacement) {
       let introducedSlop = false;
       const qLower = q.toLowerCase();
@@ -3623,9 +3639,9 @@ function groundByokLlmIssues(rawIssues, sourceText, lineStarts) {
       let lo = 0; let hi = lineStarts.length - 1;
       while (lo <= hi) { const mid = (lo + hi) >> 1; if (lineStarts[mid] <= idx) lo = mid + 1; else hi = mid - 1; }
       const li = Math.max(0, hi);
-      return { line: li + 1, col: idx - lineStarts[li] + 1 };
+      return { line: li + 1, col: codePointLength(src.slice(lineStarts[li], idx)) + 1 };
     })() : { line: 1, col: 1 };
-    out.push({
+    const issue = {
       source: "byok-llm",
       ruleId: null,
       ...(VALID_TIC_LAYERS.has(iss.ticLayer) ? { ticLayer: iss.ticLayer } : {}),
@@ -3641,7 +3657,11 @@ function groundByokLlmIssues(rawIssues, sourceText, lineStarts) {
         : action === "ask"
           ? { question: String(iss.question || finalInstruction).trim() }
           : { instruction: finalInstruction }),
-    });
+    };
+    if (action === "edit" && idx === src.lastIndexOf(q)) {
+      issue.edit = { start: codePointLength(src.slice(0, idx)), before: q, after: rep };
+    }
+    out.push(issue);
     if (out.length >= 16) break;
   }
   return out;
@@ -3831,6 +3851,8 @@ async function runRubricReview(flags, positional, packs) {
     summary,
     issues,
   };
+  prepareEdits(out, text, target);
+  if (flags["interactive-apply"]) return applyReview(out, target, flags, true);
 
   if (format === "json") {
     console.log(JSON.stringify(out, null, 2));
@@ -4279,6 +4301,8 @@ async function runProviderReview(flags, positional, packs) {
     rejected,
     usage: usageSummary,
   };
+  prepareEdits(report, rawText, target);
+  if (flags["interactive-apply"]) return applyReview(report, target, flags, true);
 
   if (format === "json") {
     console.log(JSON.stringify(report, null, 2));
@@ -4314,6 +4338,10 @@ async function runReview(args, packs) {
   if (flags.help) {
     printSubcommandHelp("review");
     return;
+  }
+  if (flags["interactive-apply"]) {
+    requirePicker(positional[0] || "-", positional.length === 1 && !flags.json && (!flags.format || flags.format === "text") &&
+      !flags["dry-run"] && !flags["print-prompt"]);
   }
   if (flags.offline || flags.endpoint || flags["api-key-env"]) {
     return await runRubricReview(flags, positional, packs);
@@ -4467,6 +4495,7 @@ Browse rules & style:
 
 Agent & review:
   review [file | -]         Multi-layer review (--offline | --endpoint <url> | --provider openai|gemini|local)
+  apply                     Apply review edits with --review-file and --source-file
   --mcp                     Run local stdio MCP server (7 offline tools)
   resources                 Show bundled packs, static agent links, and Official Cloud MCP
 
@@ -4509,7 +4538,22 @@ async function main() {
   const rest = argv.slice(1);
   if (cmd === "check") return runCheck(rest, packs);
   if (cmd === "verify") return runVerify(rest, packs);
-  if (cmd === "review") return await runReview(rest, packs);
+  if (cmd === "review" || cmd === "apply") {
+    try {
+      if (cmd === "review") return await runReview(rest, packs);
+      const { flags, positional } = parseFlags(rest, "apply");
+      if (flags.help) return printSubcommandHelp("apply");
+      if (!flags["review-file"] || !flags["source-file"] || positional.length) {
+        throw Error("specify --review-file and --source-file");
+      }
+      const report = JSON.parse(fs.readFileSync(flags["review-file"], "utf8"));
+      return applyReview(report, flags["source-file"], flags);
+    } catch (error) {
+      console.error(`dislop ${cmd}: ${error.message}`);
+      process.exitCode = 2;
+      return;
+    }
+  }
   if (cmd === "voice") return runVoice(rest);
   if (cmd === "doctor") return await runDoctor(rest, packs);
   if (cmd === "model") return await runModel(rest, packs, "model");
