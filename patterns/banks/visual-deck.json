@@ -33,5 +33,12 @@
     "minConsecutivePlainBulletSlides": 4,
     "minSlideLatinWords": 12,
     "minSlideCjkChars": 25
+  },
+  "gen2TastefulSlop": {
+    "ruleId": "ui-gen2-tasteful-slop",
+    "dimension": "visual-and-deck",
+    "detectionAngle": "visual-markup-ooxml",
+    "severity": "info",
+    "minSignals": 2
   }
 }

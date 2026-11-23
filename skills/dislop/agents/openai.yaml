@@ -1,6 +1,6 @@
 interface:
   display_name: "dislop"
-  short_description: "Linter for AI Slop in docs, web UI, and slides"
+  short_description: "Cutting AI slop is real productivity — Linter for AI Slop"
   default_prompt: "Use $dislop to check my draft for AI slop, replacement slogans, and template UI while keeping every number, link, and qualifier intact."
 policy:
   allow_implicit_invocation: true

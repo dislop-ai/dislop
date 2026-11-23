@@ -39,6 +39,10 @@ Use this bundle when auditing or revising PRDs, architecture specs, memos, Word 
 - [`narrative-sandwich-frame`](../rules/narrative-sandwich-frame.md) (`warning`): Macro-trend opener, future-facing closer, or dense transition-marker cluster ('Furthermore/Moreover/Additionally') follows the stock LLM essay sandwich.
 - [`template-skeleton-echo`](../rules/template-skeleton-echo.md) (`warning`): Three or more paragraphs or sentences repeat the exact same syntactic opener skeleton ('By <verb>ing...', '在……方面，', 'First/Second/Third/Finally').
 - [`low-burstiness-vapor`](../rules/low-burstiness-vapor.md) (`info`): Multi-sentence passage combines robotically uniform sentence lengths (low burstiness CV < 0.24) with near-zero concrete anchors (numbers, dates, files, or verifiable actions).
+- [`zh-dev-jargon`](../rules/zh-dev-jargon.md) (`warning`): Paragraph concentrates hollow AI-generated corporate/engineering buzzwords ('全闭环', '深度赋能', '范式跃迁', '零误差', '…化') rather than grounded technical mechanisms.
+- [`zh-exclamation`](../rules/zh-exclamation.md) (`warning`): Chinese prose paragraph overuses exclamation marks or combines exclamation punctuation with hype modifiers.
+- [`zh-mega-sentence`](../rules/zh-mega-sentence.md) (`warning`): Single Chinese prose sentence exceeds 180 CJK characters (or 120+ CJK with 180+ total chars) without breaking.
+- [`unsourced-statistic`](../rules/unsourced-statistic.md) (`warning`): Marketing-style percentage claim ('up to X%', 'reduces by X%', '提升 X%', '高达 X%') lacks a baseline, sample size, metric name, or citation.
 
 ## 3. Reference Contrast
 

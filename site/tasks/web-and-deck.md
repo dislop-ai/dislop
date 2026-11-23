@@ -31,6 +31,13 @@ Use this bundle when building or auditing HTML/CSS/JSX pages, SVG diagrams, or P
 - [`ui-pill-soup`](../rules/ui-pill-soup.md) (`warning`): Excessive `rounded-full` / `999px` text pills (> 6 per view) turn interface metadata into badge soup.
 - [`ui-box-in-box`](../rules/ui-box-in-box.md) (`warning`): Three or more nested bordered/rounded containers wrap the same content (`box-in-box-in-box`).
 - [`ui-prompt-echo-badge`](../rules/ui-prompt-echo-badge.md) (`warning`): Interface chrome echoes prompt-engineering hype (`AI-Powered`, `Zero Hallucination`) instead of naming the function.
+- [`ui-glow-blob-chrome`](../rules/ui-glow-blob-chrome.md) (`warning`): Decorative ambient blur orbs (`blur-3xl`), neon box-shadows, pulsing `animate-ping` pill dots, or heavy SVG glow filters.
+- [`ui-emoji-icon-chrome`](../rules/ui-emoji-icon-chrome.md) (`warning`): Three or more decorative AI stock emojis (`🚀`, `✨`, `⚡`, `🛡️`) used as interface or heading icons.
+- [`ui-template-card-grid`](../rules/ui-template-card-grid.md) (`warning`): Stock generator UI boilerplate: tinted rounded-square icon tiles (>= 3), fake macOS 3-dot window chrome, or sequential `01`/`02`/`03` eyebrow kickers.
+- [`svg-layout-slop`](../rules/svg-layout-slop.md) (`warning`): SVG graphic has structural generation defects: missing `viewBox` on a large canvas, overlapping `<text>` coordinates, or >= 2 orphaned `<defs>` entries.
+- [`image-ai-workflow-residue`](../rules/image-ai-workflow-residue.md) (`warning`): Raster image embeds unstripped AI generation prompt/workflow parameters (warning) or explicit synthetic provenance tags (info — retain required legal disclosures).
+- [`image-ai-palette-slop`](../rules/image-ai-palette-slop.md) (`info`): PNG pixel profile matches default AI-slop aesthetics: dominant neon purple-indigo-pink palette or hyper-saturated airbrushed plastic sheen.
+- [`pdf-visual-layout-slop`](../rules/pdf-visual-layout-slop.md) (`warning`): PDF slide/poster layout exhibits synthetic template defects: multi-page raster-only slides, collapsed font hierarchy, crushed < 9.5pt body copy, or 4+ consecutive identical landscape slide skeletons.
 
 ## 3. Reference Contrast
 

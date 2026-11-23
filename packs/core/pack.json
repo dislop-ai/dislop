@@ -20,7 +20,9 @@
     "jsx",
     "svg",
     "docx",
-    "pptx"
+    "pptx",
+    "pdf",
+    "image"
   ],
   "thresholds": {},
   "rules": [
@@ -31,7 +33,7 @@
       "family": "hygiene/placeholder",
       "probe": "regex",
       "zones": ["prose", "ui-text"],
-      "modalities": ["markdown", "text", "html", "jsx", "svg", "docx", "pptx"],
+      "modalities": ["markdown", "text", "html", "jsx", "svg", "docx", "pptx", "pdf"],
       "patterns": [
         "(?<![A-Za-z])(?:lorem ipsum|dolor sit amet)(?![A-Za-z])",
         "\\[(?:insert|add|your|placeholder|tbd|todo)(?:\\s+[^\\]\\n]{1,50})?\\](?!\\s*\\()",
@@ -80,7 +82,7 @@
       "family": "hygiene/chat-residue",
       "probe": "regex",
       "zones": ["prose", "ui-text"],
-      "modalities": ["markdown", "text", "html", "jsx", "docx", "pptx"],
+      "modalities": ["markdown", "text", "html", "jsx", "docx", "pptx", "pdf"],
       "patterns": [
         "(?:^|\\n)\\s*(?:Certainly|Sure|Absolutely|Of course|Happy to help|Glad to help)[!,.]?\\s+(?:[Hh]ere(?:'s| is| are)|[Bb]elow is)\\b",
         "(?:^|\\n)\\s*Here\\s+(?:is|are)\\s+the\\s+(?:revised|updated|polished)\\s+",
@@ -124,13 +126,15 @@
           "周二 10:00 切流。希望这对你有帮助！",
           "以下是为您整理的会议纪要：周四发布。",
           "Here is the revised launch note: deploys at 14:00 UTC.",
-          "作为一个 AI 助手，我建议先做灰度验证。"
+          "作为一个 AI 助手，我建议先做灰度验证。",
+          "As an AI, I cannot verify live deployment pricing."
         ],
         "clean": [
           "Sure enough, the cache warmed within 40 seconds.",
           "Q2 churn dropped from 4.1% to 3.4%.",
           "会议纪要：周三上线。",
-          "以下是本周进展：接口延迟降到 120ms。"
+          "以下是本周进展：接口延迟降到 120ms。",
+          "The daemon monitors queue depth every 5 seconds."
         ]
       }
     },
@@ -140,7 +144,7 @@
       "severity": "error",
       "family": "hygiene/markdown-leak",
       "probe": "office-markdown-leak",
-      "modalities": ["docx", "pptx"],
+      "modalities": ["docx", "pptx", "pdf"],
       "message": {
         "en": "Raw Markdown syntax (`**bold**` or `## heading`) pasted unrendered into Word or PowerPoint.",
         "zh": "Word 或 PowerPoint 文本中残留未渲染的原始 Markdown 标记（如 `**加粗**` 或 `## 标题`）。"

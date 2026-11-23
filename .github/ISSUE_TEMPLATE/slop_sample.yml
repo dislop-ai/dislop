@@ -1,0 +1,47 @@
+name: Submit an AI-Slop Writing or UI Sample
+description: Share a real AI-slop snippet so we can verify whether dislop catches it cleanly without false positives.
+title: "[Sample] "
+labels: ["slop-sample"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please redact personal names, company internals, API keys, and private customer text before posting. Keep samples anonymized and safe for a public repository.
+  - type: dropdown
+    id: language_pack
+    attributes:
+      label: Language and scene pack
+      options:
+        - English — Business Brief
+        - English — Engineering Spec
+        - English — Regulated Comms
+        - English — Executive Deck
+        - English — Literary Essay
+        - English — Slides & Web UI
+        - Chinese — Business Brief
+        - Chinese — Engineering Spec
+        - Chinese — Literary Essay
+        - Other / Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: before_sample
+    attributes:
+      label: Before (the AI-slop snippet, redacted)
+      description: Paste 1-4 sentences, or a short HTML/CSS snippet, after removing private details.
+    validations:
+      required: true
+  - type: textarea
+    id: why_slop
+    attributes:
+      label: Why does it read like AI?
+      description: Note what phrase, structure, or visual habit gave it away, and whether dislop already flagged it or missed it.
+    validations:
+      required: true
+  - type: textarea
+    id: clean_rewrite
+    attributes:
+      label: Optional clean rewrite
+      description: If you already rewrote it cleanly without inventing facts, share the human version so we can verify 0 warnings.
+    validations:
+      required: false

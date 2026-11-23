@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en" data-static-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>How to Remove AI Slop From Writing Without Triggering Second-Order Clichés — dislop</title>
+  <meta name="description" content="Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/en/guides/remove-ai-slop-writing/">
+  <meta property="og:title" content="How to Remove AI Slop From Writing Without Triggering Second-Order Clichés — dislop">
+  <meta property="og:description" content="Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="How to Remove AI Slop From Writing Without Triggering Second-Order Clichés — dislop">
+  <meta name="twitter:description" content="Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
+  <link rel="canonical" href="https://dislop.com/en/guides/remove-ai-slop-writing/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/remove-ai-slop-writing/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/remove-ai-slop-writing/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/remove-ai-slop-writing/">
+  <link rel="alternate" type="application/atom+xml" href="../../../en/feed.xml" title="dislop Guides (EN)">
+  <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../../assets/logo.svg">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/en/guides/remove-ai-slop-writing/",
+      "url": "https://dislop.com/en/guides/remove-ai-slop-writing/",
+      "headline": "How to Remove AI Slop From Writing Without Triggering Second-Order Clichés",
+      "description": "Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-23",
+      "dateModified": "2026-11-23",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "image": "https://dislop.com/assets/og-card.png",
+      "citation": [
+        "https://arxiv.org/abs/2309.05196",
+        "https://doi.org/10.1126/sciadv.adn5290",
+        "https://arxiv.org/abs/2510.01171",
+        "https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing",
+        "https://www.asd-ste100.org/",
+        "https://digital.gov/guides/plain-language/",
+        "https://www.gov.uk/guidance/style-guide",
+        "https://developers.google.com/tech-writing",
+        "https://github.com/blader/humanizer",
+        "https://github.com/hardikpandya/stop-slop"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/en/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Guides",
+          "item": "https://dislop.com/en/guides/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Remove AI Slop From Writing",
+          "item": "https://dislop.com/en/guides/remove-ai-slop-writing/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why does telling an LLM 'avoid AI clichés' still produce synthetic prose?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Post-trained models compensate for banned adjectives by switching to dramatic contrast frames (`Not just X — it's Y`), short staccato three-word bursts, or neat 3-part semicolon sentences."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does dislop flag legitimate factual contrasts like 'The bug is not in parser.py, but in loader.py'?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Specific file, number, and mechanism corrections are preserved. The rule targets strawman negation pivots that contrast an empty label with an abstract noun ('Not just a tool — peace of mind')."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do flat banned-word lists cause false positives on technical terms?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Naive word lists routinely flag real nouns such as Delve (the Go debugger), wool tapestry, or legitimate domain terms. Context-aware rules keep literal nouns intact."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../../en/">
+        <img src="../../../assets/logo.svg" width="28" height="28" alt="dislop icon">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../../?lang=en#workbench">Workbench</a>
+        <a href="../../../en/guides/" aria-current="page">Guides</a>
+        <a href="../../../en/awesome/">Directory</a>
+        <a href="../../../en/rules/">Rules</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../../guides/remove-ai-slop-writing/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../../en/">dislop</a> / <a href="../">Guides</a> / <span aria-current="page">Remove AI Slop From Writing</span>
+      </nav>
+
+      <article>
+        <header>
+          <h1 class="lead-heading" style="max-width:30ch;">How to Remove AI Slop From Writing Without Triggering Second-Order Clichés</h1>
+          <div class="article-meta">
+            <span>Writing &amp; Editing</span>
+            <span>Updated 2026-11-23</span>
+            <span>7 min read</span>
+            <a href="./index.md">Markdown</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">DIRECT ANSWER</div>
+            <p>Banning stock words alone forces LLMs to swap buzzwords for second-order templates like 'Not X, but Y' slogans, three-word staccato chains, and moralizing endings. Replace clichés by running the Deletion Test on flagged spans and re-checking after edits.</p>
+          </div>
+        </header>
+
+        <div class="article-shell">
+          <div class="article-prose">
+<p>Ask an LLM to rewrite a draft without stock words like <code>delve</code> or <code>leverage</code>, and it usually drops those tokens right away—then hands back a dramatic slogan instead:</p>
+
+<!-- dislop-quote-start -->
+<pre><code class="language-text">bad:  This isn't just an export script. It's clarity at scale. Fast. Reliable. Unstoppable.</code></pre>
+<!-- dislop-quote-end -->
+
+<p>Empirical studies explain why. Padmakumar &amp; He (ICLR 2024, <a href="https://arxiv.org/abs/2309.05196" target="_blank" rel="noopener">arXiv:2309.05196</a>) and Doshi &amp; Hauser (<em>Science Advances</em>, 2024) showed that RLHF-tuned models compress writing toward high-probability, familiar framing. Blocking surface nouns without changing sentence structure simply displaces the slop one level deeper.</p>
+
+<h2 id="1-where-second-order-slop-hides">1. Where second-order slop hides</h2>
+
+<p>Community skills such as <code>blader/humanizer</code> (71,724 stars) and <code>hardikpandya/stop-slop</code> (19,097 stars), along with <code>WP:AISIGNS</code>, converge on four displacement patterns that appear right after deleting cliché words:</p>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Pattern</th><th>Example that slips past word lists</th><th>What to do instead</th></tr></thead><tbody>
+<tr><td><strong>Negation pivot</strong></td><td><code>&quot;This isn't just a linter — it's delivery confidence.&quot;</code></td><td>Delete the negation setup; state what the tool checks</td></tr>
+<tr><td><strong>Staccato slogan run</strong></td><td><code>&quot;Signals drop. Photos vanish. Audits stall.&quot;</code></td><td>Merge into one plain sentence explaining cause and limit</td></tr>
+<tr><td><strong>3-part semicolon pitch</strong></td><td><code>&quot;Validates on input; queues slow jobs; tracks timeouts.&quot;</code></td><td>Break symmetry into plain clauses with uneven lengths</td></tr>
+<tr><td><strong>Moralizing ending</strong></td><td><code>&quot;Ultimately, tools matter less than the discipline behind them.&quot;</code></td><td>Stop on the final concrete measurement or action</td></tr>
+</tbody></table></div>
+
+<h2 id="2-the-four-step-deletion-test">2. The four-step Deletion Test</h2>
+
+<p>Grounded in plain-writing standards—<code>ASD-STE100</code>, <code>Digital.gov Plain Language</code>, <code>GOV.UK Style Guide</code>, and <code>Google Technical Writing</code>—use this edit loop instead of synonym swapping:</p>
+
+<ol>
+<li><strong>Strip hard leftovers first</strong>: Remove chat greetings, unfilled <code>[TODO]</code> brackets, and unverified claims such as <code>&quot;studies show&quot;</code> without a source.</li>
+<li><strong>Run the Deletion Test on flagged spans</strong>: Ask what concrete actor, mechanism, number, or boundary disappears if the flagged phrase is deleted.</li>
+</ol>
+
+<p>- If nothing disappears, delete the span completely. - If a real claim disappears, replace the abstract adjective with the measured fact.</p>
+
+<ol>
+<li><strong>Vary paragraph openings and sentence length</strong>: If three paragraphs in a row open with the same gerund skeleton (<code>&quot;By standardizing...&quot;</code>, <code>&quot;By automating...&quot;</code>, <code>&quot;By surfacing...&quot;</code>), collapse them into direct active statements.</li>
+<li><strong>Re-check after editing</strong>: Run <code>dislop check</code> again to make sure your cleanup didn't introduce a negation pivot or staccato slogan.</li>
+</ol>
+
+<p>Here is a real edit cycle on a field-sync note:</p>
+
+<!-- dislop-quote-start -->
+<pre><code class="language-text">bad:  Signals drop. Photos vanish. Audits stall. It is worth noting that offline sync is a game-changer that unlocks seamless resilience for 120 inspection photos.
+trap: Offline sync isn't a fallback — it's field resilience for 120 photos.
+good: When cellular coverage drops in basement vaults, offline sync queues up to 120 inspection photos locally until reconnection.</code></pre>
+<!-- dislop-quote-end -->
+
+<figure class="guide-demo" data-demo-card="workbench-live" data-demo-prefix="../../../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../../../assets/demos/workbench-live-en-v2-poster.png" data-demo-poster="workbench-live">
+              <source type="image/webp" srcset="../../../assets/demos/workbench-live-en-v2.webp" data-demo-webp="workbench-live">
+              <img src="../../../assets/demos/workbench-live-en-v2.gif" alt="dislop browser workbench checking draft, 2nd-order slop trap, and clean version with 5-axis telemetry" width="1140" height="640" loading="lazy" decoding="async" data-demo-gif="workbench-live">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">3. Zero-upload browser workbench in action</strong>
+              <span class="demo-cap-badge">Live DOM · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Live capture of the workbench on dislop.com: toggle between draft, 2nd-order slop, and clean copy with 5-axis telemetry.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="workbench-live" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="workbench-live">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<h2 id="3-better-structures-before-you-draft">3. Better structures before you draft</h2>
+
+<p>If you draft with an agent, pick an explicit structural skeleton upfront instead of letting the model default to <em>&quot;Background -&gt; Benefits -&gt; Conclusion.&quot;</em> Inspired by Verbalized Sampling (<a href="https://arxiv.org/abs/2510.01171" target="_blank" rel="noopener">arXiv:2510.01171</a>), four compact shapes cover most engineering and business writing:</p>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Skeleton</th><th>Sequence</th></tr></thead><tbody>
+<tr><td>Decision Ledger</td><td>1-sentence decision → sample size &amp; metrics → known limitation → owner &amp; date</td></tr>
+<tr><td>Mechanism Teardown</td><td>observed anomaly → wrong initial guess → underlying cause → bounded fix</td></tr>
+<tr><td>Technical Spec</td><td>capability table → explicit non-goals → failure modes &amp; exit codes → minimal command</td></tr>
+<tr><td>Field Note</td><td>time, place, and physical detail → direct quote or observation → stop on the last concrete detail</td></tr>
+</tbody></table></div>
+
+<p>Run deterministic prose and cadence checks locally before publishing:</p>
+
+<pre><code class="language-bash">npx --yes dislop check draft.md --pack business-brief</code></pre>
+<h2 id="faq">Frequently asked questions</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>Why does telling an LLM 'avoid AI clichés' still produce synthetic prose?</h3>
+            <p>Post-trained models compensate for banned adjectives by switching to dramatic contrast frames (<code>Not just X — it's Y</code>), short staccato three-word bursts, or neat 3-part semicolon sentences.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Does dislop flag legitimate factual contrasts like 'The bug is not in parser.py, but in loader.py'?</h3>
+            <p>No. Specific file, number, and mechanism corrections are preserved. The rule targets strawman negation pivots that contrast an empty label with an abstract noun ('Not just a tool — peace of mind').</p>
+          </div>
+          <div class="faq-item">
+            <h3>Do flat banned-word lists cause false positives on technical terms?</h3>
+            <p>Yes. Naive word lists routinely flag real nouns such as Delve (the Go debugger), wool tapestry, or legitimate domain terms. Context-aware rules keep literal nouns intact.</p>
+          </div>
+        </div>
+<h2 id="related-rules">Matching deterministic rules</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../../en/rules/en-cliche-lexicon/"><code>en-cliche-lexicon</code> · Stock AI buzzword</a>
+<a class="related-link-chip" href="../../../en/rules/en-throat-clearing-opener/"><code>en-throat-clearing-opener</code> · Throat-clearing opener</a>
+<a class="related-link-chip" href="../../../en/rules/negation-pivot-frame/"><code>negation-pivot-frame</code> · &quot;Not X, but Y&quot; slogan frame</a>
+<a class="related-link-chip" href="../../../en/rules/staccato-slogan-run/"><code>staccato-slogan-run</code> · Staccato slogan chain</a>
+<a class="related-link-chip" href="../../../en/rules/semicolon-tricolon/"><code>semicolon-tricolon</code> · Three-part balanced semicolon pitch</a>
+<a class="related-link-chip" href="../../../en/rules/en-essay-moralizing-ending/"><code>en-essay-moralizing-ending</code> · Moralizing ending</a>
+</div>
+<h2 id="next-guides">Next guides</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../what-is-ai-slop/">What Is AI Slop?</a>
+<a class="related-link-chip" href="../deslop-pptx-docx/">Clean Up PPTX &amp; DOCX</a>
+<a class="related-link-chip" href="../linter-vs-detector-vs-skill/">Linter vs. Detector vs. Skill</a>
+</div>
+<h2 id="sources">Verified references</h2>
+        <ul>
+          <li><a href="https://arxiv.org/abs/2309.05196" target="_blank" rel="noopener">Does Writing with Language Models Reduce Content Diversity? (ICLR 2024)</a> — Feedback-tuned models (RLHF) reduce collective lexical and content diversity compared with unaided human writing.</li>
+          <li><a href="https://doi.org/10.1126/sciadv.adn5290" target="_blank" rel="noopener">Generative artificial intelligence enhances creativity but reduces the diversity of novel content (Science Advances 2024)</a> — Controlled short-story experiments showed AI ideas improved individual ratings while making stories across writers significantly more similar to one another.</li>
+          <li><a href="https://arxiv.org/abs/2510.01171" target="_blank" rel="noopener">Verbalized Sampling: How to Mitigate Mode Collapse and Unlock LLM Diversity</a> — Prompting models to verbalize a distribution of candidate outputs mitigates RLHF typicality bias without retraining.</li>
+          <li><a href="https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing" target="_blank" rel="noopener">Wikipedia: Signs of AI writing (WP:AISIGNS)</a> — WikiProject AI Cleanup's living taxonomy of AI prose defects: inflated significance, stock vocabulary, rule-of-three lists, negative parallelisms, chatbot wrappers, and formatting artifacts.</li>
+          <li><a href="https://www.asd-ste100.org/" target="_blank" rel="noopener">ASD-STE100 Simplified Technical English Specification</a> — Aerospace and technical documentation specification enforcing short active sentences, one instruction per sentence, and consistent naming for the same concept.</li>
+          <li><a href="https://digital.gov/guides/plain-language/" target="_blank" rel="noopener">Digital.gov Plain Language Guide (formerly PlainLanguage.gov)</a> — Federal plain-writing rules: front-load key conclusions, use active voice, replace hidden verbs and filler openings with concrete actors and actions.</li>
+          <li><a href="https://www.gov.uk/guidance/style-guide" target="_blank" rel="noopener">GOV.UK Content and Style Guide</a> — Bans empty corporate padding and buzzwords ('deliver', 'key', 'going forward') in favor of direct user-facing verbs and verifiable dates/numbers.</li>
+          <li><a href="https://developers.google.com/tech-writing" target="_blank" rel="noopener">Google Technical Writing Courses</a> — Engineering writing guidance prioritizing short sentences, clear actors, explicit scope boundaries, and lists/tables over wall-of-text paragraphs.</li>
+          <li><a href="https://github.com/blader/humanizer" target="_blank" rel="noopener">blader/humanizer (Agent Skill based on WP:AISIGNS)</a> — 71,724 stars (2026-11-21 snapshot); translates Wikipedia's Signs of AI Writing into an agent editing skill with voice sample calibration.</li>
+          <li><a href="https://github.com/hardikpandya/stop-slop" target="_blank" rel="noopener">hardikpandya/stop-slop</a> — 19,097 stars (2026-11-21 snapshot); separates banned phrases, structural patterns, and before/after examples with a five-axis rubric.</li>
+        </ul>
+<div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../../?lang=en#workbench">Try in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[How to Remove AI Slop From Writing Without Triggering Second-Order Clichés](https://dislop.com/en/guides/remove-ai-slop-writing/) — Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
+        </div>
+          </div>
+        <aside class="toc-rail" aria-label="On this page">
+          <h2 class="toc-rail-title">On this page</h2>
+          <ol>
+            <li><a href="#1-where-second-order-slop-hides">1. Where second-order slop hides</a></li>
+            <li><a href="#2-the-four-step-deletion-test">2. The four-step Deletion Test</a></li>
+            <li><a href="#3-better-structures-before-you-draft">3. Better structures before you draft</a></li>
+          </ol>
+        </aside>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>This site passes dislop check site/ with 0 issues. For agents, start at <a href="../../../llms.txt">/llms.txt</a>.</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../../en/guides/">Guides</a>
+        <a href="../../../en/awesome/">Awesome list</a>
+        <a href="../../../en/rules/">All rules</a>
+        <a href="../../../privacy.md">Privacy</a>
+        <a href="../../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">Close</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../../static-ui.js"></script>
+
+</body>
+</html>

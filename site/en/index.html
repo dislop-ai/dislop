@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en" data-static-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>dislop — Cutting AI slop is real productivity.</title>
+  <meta name="description" content="Dedicated linter for AI slop in docs, web UI, Word, and PowerPoint. 53 built-in rules, 90 curated tools, and offline CLI/Skill.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/en/">
+  <meta property="og:title" content="dislop — Cutting AI slop is real productivity.">
+  <meta property="og:description" content="Dedicated linter for AI slop in docs, web UI, Word, and PowerPoint. 53 built-in rules, 90 curated tools, and offline CLI/Skill.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="dislop — Cutting AI slop is real productivity.">
+  <meta name="twitter:description" content="Dedicated linter for AI slop in docs, web UI, Word, and PowerPoint. 53 built-in rules, 90 curated tools, and offline CLI/Skill.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
+  <link rel="canonical" href="https://dislop.com/en/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/">
+  <link rel="alternate" type="application/atom+xml" href="../en/feed.xml" title="dislop Guides (EN)">
+  <link rel="alternate" type="text/markdown" href="../index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+  <link rel="stylesheet" href="../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://dislop.com/#organization",
+      "name": "dislop",
+      "url": "https://dislop.com/",
+      "logo": "https://dislop.com/assets/logo.svg",
+      "sameAs": [
+        "https://github.com/dislop-ai/dislop",
+        "https://x.com/dislop_ai"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://dislop.com/en/#website",
+      "url": "https://dislop.com/en/",
+      "name": "dislop — Cutting AI slop is real productivity.",
+      "inLanguage": "en",
+      "publisher": {
+        "@id": "https://dislop.com/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "dislop",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Linux, Windows, Web",
+      "softwareVersion": "0.7.1",
+      "url": "https://dislop.com/en/",
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "description": "Dedicated linter for AI slop across docs, web UI, Word, and PowerPoint (53 built-in rules, 7 scenario packs, 90 curated anti-slop tools, 6 guides).",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Open-Source CLI & Skill",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "name": "Cloud Free (30 credits/mo)",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does dislop upload my drafts when checking locally?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The pure-Markdown Skill, local CLI, editor plugins, and the default browser workbench run completely offline with zero uploads."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is dislop different from a probabilistic AI text detector?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AI detectors output a single probability score without telling you what to fix. dislop flags concrete defects—leftover greetings, unfilled placeholders, second-order slogans, AI UI gradients, and dense PPTX slides—with line numbers and edit checks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which coding and office agents can connect to dislop?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Claude Code, Codex, Cursor, Windsurf, Antigravity, GitHub Actions, and any client supporting Agent Skills or Streamable HTTP MCP at https://dislop.com/mcp."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../en/">
+        <img src="../assets/logo.svg" width="28" height="28" alt="dislop icon">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../?lang=en#workbench">Workbench</a>
+        <a href="../en/guides/">Guides</a>
+        <a href="../en/awesome/">Directory</a>
+        <a href="../en/rules/">Rules</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../?lang=zh" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="band-rule">
+      <div class="lead-band band-rule">
+        <div class="lead-copy">
+          <div>
+            <!-- dislop-quote-start -->
+            <div class="hero-strike-wrap" aria-hidden="true">
+              <del class="hero-strike">Certainly! Here is your polished draft.</del>
+              <svg class="hero-pen-svg" viewBox="0 0 320 18" preserveAspectRatio="none" focusable="false">
+                <path class="hero-pen-path" d="M3 10 C86 6 196 13 317 8"/>
+              </svg>
+            </div>
+            <!-- dislop-quote-end -->
+            <h1 class="lead-heading">Cutting AI slop is real productivity.</h1>
+            <p class="lead-sub">
+              A dedicated linter for AI slop. Catches AI leftovers, cliché phrasing, and stock template layouts in docs, web pages, and slides before you ship. Connects to Claude Code, Codex, Cursor, and office agents in one command, locally offline or via Cloud MCP.
+            </p>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="hero-cta-row">
+              <a href="../?lang=en#workbench" class="btn-primary" style="min-height:36px;padding:7px 16px;font-size:0.86rem;">Open Interactive Workbench →</a>
+              <a href="./guides/agent-cli-mcp-tutorial/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Install Skill / CLI (Offline)</a>
+            </div>
+            <p class="hero-reassure">CLI v0.7.1 and local plugins run completely offline with zero uploads; optional Cloud MCP adds multi-model genre review.</p>
+          </div>
+
+          <div class="hero-cli-inline">
+            <span class="hero-cli-label">Run offline right now or paste this into any web-capable AI</span>
+            <div class="cmd-box is-prompt">
+              <code id="en-cli-cmd">npx --yes dislop check .</code>
+              <button type="button" class="ctrl-btn" style="min-height:32px;padding:5px 12px;font-size:0.8rem;flex-shrink:0;" data-copy-target="en-cli-cmd">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- dislop-quote-start -->
+        <div class="hero-proof" aria-label="Three-state editing example">
+          <div class="hero-proof-stage">
+            <p style="margin:0 0 8px;"><strong>Original draft:</strong> <span class="mark-span mark-error">Certainly! Here is the launch note.</span> <span class="mark-span mark-warn">It's worth noting that</span> CSV exports are a <span class="mark-span mark-warn">game-changer</span>, finishing in up to 12 minutes for 500,000 rows.</p>
+            <p style="margin:0 0 8px;"><strong>Second-order fallback:</strong> CSV exports finish in up to 12 minutes for 500,000 rows. <span class="mark-span mark-warn">This isn't just an upgrade — it's a new standard.</span></p>
+            <p style="margin:0;"><strong>Clean result (0 issues):</strong> CSV exports finish in up to 12 minutes for workspaces above 500,000 rows.</p>
+          </div>
+          <div class="hero-proof-foot">
+            <span>Checked by the same rule engine in browser &amp; CLI</span>
+            <a href="../?lang=en#workbench">Test your own draft →</a>
+          </div>
+        </div>
+        <!-- dislop-quote-end -->
+      </div>
+
+      <div class="marks-strip" aria-label="Core capabilities">
+        <div class="mark-pillar">
+          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Curated community rules and tools</h2></div>
+          <p class="mark-pillar-desc">Combines 53 built-in rules across 7 packs, 65 structured patterns, and 90 verified anti-slop tools in one repository.</p>
+        </div>
+        <div class="mark-pillar">
+          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Fits coding and office workflows</h2></div>
+          <p class="mark-pillar-desc">Use the pure-Markdown Skill before drafting, run the zero-dep CLI in pre-commit or GitHub Actions, or connect Cloud MCP at https://dislop.com/mcp.</p>
+        </div>
+        <div class="mark-pillar">
+          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Local and offline by default</h2></div>
+          <p class="mark-pillar-desc">Private codebases, specs, and Word/PowerPoint decks stay on your machine during local checks with zero outbound requests.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="demos" class="section-block band-rule" aria-labelledby="en-demos-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="en-demos-heading">Six 6-second loops: prose, CLI, web UI, PPTX &amp; agent gate</h2>
+          <p class="section-desc">Every clip is rendered offline from the real engine and browser workbench, delivered as lossless animated WebP with GIF and reduced-motion poster fallbacks.</p>
+        </div>
+        <a href="https://github.com/dislop-ai/dislop/blob/main/docs/gif-production-guide.md" target="_blank" rel="noopener">Animation &amp; GIF guide →</a>
+      </div>
+      <div class="demos-grid">
+<figure class="demo-card" data-demo-card="proof-cycle" data-demo-prefix="../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/proof-cycle-en-v2-poster.png" data-demo-poster="proof-cycle">
+              <source type="image/webp" srcset="../assets/demos/proof-cycle-en-v2.webp" data-demo-webp="proof-cycle">
+              <img src="../assets/demos/proof-cycle-en-v2.gif" alt="dislop 3-state proof: flagging chatbot artifact, catching 2nd-order slogan, passing with exit 0" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="proof-cycle">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">1. Three states of one note: catching 2nd-order slop</strong>
+              <span class="demo-cap-badge">3-state proof · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Strikes the leftover chat greeting in red, catches the 'Not X, but Y' slogan in blue, and ends clean at 12 minutes and 500,000 rows.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="proof-cycle" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="proof-cycle">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<figure class="demo-card" data-demo-card="cli-check" data-demo-prefix="../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/cli-check-en-v2-poster.png" data-demo-poster="cli-check">
+              <source type="image/webp" srcset="../assets/demos/cli-check-en-v2.webp" data-demo-webp="cli-check">
+              <img src="../assets/demos/cli-check-en-v2.gif" alt="dislop CLI offline check: exit code 1 on draft and exit code 0 after cleanup" width="920" height="460" loading="lazy" decoding="async" data-demo-gif="cli-check">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">2. Offline CLI gate: Node &amp; Python parity</strong>
+              <span class="demo-cap-badge">Offline CLI · 6.4s</span>
+            </div>
+            <span class="demo-cap-desc">Runs dislop check --profile locally: core artifacts exit 1 to block CI while rhythm and concreteness telemetry prints inline.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="cli-check" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="cli-check">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<figure class="demo-card" data-demo-card="workbench-live" data-demo-prefix="../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/workbench-live-en-v2-poster.png" data-demo-poster="workbench-live">
+              <source type="image/webp" srcset="../assets/demos/workbench-live-en-v2.webp" data-demo-webp="workbench-live">
+              <img src="../assets/demos/workbench-live-en-v2.gif" alt="dislop.com browser workbench capture: checking draft, 2nd-order slop, and clean copy" width="1140" height="640" loading="lazy" decoding="async" data-demo-gif="workbench-live">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">3. Zero-upload browser workbench in action</strong>
+              <span class="demo-cap-badge">Live DOM · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Live capture of the workbench on dislop.com: toggle between draft, 2nd-order slop, and clean copy with 5-axis telemetry.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="workbench-live" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="workbench-live">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<figure class="demo-card" data-demo-card="ui-slop" data-demo-prefix="../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/ui-slop-en-v2-poster.png" data-demo-poster="ui-slop">
+              <source type="image/webp" srcset="../assets/demos/ui-slop-en-v2.webp" data-demo-webp="ui-slop">
+              <img src="../assets/demos/ui-slop-en-v2.gif" alt="UI template slop check: flagging AI gradient, pill wall, and dead href='#' control" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="ui-slop">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">4. Web UI audit: strip gradients &amp; dead controls</strong>
+              <span class="demo-cap-badge">UI audit · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Flags indigo-purple gradients, prompt-echo badges, pill walls, and dead href='#' buttons before switching to a 1px paper sheet.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="ui-slop" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="ui-slop">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<figure class="demo-card" data-demo-card="deck-office" data-demo-prefix="../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/deck-office-en-v2-poster.png" data-demo-poster="deck-office">
+              <source type="image/webp" srcset="../assets/demos/deck-office-en-v2.webp" data-demo-webp="deck-office">
+              <img src="../assets/demos/deck-office-en-v2.gif" alt="dislop auditing quarterly-review.pptx for markdown leaks, word walls, autofit shrink, and process titles" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="deck-office">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">5. PPTX &amp; DOCX audit: catch walls &amp; shrunk text</strong>
+              <span class="demo-cap-badge">PPTX audit · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Unpacks .pptx slides locally to flag raw **markdown** leaks, word walls, 68% autofit shrink, and process titles.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="deck-office" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="deck-office">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<figure class="demo-card" data-demo-card="agent-workflow" data-demo-prefix="../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/agent-workflow-en-v2-poster.png" data-demo-poster="agent-workflow">
+              <source type="image/webp" srcset="../assets/demos/agent-workflow-en-v2.webp" data-demo-webp="agent-workflow">
+              <img src="../assets/demos/agent-workflow-en-v2.gif" alt="Agent workflow loop: loading SKILL.md, PR diff gate exit 1, and passing re-check with exit 0" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="agent-workflow">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">6. Coding Agent + CI loop: Skill, diff gate &amp; re-check</strong>
+              <span class="demo-cap-badge">Agent loop · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Agent reads pure-Markdown SKILL.md, gates changed PR lines with exit 1, and re-checks the clean edit to confirm metrics stay intact.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="agent-workflow" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="agent-workflow">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section-block band-rule">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Practical anti-slop guides</h2>
+          <p class="section-desc">Step-by-step field guides grounded in Wikipedia Signs of AI Writing, stylometric benchmarks, and real repository checks.</p>
+        </div>
+        <a href="./guides/">All 6 guides →</a>
+      </div>
+      <div class="guide-grid">
+          <article class="guide-card">
+            <div class="guide-card-cat">Setup &amp; CI · 6 min</div>
+            <h3><a href="./guides/agent-cli-mcp-tutorial/">Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions</a></h3>
+            <p>How to combine the pure-Markdown Agent Skill, zero-dependency offline CLI, incremental git-diff PR gates, and Cloud MCP.</p>
+            <div class="guide-card-foot"><a href="./guides/agent-cli-mcp-tutorial/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">Docs &amp; Decks · 6 min</div>
+            <h3><a href="./guides/deslop-pptx-docx/">Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)</a></h3>
+            <p>How to catch raw Markdown asterisks, 140-word slide walls, shrunk autofit text, and process-only headlines in Word, PowerPoint, and PDF decks.</p>
+            <div class="guide-card-foot"><a href="./guides/deslop-pptx-docx/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">UI &amp; Visual Craft · 6 min</div>
+            <h3><a href="./guides/fix-ai-slop-web-ui/">Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons</a></h3>
+            <p>How to catch and replace the 7 most common AI-generated frontend templates—purple gradients, pill walls, nested boxes, and href='#' dead buttons—before shipping.</p>
+            <div class="guide-card-foot"><a href="./guides/fix-ai-slop-web-ui/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">Selection &amp; Benchmarks · 6 min</div>
+            <h3><a href="./guides/linter-vs-detector-vs-skill/">AI Slop Linter vs. AI Detectors vs. Prompt Skills: How to Choose in 2026</a></h3>
+            <p>Comparing probabilistic AI detectors (Fast-DetectGPT, Binoculars, Pangram), Markdown skills (humanizer, stop-slop, Impeccable), and deterministic linters (Vale, dislop).</p>
+            <div class="guide-card-foot"><a href="./guides/linter-vs-detector-vs-skill/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">Writing &amp; Editing · 7 min</div>
+            <h3><a href="./guides/remove-ai-slop-writing/">How to Remove AI Slop From Writing Without Triggering Second-Order Clichés</a></h3>
+            <p>Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.</p>
+            <div class="guide-card-foot"><a href="./guides/remove-ai-slop-writing/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">Fundamentals · 6 min</div>
+            <h3><a href="./guides/what-is-ai-slop/">What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks</a></h3>
+            <p>A breakdown of the four layers of AI slop across prose, websites, and slides—backed by empirical benchmarks, Wikipedia's cleanup catalog, and real repository examples.</p>
+            <div class="guide-card-foot"><a href="./guides/what-is-ai-slop/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+      </div>
+    </section>
+
+    <section class="section-block band-rule">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">53 built-in rules across 7 scenario packs</h2>
+          <p class="section-desc">Each rule pairs a deterministic probe with a check question and Before / Fallback / Clean examples.</p>
+        </div>
+        <a href="./rules/">Browse all 53 rule pages →</a>
+      </div>
+      <div class="table-scroll" tabindex="0">
+        <table class="matrix-table">
+          <thead>
+            <tr><th>Pack ID</th><th>Name</th><th>What it catches</th><th>Rules</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>core</code></td>
+              <td><strong>AI Delivery Artifacts</strong></td>
+              <td>Clear AI-generation artifacts enabled across every pack: stray chatbot greetings, unfilled placeholders, raw Markdown pasted into Word/PowerPoint, and dead placeholder links/buttons in generated UI.</td>
+              <td style="white-space:nowrap;">4 rules</td>
+            </tr>
+            <tr>
+              <td><code>business-brief</code></td>
+              <td><strong>Business Brief &amp; Technical Proposal</strong></td>
+              <td>Flags throat-clearing openers, bureaucratic padding, second-order negation pivots ('Not X, but Y'), staccato slogan chains, four-character triads, and unsourced claims.</td>
+              <td style="white-space:nowrap;">19 rules</td>
+            </tr>
+            <tr>
+              <td><code>engineering-spec</code></td>
+              <td><strong>Engineering RFC, PR &amp; Postmortem</strong></td>
+              <td>Catches empty AI PR summaries, stop-thinking 'human error' postmortem labels, and unowned wishful action items alongside core and brief checks.</td>
+              <td style="white-space:nowrap;">3 rules</td>
+            </tr>
+            <tr>
+              <td><code>regulated-comms</code></td>
+              <td><strong>External &amp; Regulated Communications</strong></td>
+              <td>Flags unsubstantiated absolute claims ('100% secure', 'zero risk') and floating hype multipliers ('10x faster' with no baseline) in external docs.</td>
+              <td style="white-space:nowrap;">2 rules</td>
+            </tr>
+            <tr>
+              <td><code>literary-essay</code></td>
+              <td><strong>Literary Essay &amp; Longform Narrative</strong></td>
+              <td>Protects concrete observation and voice against moralizing paragraph endings, second-order negation pivots, em-dash saturation, and half-width Chinese punctuation.</td>
+              <td style="white-space:nowrap;">8 rules</td>
+            </tr>
+            <tr>
+              <td><code>deck-and-ui</code></td>
+              <td><strong>Slide Deck, Web UI &amp; Graphic Layout</strong></td>
+              <td>Flags PowerPoint and PDF slide word-walls, autofit text shrink, generic titles, Web UI neon gradients, glow orbs, emoji chrome, icon-tile grids, SVG layout defects, and raster image AI workflow/palette slop.</td>
+              <td style="white-space:nowrap;">15 rules</td>
+            </tr>
+            <tr>
+              <td><code>executive-deck</code></td>
+              <td><strong>Executive Slide Deck &amp; Board Readout</strong></td>
+              <td>Enforces conclusion-first slide headlines and flags monotonous multi-slide bullet skeletons on top of core deck and UI hygiene.</td>
+              <td style="white-space:nowrap;">2 rules</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section-block band-rule">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Awesome Anti-Slop (90 verified entries)</h2>
+          <p class="section-desc">Curated linters, writing skills, UI rules, PR policies, and papers checked on 2026-11-21 (20 automated tools).</p>
+        </div>
+        <a href="./awesome/">Filter all 90 entries →</a>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <h2 class="section-title">Frequently asked questions</h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <h3>Does dislop upload my drafts when checking locally?</h3>
+          <p>No. The pure-Markdown Skill, local CLI, editor plugins, and the default browser workbench run offline with zero uploads. Only explicit Cloud MCP or signed-in cloud buttons call our paid Google Gemini API tier without storing drafts.</p>
+        </div>
+        <div class="faq-item">
+          <h3>How is dislop different from an AI text detector?</h3>
+          <p>Probabilistic detectors give a single guess percentage without saying what to fix. dislop flags exact lines—leftover chat greetings, unfilled placeholders, second-order slogans, AI gradients, and dense PPTX slides—with edit checks.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Which coding and office agents can connect to dislop?</h3>
+          <p>Claude Code, Codex, Cursor, Windsurf, Antigravity, GitHub Actions, and any client supporting Agent Skills or Streamable HTTP MCP at <code>https://dislop.com/mcp</code>.</p>
+        </div>
+      </div>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>This site passes dislop check site/ with 0 issues. For agents, start at <a href="../llms.txt">/llms.txt</a>.</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../en/guides/">Guides</a>
+        <a href="../en/awesome/">Awesome list</a>
+        <a href="../en/rules/">All rules</a>
+        <a href="../privacy.md">Privacy</a>
+        <a href="../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">Close</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../static-ui.js"></script>
+
+</body>
+</html>

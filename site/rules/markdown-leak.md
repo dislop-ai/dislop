@@ -10,7 +10,7 @@ family: hygiene/markdown-leak
 # Rule: `markdown-leak`
 
 - Pack: [`core`](../packs/core.md) · Tier: `invariant` · Severity: `error`
-- Modalities: `docx, pptx`
+- Modalities: `docx, pptx, pdf`
 - Human anchor: https://dislop.com/#rule-markdown-leak
 
 ## What It Catches

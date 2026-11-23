@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" data-static-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>All 46 Anti-Slop Rules — dislop</title>
+  <meta name="description" content="Reference index of 46 deterministic anti-slop rules across 7 packs with check questions and clean rewrite examples.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/en/rules/">
+  <meta property="og:title" content="All 46 Anti-Slop Rules — dislop">
+  <meta property="og:description" content="Reference index of 46 deterministic anti-slop rules across 7 packs with check questions and clean rewrite examples.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="All 46 Anti-Slop Rules — dislop">
+  <meta name="twitter:description" content="Reference index of 46 deterministic anti-slop rules across 7 packs with check questions and clean rewrite examples.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
+  <link rel="canonical" href="https://dislop.com/en/rules/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/">
+  <link rel="alternate" type="application/atom+xml" href="../../en/feed.xml" title="dislop Guides (EN)">
+  <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": "https://dislop.com/en/rules/",
+      "url": "https://dislop.com/en/rules/",
+      "name": "All 46 Anti-Slop Rules — dislop",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/en/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Rules",
+          "item": "https://dislop.com/en/rules/"
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../en/">
+        <img src="../../assets/logo.svg" width="28" height="28" alt="dislop icon">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../?lang=en#workbench">Workbench</a>
+        <a href="../../en/guides/">Guides</a>
+        <a href="../../en/awesome/">Directory</a>
+        <a href="../../en/rules/" aria-current="page">Rules</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../rules/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block band-rule">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../">dislop</a> / <span aria-current="page">Rules</span>
+      </nav>
+      <h1 class="lead-heading" style="max-width:26ch;">All 46 English &amp; cross-language rules</h1>
+      <p class="section-desc">
+        46 deterministic rules ship inside the offline CLI and browser workbench across 7 scenario packs, each with a Deletion Test question and Before / Fallback / Clean examples.
+      </p>
+    </section>
+      <section class="section-block band-rule" id="pack-core">
+        <h2 class="section-title">AI Delivery Artifacts <code>core</code></h2>
+        <p class="section-desc">Clear AI-generation artifacts enabled across every pack: stray chatbot greetings, unfilled placeholders, raw Markdown pasted into Word/PowerPoint, and dead placeholder links/buttons in generated UI.</p>
+        <div class="table-scroll" tabindex="0">
+          <table class="rules-table">
+            <thead>
+              <tr><th>Rule</th><th>Level</th><th>Formats</th><th>What it catches</th></tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><a href="./unfilled-placeholder/"><strong>Unfilled placeholder</strong></a><div style="margin-top:2px;"><code>unfilled-placeholder</code></div></td>
+              <td><code>error</code></td>
+              <td><code>markdown, text, html, jsx, svg, docx, pptx, pdf</code></td>
+              <td>Unfilled AI template placeholder or dummy copy.</td>
+            </tr>
+            <tr>
+              <td><a href="./chatbot-artifact/"><strong>Chatbot greeting</strong></a><div style="margin-top:2px;"><code>chatbot-artifact</code></div></td>
+              <td><code>error</code></td>
+              <td><code>markdown, text, html, jsx, docx, pptx, pdf</code></td>
+              <td>Unstripped chatbot wrapper sentence or AI search citation token.</td>
+            </tr>
+            <tr>
+              <td><a href="./markdown-leak/"><strong>Raw Markdown in Office doc</strong></a><div style="margin-top:2px;"><code>markdown-leak</code></div></td>
+              <td><code>error</code></td>
+              <td><code>docx, pptx, pdf</code></td>
+              <td>Raw Markdown syntax (<code>**bold**</code> or <code>## heading</code>) pasted unrendered into Word or PowerPoint.</td>
+            </tr>
+            <tr>
+              <td><a href="./ui-dead-control/"><strong>Dead placeholder link or button</strong></a><div style="margin-top:2px;"><code>ui-dead-control</code></div></td>
+              <td><code>error</code></td>
+              <td><code>html, jsx</code></td>
+              <td>Placeholder <code>href=&quot;#&quot;</code> link, empty button, or unexplained disabled button typical of generated UI mockups.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="section-block band-rule" id="pack-business-brief">
+        <h2 class="section-title">Business Brief &amp; Technical Proposal <code>business-brief</code></h2>
+        <p class="section-desc">Flags throat-clearing openers, bureaucratic padding, second-order negation pivots ('Not X, but Y'), staccato slogan chains, four-character triads, and unsourced claims.</p>
+        <div class="table-scroll" tabindex="0">
+          <table class="rules-table">
+            <thead>
+              <tr><th>Rule</th><th>Level</th><th>Formats</th><th>What it catches</th></tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><a href="./en-throat-clearing-opener/"><strong>Throat-clearing opener</strong></a><div style="margin-top:2px;"><code>en-throat-clearing-opener</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Throat-clearing opener delays the concrete point.</td>
+            </tr>
+            <tr>
+              <td><a href="./en-cliche-lexicon/"><strong>Stock AI buzzword</strong></a><div style="margin-top:2px;"><code>en-cliche-lexicon</code></div></td>
+              <td><code>info</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Stock promotional phrase where a specific verb or measurement would carry more weight.</td>
+            </tr>
+            <tr>
+              <td><a href="./negation-pivot-frame/"><strong>&quot;Not X, but Y&quot; slogan frame</strong></a><div style="margin-top:2px;"><code>negation-pivot-frame</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Second-order 'Not X, but Y' rhetorical pivot elevates an abstract slogan instead of stating a concrete fact.</td>
+            </tr>
+            <tr>
+              <td><a href="./staccato-slogan-run/"><strong>Staccato slogan chain</strong></a><div style="margin-top:2px;"><code>staccato-slogan-run</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Three or more consecutive ultra-short slogan fragments mimic dramatic copywriting cadence.</td>
+            </tr>
+            <tr>
+              <td><a href="./unsourced-attribution/"><strong>Unsourced claim</strong></a><div style="margin-top:2px;"><code>unsourced-attribution</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Vague authority claim (<code>studies show</code>) without a named source, link, or citation.</td>
+            </tr>
+            <tr>
+              <td><a href="./bold-lead-list-wall/"><strong>Bold-lead bullet wall</strong></a><div style="margin-top:2px;"><code>bold-lead-list-wall</code></div></td>
+              <td><code>info</code></td>
+              <td><code>markdown, text</code></td>
+              <td>Run of 4+ <code>- **Label**: description</code> bullets reads like an unedited LLM summary wall.</td>
+            </tr>
+            <tr>
+              <td><a href="./cooccurrence-slop-cluster/"><strong>Buzzword cluster in fact-free paragraph</strong></a><div style="margin-top:2px;"><code>cooccurrence-slop-cluster</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Multiple subtle corporate/AI fluff verbs and modifiers co-occur in one low-evidence paragraph.</td>
+            </tr>
+            <tr>
+              <td><a href="./semicolon-tricolon/"><strong>Three-part balanced semicolon pitch</strong></a><div style="margin-top:2px;"><code>semicolon-tricolon</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Three-part balanced semicolon pitch sentence reads like generated marketing cadence.</td>
+            </tr>
+            <tr>
+              <td><a href="./rhetorical-qa-cadence/"><strong>Self-answered rhetorical Q&amp;A</strong></a><div style="margin-top:2px;"><code>rhetorical-qa-cadence</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Formulaic self-answered rhetorical question ('Why...? Because...' / 'The result?') mimics LLM blog hooks.</td>
+            </tr>
+            <tr>
+              <td><a href="./comma-chain-runon/"><strong>Five-comma run-on chain</strong></a><div style="margin-top:2px;"><code>comma-chain-runon</code></div></td>
+              <td><code>info</code></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td>Single sentence chains 5+ comma clauses in breathless LLM cadence.</td>
+            </tr>
+            <tr>
+              <td><a href="./narrative-sandwich-frame/"><strong>Macro-trend opener or future-gazing closer</strong></a><div style="margin-top:2px;"><code>narrative-sandwich-frame</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td>Macro-trend opener, future-facing closer, or dense transition-marker cluster ('Furthermore/Moreover/Additionally') follows the stock LLM essay sandwich.</td>
+            </tr>
+            <tr>
+              <td><a href="./template-skeleton-echo/"><strong>Repeated paragraph-opener skeleton</strong></a><div style="margin-top:2px;"><code>template-skeleton-echo</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td>Three or more paragraphs or sentences repeat the exact same syntactic opener skeleton ('By &lt;verb&gt;ing...', 'First/Second/Third/Finally').</td>
+            </tr>
+            <tr>
+              <td><a href="./low-burstiness-vapor/"><strong>Flat sentence rhythm with zero concrete facts</strong></a><div style="margin-top:2px;"><code>low-burstiness-vapor</code></div></td>
+              <td><code>info</code></td>
+              <td><code>markdown, text</code></td>
+              <td>Multi-sentence passage combines robotically uniform sentence lengths (low burstiness CV &lt; 0.24) with near-zero concrete anchors (numbers, dates, files, or verifiable actions).</td>
+            </tr>
+            <tr>
+              <td><a href="./unsourced-statistic/"><strong>Unsourced percentage claim</strong></a><div style="margin-top:2px;"><code>unsourced-statistic</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Marketing-style percentage claim ('up to X%', 'reduces by X%') lacks a baseline, sample size, metric name, or citation.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="section-block band-rule" id="pack-engineering-spec">
+        <h2 class="section-title">Engineering RFC, PR &amp; Postmortem <code>engineering-spec</code></h2>
+        <p class="section-desc">Catches empty AI PR summaries, stop-thinking 'human error' postmortem labels, and unowned wishful action items alongside core and brief checks.</p>
+        <div class="table-scroll" tabindex="0">
+          <table class="rules-table">
+            <thead>
+              <tr><th>Rule</th><th>Level</th><th>Formats</th><th>What it catches</th></tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><a href="./eng-pr-diff-parrot/"><strong>Empty AI PR diff summary</strong></a><div style="margin-top:2px;"><code>eng-pr-diff-parrot</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text</code></td>
+              <td>Generic AI PR summary parrots file changes without stating the concrete bug, constraint, or metric.</td>
+            </tr>
+            <tr>
+              <td><a href="./eng-shallow-root-cause/"><strong>Stop-thinking 'human error' root cause</strong></a><div style="margin-top:2px;"><code>eng-shallow-root-cause</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, docx</code></td>
+              <td>Postmortem stops at 'human error' instead of identifying the missing system guardrail.</td>
+            </tr>
+            <tr>
+              <td><a href="./eng-vague-action-item/"><strong>Unowned wishful action item</strong></a><div style="margin-top:2px;"><code>eng-vague-action-item</code></div></td>
+              <td><code>info</code></td>
+              <td><code>markdown, text, docx</code></td>
+              <td>Wishful action item lacks a concrete target component, threshold, owner, or due date.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="section-block band-rule" id="pack-regulated-comms">
+        <h2 class="section-title">External &amp; Regulated Communications <code>regulated-comms</code></h2>
+        <p class="section-desc">Flags unsubstantiated absolute claims ('100% secure', 'zero risk') and floating hype multipliers ('10x faster' with no baseline) in external docs.</p>
+        <div class="table-scroll" tabindex="0">
+          <table class="rules-table">
+            <thead>
+              <tr><th>Rule</th><th>Level</th><th>Formats</th><th>What it catches</th></tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><a href="./reg-unsubstantiated-superlative/"><strong>Unsubstantiated '100% / zero-risk' claim</strong></a><div style="margin-top:2px;"><code>reg-unsubstantiated-superlative</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Absolute or superlative claim creates legal/compliance exposure where scoped SLA terms belong.</td>
+            </tr>
+            <tr>
+              <td><a href="./reg-unanchored-multiplier/"><strong>Multiplier claim without baseline</strong></a><div style="margin-top:2px;"><code>reg-unanchored-multiplier</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td>Floating speedup or efficiency multiplier ('10x faster') omits the before/after baseline.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="section-block band-rule" id="pack-literary-essay">
+        <h2 class="section-title">Literary Essay &amp; Longform Narrative <code>literary-essay</code></h2>
+        <p class="section-desc">Protects concrete observation and voice against moralizing paragraph endings, second-order negation pivots, em-dash saturation, and half-width Chinese punctuation.</p>
+        <div class="table-scroll" tabindex="0">
+          <table class="rules-table">
+            <thead>
+              <tr><th>Rule</th><th>Level</th><th>Formats</th><th>What it catches</th></tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><a href="./en-essay-moralizing-ending/"><strong>Moralizing ending</strong></a><div style="margin-top:2px;"><code>en-essay-moralizing-ending</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td>Formulaic wistful conclusion tells the reader what to feel instead of ending on the scene.</td>
+            </tr>
+            <tr>
+              <td><a href="./literary-negation-pivot/"><strong>Aphorism &quot;not X, but Y&quot;</strong></a><div style="margin-top:2px;"><code>literary-negation-pivot</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td>Formulaic 'Not X, but Y' aphorism interrupts narrative texture.</td>
+            </tr>
+            <tr>
+              <td><a href="./excessive-em-dash-density/"><strong>Too many em-dashes</strong></a><div style="margin-top:2px;"><code>excessive-em-dash-density</code></div></td>
+              <td><code>info</code></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td>High em-dash (<code>—</code> / <code>——</code>) frequency creates breathless LLM parenthetical rhythm.</td>
+            </tr>
+            <tr>
+              <td><a href="./literary-semicolon-tricolon/"><strong>Lyrical three-part semicolon balance</strong></a><div style="margin-top:2px;"><code>literary-semicolon-tricolon</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td>Balanced three-part semicolon sentence turns scene description into synthetic lyrical cadence.</td>
+            </tr>
+            <tr>
+              <td><a href="./literary-rhetorical-qa/"><strong>Essay rhetorical self-Q&amp;A</strong></a><div style="margin-top:2px;"><code>literary-rhetorical-qa</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td>Staged self-answered rhetorical question ('Why does ...? Because ...') lectures the reader instead of showing the scene.</td>
+            </tr>
+            <tr>
+              <td><a href="./literary-narrative-frame/"><strong>Sweeping era opener in personal essay</strong></a><div style="margin-top:2px;"><code>literary-narrative-frame</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td>Sweeping era opener ('In an era defined by...') or uplifting takeaway closer wraps a personal essay in an LLM template.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="section-block band-rule" id="pack-deck-and-ui">
+        <h2 class="section-title">Slide Deck, Web UI &amp; Graphic Layout <code>deck-and-ui</code></h2>
+        <p class="section-desc">Flags PowerPoint and PDF slide word-walls, autofit text shrink, generic titles, Web UI neon gradients, glow orbs, emoji chrome, icon-tile grids, SVG layout defects, and raster image AI workflow/palette slop.</p>
+        <div class="table-scroll" tabindex="0">
+          <table class="rules-table">
+            <thead>
+              <tr><th>Rule</th><th>Level</th><th>Formats</th><th>What it catches</th></tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><a href="./slide-word-wall/"><strong>Slide word wall</strong></a><div style="margin-top:2px;"><code>slide-word-wall</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>pptx, pdf</code></td>
+              <td>Slide exceeds readable copy budget (&gt; 120 Latin words or &gt; 280 Chinese characters).</td>
+            </tr>
+            <tr>
+              <td><a href="./slide-bullet-overload/"><strong>Too many bullets on one slide</strong></a><div style="margin-top:2px;"><code>slide-bullet-overload</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>pptx</code></td>
+              <td>Slide contains more than 6 bullet items (<code>maxSlideBullets</code>), fragmenting visual hierarchy.</td>
+            </tr>
+            <tr>
+              <td><a href="./slide-autofit-shrink/"><strong>Slide text auto-shrunk too small</strong></a><div style="margin-top:2px;"><code>slide-autofit-shrink</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>pptx</code></td>
+              <td>PowerPoint <code>normAutofit</code> shrank text below 80% (<code>fontScale &lt; 80000</code>) because copy overflowed its box.</td>
+            </tr>
+            <tr>
+              <td><a href="./slide-weak-topic-title/"><strong>Generic slide title</strong></a><div style="margin-top:2px;"><code>slide-weak-topic-title</code></div></td>
+              <td><code>info</code></td>
+              <td><code>pptx</code></td>
+              <td>Content-heavy slide uses a generic topic label (<code>Overview</code>, <code>Background</code>) instead of stating its takeaway.</td>
+            </tr>
+            <tr>
+              <td><a href="./ui-ai-gradient/"><strong>Default purple-pink AI gradient</strong></a><div style="margin-top:2px;"><code>ui-ai-gradient</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>html, css, jsx, svg, pdf</code></td>
+              <td>Default purple/indigo-to-pink generator gradient or gradient-clipped display headline.</td>
+            </tr>
+            <tr>
+              <td><a href="./ui-pill-soup/"><strong>Pill-badge soup</strong></a><div style="margin-top:2px;"><code>ui-pill-soup</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>html, jsx</code></td>
+              <td>Excessive <code>rounded-full</code> / <code>999px</code> text pills (&gt; 6 per view) turn interface metadata into badge soup.</td>
+            </tr>
+            <tr>
+              <td><a href="./ui-box-in-box/"><strong>Three-level nested boxes</strong></a><div style="margin-top:2px;"><code>ui-box-in-box</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>html, jsx</code></td>
+              <td>Three or more nested bordered/rounded containers wrap the same content (<code>box-in-box-in-box</code>).</td>
+            </tr>
+            <tr>
+              <td><a href="./ui-prompt-echo-badge/"><strong>Prompt-echo marketing badge</strong></a><div style="margin-top:2px;"><code>ui-prompt-echo-badge</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>html, jsx, svg</code></td>
+              <td>Interface chrome echoes prompt-engineering hype (<code>AI-Powered</code>, <code>Zero Hallucination</code>) instead of naming the function.</td>
+            </tr>
+            <tr>
+              <td><a href="./ui-glow-blob-chrome/"><strong>Ambient glow orbs &amp; pulsing dots</strong></a><div style="margin-top:2px;"><code>ui-glow-blob-chrome</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>html, css, jsx, svg</code></td>
+              <td>Decorative ambient blur orbs (<code>blur-3xl</code>), neon box-shadows, pulsing <code>animate-ping</code> pill dots, or heavy SVG glow filters.</td>
+            </tr>
+            <tr>
+              <td><a href="./ui-emoji-icon-chrome/"><strong>Decorative emoji UI chrome</strong></a><div style="margin-top:2px;"><code>ui-emoji-icon-chrome</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>html, jsx, svg</code></td>
+              <td>Three or more decorative AI stock emojis (<code>🚀</code>, <code>✨</code>, <code>⚡</code>, <code>🛡️</code>) used as interface or heading icons.</td>
+            </tr>
+            <tr>
+              <td><a href="./ui-template-card-grid/"><strong>Icon-tile grid &amp; fake window dots</strong></a><div style="margin-top:2px;"><code>ui-template-card-grid</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>html, jsx</code></td>
+              <td>Stock generator UI boilerplate: tinted rounded-square icon tiles (&gt;= 3), fake macOS 3-dot window chrome, or sequential <code>01</code>/<code>02</code>/<code>03</code> eyebrow kickers.</td>
+            </tr>
+            <tr>
+              <td><a href="./svg-layout-slop/"><strong>SVG missing viewBox or text overlap</strong></a><div style="margin-top:2px;"><code>svg-layout-slop</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>svg</code></td>
+              <td>SVG graphic has structural generation defects: missing <code>viewBox</code> on a large canvas, overlapping <code>&lt;text&gt;</code> coordinates, or &gt;= 2 orphaned <code>&lt;defs&gt;</code> entries.</td>
+            </tr>
+            <tr>
+              <td><a href="./image-ai-workflow-residue/"><strong>Image AI workflow residue &amp; provenance</strong></a><div style="margin-top:2px;"><code>image-ai-workflow-residue</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>image</code></td>
+              <td>Raster image embeds unstripped AI generation prompt/workflow parameters (warning) or explicit synthetic provenance tags (info — retain required legal disclosures).</td>
+            </tr>
+            <tr>
+              <td><a href="./image-ai-palette-slop/"><strong>PNG neon purple palette or plastic sheen</strong></a><div style="margin-top:2px;"><code>image-ai-palette-slop</code></div></td>
+              <td><code>info</code></td>
+              <td><code>image</code></td>
+              <td>PNG pixel profile matches default AI-slop aesthetics: dominant neon purple-indigo-pink palette or hyper-saturated airbrushed plastic sheen.</td>
+            </tr>
+            <tr>
+              <td><a href="./pdf-visual-layout-slop/"><strong>PDF raster slides or flat typography</strong></a><div style="margin-top:2px;"><code>pdf-visual-layout-slop</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>pdf</code></td>
+              <td>PDF slide/poster layout exhibits synthetic template defects: multi-page raster-only slides, collapsed font hierarchy, crushed &lt; 9.5pt body copy, or 4+ consecutive identical landscape slide skeletons.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="section-block band-rule" id="pack-executive-deck">
+        <h2 class="section-title">Executive Slide Deck &amp; Board Readout <code>executive-deck</code></h2>
+        <p class="section-desc">Enforces conclusion-first slide headlines and flags monotonous multi-slide bullet skeletons on top of core deck and UI hygiene.</p>
+        <div class="table-scroll" tabindex="0">
+          <table class="rules-table">
+            <thead>
+              <tr><th>Rule</th><th>Level</th><th>Formats</th><th>What it catches</th></tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><a href="./slide-process-not-finding-title/"><strong>Process-label slide title instead of takeaway</strong></a><div style="margin-top:2px;"><code>slide-process-not-finding-title</code></div></td>
+              <td><code>warning</code></td>
+              <td><code>markdown, pptx</code></td>
+              <td>Topic-label headline names the work done ('Analysis of X') instead of stating the finding.</td>
+            </tr>
+            <tr>
+              <td><a href="./pptx-layout-monotony/"><strong>4+ consecutive identical bullet slides</strong></a><div style="margin-top:2px;"><code>pptx-layout-monotony</code></div></td>
+              <td><code>info</code></td>
+              <td><code>pptx</code></td>
+              <td>Four or more consecutive slides repeat the exact same plain text-box skeleton without tables, charts, or visual variation.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>This site passes dislop check site/ with 0 issues. For agents, start at <a href="../../llms.txt">/llms.txt</a>.</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../en/guides/">Guides</a>
+        <a href="../../en/awesome/">Awesome list</a>
+        <a href="../../en/rules/">All rules</a>
+        <a href="../../privacy.md">Privacy</a>
+        <a href="../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">Close</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../static-ui.js"></script>
+
+</body>
+</html>

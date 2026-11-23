@@ -24,7 +24,7 @@ npx --yes dislop explain negation-pivot-frame
 # Check with 5-axis rhythm stats and bundled 14.6 KB Pocket ML
 npx --yes dislop check draft.md --profile --ml
 
-# Run extended 53-pattern catalog probes offline
+# Run extended 65-pattern catalog probes offline
 npx --yes dislop patterns draft.md
 
 # Extract an offline deterministic personal voice profile (0 network calls)

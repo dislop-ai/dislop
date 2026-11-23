@@ -57,9 +57,9 @@ const META = {
   license: "Apache-2.0",
   brandColor: "#F04438",
   shortSubtitle: "Linter for AI Slop",
-  serverDescription: "Linter for AI Slop in docs, web UI, and slides — Official Cloud MCP.",
+  serverDescription: "Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI & slides (Cloud MCP).",
   pluginDescription:
-    "Linter for AI Slop. Combines vetted community rules (7 packs, 42 rules, 53 patterns) across pure-doc Skill, local offline CLI, and Official Cloud MCP.",
+    "Cutting AI slop is real productivity. Linter for AI Slop with vetted rules (7 packs, 53 rules, 65 patterns) across pure-doc Skill, offline CLI, and Official Cloud MCP.",
   keywords: [
     "anti-slop",
     "de-slop",
@@ -321,7 +321,7 @@ const targets = [
     content: [
       "interface:",
       '  display_name: "dislop"',
-      '  short_description: "Linter for AI Slop in docs, web UI, and slides"',
+      '  short_description: "Cutting AI slop is real productivity — Linter for AI Slop"',
       `  default_prompt: "Use $dislop to check my draft for AI slop, replacement slogans, and template UI while keeping every number, link, and qualifier intact."`,
       "policy:",
       "  allow_implicit_invocation: true",
@@ -406,8 +406,9 @@ function walkRelativeFiles(baseDir, prefix = "") {
   return out.sort();
 }
 const rootSkillDir = path.join(ROOT, "skills", "dislop");
+const rootSkillFiles = new Set(walkRelativeFiles(rootSkillDir));
 const openaiYamlTarget = targets.find((t) => t.rel === "skills/dislop/agents/openai.yaml");
-for (const subRel of walkRelativeFiles(rootSkillDir)) {
+for (const subRel of [...rootSkillFiles].sort()) {
   targets.push({
     rel: `integrations/antigravity/skills/dislop/${subRel}`,
     content:
@@ -416,6 +417,11 @@ for (const subRel of walkRelativeFiles(rootSkillDir)) {
         : fs.readFileSync(path.join(rootSkillDir, subRel), "utf8"),
   });
 }
+
+const antigravitySkillDir = path.join(ROOT, "integrations", "antigravity", "skills", "dislop");
+const staleMirrorFiles = fs.existsSync(antigravitySkillDir)
+  ? walkRelativeFiles(antigravitySkillDir).filter((rel) => !rootSkillFiles.has(rel))
+  : [];
 
 const pyProjVer = pyproject.match(/^version\s*=\s*"([^"]+)"/m)?.[1];
 const skillVer = skillMd.match(/^version:\s*([^\s]+)/m)?.[1];
@@ -457,6 +463,14 @@ const portableManifest = JSON.parse(targets.find((t) => t.rel === "plugin.json")
 for (const k of Object.keys(portableManifest)) {
   if (!ALLOWED_AGENT_PLUGIN_KEYS.has(k)) {
     driftErrors.push(`plugin.json contains disallowed top-level key '${k}' under agent-plugins.org/1.0.0`);
+  }
+}
+
+for (const staleRel of staleMirrorFiles) {
+  if (checkOnly) {
+    driftErrors.push(`Stale mirror file: integrations/antigravity/skills/dislop/${staleRel} (run 'node scripts/sync_manifests.mjs' to clean)`);
+  } else {
+    fs.rmSync(path.join(antigravitySkillDir, staleRel), { force: true });
   }
 }
 

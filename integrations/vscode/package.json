@@ -1,7 +1,7 @@
 {
   "name": "dislop",
   "displayName": "dislop",
-  "description": "Linter for AI Slop — helps you (and your agent) catch and fix AI-sounding text and layouts in docs and web UI (7 packs, 42 rules, offline).",
+  "description": "Cutting AI slop is real productivity. Linter for AI Slop in docs and web UI (7 packs, 42 rules, offline).",
   "version": "0.7.1",
   "publisher": "dislop-ai",
   "license": "Apache-2.0",

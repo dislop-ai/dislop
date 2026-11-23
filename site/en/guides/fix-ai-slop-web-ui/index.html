@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" data-static-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons — dislop</title>
+  <meta name="description" content="How to catch and replace the 7 most common AI-generated frontend templates—purple gradients, pill walls, nested boxes, and href='#' dead buttons—before shipping.">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/en/guides/fix-ai-slop-web-ui/">
+  <meta property="og:title" content="Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons — dislop">
+  <meta property="og:description" content="How to catch and replace the 7 most common AI-generated frontend templates—purple gradients, pill walls, nested boxes, and href='#' dead buttons—before shipping.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons — dislop">
+  <meta name="twitter:description" content="How to catch and replace the 7 most common AI-generated frontend templates—purple gradients, pill walls, nested boxes, and href='#' dead buttons—before shipping.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
+  <link rel="canonical" href="https://dislop.com/en/guides/fix-ai-slop-web-ui/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/fix-ai-slop-web-ui/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/fix-ai-slop-web-ui/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/fix-ai-slop-web-ui/">
+  <link rel="alternate" type="application/atom+xml" href="../../../en/feed.xml" title="dislop Guides (EN)">
+  <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../../assets/logo.svg">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/en/guides/fix-ai-slop-web-ui/",
+      "url": "https://dislop.com/en/guides/fix-ai-slop-web-ui/",
+      "headline": "Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons",
+      "description": "How to catch and replace the 7 most common AI-generated frontend templates—purple gradients, pill walls, nested boxes, and href='#' dead buttons—before shipping.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-23",
+      "dateModified": "2026-11-23",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "image": "https://dislop.com/assets/og-card.png",
+      "citation": [
+        "https://github.com/anthropics/skills/tree/main/skills/frontend-design",
+        "https://github.com/pbakaus/impeccable",
+        "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+        "https://www.norm.to",
+        "https://fontsinuse.com",
+        "https://www.stiftung-buchkunst.de"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/en/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Guides",
+          "item": "https://dislop.com/en/guides/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Fix AI Slop in Web UI",
+          "item": "https://dislop.com/en/guides/fix-ai-slop-web-ui/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why do coding agents keep generating purple-indigo gradients and glow blobs?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Under generic prompts like 'modern SaaS landing page', models default to the highest-probability Tailwind patterns in their training mix: indigo-to-pink gradients, blur-3xl orbs, and three-column icon cards."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can static code analysis actually catch AI UI slop without opening a browser?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes for structural and markup defects. Deterministic probes reliably catch dead href='#' anchors, unexplained disabled buttons, purple-pink gradient stops, 7+ rounded-full pills per view, 3-level nested borders, and SVGs missing viewBox or overlapping text coordinates."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What references help teams move beyond SaaS templates?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Browse independent print, foundry, and editorial archives such as Norm (Zurich), Fonts In Use, and Stiftung Buchkunst. Rely on grid proportions, 1px hairline rules, and real product specimens instead of glowing card chrome."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../../en/">
+        <img src="../../../assets/logo.svg" width="28" height="28" alt="dislop icon">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../../?lang=en#workbench">Workbench</a>
+        <a href="../../../en/guides/" aria-current="page">Guides</a>
+        <a href="../../../en/awesome/">Directory</a>
+        <a href="../../../en/rules/">Rules</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../../guides/fix-ai-slop-web-ui/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../../en/">dislop</a> / <a href="../">Guides</a> / <span aria-current="page">Fix AI Slop in Web UI</span>
+      </nav>
+
+      <article>
+        <header>
+          <h1 class="lead-heading" style="max-width:30ch;">Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons</h1>
+          <div class="article-meta">
+            <span>UI &amp; Visual Craft</span>
+            <span>Updated 2026-11-23</span>
+            <span>6 min read</span>
+            <a href="./index.md">Markdown</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">DIRECT ANSWER</div>
+            <p>AI-generated web UIs look interchangeable when they fall back on purple-pink gradients, pill-badge walls, 3-level nested cards, fake macOS window dots, and dead href='#' buttons. Replace template chrome with 1px structural grids, clear type hierarchy, and deterministic HTML/CSS linting.</p>
+          </div>
+        </header>
+
+        <div class="article-shell">
+          <div class="article-prose">
+<p>Ask a coding agent to scaffold a landing page or admin dashboard, and eight times out of ten you get the same template. It puts blurred purple orbs on the background, adds gradient hero text, draws fake macOS window dots above pastel icon cards, and wires <code>&quot;Get Started&quot;</code> to <code>href=&quot;#&quot;</code>.</p>
+
+<p>That convergence is why design skills like Anthropic's <code>frontend-design</code> (198,134 stars) and <code>pbakaus/impeccable</code> (114,155 stars) gained rapid adoption. Fixing it does not require rewriting your stack—it requires catching template habits automatically before merge.</p>
+
+<h2 id="1-seven-ui-defects-that-scream-generated-template">1. Seven UI defects that scream &quot;generated template&quot;</h2>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Rule ID</th><th>What appears in code</th><th>Why it hurts users</th><th>Clean fix</th></tr></thead><tbody>
+<tr><td><code>ui-dead-control</code></td><td><code>&lt;a href=&quot;#&quot;&gt;Download&lt;/a&gt;</code> or unexplained <code>&lt;button disabled&gt;</code></td><td>Hard functional bug; users click controls that go nowhere</td><td>Wire real destinations or remove unbuilt actions</td></tr>
+<tr><td><code>ui-ai-gradient</code></td><td><code>from-indigo-500 via-purple-500 to-pink-500</code> clipped text</td><td>Instantly marks a generic SaaS template and lowers contrast</td><td>Use crisp solid ink and reserve a single brand accent</td></tr>
+<tr><td><code>ui-pill-soup</code></td><td>7+ <code>rounded-full</code> pill tags stacked on one card</td><td>Drowns out the one status badge users actually need</td><td>Format routine metadata as plain <code>·</code>-separated text</td></tr>
+<tr><td><code>ui-box-in-box</code></td><td>Three nested <code>border rounded-xl p-4</code> wrappers</td><td>Eats mobile viewport width with repetitive padding</td><td>Use alignment, whitespace, or single <code>1px</code> dividers</td></tr>
+<tr><td><code>ui-prompt-echo-badge</code></td><td>Eyebrow stickers saying <code>&quot;AI-Powered · Zero Hallucination&quot;</code></td><td>Echoes marketing prompt slogans instead of product function</td><td>Name the concrete behavior (<code>&quot;Runs offline locally&quot;</code>)</td></tr>
+<tr><td><code>ui-glow-blob-chrome</code></td><td><code>blur-3xl</code> neon background orbs and <code>animate-ping</code> dots</td><td>Visual noise with zero information value</td><td>Remove decorative orbs; separate layers with surface tone</td></tr>
+<tr><td><code>ui-template-card-grid</code></td><td><code>01</code>/<code>02</code>/<code>03</code> eyebrow numbers, fake window dots, <code>🚀✨🛡️</code> icons</td><td>Makes every feature section look identical</td><td>Lead with direct headings and real product screenshots</td></tr>
+</tbody></table></div>
+
+<h2 id="2-before-and-after-markup">2. Before and after markup</h2>
+
+<!-- dislop-quote-start -->
+<pre><code class="language-text">bad:
+&lt;div class=&quot;border rounded-xl p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500&quot;&gt;
+  &lt;span class=&quot;rounded-full px-3 py-1&quot;&gt;AI-Powered · Zero Hallucination&lt;/span&gt;
+  &lt;h3&gt;🚀 Blazing Fast Audits&lt;/h3&gt;
+  &lt;a href=&quot;#&quot;&gt;Download Report&lt;/a&gt;
+&lt;/div&gt;
+
+good:
+&lt;section class=&quot;surface-sheet&quot;&gt;
+  &lt;span class=&quot;section-meta&quot;&gt;Local offline engine&lt;/span&gt;
+  &lt;h3&gt;50ms checks with zero uploads&lt;/h3&gt;
+  &lt;a href=&quot;./report.html&quot;&gt;Download report&lt;/a&gt;
+&lt;/section&gt;</code></pre>
+<!-- dislop-quote-end -->
+
+<p>For inline <code>&lt;svg&gt;</code> diagrams, check two additional failure modes: large canvases missing an explicit <code>viewBox</code> (which clip on mobile) and overlapping <code>&lt;text&gt;</code> coordinates.</p>
+
+<figure class="guide-demo" data-demo-card="ui-slop" data-demo-prefix="../../../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../../../assets/demos/ui-slop-en-v2-poster.png" data-demo-poster="ui-slop">
+              <source type="image/webp" srcset="../../../assets/demos/ui-slop-en-v2.webp" data-demo-webp="ui-slop">
+              <img src="../../../assets/demos/ui-slop-en-v2.gif" alt="Web UI audit flagging purple-pink gradients, pill soup, prompt-echo badges, and dead href='#' buttons before switching to a 1px paper sheet" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="ui-slop">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">4. Web UI audit: strip gradients &amp; dead controls</strong>
+              <span class="demo-cap-badge">UI audit · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Flags indigo-purple gradients, prompt-echo badges, pill walls, and dead href='#' buttons before switching to a 1px paper sheet.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="ui-slop" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="ui-slop">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<h2 id="3-keep-pages-grounded-without-heavy-frameworks">3. Keep pages grounded without heavy frameworks</h2>
+
+<ol>
+<li><strong>Adopt print-inspired constraints</strong>: Study modular grids and type pairings from <code>Norm (Zurich)</code>, <code>Fonts In Use</code>, and <code>Stiftung Buchkunst</code>. Pair one readable UI sans-serif with a monospace font for code, rule IDs, and numbers, and enforce WCAG 2.2 AA contrast (<code>&gt;= 4.5:1</code> for text, <code>&gt;= 3.0:1</code> for control borders).</li>
+<li><strong>Keep runtime dependencies minimal</strong>: Avoid third-party font CDNs or tracking scripts when static HTML/CSS solves the job faster.</li>
+<li><strong>Gate HTML, CSS, JSX, and SVG in CI</strong>:</li>
+</ol>
+
+<pre><code class="language-bash">npx --yes dislop check site/ --pack deck-and-ui --fail-on warning</code></pre>
+
+<p>You can also drop any <code>.html</code>, <code>.css</code>, <code>.jsx</code>, <code>.svg</code>, or <code>.png</code> file directly into the browser workbench on the homepage to inspect UI slop locally without uploading files.</p>
+<h2 id="faq">Frequently asked questions</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>Why do coding agents keep generating purple-indigo gradients and glow blobs?</h3>
+            <p>Under generic prompts like 'modern SaaS landing page', models default to the highest-probability Tailwind patterns in their training mix: indigo-to-pink gradients, blur-3xl orbs, and three-column icon cards.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Can static code analysis actually catch AI UI slop without opening a browser?</h3>
+            <p>Yes for structural and markup defects. Deterministic probes reliably catch dead href='#' anchors, unexplained disabled buttons, purple-pink gradient stops, 7+ rounded-full pills per view, 3-level nested borders, and SVGs missing viewBox or overlapping text coordinates.</p>
+          </div>
+          <div class="faq-item">
+            <h3>What references help teams move beyond SaaS templates?</h3>
+            <p>Browse independent print, foundry, and editorial archives such as Norm (Zurich), Fonts In Use, and Stiftung Buchkunst. Rely on grid proportions, 1px hairline rules, and real product specimens instead of glowing card chrome.</p>
+          </div>
+        </div>
+<h2 id="related-rules">Matching deterministic rules</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../../en/rules/ui-dead-control/"><code>ui-dead-control</code> · Dead placeholder link or button</a>
+<a class="related-link-chip" href="../../../en/rules/ui-ai-gradient/"><code>ui-ai-gradient</code> · Default purple-pink AI gradient</a>
+<a class="related-link-chip" href="../../../en/rules/ui-pill-soup/"><code>ui-pill-soup</code> · Pill-badge soup</a>
+<a class="related-link-chip" href="../../../en/rules/ui-box-in-box/"><code>ui-box-in-box</code> · Three-level nested boxes</a>
+<a class="related-link-chip" href="../../../en/rules/ui-prompt-echo-badge/"><code>ui-prompt-echo-badge</code> · Prompt-echo marketing badge</a>
+<a class="related-link-chip" href="../../../en/rules/ui-glow-blob-chrome/"><code>ui-glow-blob-chrome</code> · Ambient glow orbs &amp; pulsing dots</a>
+<a class="related-link-chip" href="../../../en/rules/ui-emoji-icon-chrome/"><code>ui-emoji-icon-chrome</code> · Decorative emoji UI chrome</a>
+<a class="related-link-chip" href="../../../en/rules/ui-template-card-grid/"><code>ui-template-card-grid</code> · Icon-tile grid &amp; fake window dots</a>
+<a class="related-link-chip" href="../../../en/rules/svg-layout-slop/"><code>svg-layout-slop</code> · SVG missing viewBox or text overlap</a>
+</div>
+<h2 id="next-guides">Next guides</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../what-is-ai-slop/">What Is AI Slop?</a>
+<a class="related-link-chip" href="../deslop-pptx-docx/">Clean Up PPTX &amp; DOCX</a>
+<a class="related-link-chip" href="../agent-cli-mcp-tutorial/">Agent, CLI &amp; CI Setup</a>
+</div>
+<h2 id="sources">Verified references</h2>
+        <ul>
+          <li><a href="https://github.com/anthropics/skills/tree/main/skills/frontend-design" target="_blank" rel="noopener">anthropics/skills — frontend-design</a> — 198,134 repo stars (2026-11-21 snapshot); warns coding agents against generic SaaS palettes, purple gradients, and default AI card grids.</li>
+          <li><a href="https://github.com/pbakaus/impeccable" target="_blank" rel="noopener">pbakaus/impeccable: Design rules &amp; /audit workflow for AI-built UI</a> — 114,155 stars (2026-11-21 snapshot); packages frontend anti-slop design rules, 7 domain references, and commands like /audit and /polish.</li>
+          <li><a href="https://github.com/nextlevelbuilder/ui-ux-pro-max-skill" target="_blank" rel="noopener">nextlevelbuilder/ui-ux-pro-max-skill</a> — 152,711 stars (2026-11-21 snapshot); supplies pre-built palette, font, and layout constraints for AI coding tools.</li>
+          <li><a href="https://www.norm.to" target="_blank" rel="noopener">Norm (Zurich) — Modular Graphic Systems</a> — Independent Swiss studio demonstrating modular grids, restrained micro-typography, and zero-ornament structure.</li>
+          <li><a href="https://fontsinuse.com" target="_blank" rel="noopener">Fonts In Use</a> — Indexed archive of real-world type pairings across print, signage, and web interfaces instead of generic SaaS defaults.</li>
+          <li><a href="https://www.stiftung-buchkunst.de" target="_blank" rel="noopener">Stiftung Buchkunst — Best Book Design from all over the World</a> — Book proportion, margin choreography, and reading pacing benchmarks directly transferable to PDF reports and presentation decks.</li>
+        </ul>
+<div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../../?lang=en#workbench">Try in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons](https://dislop.com/en/guides/fix-ai-slop-web-ui/) — How to catch and replace the 7 most common AI-generated frontend templates—purple gradients, pill walls, nested boxes, and href='#' dead buttons—before shipping.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
+        </div>
+          </div>
+        <aside class="toc-rail" aria-label="On this page">
+          <h2 class="toc-rail-title">On this page</h2>
+          <ol>
+            <li><a href="#1-seven-ui-defects-that-scream-generated-template">1. Seven UI defects that scream &quot;generated template&quot;</a></li>
+            <li><a href="#2-before-and-after-markup">2. Before and after markup</a></li>
+            <li><a href="#3-keep-pages-grounded-without-heavy-frameworks">3. Keep pages grounded without heavy frameworks</a></li>
+          </ol>
+        </aside>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>This site passes dislop check site/ with 0 issues. For agents, start at <a href="../../../llms.txt">/llms.txt</a>.</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../../en/guides/">Guides</a>
+        <a href="../../../en/awesome/">Awesome list</a>
+        <a href="../../../en/rules/">All rules</a>
+        <a href="../../../privacy.md">Privacy</a>
+        <a href="../../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">Close</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../../static-ui.js"></script>
+
+</body>
+</html>

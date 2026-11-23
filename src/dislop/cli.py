@@ -5,9 +5,13 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
 import subprocess
 import sys
+import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -15,19 +19,39 @@ from .engine import (
     ENGINE_VERSION,
     SEVERITY_RANK,
     analyze_text_profile,
+    audit_image_document,
+    audit_ooxml_entries,
+    audit_pdf_document,
     audit_text,
     build_catalog,
+    build_line_starts,
+    build_zones,
     collect_target_files,
+    compute_ruleset_hash,
+    default_pack_for_modality,
+    derive_fix_strategy,
     detect_modality,
+    discover_voice_card,
     extract_voice_profile_offline,
+    find_patterns_dir,
     fnv1a_hex,
+    has_embedded_ui_markup,
     inspect_file,
+    is_long_form_html_document,
     load_all_packs,
     load_config,
     load_pattern_library,
+    merge_packs,
+    offset_to_line_col,
+    parse_image_bytes,
+    parse_pdf_bytes,
     pick_pack_for_file,
     query_catalog,
+    resolve_config_for_file,
     resolve_effective_pack,
+    rule_doc_url,
+    verify_revision,
+    verify_revision_bundle,
 )
 from .local_model import (
     LOCAL_MODEL_TIERS,
@@ -42,6 +66,9 @@ from .pattern_engine import analyze_pattern_profile, audit_patterns, load_patter
 from .pocket_model import analyze_document_with_pocket_models, predict_pack_with_pocket_router
 
 
+PROSE_ML_MODALITIES = {"markdown", "text", "html", "svg"}
+
+
 def _js_round_pct(v: float) -> int:
     return int(math.floor(v * 100.0 + 0.5))
 
@@ -50,14 +77,30 @@ def _merge_pattern_bank_findings(
     existing_findings: list[dict[str, Any]],
     pat_findings: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    seen = {f"{f.get('ruleId')}:{f.get('line')}" for f in existing_findings}
+    seen = {f"{f.get('ruleId')}:{f.get('line')}:{f.get('col') or 1}" for f in existing_findings}
     out = list(existing_findings)
     for pf in pat_findings:
-        key = f"{pf.get('ruleId')}:{pf.get('line')}"
+        key = f"{pf.get('ruleId')}:{pf.get('line')}:{pf.get('col') or 1}"
         if key in seen:
             continue
         seen.add(key)
         out.append(pf)
+    return out
+
+
+def _filter_drivers_with_profile(drivers: list[dict[str, Any]], profile: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if not profile or not drivers:
+        return drivers or []
+    out: list[dict[str, Any]] = []
+    conc_grounded = (profile.get("concreteness") or {}).get("status") == "grounded"
+    burst_varied = (profile.get("burstiness") or {}).get("status") == "varied"
+    for d in drivers:
+        feat = str(d.get("feature") or "")
+        if conc_grounded and "concreteness" in feat:
+            continue
+        if burst_varied and "sent_cv" in feat:
+            continue
+        out.append(d)
     return out
 
 
@@ -66,18 +109,22 @@ def _build_pocket_ml_findings(
     filename: str,
     existing_findings: list[dict[str, Any]],
     threshold: float | None = None,
+    *,
+    profile: dict[str, Any] | None = None,
+    modality: str | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     doc = analyze_document_with_pocket_models(text, threshold=threshold)
     extras: list[dict[str, Any]] = []
-    mod = detect_modality(filename) or "markdown"
+    mod = modality or detect_modality(filename) or "markdown"
     for p in doc["paragraphs"]:
         if not p["flagged"]:
             continue
         if any(p["startLine"] <= f.get("line", -1) <= p["endLine"] for f in existing_findings):
             continue
         pct = _js_round_pct(p["slopProbability"])
-        drv_en = "; ".join(d["reason"]["en"] for d in p["topDrivers"]) or "uniform abstract phrasing"
-        drv_zh = "、".join(d["reason"]["zh"] for d in p["topDrivers"]) or "句式与用词高度均质"
+        active_drivers = _filter_drivers_with_profile(p["topDrivers"], profile)
+        drv_en = "; ".join(d["reason"]["en"] for d in active_drivers) or "uniform abstract phrasing"
+        drv_zh = "、".join(d["reason"]["zh"] for d in active_drivers) or "句式与用词高度均质"
         loc = str(p["startLine"])
         clean_excerpt = str(p.get("excerpt") or "")
         fp = f"pocket-stealth-vapor:{fnv1a_hex(f'pocket-stealth-vapor|{clean_excerpt.lower()}|{loc}')}"
@@ -87,6 +134,7 @@ def _build_pocket_ml_findings(
             "packId": "pocket-model",
             "severity": "warning",
             "tier": "taste",
+            "fixStrategy": "rephrase",
             "family": "rhythm/pocket-stealth-vapor",
             "category": "statistical-vapor",
             "modality": mod,
@@ -110,6 +158,89 @@ def _build_pocket_ml_findings(
     return doc, extras
 
 
+def _collect_text_coverage_warnings(text: str, modality: str, rel: str, profile: dict[str, Any] | None) -> list[dict[str, str]]:
+    warnings: list[dict[str, str]] = []
+    if modality == "html" and re.search(
+        r'<script\b[^>]*\btype\s*=\s*(?:"application/json"|\'application/json\'|application/json(?=[\s>]))',
+        text,
+        re.I | re.ASCII,
+    ):
+        zones = build_zones(text, "html")
+        if len(re.sub(r"\s+", "", zones["prose"])) < 120:
+            warnings.append({
+                "file": rel,
+                "code": "spa-json-shell",
+                "message": 'HTML appears to be an SPA shell with <script type="application/json"> data and <120 visible prose chars; inspect JSON payload or rendered DOM.',
+            })
+            return warnings
+    if modality in {"markdown", "text", "html"} and len(text) >= 2000 and profile and profile.get("proseCoverage", 1.0) < 0.15:
+        pct = _js_round_pct(profile["proseCoverage"])
+        if modality == "html":
+            warnings.append({
+                "file": rel,
+                "code": "low-prose-coverage",
+                "message": f"Extracted prose covers only {pct}% of file ({len(text)} chars); check fenced blocks/markup if unexpected.",
+            })
+            return warnings
+        non_empty = [ln for ln in re.split(r"\r?\n", text) if ln.strip()]
+        table_or_link = sum(1 for ln in non_empty if re.match(r"^\s*(?:\||[-*+]\s+\[)", ln))
+        if non_empty and table_or_link / len(non_empty) < 0.5:
+            warnings.append({
+                "file": rel,
+                "code": "low-prose-coverage",
+                "message": f"Extracted prose covers only {pct}% of file ({len(text)} chars); check fenced blocks/markup if unexpected.",
+            })
+    return warnings
+
+
+def _select_pack_with_confidence_floor(route_res: dict[str, Any]) -> tuple[str, str]:
+    rec = str((route_res or {}).get("recommendedPack") or "business-brief")
+    conf = float((route_res or {}).get("confidence") or 0.0)
+    if rec == "business-brief":
+        return "business-brief", "auto-pocket-router"
+    if rec == "deck-and-ui" and conf >= 0.60:
+        return "deck-and-ui", "auto-pocket-router"
+    if rec != "deck-and-ui" and conf >= 0.65:
+        return rec, "auto-pocket-router"
+    return "business-brief", "auto-default-fallback"
+
+
+def _resolve_text_pack_and_source(
+    text: str,
+    rel: str,
+    modality: str,
+    explicit_pack: str | None,
+    file_config: dict[str, Any],
+    packs: dict[str, dict[str, Any]],
+) -> tuple[dict[str, Any], str, str]:
+    if explicit_pack and explicit_pack != "auto":
+        return resolve_effective_pack(explicit_pack, packs, file_config), explicit_pack, "cli-flag"
+    if explicit_pack == "auto" and modality in {"markdown", "text"}:
+        routed, pack_source = _select_pack_with_confidence_floor(predict_pack_with_pocket_router(text))
+        if modality == "markdown" and has_embedded_ui_markup(text):
+            prose_pack_id = routed
+            if prose_pack_id == "deck-and-ui":
+                stripped = re.sub(r"<[^>]+>", " ", text)
+                stripped_cjk = len(re.findall(r"[\u4e00-\u9fff]", stripped))
+                stripped_words = len([w for w in stripped.split() if re.search(r"[A-Za-z0-9]", w, re.ASCII)])
+                if stripped_cjk >= 20 or stripped_words >= 12:
+                    rerouted, _ = _select_pack_with_confidence_floor(predict_pack_with_pocket_router(stripped))
+                    prose_pack_id = "business-brief" if rerouted == "deck-and-ui" else rerouted
+            if prose_pack_id != "deck-and-ui":
+                prose_pack = resolve_effective_pack(prose_pack_id, packs, file_config)
+                ui_pack = resolve_effective_pack("deck-and-ui", packs, file_config)
+                return merge_packs(prose_pack, ui_pack), f"{prose_pack_id}+deck-and-ui", "auto-mixed-ui"
+        return resolve_effective_pack(routed, packs, file_config), routed, pack_source
+    if explicit_pack == "auto" and modality == "html" and is_long_form_html_document(text):
+        biz = resolve_effective_pack("business-brief", packs, file_config)
+        ui = resolve_effective_pack("deck-and-ui", packs, file_config)
+        return merge_packs(biz, ui), "business-brief+deck-and-ui", "auto-html-longform"
+    pack_id = pick_pack_for_file(rel, modality, None if explicit_pack == "auto" else explicit_pack, file_config)
+    pack = resolve_effective_pack(pack_id, packs, file_config)
+    source = "auto-modality" if explicit_pack == "auto" else ("config" if file_config.get("pack") else "default-modality")
+    return pack, pack_id, source
+
+
 def _summarize_pocket_for_profile(text: str) -> dict[str, Any]:
     doc = analyze_document_with_pocket_models(text)
     return {
@@ -131,7 +262,7 @@ def _format_sarif(report: dict[str, Any], lang: str = "en") -> dict[str, Any]:
                 "id": rid,
                 "shortDescription": {"text": msg},
                 "help": {"text": help_txt},
-                "helpUri": f"https://dislop.com/#rule-{rid}",
+                "helpUri": rule_doc_url(f, lang),
                 "defaultConfiguration": {
                     "level": "error" if f["severity"] == "error" else "warning" if f["severity"] == "warning" else "note"
                 },
@@ -196,6 +327,8 @@ def format_report(report: dict[str, Any], fmt: str = "text", lang: str = "en") -
     checked_count = report["checkedCount"]
     skipped = report.get("skipped", [])
     unused = report.get("unusedSuppressions", [])
+    coverage_warnings = report.get("coverageWarnings", [])
+    changed_filter = bool(report.get("changedFilter"))
 
     if fmt == "json":
         return json.dumps(report, ensure_ascii=False, indent=2)
@@ -208,7 +341,7 @@ def format_report(report: dict[str, Any], fmt: str = "text", lang: str = "en") -
             msg = re.sub(r"\r?\n", " ", (f.get("message") or {}).get(lang) or (f.get("message") or {}).get("en") or "")
             file_prop = _escape_github_prop(f["file"])
             title_prop = _escape_github_prop(f["ruleId"])
-            data_body = _escape_github_data(f"{msg} ({f['match']})")
+            data_body = _escape_github_data(f"{msg} ({f['match']}) — {rule_doc_url(f, lang)}")
             lines.append(f"::{lvl} file={file_prop},line={f.get('line', 1)},col={f.get('col', 1)},title={title_prop}::{data_body}")
         return "\n".join(lines)
     if fmt == "md":
@@ -224,26 +357,63 @@ def format_report(report: dict[str, Any], fmt: str = "text", lang: str = "en") -
 
     skip_note = f", {len(skipped)} skipped" if skipped else ""
     out: list[str] = []
-    if not findings and not unused:
+    if changed_filter and checked_count == 0 and not skipped and not findings and not coverage_warnings:
+        out.append(
+            "dislop: --changed 未匹配到可检查的变更文件（已检 0 项，0 处命中）"
+            if lang == "zh"
+            else "dislop: --changed matched 0 inspectable files (0 checked, 0 findings)"
+        )
+    elif not findings and not unused:
         if lang == "zh":
             zh_skip = f"，跳过 {len(skipped)} 项" if skipped else ""
             out.append(f"dislop: 未发现已知模式（已检 {checked_count} 项{zh_skip}，0 处命中）")
         else:
             out.append(f"dislop: no known patterns found ({checked_count} checked{skip_note}, 0 findings)")
     else:
-        out.append(f"dislop: {len(findings)} finding(s) across {checked_count} checked file(s){skip_note}")
+        is_zh = lang == "zh"
+        err_count = sum(1 for f in findings if f["severity"] == "error")
+        adv_count = len(findings) - err_count
+        zh_skip = f"，跳过 {len(skipped)} 项" if skipped else ""
+        out.append(
+            f"dislop: 发现 {len(findings)} 处问题（{err_count} 硬伤 · {adv_count} 提醒，已检 {checked_count} 个文件{zh_skip}）"
+            if is_zh
+            else f"dislop: {len(findings)} finding(s) ({err_count} error · {adv_count} advisory) across {checked_count} checked file(s){skip_note}"
+        )
+        strat_labels_zh = {"delete": "删掉", "need-source": "补出处", "unwrap-layout": "去套壳", "rephrase": "改写"}
+        seen_rule_ids: set[str] = set()
+        rule_counts: dict[str, int] = {}
         for f in findings:
-            msg = (f.get("message") or {}).get(lang) or (f.get("message") or {}).get("en") or ""
-            out.append(f"  [{f['severity'].upper()}] {f['file']}:{f['location']}  {f['ruleId']}")
-            out.append(f'    match: "{f["match"]}"')
-            out.append(f"    why:   {msg}")
-            dt = f.get("deletionTest")
-            if dt:
-                out.append(f"    test:  {dt.get(lang) or dt.get('en')}")
+            rid = f["ruleId"]
+            rule_counts[rid] = rule_counts.get(rid, 0) + 1
+            strat = f.get("fixStrategy") or derive_fix_strategy({"id": rid, "family": f.get("family")})
+            tag = strat_labels_zh.get(strat, "改写") if is_zh else strat
+            out.append(f'  [{f["severity"].upper()}] {f["file"]}:{f["location"]}  {rid} [{tag}]  "{f["match"]}"')
+            if rid not in seen_rule_ids:
+                seen_rule_ids.add(rid)
+                msg = (f.get("message") or {}).get(lang) or (f.get("message") or {}).get("en") or ""
+                dt = f.get("deletionTest")
+                test_txt = (dt.get(lang) or dt.get("en") or "") if isinstance(dt, dict) else ""
+                if msg:
+                    out.append(f"    原因: {msg}" if is_zh else f"    why: {msg}")
+                if test_txt and test_txt != msg:
+                    out.append(f"    改法: {test_txt}" if is_zh else f"    fix: {test_txt}")
         for u in unused:
-            out.append(f"  [UNUSED] {u['file']}:{u['line']}  stale dislop-ignore ({', '.join(u['ruleIds'])})")
+            out.append(
+                f"  [UNUSED] {u['file']}:{u['line']}  失效忽略注释 dislop-ignore ({', '.join(u['ruleIds'])})"
+                if is_zh
+                else f"  [UNUSED] {u['file']}:{u['line']}  stale dislop-ignore ({', '.join(u['ruleIds'])})"
+            )
+        if len(findings) >= 4 or (checked_count >= 2 and len(findings) > 0):
+            top_str = ", ".join(
+                f"{rid}×{cnt}"
+                for rid, cnt in sorted(rule_counts.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
+            )
+            out.append(f"  按规则分布: {top_str}" if is_zh else f"  Top rules: {top_str}")
+            out.append("  下一步: 改完可跑 dislop verify --git HEAD <文件>" if is_zh else "  Next: verify edits with dislop verify --git HEAD <file>")
     for s in skipped:
         out.append(f"  [SKIP] {s['file']} — {s['reason']}")
+    for w in coverage_warnings:
+        out.append(f"  [COVERAGE] {w['file']} — {w['message']}")
     for item in report.get("profiles") or []:
         p = item["profile"]
         sigs = ", ".join(p["telemetryRisk"]["signals"]) if p["telemetryRisk"]["signals"] else "none"
@@ -256,30 +426,339 @@ def format_report(report: dict[str, Any], fmt: str = "text", lang: str = "en") -
     return "\n".join(out)
 
 
+def _unquote_git_path(raw_path: str) -> str:
+    s = str(raw_path or "")
+    if len(s) < 2 or not s.startswith('"') or not s.endswith('"'):
+        return s
+    inner = s[1:-1]
+    buf = bytearray()
+    esc_map = {
+        "a": b"\x07",
+        "b": b"\x08",
+        "f": b"\x0c",
+        "n": b"\n",
+        "r": b"\r",
+        "t": b"\t",
+        "v": b"\x0b",
+        "\\": b"\\",
+        '"': b'"',
+    }
+    i = 0
+    n = len(inner)
+    while i < n:
+        ch = inner[i]
+        if ch != "\\":
+            buf.extend(ch.encode("utf-8"))
+            i += 1
+            continue
+        if i + 1 >= n:
+            buf.append(0x5C)
+            break
+        nxt = inner[i + 1]
+        if i + 3 < n and all("0" <= c <= "7" for c in inner[i + 1 : i + 4]):
+            buf.append(int(inner[i + 1 : i + 4], 8))
+            i += 4
+        elif nxt in esc_map:
+            buf.extend(esc_map[nxt])
+            i += 2
+        else:
+            buf.extend(nxt.encode("utf-8"))
+            i += 2
+    return buf.decode("utf-8", errors="replace")
+
+
 def _get_changed_lines(cwd: Path, git_ref: str, staged: bool) -> dict[str, set[int] | str]:
-    cmd = ["git", "diff", "--cached", "-U0", "--no-color"] if staged else ["git", "diff", "-U0", "--no-color", git_ref]
-    res = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=True)
+    cmd = (
+        [
+            "git", "-c", "core.quotepath=off", "-c", "diff.interHunkContext=0",
+            "diff", "--cached",
+            "--no-ext-diff", "--no-textconv", "--src-prefix=a/", "--dst-prefix=b/", "--relative",
+            "-U0", "--no-color", "--",
+        ]
+        if staged
+        else [
+            "git", "-c", "core.quotepath=off", "-c", "diff.interHunkContext=0",
+            "diff",
+            "--no-ext-diff", "--no-textconv", "--src-prefix=a/", "--dst-prefix=b/", "--relative",
+            "-U0", "--no-color", git_ref or "HEAD", "--",
+        ]
+    )
+    res = subprocess.run(cmd, cwd=cwd, capture_output=True, check=True)
+    diff_text = res.stdout.decode("utf-8", errors="replace")
     changed: dict[str, set[int] | str] = {}
     cur_file: str | None = None
-    for line in res.stdout.splitlines():
+    in_hunk = False
+    for line in re.split(r"\r?\n", diff_text):
         if line.startswith("diff --git "):
-            dm = re.match(r"^diff --git a/.+ b/(.+)$", line)
-            cur_file = dm.group(1).strip() if dm else None
-        elif line.startswith("+++ b/"):
-            cur_file = line[6:].strip()
-            changed.setdefault(cur_file, set())
-        elif line.startswith("Binary files ") and cur_file:
-            changed[cur_file] = "ALL"
+            in_hunk = False
+            cur_file = None
+        elif not in_hunk and (line.startswith("+++ b/") or line.startswith('+++ "b/')):
+            target = _unquote_git_path(line[4:])
+            if target.startswith("b/"):
+                cur_file = target[2:]
+                changed.setdefault(cur_file, set())
+        elif not in_hunk and line.startswith("Binary files "):
+            bm = re.match(r'^Binary files .* and (b/.+|"b/.+") differ$', line)
+            if bm:
+                bin_target = _unquote_git_path(bm.group(1))
+                if bin_target.startswith("b/"):
+                    changed[bin_target[2:]] = "ALL"
         elif line.startswith("@@ ") and cur_file:
+            in_hunk = True
             m = re.search(r"\+(\d+)(?:,(\d+))?", line)
             if m and isinstance(changed.get(cur_file), set):
                 start = int(m.group(1))
                 cnt = int(m.group(2)) if m.group(2) is not None else 1
+                if cnt == 0:
+                    continue
                 target_set = changed[cur_file]
                 assert isinstance(target_set, set)
-                for k in range(max(1, cnt)):
+                for k in range(cnt):
                     target_set.add(start + k)
     return changed
+
+
+def _inspect_single_file_full(
+    abs_p: Path,
+    rel: str,
+    modality: str,
+    packs: dict[str, dict[str, Any]],
+    explicit_pack: str | None,
+    config: dict[str, Any],
+    *,
+    include_ml: bool = False,
+    include_patterns: bool = False,
+    include_profile: bool = False,
+    banks: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if abs_p.stat().st_size > 25 * 1024 * 1024:
+        return {
+            "checked": False,
+            "findings": [],
+            "unusedSuppressions": [],
+            "coverageWarnings": [],
+            "skipped": [{"file": rel, "reason": "File exceeds 25 MB single-file inspection cap"}],
+        }
+
+    file_cfg = resolve_config_for_file(rel, config)
+    raw_bytes = abs_p.read_bytes()
+
+    if modality in {"docx", "pptx"}:
+        pack_id = pick_pack_for_file(rel, modality, None if explicit_pack == "auto" else explicit_pack, file_cfg)
+        pack = resolve_effective_pack(pack_id, packs, file_cfg)
+        pack_source = (
+            "cli-flag" if explicit_pack and explicit_pack != "auto"
+            else ("auto-modality" if explicit_pack == "auto" else ("config" if file_cfg.get("pack") else "default-modality"))
+        )
+        import io
+        import zipfile
+        try:
+            entries: dict[str, str] = {}
+            total_bytes = 0
+            with zipfile.ZipFile(io.BytesIO(raw_bytes), "r") as zf:
+                infos = zf.infolist()
+                if len(infos) > 3000:
+                    raise ValueError("Archive exceeds 3000-entry safety cap")
+                for info in infos:
+                    if info.filename.endswith((".xml", ".rels")):
+                        total_bytes += info.file_size
+                        if total_bytes > 120 * 1024 * 1024:
+                            raise ValueError("OOXML uncompressed XML exceeds 120 MB safety ceiling")
+                        entries[info.filename] = zf.read(info.filename).decode("utf-8", errors="replace")
+            res = audit_ooxml_entries(entries, filename=rel, modality=modality, pack=pack, config=file_cfg)
+            missing_core = any(s["file"] == rel for s in res["skipped"])
+            f_list = list(res["findings"])
+            if include_patterns and not missing_core:
+                pat_res = audit_patterns("", filename=rel, modality=modality, banks=banks, ooxml=entries, config=file_cfg)
+                f_list = _merge_pattern_bank_findings(f_list, pat_res["findings"])
+            return {
+                "checked": not missing_core,
+                "findings": f_list,
+                "unusedSuppressions": [],
+                "coverageWarnings": [],
+                "skipped": res["skipped"],
+                "effectivePack": pack_id,
+                "packSource": pack_source,
+                "rulesetHash": compute_ruleset_hash(pack),
+            }
+        except Exception as exc:
+            return {
+                "checked": False,
+                "findings": [],
+                "unusedSuppressions": [],
+                "coverageWarnings": [],
+                "skipped": [{"file": rel, "reason": f"Uninspectable {modality.upper()} archive: {exc}"}],
+            }
+
+    if modality == "image":
+        pack_id = pick_pack_for_file(rel, modality, None if explicit_pack == "auto" else explicit_pack, file_cfg)
+        pack = resolve_effective_pack(pack_id, packs, file_cfg)
+        pack_source = (
+            "cli-flag" if explicit_pack and explicit_pack != "auto"
+            else ("auto-modality" if explicit_pack == "auto" else ("config" if file_cfg.get("pack") else "default-modality"))
+        )
+        try:
+            parsed = parse_image_bytes(raw_bytes)
+            res = audit_image_document(parsed, filename=rel, pack=pack, config=file_cfg)
+            return {
+                "checked": True,
+                "findings": res["findings"],
+                "unusedSuppressions": [],
+                "coverageWarnings": [],
+                "skipped": res["skipped"],
+                "effectivePack": pack_id,
+                "packSource": pack_source,
+                "rulesetHash": compute_ruleset_hash(pack),
+            }
+        except Exception as exc:
+            return {
+                "checked": False,
+                "findings": [],
+                "unusedSuppressions": [],
+                "coverageWarnings": [],
+                "skipped": [{"file": rel, "reason": f"Uninspectable image: {exc}"}],
+            }
+
+    if modality == "pdf":
+        try:
+            parsed = parse_pdf_bytes(raw_bytes)
+            if explicit_pack and explicit_pack != "auto":
+                pack = resolve_effective_pack(explicit_pack, packs, file_cfg)
+                eff_pack = explicit_pack
+                pack_source = "cli-flag"
+            elif explicit_pack == "auto":
+                pages = parsed.get("pages") or []
+                landscape_count = sum(1 for p in pages if p.get("isLandscape"))
+                portrait_count = len(pages) - landscape_count
+                if pages and portrait_count >= landscape_count:
+                    pack = merge_packs(
+                        resolve_effective_pack("business-brief", packs, file_cfg),
+                        resolve_effective_pack("deck-and-ui", packs, file_cfg),
+                    )
+                    eff_pack = "business-brief+deck-and-ui"
+                    pack_source = "auto-pdf-portrait"
+                else:
+                    pack = resolve_effective_pack("deck-and-ui", packs, file_cfg)
+                    eff_pack = "deck-and-ui"
+                    pack_source = "auto-pdf-landscape"
+            else:
+                pack_id = pick_pack_for_file(rel, modality, None, file_cfg)
+                pack = resolve_effective_pack(pack_id, packs, file_cfg)
+                eff_pack = pack_id
+                pack_source = "config" if file_cfg.get("pack") else "default-modality"
+            res = audit_pdf_document(parsed, filename=rel, pack=pack, config=file_cfg)
+            uninspectable = any(s["file"] == rel for s in res["skipped"])
+            return {
+                "checked": not uninspectable,
+                "findings": res["findings"],
+                "unusedSuppressions": [],
+                "coverageWarnings": res.get("coverageWarnings", []),
+                "skipped": res["skipped"],
+                "effectivePack": eff_pack,
+                "packSource": pack_source,
+                "rulesetHash": compute_ruleset_hash(pack),
+            }
+        except Exception as exc:
+            return {
+                "checked": False,
+                "findings": [],
+                "unusedSuppressions": [],
+                "coverageWarnings": [],
+                "skipped": [{"file": rel, "reason": f"Uninspectable PDF: {exc}"}],
+            }
+
+    try:
+        text = raw_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        return {
+            "checked": False,
+            "findings": [],
+            "unusedSuppressions": [],
+            "coverageWarnings": [],
+            "skipped": [{"file": rel, "reason": "Non-UTF-8 text encoding; convert to UTF-8 to inspect"}],
+        }
+
+    pack, eff_pack, pack_source = _resolve_text_pack_and_source(text, rel, modality, explicit_pack, file_cfg, packs)
+    res = audit_text(text, filename=rel, modality=modality, pack=pack, config=file_cfg)
+    f_list = list(res["findings"])
+    if include_patterns:
+        pat_res = audit_patterns(text, filename=rel, modality=modality, banks=banks, config=file_cfg)
+        f_list = _merge_pattern_bank_findings(f_list, pat_res["findings"])
+
+    profile_obj: dict[str, Any] | None = None
+    ml_input: str | None = None
+    if modality in PROSE_ML_MODALITIES and (include_ml or include_profile or len(text) >= 2000 or modality == "html"):
+        profile_obj = analyze_text_profile(text, modality=modality, config=file_cfg)
+        if include_ml:
+            ml_input = build_zones(text, modality, {"proseFences": file_cfg.get("proseFences"), "maskBlockquotes": file_cfg.get("maskBlockquotes")})["prose"] if modality in {"html", "svg"} else text
+            _, ml_extras = _build_pocket_ml_findings(ml_input, rel, f_list, profile=profile_obj, modality=modality)
+            f_list.extend(ml_extras)
+
+    coverage_warnings = _collect_text_coverage_warnings(text, modality, rel, profile_obj)
+    profile_item: dict[str, Any] | None = None
+    if include_profile and modality in PROSE_ML_MODALITIES:
+        pocket_src = ml_input if ml_input is not None else (
+            build_zones(text, modality, {"proseFences": file_cfg.get("proseFences"), "maskBlockquotes": file_cfg.get("maskBlockquotes")})["prose"]
+            if modality in {"html", "svg"}
+            else text
+        )
+        profile_item = {
+            "file": rel,
+            "profile": profile_obj or analyze_text_profile(text, modality=modality, config=file_cfg),
+            "pocketModel": _summarize_pocket_for_profile(pocket_src),
+        }
+
+    return {
+        "checked": True,
+        "findings": f_list,
+        "unusedSuppressions": res["unusedSuppressions"],
+        "coverageWarnings": coverage_warnings,
+        "skipped": [],
+        "effectivePack": eff_pack,
+        "packSource": pack_source,
+        "rulesetHash": compute_ruleset_hash(pack),
+        "profileItem": profile_item,
+        "_lineStarts": build_line_starts(text),
+    }
+
+
+def _apply_compact_report(report: dict[str, Any]) -> dict[str, Any]:
+    rule_meta: dict[str, Any] = {}
+    compact_findings: list[dict[str, Any]] = []
+    for f in report.get("findings") or []:
+        rid = f["ruleId"]
+        strategy = f.get("fixStrategy") or derive_fix_strategy({"id": rid, "family": f.get("family")})
+        if rid not in rule_meta:
+            meta: dict[str, Any] = {
+                "tier": f.get("tier") or "taste",
+                "family": f.get("family") or "general",
+                "fixStrategy": strategy,
+                "message": f.get("message"),
+            }
+            if f.get("deletionTest"):
+                meta["deletionTest"] = f["deletionTest"]
+            rule_meta[rid] = meta
+        compact_item: dict[str, Any] = {
+            "fingerprint": f.get("fingerprint"),
+            "ruleId": rid,
+            "severity": f.get("severity"),
+            "fixStrategy": strategy,
+            "file": f.get("file"),
+            "modality": f.get("modality"),
+            "location": f.get("location"),
+            "line": f.get("line"),
+            "col": f.get("col"),
+        }
+        if f.get("span") is not None:
+            compact_item["span"] = f["span"]
+        compact_item["match"] = f.get("match")
+        compact_findings.append(compact_item)
+    return {
+        **report,
+        "compact": True,
+        "ruleMeta": rule_meta,
+        "findings": compact_findings,
+    }
 
 
 def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
@@ -291,45 +770,63 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
         print(f"dislop: invalid --fail-on '{fail_on}'", file=sys.stderr)
         return 2
 
+    include_ml = bool(ns.ml or getattr(ns, "deep", False))
+    include_patterns = bool(ns.patterns or getattr(ns, "deep", False))
+    compact_json = bool(getattr(ns, "compact", False) and fmt == "json")
+    banks_cached = load_pattern_banks() if include_patterns else None
+
     if "-" in ns.paths:
         stdin_text = sys.stdin.read()
         fn = ns.stdin_filename or "stdin.md"
         mod = detect_modality(fn) or "markdown"
-        eff_explicit = (
-            predict_pack_with_pocket_router(stdin_text)["recommendedPack"]
-            if ns.pack == "auto" and mod in {"markdown", "text"}
-            else (None if ns.pack == "auto" else ns.pack)
-        )
-        pack_id = pick_pack_for_file(fn, mod, eff_explicit, config)
+        file_cfg = resolve_config_for_file(fn, config)
         try:
-            pack = resolve_effective_pack(pack_id, packs, config)
+            pack, eff_pack, pack_source = _resolve_text_pack_and_source(stdin_text, fn, mod, ns.pack, file_cfg, packs)
         except Exception as exc:
             print(f"dislop: {exc}", file=sys.stderr)
             return 2
-        res = audit_text(stdin_text, filename=fn, modality=mod, pack=pack, config=config)
+        res = audit_text(stdin_text, filename=fn, modality=mod, pack=pack, config=file_cfg)
         findings = list(res["findings"])
-        if ns.patterns:
-            pat_res = audit_patterns(stdin_text, filename=fn, modality=mod, banks=load_pattern_banks())
+        if include_patterns:
+            pat_res = audit_patterns(stdin_text, filename=fn, modality=mod, banks=banks_cached, config=file_cfg)
             findings = _merge_pattern_bank_findings(findings, pat_res["findings"])
-        if ns.ml and mod in {"markdown", "text"}:
-            _, ml_extras = _build_pocket_ml_findings(stdin_text, fn, findings)
-            findings.extend(ml_extras)
+        profile_obj: dict[str, Any] | None = None
+        ml_input: str | None = None
+        if mod in PROSE_ML_MODALITIES and (include_ml or ns.profile or len(stdin_text) >= 2000 or mod == "html"):
+            profile_obj = analyze_text_profile(stdin_text, modality=mod, config=file_cfg)
+            if include_ml:
+                ml_input = build_zones(stdin_text, mod, {"proseFences": file_cfg.get("proseFences"), "maskBlockquotes": file_cfg.get("maskBlockquotes")})["prose"] if mod in {"html", "svg"} else stdin_text
+                _, ml_extras = _build_pocket_ml_findings(ml_input, fn, findings, profile=profile_obj, modality=mod)
+                findings.extend(ml_extras)
+        coverage_warnings = _collect_text_coverage_warnings(stdin_text, mod, fn, profile_obj)
         report: dict[str, Any] = {
             "version": ENGINE_VERSION,
+            "rulesetHash": compute_ruleset_hash(pack),
+            "effectivePack": eff_pack,
+            "packSource": pack_source,
+            "changedFilter": False,
+            "files": [{"file": fn, "modality": mod, "effectivePack": eff_pack, "packSource": pack_source}],
             "checkedCount": 1,
             "skipped": [],
+            "coverageWarnings": coverage_warnings,
             "findings": findings,
             "unusedSuppressions": res["unusedSuppressions"] if ns.report_unused else [],
         }
-        if ns.profile and mod in {"markdown", "text"}:
+        if ns.profile and mod in PROSE_ML_MODALITIES:
+            pocket_src = ml_input if ml_input is not None else (
+                build_zones(stdin_text, mod, {"proseFences": file_cfg.get("proseFences"), "maskBlockquotes": file_cfg.get("maskBlockquotes")})["prose"]
+                if mod in {"html", "svg"}
+                else stdin_text
+            )
             report["profiles"] = [
                 {
                     "file": fn,
-                    "profile": analyze_text_profile(stdin_text, modality=mod),
-                    "pocketModel": _summarize_pocket_for_profile(stdin_text),
+                    "profile": profile_obj or analyze_text_profile(stdin_text, modality=mod, config=file_cfg),
+                    "pocketModel": _summarize_pocket_for_profile(pocket_src),
                 }
             ]
-        print(format_report(report, fmt, ns.lang))
+        out_report = _apply_compact_report(report) if compact_json else report
+        print(format_report(out_report, fmt, ns.lang))
         triggered = any(SEVERITY_RANK[f["severity"]] >= SEVERITY_RANK[fail_on] for f in findings) or (
             ns.report_unused and len(res["unusedSuppressions"]) > 0
         )
@@ -345,97 +842,125 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
 
     targets = ns.paths or ([p for p in (changed_map or {}) if (cwd / p).exists()] if changed_map is not None else ["."])
     try:
-        files, skipped_init = collect_target_files(targets, cwd, config)
+        files, skipped_init = collect_target_files(targets, cwd, config, explicit_targets=bool(ns.paths))
     except Exception as exc:
         print(f"dislop: {exc}", file=sys.stderr)
         return 2
 
     all_findings: list[dict[str, Any]] = []
     all_skipped = list(skipped_init)
+    all_coverage_warnings: list[dict[str, str]] = []
     all_unused: list[dict[str, Any]] = []
     all_profiles: list[dict[str, Any]] = []
+    file_meta: list[dict[str, Any]] = []
+    seen_hashes: set[str] = set()
+    seen_packs: set[str] = set()
+    seen_sources: set[str] = set()
     checked_count = 0
     explicit_targets = {(cwd / p).resolve() for p in ns.paths}
     explicit_uninspectable = bool(skipped_init)
 
-    banks_cached = load_pattern_banks() if ns.patterns else None
     for abs_p, rel in files:
         if changed_map is not None and rel not in changed_map:
             continue
         mod_f = detect_modality(abs_p.name)
-        eff_pack_arg = ns.pack
-        raw_txt_cached: str | None = None
-        if (mod_f in {"markdown", "text"} and (ns.pack == "auto" or ns.ml or ns.profile)) or (
-            ns.patterns and mod_f not in {"docx", "pptx"}
-        ):
-            try:
-                raw_txt_cached = abs_p.read_text(encoding="utf-8")
-            except Exception:
-                raw_txt_cached = None
-        if ns.pack == "auto":
-            eff_pack_arg = (
-                predict_pack_with_pocket_router(raw_txt_cached)["recommendedPack"]
-                if raw_txt_cached is not None and mod_f in {"markdown", "text"}
-                else None
-            )
+        if not mod_f:
+            if abs_p not in explicit_targets:
+                continue
+            explicit_uninspectable = True
+            all_skipped.append({"file": rel, "reason": f"Unsupported file extension '{abs_p.suffix or '(none)'}'"})
+            continue
         try:
-            res = inspect_file(abs_p, rel, packs, eff_pack_arg, config)
+            res = _inspect_single_file_full(
+                abs_p,
+                rel,
+                mod_f,
+                packs,
+                ns.pack,
+                config,
+                include_ml=include_ml,
+                include_patterns=include_patterns,
+                include_profile=bool(ns.profile),
+                banks=banks_cached,
+            )
         except Exception as exc:
             print(f"dislop: {exc}", file=sys.stderr)
             return 2
+
         f_list = list(res["findings"])
         if res["checked"]:
             checked_count += 1
-            if ns.patterns:
-                if mod_f in {"docx", "pptx"}:
-                    import zipfile
-                    try:
-                        ooxml_entries: dict[str, str] = {}
-                        with zipfile.ZipFile(abs_p, "r") as zf:
-                            for info in zf.infolist():
-                                if info.filename.endswith((".xml", ".rels")):
-                                    ooxml_entries[info.filename] = zf.read(info.filename).decode("utf-8", errors="replace")
-                        pat_res = audit_patterns("", filename=rel, modality=mod_f or "pptx", banks=banks_cached, ooxml=ooxml_entries)
-                        f_list = _merge_pattern_bank_findings(f_list, pat_res["findings"])
-                    except Exception:
-                        pass
-                elif raw_txt_cached is not None and mod_f:
-                    pat_res = audit_patterns(raw_txt_cached, filename=rel, modality=mod_f, banks=banks_cached)
-                    f_list = _merge_pattern_bank_findings(f_list, pat_res["findings"])
-            if ns.ml and raw_txt_cached is not None and mod_f in {"markdown", "text"}:
-                _, ml_extras = _build_pocket_ml_findings(raw_txt_cached, rel, f_list)
-                f_list.extend(ml_extras)
-            if ns.profile and raw_txt_cached is not None and mod_f in {"markdown", "text"}:
-                all_profiles.append(
-                    {
-                        "file": rel,
-                        "profile": analyze_text_profile(raw_txt_cached, modality=mod_f),
-                        "pocketModel": _summarize_pocket_for_profile(raw_txt_cached),
-                    }
-                )
+            if res.get("effectivePack"):
+                seen_packs.add(res["effectivePack"])
+            if res.get("packSource"):
+                seen_sources.add(res["packSource"])
+            if res.get("rulesetHash"):
+                seen_hashes.add(res["rulesetHash"])
+            file_meta.append({
+                "file": rel,
+                "modality": mod_f,
+                "effectivePack": res.get("effectivePack"),
+                "packSource": res.get("packSource"),
+            })
+            if res.get("profileItem"):
+                all_profiles.append(res["profileItem"])
         elif abs_p in explicit_targets:
             explicit_uninspectable = True
 
         if changed_map is not None and rel in changed_map:
             allowed = changed_map[rel]
             if isinstance(allowed, set):
-                f_list = [f for f in f_list if f.get("line") in allowed]
+                line_starts = res.get("_lineStarts")
+                filtered_findings: list[dict[str, Any]] = []
+                for f in f_list:
+                    start_line = f["line"] if isinstance(f.get("line"), int) else 1
+                    raw_end = f.get("endLine")
+                    end_line = raw_end if isinstance(raw_end, int) and raw_end >= start_line else start_line
+                    span = f.get("span")
+                    if not isinstance(raw_end, int) and isinstance(span, dict) and isinstance(span.get("end"), int) and line_starts:
+                        end_off = max(span.get("start") or 0, span["end"] - 1)
+                        end_line = max(start_line, offset_to_line_col(line_starts, end_off)[0])
+                    if any(ln in allowed for ln in range(start_line, end_line + 1)):
+                        filtered_findings.append(f)
+                f_list = filtered_findings
 
         all_findings.extend(f_list)
         all_skipped.extend(res["skipped"])
+        if res.get("coverageWarnings"):
+            all_coverage_warnings.extend(res["coverageWarnings"])
         if ns.report_unused:
             all_unused.extend(res["unusedSuppressions"])
 
+    ruleset_hash = (
+        next(iter(seen_hashes)) if len(seen_hashes) == 1
+        else (fnv1a_hex("|".join(sorted(seen_hashes))) if len(seen_hashes) > 1 else None)
+    )
+    eff_pack_out = (
+        next(iter(seen_packs)) if len(seen_packs) == 1
+        else ("mixed" if len(seen_packs) > 1 else ns.pack)
+    )
+    pack_source_out = (
+        next(iter(seen_sources)) if len(seen_sources) == 1
+        else ("mixed" if len(seen_sources) > 1 else None)
+    )
+
     report = {
         "version": ENGINE_VERSION,
+        "rulesetHash": ruleset_hash,
+        "effectivePack": eff_pack_out,
+        "packSource": pack_source_out,
+        "changedFilter": changed_map is not None,
+        "files": file_meta,
         "checkedCount": checked_count,
         "skipped": all_skipped,
+        "coverageWarnings": all_coverage_warnings,
         "findings": all_findings,
         "unusedSuppressions": all_unused,
     }
     if all_profiles:
         report["profiles"] = all_profiles
-    rendered = format_report(report, fmt, ns.lang)
+    out_report = _apply_compact_report(report) if compact_json else report
+    rendered = format_report(out_report, fmt, ns.lang)
     if rendered:
         print(rendered)
 
@@ -581,7 +1106,7 @@ def _cmd_packs(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
     return 0
 
 
-VALID_MODALITIES = {"markdown", "text", "html", "css", "jsx", "svg", "docx", "pptx"}
+VALID_MODALITIES = {"markdown", "text", "html", "css", "jsx", "svg", "docx", "pptx", "pdf", "image"}
 VALID_SEVERITIES = {"error", "warning", "info"}
 VALID_TIERS = {"invariant", "taste"}
 
@@ -746,6 +1271,12 @@ def _cmd_patterns(ns: argparse.Namespace) -> int:
             print(f"dislop: unsupported file extension for '{ns.target}'", file=sys.stderr)
             return 2
         modality = detected
+        if modality in {"pdf", "image"}:
+            print(
+                f"dislop: unsupported modality '{modality}' for patterns (use 'dislop check' for PDF and image files)",
+                file=sys.stderr,
+            )
+            return 2
         try:
             if modality in {"pptx", "docx"}:
                 ooxml = {}
@@ -1091,6 +1622,511 @@ def _cmd_model(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
     return 0
 
 
+def _read_git_baseline_for_file(abs_file: Path, git_ref: str = "HEAD") -> str:
+    top_res = subprocess.run(
+        ["git", "-c", "core.quotepath=off", "rev-parse", "--show-toplevel"],
+        cwd=abs_file.parent,
+        capture_output=True,
+        check=True,
+    )
+    top_dir = Path(top_res.stdout.decode("utf-8").strip()).resolve()
+    rel_posix = abs_file.resolve().relative_to(top_dir).as_posix()
+    show_res = subprocess.run(
+        ["git", "-c", "core.quotepath=off", "show", f"{git_ref}:{rel_posix}"],
+        cwd=top_dir,
+        capture_output=True,
+        check=True,
+    )
+    return show_res.stdout.decode("utf-8")
+
+
+def _cmd_verify(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
+    cwd = Path.cwd()
+    fmt = "json" if ns.json else ns.format
+    keep_terms = [t.strip() for t in (ns.keep or "").split(",") if t.strip()]
+    config = load_config(cwd, ns.config)
+
+    if ns.git is not None:
+        git_ref = "HEAD"
+        target_arg: str | None = None
+        if not ns.targets:
+            target_arg = ns.git if ns.git != "HEAD" else None
+        else:
+            git_ref = ns.git or "HEAD"
+            target_arg = ns.targets[0]
+        if not target_arg:
+            print("Usage: dislop verify --git [ref] <file> [--keep a,b] [--pack <id|auto>] [--strict] [--json]", file=sys.stderr)
+            return 2
+        abs_t = (cwd / target_arg).resolve()
+        if not abs_t.is_file():
+            print(f"dislop: file not found: {target_arg}", file=sys.stderr)
+            return 2
+        label = target_arg
+        after_text = _read_utf8_exact(abs_t)
+        try:
+            before_text = _read_git_baseline_for_file(abs_t, git_ref)
+        except Exception as exc:
+            print(f"dislop verify: failed to read '{git_ref}' baseline for '{target_arg}': {exc}", file=sys.stderr)
+            return 2
+    else:
+        if len(ns.targets) < 2:
+            print("Usage: dislop verify <before-file> <after-file> [--keep a,b] [--pack <id|auto>] [--strict] [--json]", file=sys.stderr)
+            return 2
+        before_abs = (cwd / ns.targets[0]).resolve()
+        after_abs = (cwd / ns.targets[1]).resolve()
+        if not before_abs.is_file():
+            print(f"dislop: file not found: {ns.targets[0]}", file=sys.stderr)
+            return 2
+        if not after_abs.is_file():
+            print(f"dislop: file not found: {ns.targets[1]}", file=sys.stderr)
+            return 2
+        label = ns.targets[1]
+        before_text = _read_utf8_exact(before_abs)
+        after_text = _read_utf8_exact(after_abs)
+
+    mod = detect_modality(label) or "markdown"
+    file_cfg = resolve_config_for_file(label, config)
+    try:
+        pack, eff_pack, pack_source = _resolve_text_pack_and_source(after_text, label, mod, ns.pack or "auto", file_cfg, packs)
+    except Exception as exc:
+        print(f"dislop: {exc}", file=sys.stderr)
+        return 2
+    result = verify_revision_bundle(
+        before_text,
+        after_text,
+        filename=label,
+        modality=mod,
+        pack=pack,
+        config=file_cfg,
+        keep_terms=keep_terms,
+        allow_added=bool(ns.allow_added),
+        strict=bool(ns.strict),
+    )
+    result["effectivePack"] = eff_pack
+    result["packSource"] = pack_source
+
+    if fmt == "json":
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        fl = result["factLedger"]
+        lc = result["lengthCheck"]
+        ad = result["antiDegradation"]
+        if ns.lang == "zh":
+            print(f"dislop verify ({label}): {'通过 (PASSED)' if result['ok'] else '未通过 (FAILED)'}")
+            print(f"  事实账本  : {fl['status']}（保留 {fl['retainedCount']}/{fl['totalProtected']}，丢失 {len(fl['missing'])}，限定词降级 {len(fl['qualifierDropped'])}）")
+            if result["keepTerms"]["requested"]:
+                miss = f"（缺失：{', '.join(result['keepTerms']['missing'])}）" if result["keepTerms"]["missing"] else ""
+                print(f"  关键词保留: 保留 {len(result['keepTerms']['kept'])}/{len(result['keepTerms']['requested'])}{miss}")
+            if result.get("findingsDelta"):
+                fd = result["findingsDelta"]
+                print(f"  AI味变化  : {fd['beforeCount']} -> {fd['afterCount']}（消解 {fd['resolvedCount']}，新引入 {len(fd['introduced'])}）")
+            print(f"  篇幅比例  : {lc['beforeChars']} -> {lc['afterChars']} 字（{lc['ratio']}x · {lc['status']}）")
+            print(f"  反退化校验: {ad['status']}")
+            for w in ad["warnings"]:
+                print(f"    - [{w['severity'].upper()}] {w['code']}: {w['message']['zh']}")
+        else:
+            print(f"dislop verify ({label}): {result['status'].upper()}")
+            print(f"  Fact ledger   : {fl['status']} ({fl['retainedCount']}/{fl['totalProtected']} retained, {len(fl['missing'])} missing, {len(fl['qualifierDropped'])} qualifier dropped)")
+            if result["keepTerms"]["requested"]:
+                miss = f" (missing: {', '.join(result['keepTerms']['missing'])})" if result["keepTerms"]["missing"] else ""
+                print(f"  Keep terms    : {len(result['keepTerms']['kept'])}/{len(result['keepTerms']['requested'])} kept{miss}")
+            if result.get("findingsDelta"):
+                fd = result["findingsDelta"]
+                print(f"  Findings delta: {fd['beforeCount']} -> {fd['afterCount']} ({fd['resolvedCount']} resolved, {len(fd['introduced'])} introduced)")
+            print(f"  Length ratio  : {lc['beforeChars']} -> {lc['afterChars']} chars ({lc['ratio']}x · {lc['status']})")
+            print(f"  Anti-degrade  : {ad['status']}")
+            for w in ad["warnings"]:
+                print(f"    - [{w['severity'].upper()}] {w['code']}: {w['message']['en']}")
+    return 0 if result["ok"] else 1
+
+
+_REVIEW_RESLOP_ZH_RE = re.compile(r"(?:全闭环|闭环|严禁|杜绝|赋能|抓手|家人们|绝绝子|其实吧|咱就是说|不是[^。\n]{1,30}而是)")
+_REVIEW_RESLOP_EN_RE = re.compile(r"\b(?:not\s+just\b[^.\n]{1,35}\bbut\b|game[- ]changing|seamless|delve\s+into|tapestry|let\s+that\s+sink\s+in)\b", re.I | re.ASCII)
+_VALID_TIC_LAYERS = {"lexical", "syntactic", "rhythm", "cognitive-framing", "rhetorical-stance", "visual", "artifact"}
+
+
+def _load_ai_tic_rubric() -> dict[str, Any]:
+    p = find_patterns_dir() / "ai-tic-rubric.json"
+    try:
+        if p.is_file():
+            return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+    return {"layers": [], "antiDegradationPrinciples": {"en": [], "zh": []}}
+
+
+def _map_finding_to_tic_layer(finding: dict[str, Any]) -> str:
+    rid = str(finding.get("ruleId") or "")
+    dim = str(finding.get("dimension") or "")
+    fam = str(finding.get("family") or "")
+    if rid.startswith("core/") or fam.startswith("hygiene/") or fam.startswith("office/") or dim == "artifacts":
+        return "artifact"
+    if rid.startswith("ui-") or rid.startswith("pptx-") or fam.startswith("deck/") or fam.startswith("ui/") or dim == "visual-and-deck":
+        return "visual"
+    if (
+        dim == "rhythm"
+        or fam.startswith("rhythm/")
+        or fam.startswith("punctuation/")
+        or rid in {
+            "low-burstiness-vapor",
+            "comma-chain-runon",
+            "opener-anaphora-monotony",
+            "inline-bold-saturation",
+            "paragraph-length-uniformity",
+            "semicolon-tricolon",
+            "em-dash-cluster",
+            "en-dash-overuse",
+            "bold-lead-list-wall",
+        }
+    ):
+        return "rhythm"
+    if (
+        dim == "syntactic"
+        or fam.startswith("frame/")
+        or rid in {
+            "negation-pivot",
+            "staccato-slogan-run",
+            "zh-four-char-triad",
+            "concession-symmetry-frame",
+            "rhetorical-qa-cadence",
+            "pull-quote-closer",
+            "template-skeleton-echo",
+        }
+    ):
+        return "syntactic"
+    if (
+        rid in {
+            "macro-trend-opener",
+            "moralizing-ending",
+            "narrative-sandwich",
+            "unsourced-attribution",
+            "unsubstantiated-superlative",
+            "composite-multi-signal",
+        }
+        or fam.startswith("evidence/")
+    ):
+        return "cognitive-framing"
+    if rid in {"throat-clearing-opener", "sycophancy-residue", "hedge-cluster", "discourse-marker-cluster"} or dim == "discourse":
+        return "rhetorical-stance"
+    return "lexical"
+
+
+def _build_cross_check_summary(
+    *,
+    rule_findings: list[dict[str, Any]],
+    pattern_findings: list[dict[str, Any]],
+    profile: dict[str, Any] | None,
+    ml_findings: list[dict[str, Any]],
+    merged_findings: list[dict[str, Any]],
+    modality: str,
+) -> dict[str, Any]:
+    signals_present: list[str] = []
+    if rule_findings:
+        signals_present.append("rules")
+    if pattern_findings:
+        signals_present.append("patterns")
+    if profile and ((profile.get("telemetryRisk", {}).get("score") or 0) >= 15 or profile.get("structure", {}).get("lowBurstinessVapor")):
+        signals_present.append("profile")
+    if ml_findings:
+        signals_present.append("pocket-ml")
+
+    layer_counts: dict[str, int] = {}
+    for f in merged_findings:
+        layer = _map_finding_to_tic_layer(f)
+        layer_counts[layer] = layer_counts.get(layer, 0) + 1
+
+    has_subtle_prose = bool(modality in {"markdown", "text", "html", "svg"} and profile and (profile.get("sentenceCount") or 0) >= 3)
+    suspected_subtle_layers = ["cognitive-framing", "rhetorical-stance"] if has_subtle_prose and (signals_present or not rule_findings) else []
+    llm_recommended = bool(
+        has_subtle_prose and (((profile.get("telemetryRisk", {}).get("score") or 0) >= 15) or ml_findings or not rule_findings)
+    )
+    return {
+        "signalsPresent": signals_present,
+        "multiSignalConfirmed": len(signals_present) >= 2,
+        "layerCounts": layer_counts,
+        "suspectedSubtleLayers": suspected_subtle_layers,
+        "llmRecommended": llm_recommended,
+    }
+
+
+def _findings_to_review_issues(findings: list[dict[str, Any]], lang: str = "en") -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for f in findings:
+        strategy = f.get("fixStrategy") or derive_fix_strategy({"id": f["ruleId"], "family": f.get("family")})
+        action = "edit" if strategy == "delete" else ("ask" if strategy == "need-source" else "rewrite")
+        msg_obj = f.get("message") or {}
+        dt_obj = f.get("deletionTest") or {}
+        why = str(msg_obj.get(lang) or msg_obj.get("en") or f["ruleId"]).strip()
+        guidance = str(dt_obj.get(lang) or dt_obj.get("en") or why).strip()
+        item: dict[str, Any] = {
+            "source": f.get("source") or "rule",
+            "ruleId": f["ruleId"],
+            "ticLayer": _map_finding_to_tic_layer(f),
+            "severity": f["severity"],
+            "fixStrategy": strategy,
+            "action": action,
+            "line": f.get("line") or 1,
+            "col": f.get("col") or 1,
+            "quote": f.get("match") or "",
+            "why": why,
+        }
+        if action == "edit":
+            item["replacement"] = ""
+        elif action == "ask":
+            item["question"] = guidance
+        else:
+            item["instruction"] = guidance
+        out.append(item)
+    return out
+
+
+def _ground_byok_llm_issues(raw_issues: Any, source_text: str, line_starts: list[int]) -> list[dict[str, Any]]:
+    if not isinstance(raw_issues, list):
+        return []
+    src = str(source_text or "")
+    out: list[dict[str, Any]] = []
+    for iss in raw_issues:
+        if not isinstance(iss, dict):
+            continue
+        q = str(iss.get("quote") or "").strip()
+        if not q:
+            continue
+        idx = src.find(q)
+        if idx == -1:
+            continue
+        raw_act = str(iss.get("action") or "rewrite")
+        action = raw_act if raw_act in {"edit", "replace", "delete", "rewrite", "ask"} else "rewrite"
+        if action in {"replace", "delete"}:
+            action = "edit"
+        rep = str(iss.get("replacement") if iss.get("replacement") is not None else "") if action == "edit" else ""
+        if action == "edit" or iss.get("replacement"):
+            rep_txt = str(iss.get("replacement") or "")
+            q_lower = q.lower()
+            if any(m.group(0) not in q for m in _REVIEW_RESLOP_ZH_RE.finditer(rep_txt)):
+                continue
+            if any(m.group(0).lower() not in q_lower for m in _REVIEW_RESLOP_EN_RE.finditer(rep_txt)):
+                continue
+        final_inst = str(iss.get("instruction") or iss.get("why") or "").strip()
+        if action == "edit":
+            vr = verify_revision(q, rep)
+            if vr["status"] != "preserved":
+                action = "rewrite"
+                if not final_inst:
+                    final_inst = str(iss.get("why") or "Keep all numbers and qualifiers intact while removing filler.")
+        line_no, col_no = offset_to_line_col(line_starts, idx) if line_starts else (1, 1)
+        sev = iss.get("severity") if iss.get("severity") in {"error", "warning", "info"} else "warning"
+        item: dict[str, Any] = {
+            "source": "byok-llm",
+            "ruleId": None,
+            **({"ticLayer": iss["ticLayer"]} if iss.get("ticLayer") in _VALID_TIC_LAYERS else {}),
+            "severity": sev,
+            "fixStrategy": ("delete" if rep == "" else "rephrase") if action == "edit" else ("need-source" if action == "ask" else "rephrase"),
+            "action": action,
+            "line": line_no,
+            "col": col_no,
+            "quote": q,
+            "why": str(iss.get("why") or "").strip(),
+        }
+        if action == "edit":
+            item["replacement"] = rep
+        elif action == "ask":
+            item["question"] = str(iss.get("question") or final_inst).strip()
+        else:
+            item["instruction"] = final_inst
+        out.append(item)
+        if len(out) >= 16:
+            break
+    return out
+
+
+def _build_rubric_prompt_digest(rubric: dict[str, Any], lang: str = "en") -> str:
+    key = "zh" if lang == "zh" else "en"
+    layers = rubric.get("layers") if isinstance(rubric.get("layers"), list) else []
+    lines: list[str] = []
+    for layer in layers:
+        name = (layer.get("name") or {}).get(key) or layer.get("id") or ""
+        prompt = (layer.get("llmCheckPrompt") or {}).get(key) or ""
+        guards = ((layer.get("falsePositiveGuards") or {}).get(key) or [])[:1]
+        g_txt = f" (Guard: {'; '.join(guards)})" if guards else ""
+        lines.append(f"- [{layer.get('id')}] {name}: {prompt}{g_txt}")
+    return "\n".join(lines)
+
+
+def _cmd_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
+    cwd = Path.cwd()
+    fmt = "json" if ns.json else ns.format
+    config = load_config(cwd, ns.config)
+    voice_info = discover_voice_card(cwd)
+    rubric = _load_ai_tic_rubric()
+    target = ns.target or "-"
+
+    if target == "-":
+        text = sys.stdin.read()
+        label = ns.stdin_filename or "stdin.md"
+    else:
+        abs_t = (cwd / target).resolve()
+        if not abs_t.is_file():
+            print(f"dislop: file not found: {target}", file=sys.stderr)
+            return 2
+        label = target
+        text = _read_utf8_exact(abs_t)
+
+    mod = detect_modality(label) or "markdown"
+    file_cfg = resolve_config_for_file(label, config)
+    pack, eff_pack, pack_source = _resolve_text_pack_and_source(text, label, mod, ns.pack or "auto", file_cfg, packs)
+    audit_res = audit_text(text, filename=label, modality=mod, pack=pack, config=file_cfg)
+    rule_findings = list(audit_res["findings"])
+    pat_res = audit_patterns(text, filename=label, modality=mod, banks=load_pattern_banks(), config=file_cfg)
+    pattern_findings = list(pat_res["findings"])
+    findings = _merge_pattern_bank_findings(rule_findings, pattern_findings)
+    profile = analyze_text_profile(text, modality=mod, config=file_cfg) if mod in PROSE_ML_MODALITIES else None
+    ml_findings: list[dict[str, Any]] = []
+    if mod in PROSE_ML_MODALITIES:
+        ml_src = build_zones(text, mod, {"proseFences": file_cfg.get("proseFences"), "maskBlockquotes": file_cfg.get("maskBlockquotes")})["prose"] if mod in {"html", "svg"} else text
+        _, ml_findings = _build_pocket_ml_findings(ml_src, label, findings, profile=profile, modality=mod)
+        findings.extend(ml_findings)
+    cross_check = _build_cross_check_summary(
+        rule_findings=rule_findings,
+        pattern_findings=pattern_findings,
+        profile=profile,
+        ml_findings=ml_findings,
+        merged_findings=findings,
+        modality=mod,
+    )
+
+    det_issues = _findings_to_review_issues(findings, ns.lang)
+    issues = list(det_issues)
+    mode = "offline-deterministic"
+    sig_str = "+".join(cross_check["signalsPresent"]) or "rules"
+    summary = (
+        ("未发现确定性 AI 味或硬伤问题。" if ns.lang == "zh" else "No deterministic AI-slop issues detected.")
+        if not issues
+        else (
+            f"发现 {len(issues)} 处多信号审校建议（覆盖 {sig_str}，改后可用 dislop verify 校验）。"
+            if ns.lang == "zh"
+            else f"Found {len(issues)} multi-signal review item(s) across {sig_str}."
+        )
+    )
+
+    endpoint = "" if ns.offline else str(ns.endpoint or os.environ.get("DISLOP_REVIEW_ENDPOINT") or os.environ.get("OPENAI_BASE_URL") or "").strip()
+    key_env_name = (
+        str(ns.api_key_env)
+        if ns.api_key_env
+        else ("DISLOP_REVIEW_API_KEY" if os.environ.get("DISLOP_REVIEW_API_KEY") else ("OPENAI_API_KEY" if os.environ.get("OPENAI_API_KEY") else ""))
+    )
+    api_key = str(os.environ.get(key_env_name) or "") if key_env_name else ""
+
+    if not ns.offline and endpoint and api_key:
+        parsed_u = urllib.parse.urlparse(endpoint)
+        if parsed_u.scheme not in {"http", "https"} or not parsed_u.hostname:
+            print(f"dislop review: invalid endpoint URL '{endpoint}'", file=sys.stderr)
+            return 2
+        if os.environ.get("DISLOP_TEST_MODE") == "1" and parsed_u.hostname not in {"127.0.0.1", "localhost", "::1"}:
+            print("dislop review: live BYOK requests are blocked when DISLOP_TEST_MODE=1", file=sys.stderr)
+            return 2
+        chat_url = endpoint if endpoint.endswith("/chat/completions") else f"{endpoint.rstrip('/')}/chat/completions"
+        model_id = str(ns.model or os.environ.get("DISLOP_REVIEW_MODEL") or "gpt-4o-mini")
+        sys_prompt = (
+            "你是 dislop 审校助手，请结合五层 AI 口癖准则交叉核对确定性预检与统计信号。只输出 JSON：{\"summary\":\"...\",\"issues\":[{\"quote\":\"原文原样片段\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"原因\",\"replacement\":\"仅edit填\",\"instruction\":\"仅rewrite填\",\"question\":\"仅ask填\"}]}。硬规则：1) 保留作者原有视角、自然句长起伏、个性化表达与带事实锚点的行业术语，禁止改写成死板说教、廉价“装人味”口水词（家人们/其实吧/绝绝子）或删减干货；2) quote 必须一字不差从原文复制；3) 禁止引入全闭环/闭环/赋能/抓手/不是A而是B等新套词；4) 绝不改丢数字或范围限定词（预计/仅在/除非/待确认）。"
+            if ns.lang == "zh"
+            else "You are dislop's multi-layer AI-tic reviewer. Cross-check deterministic findings and telemetry against the 5-layer rubric. Output strict JSON only: {\"summary\":\"...\",\"issues\":[{\"quote\":\"exact verbatim substring\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"reason\",\"replacement\":\"for edit\",\"instruction\":\"for rewrite\",\"question\":\"for ask\"}]}. Rules: 1) preserve author voice, perspective, rhythm contrast, vivid phrasing, grounded domain terms, and modality qualifiers; never suggest cheesy fake-human slang; 2) quote MUST match verbatim; 3) never introduce filler slogans; 4) keep every number and unit intact."
+        )
+        rubric_digest = _build_rubric_prompt_digest(rubric, ns.lang)
+        user_parts = [f"Modality: {mod} | Pack: {eff_pack}"]
+        if rubric_digest:
+            user_parts.append(f"5-Layer AI-Tic Rubric:\n{rubric_digest}")
+        user_parts.append(f"Local Cross-Check Signals: {json.dumps(cross_check, ensure_ascii=False)}")
+        if voice_info["found"] and isinstance((voice_info.get("card") or {}).get("profile"), dict):
+            user_parts.append(f"Author style card ({voice_info['scope']}): {json.dumps(voice_info['card']['profile'], ensure_ascii=False)}")
+        user_parts.append(
+            "Deterministic findings: "
+            + json.dumps([{"ruleId": d["ruleId"], "ticLayer": d.get("ticLayer"), "quote": d["quote"], "fixStrategy": d["fixStrategy"]} for d in det_issues[:12]], ensure_ascii=False)
+        )
+        user_parts.append(f"Draft:\n{text}")
+        req_body = json.dumps({
+            "model": model_id,
+            "temperature": 0.2,
+            "messages": [
+                {"role": "system", "content": sys_prompt},
+                {"role": "user", "content": "\n\n".join(user_parts)},
+            ],
+        }).encode("utf-8")
+        try:
+            req = urllib.request.Request(
+                chat_url,
+                data=req_body,
+                headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                if getattr(resp, "status", 200) >= 400:
+                    raise RuntimeError(f"HTTP {resp.status}")
+                data = json.loads(resp.read().decode("utf-8"))
+            raw_content = str((((data.get("choices") or [{}])[0].get("message") or {}).get("content")) or "").strip()
+            json_body = re.sub(r"^```(?:json)?\s*", "", raw_content, flags=re.I)
+            json_body = re.sub(r"\s*```$", "", json_body).strip()
+            parsed = json.loads(json_body)
+            line_starts = build_line_starts(text)
+            det_quotes = {d["quote"] for d in det_issues if d.get("quote")}
+            llm_grounded = [x for x in _ground_byok_llm_issues(parsed.get("issues"), text, line_starts) if x["quote"] not in det_quotes]
+            issues = [*det_issues, *llm_grounded]
+            mode = "byok-llm"
+            if isinstance(parsed.get("summary"), str) and parsed["summary"].strip():
+                summary = parsed["summary"].strip()
+        except Exception as exc:
+            print(f"dislop review: endpoint call failed ({exc})", file=sys.stderr)
+            return 2
+
+    out: dict[str, Any] = {
+        "schema": "dislop.review/1",
+        "mode": mode,
+        "file": label,
+        "modality": mod,
+        "effectivePack": eff_pack,
+        "packSource": pack_source,
+        "crossCheck": cross_check,
+        "rubricLayers": [l.get("id") for l in (rubric.get("layers") or [])],
+        "voiceCard": {"found": voice_info["found"], "scope": voice_info["scope"]},
+    }
+    if profile is not None:
+        out["profile"] = profile
+    out["summary"] = summary
+    out["issues"] = issues
+
+    if fmt == "json":
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        return 0
+    is_zh = ns.lang == "zh"
+    strat_labels_zh = {"delete": "删掉", "need-source": "补出处", "unwrap-layout": "去套壳", "rephrase": "改写"}
+    act_labels_zh = {"edit": "修改", "rewrite": "改写", "ask": "核实"}
+    mode_label_zh = "本地+BYOK联合审校" if mode == "byok-llm" else "四路离线核对"
+    vc_note = (f" · 个人文风:{voice_info['scope']}" if is_zh else f" · voice:{voice_info['scope']}") if voice_info["found"] else ""
+    layer_str = ", ".join(f"{k}×{v}" for k, v in cross_check["layerCounts"].items()) or ("无明确命中" if is_zh else "none")
+    sig_str_out = "+".join(cross_check["signalsPresent"]) or "rules"
+    print(f"dislop review ({label} · {mode_label_zh if is_zh else mode} · {eff_pack}{vc_note})")
+    print(f"  摘要    : {summary}" if is_zh else f"  summary : {summary}")
+    print(f"  信号分布: {sig_str_out} | 层级: {layer_str}" if is_zh else f"  signals : {sig_str_out} | layers: {layer_str}")
+    for iss in issues:
+        tag = strat_labels_zh.get(iss["fixStrategy"], iss["fixStrategy"]) if is_zh else iss["fixStrategy"]
+        act = act_labels_zh.get(iss["action"], iss["action"]) if is_zh else iss["action"]
+        layer_tag = f" · {iss['ticLayer']}" if iss.get("ticLayer") else ""
+        print(f'  [{str(iss["severity"]).upper()}] {iss["line"]}:{iss["col"]} {act} ({tag}{layer_tag}) "{iss["quote"]}"')
+        print(f"    原因: {iss['why']}" if is_zh else f"    why: {iss['why']}")
+        if iss["action"] == "edit":
+            print(f"    替换: {json.dumps(iss['replacement'], ensure_ascii=False)}" if is_zh else f"    rep: {json.dumps(iss['replacement'], ensure_ascii=False)}")
+        elif iss["action"] == "ask":
+            print(f"    追问: {iss['question']}" if is_zh else f"    ask: {iss['question']}")
+        elif iss.get("instruction") and iss["instruction"] != iss["why"]:
+            print(f"    改法: {iss['instruction']}" if is_zh else f"    how: {iss['instruction']}")
+    if mode == "offline-deterministic" and cross_check.get("llmRecommended"):
+        print(
+            "  深查提示: 思维“端水”(cognitive-framing)与说教角度(rhetorical-stance)可配 --endpoint 或云端 dislop_review 联合复核。"
+            if is_zh
+            else "  tip: Pass --endpoint (or use Cloud dislop_review) for LLM semantic cross-check on cognitive-framing and rhetorical-stance."
+        )
+    return 0
+
+
 def _cmd_init() -> int:
     cwd = Path.cwd()
     cfg = cwd / ".dislop.json"
@@ -1121,7 +2157,7 @@ def main(argv: list[str] | None = None) -> None:
         run_mcp_stdio()
         return
 
-    parser = argparse.ArgumentParser(prog="dislop", description="Linter for AI Slop in docs, web UI, and slides")
+    parser = argparse.ArgumentParser(prog="dislop", description="Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI, and slides")
     parser.add_argument("-v", "--version", action="version", version=ENGINE_VERSION)
     sub = parser.add_subparsers(dest="cmd")
 
@@ -1137,9 +2173,37 @@ def main(argv: list[str] | None = None) -> None:
     p_check.add_argument("--stdin-filename", default=None)
     p_check.add_argument("--report-unused", action="store_true")
     p_check.add_argument("--profile", action="store_true", help="Attach 5-axis offline statistical text rhythm + Pocket ML profile")
+    p_check.add_argument("--deep", action="store_true", help="Run thorough inspection (Pocket ML + extended 6-dimension pattern bank)")
+    p_check.add_argument("--compact", action="store_true", help="Deduplicate repeated rule metadata into ruleMeta in --json output")
     p_check.add_argument("--ml", action="store_true", help="Enable bundled Pocket ML stealth-vapor paragraph detection")
     p_check.add_argument("--patterns", action="store_true", help="Include extended 6-dimension pattern-bank probes")
     p_check.add_argument("--lang", default="en", choices=["en", "zh"])
+
+    p_verify = sub.add_parser("verify", help="Verify fact ledger, keep terms, and anti-degradation guardrails on a revision")
+    p_verify.add_argument("targets", nargs="*")
+    p_verify.add_argument("--git", nargs="?", const="HEAD", default=None)
+    p_verify.add_argument("--keep", default=None)
+    p_verify.add_argument("--pack", default=None)
+    p_verify.add_argument("--config", default=None)
+    p_verify.add_argument("--allow-added", action="store_true")
+    p_verify.add_argument("--strict", action="store_true")
+    p_verify.add_argument("--format", default="text", choices=["text", "json"])
+    p_verify.add_argument("--json", action="store_true")
+    p_verify.add_argument("--lang", default="en", choices=["en", "zh"])
+
+    p_review = sub.add_parser("review", help="Structured dislop.review/1 inspection (offline deterministic or optional BYOK endpoint)")
+    p_review.add_argument("target", nargs="?", default="-")
+    p_review.add_argument("--pack", default=None)
+    p_review.add_argument("--config", default=None)
+    p_review.add_argument("--stdin-filename", default=None)
+    p_review.add_argument("--deep", action="store_true")
+    p_review.add_argument("--offline", action="store_true")
+    p_review.add_argument("--endpoint", default=None)
+    p_review.add_argument("--model", default=None)
+    p_review.add_argument("--api-key-env", default=None)
+    p_review.add_argument("--format", default="text", choices=["text", "json"])
+    p_review.add_argument("--json", action="store_true")
+    p_review.add_argument("--lang", default="en", choices=["en", "zh"])
 
     p_exp = sub.add_parser("explain", help="Show check question and before/trap/after examples for a rule")
     p_exp.add_argument("rule_id")
@@ -1251,6 +2315,10 @@ def main(argv: list[str] | None = None) -> None:
 
     if ns.cmd == "check":
         sys.exit(_cmd_check(ns, packs))
+    if ns.cmd == "verify":
+        sys.exit(_cmd_verify(ns, packs))
+    if ns.cmd == "review":
+        sys.exit(_cmd_review(ns, packs))
     if ns.cmd == "voice":
         sys.exit(_cmd_voice(ns))
     if ns.cmd in {"model", "doctor"}:

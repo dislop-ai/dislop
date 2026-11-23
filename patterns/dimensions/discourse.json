@@ -407,6 +407,32 @@
         "good": "接入新版批处理引擎后，50 万行月度对账单导出耗时从 14 分钟缩短至 95 秒。",
         "source": "original"
       }
+    },
+    {
+      "id": "pat-unsourced-statistic",
+      "ruleId": "unsourced-statistic",
+      "packId": "business-brief",
+      "category": "evidence-rigor",
+      "detectionAngle": "discourse-structure",
+      "status": "active",
+      "severityDefault": "warning",
+      "languages": ["en", "zh"],
+      "modalities": ["markdown", "text", "html", "docx", "pptx"],
+      "evidenceLevel": "editorial-consensus",
+      "name": { "en": "Unsourced Percentage Lift Claim", "zh": "无出处百分比成效宣称" },
+      "mechanism": {
+        "en": "Claims like 'boosts efficiency by up to 45%' or '提升 45%' fabricate quantitative authority without a baseline, sample count, or source citation.",
+        "zh": "使用“效率提升 45%”“高达 80%”“up to 60%”等看似量化的比例宣称，但附近未附带实验样本、基线对照或出处引用。"
+      },
+      "tags": ["unsourced", "percentage", "metrics", "evidence", "无出处数字", "百分比"],
+      "falsePositiveGuards": ["Exempts claims near from/to baselines (`from 12% to 4%`), `n=...` / benchmark terms, or citation links."],
+      "modelTendencies": ["marketing-llm", "general-llm"],
+      "exemplar": {
+        "bad": "Switching to the automated workflow boosts team delivery efficiency by up to 45%.",
+        "trap": "Workflows improve. Delivery speeds up.",
+        "good": "Across 112 audit samples (`n=112`), median triage time dropped from 18 min to 10 min (measured on CI logs).",
+        "source": "original"
+      }
     }
   ]
 }

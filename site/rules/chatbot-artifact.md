@@ -10,7 +10,7 @@ family: hygiene/chat-residue
 # Rule: `chatbot-artifact`
 
 - Pack: [`core`](../packs/core.md) · Tier: `invariant` · Severity: `error`
-- Modalities: `markdown, text, html, jsx, docx, pptx`
+- Modalities: `markdown, text, html, jsx, docx, pptx, pdf`
 - Human anchor: https://dislop.com/#rule-chatbot-artifact
 
 ## What It Catches

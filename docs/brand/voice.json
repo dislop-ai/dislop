@@ -3,6 +3,10 @@
   "id": "dislop-self-voice",
   "version": "0.2.0-draft",
   "status": "proposal",
+  "slogan": {
+    "zh": "去 AI 味才是真正的生产力！",
+    "en": "Cutting AI slop is real productivity."
+  },
   "privacy": {
     "scope": "public",
     "containsPersonalCorpus": false,
@@ -39,7 +43,7 @@
       "Do not bundle three features into one symmetrical semicolon or parallel sentence.",
       "Cut pull-quote mic-drop closers (lines written to look quotable or literary).",
       "Skip copy-editor roleplay metaphors ('Pass for press', 'the pen stays in your hand', 'asks in the margin').",
-      "Write English and Chinese independently with zero language mixing."
+      "Author English and Chinese independently for their own audiences (never word-for-word translations) with zero language mixing inside a single page or post."
     ]
   },
   "positiveSkeletons": [

@@ -10,7 +10,7 @@ family: ui/slop-chrome
 # Rule: `ui-ai-gradient`
 
 - Pack: [`deck-and-ui`](../packs/deck-and-ui.md) · Tier: `taste` · Severity: `warning`
-- Modalities: `html, css, jsx, svg`
+- Modalities: `html, css, jsx, svg, pdf`
 - Human anchor: https://dislop.com/#rule-ui-ai-gradient
 
 ## What It Catches

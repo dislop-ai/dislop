@@ -1,6 +1,6 @@
 name = "dislop"
 version = "0.7.1"
-description = "Linter for AI Slop — check changed docs, slides, and web UI in this pane offline."
+description = "Cutting AI slop is real productivity. Linter for AI Slop — check changed docs, slides, and web UI offline."
 
 [[actions]]
 id = "check-ai-slop"

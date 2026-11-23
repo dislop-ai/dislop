@@ -124,7 +124,8 @@ export const PACKS_BY_ID = {
           "抓手(?!机)",
           "组合拳",
           "打通最后一公里",
-          "(?:打造|构建|形成)[^，。！？；\\n]{0,12}闭环",
+          "(?:打造|构建|形成|实现)[^，。！？；\\n]{0,12}闭环",
+          "(?:全|强|硬|大|小)闭环",
           "底层逻辑",
           "顶层设计",
           "颗粒度",
@@ -562,6 +563,145 @@ export const PACKS_BY_ID = {
           },
           "source": "original"
         }
+      },
+      {
+        "id": "zh-dev-jargon",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "lexicon/dev-jargon",
+        "probe": "zh-dev-jargon",
+        "zones": [
+          "prose"
+        ],
+        "modalities": [
+          "markdown",
+          "text",
+          "html",
+          "docx",
+          "pptx"
+        ],
+        "message": {
+          "en": "Paragraph concentrates hollow AI-generated corporate/engineering buzzwords ('全闭环', '深度赋能', '范式跃迁', '零误差', '…化') rather than grounded technical mechanisms.",
+          "zh": "单段集中出现 AI 爱写的空洞自嗨黑话（如“全闭环/深度赋能/范式跃迁/零失误/体系化”），而非具体工程或业务机制；偶发行业实词会自动豁免。"
+        },
+        "deletionTest": {
+          "en": "Replace each abstract buzzword with the concrete retry count, queue limit, or exit code.",
+          "zh": "把空洞黑话拆成真实机制：写出具体报错码、重试上限、超时秒数或人工处理步骤。"
+        },
+        "exemplar": {
+          "bad": "本次发布建立全闭环校验机制，通过铁律约束完成总收口并形成强兜底，实现零失误交付。",
+          "trap": "这不只是发布脚本，而是零缺陷交付的工程铁律。",
+          "good": "发布脚本在合入前运行单测与类型检查；任一失败直接退出非零状态码，并保留前一次构建产物用于回滚。",
+          "note": {
+            "en": "Distinguishes AI-concentrated filler buzzwords from grounded industry terms (such as WAL flush or fallback cache).",
+            "zh": "区分 AI 集中黑话与有事实锚点的正常行业术语（如 WAL 落盘、Redis 兜底），不误伤实干表达。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "zh-exclamation",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "punctuation/exclamation",
+        "probe": "zh-exclamation",
+        "zones": [
+          "prose"
+        ],
+        "modalities": [
+          "markdown",
+          "text",
+          "html",
+          "docx",
+          "pptx"
+        ],
+        "message": {
+          "en": "Chinese prose paragraph overuses exclamation marks or combines exclamation punctuation with hype modifiers.",
+          "zh": "中文正文段出现鸡血营销感叹号（2 处及以上或搭配“太棒了/重磅/彻底告别/震撼”等煽动词），破坏冷静客观的叙述语气。"
+        },
+        "deletionTest": {
+          "en": "Change trailing exclamation marks to periods and remove emotional hype adverbs.",
+          "zh": "把句末感叹号改回句号，删去“重磅/太棒了/彻底告别”等鼓动字眼。"
+        },
+        "exemplar": {
+          "bad": "太棒了！新版工具帮你彻底告别繁琐的人工排查！",
+          "trap": "别再手查了！立刻开启自动化新体验！",
+          "good": "新版工具会在提交前自动扫描未填占位符和超长列表，减少人工复核遗漏。",
+          "note": {
+            "en": "Short standalone taglines (<20 CJK chars), quoted dialogue, and parenthetical asides remain exempt.",
+            "zh": "不超过 20 字的独立短标语、引号对话和括号附注不触发误报。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "zh-mega-sentence",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "rhythm/mega-sentence",
+        "probe": "zh-mega-sentence",
+        "zones": [
+          "prose"
+        ],
+        "modalities": [
+          "markdown",
+          "text",
+          "html",
+          "docx"
+        ],
+        "message": {
+          "en": "Single Chinese prose sentence exceeds 180 CJK characters (or 120+ CJK with 180+ total chars) without breaking.",
+          "zh": "中文单句一逗到底超过 180 个汉字（或 >= 120 汉字且总长超 180 字），阅读负担重，呈大模型长从句生成特征。"
+        },
+        "deletionTest": {
+          "en": "Split at the natural clause shift using periods so each sentence carries one main subject and action.",
+          "zh": "按事件或条件转换处切成句号短句，每句只交代一个主动作或边界条件。"
+        },
+        "exemplar": {
+          "bad": "我们在周一完成双集群流量切分后观察到 orders-worker-service-cluster-01 核心交易接口延迟上升三毫秒但考虑到异步日志落盘能够避免主线程在高峰期被磁盘刷写操作阻塞并且可在节点异常重启后完整保留上下文追踪链路以便值班同学快速排查请求参数与调用栈因此决定保留当前配置并在周四晚低峰期继续观察四十八小时以确认内存缓冲池没有缓慢泄漏或堆积风险。",
+          "trap": "切双集群。延迟微升。观察两天。",
+          "good": "周一完成双集群切分后延迟升了 3ms，但异步落盘可防阻塞并保链路。团队周四再复查 48 小时内存占用。",
+          "note": {
+            "en": "Protects decimals and versions during break scan.",
+            "zh": "切句时跳过小数与版本号。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "unsourced-statistic",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "evidence/unsourced-stat",
+        "probe": "unsourced-statistic",
+        "zones": [
+          "prose"
+        ],
+        "modalities": [
+          "markdown",
+          "text",
+          "html",
+          "docx",
+          "pptx"
+        ],
+        "message": {
+          "en": "Marketing-style percentage claim ('up to X%', 'reduces by X%', '提升 X%', '高达 X%') lacks a baseline, sample size, metric name, or citation.",
+          "zh": "宣传式百分比数字宣称（如“提升 40%”“高达 80%”“up to 50%”）附近缺少测试基线、样本数、指标口径或引用来源。"
+        },
+        "deletionTest": {
+          "en": "Add the before -> after baseline, sample size (n=...), or link to the benchmark; otherwise cut the unverified percentage.",
+          "zh": "补出改动前后的基准对比、样本量或测评出处；拿不出出处就删掉具体百分比。"
+        },
+        "exemplar": {
+          "bad": "Switching to the updated triage workflow boosts team efficiency by up to 45%.",
+          "trap": "Teams work smarter. Triage moves faster. Quality soars.",
+          "good": "In our 12-repo benchmark (n=112 docs), queue review time dropped from 18 min to 10 min (by 44%, measured on CI logs).",
+          "note": {
+            "en": "Exempts claims backed by from/to baselines, sample counts, metric terms, or citation links nearby.",
+            "zh": "同句或紧邻范围出现基线对比、样本数或出处链接时自动豁免。"
+          },
+          "source": "original"
+        }
       }
     ]
   },
@@ -587,7 +727,9 @@ export const PACKS_BY_ID = {
       "jsx",
       "svg",
       "docx",
-      "pptx"
+      "pptx",
+      "pdf",
+      "image"
     ],
     "thresholds": {},
     "rules": [
@@ -608,7 +750,8 @@ export const PACKS_BY_ID = {
           "jsx",
           "svg",
           "docx",
-          "pptx"
+          "pptx",
+          "pdf"
         ],
         "patterns": [
           "(?<![A-Za-z])(?:lorem ipsum|dolor sit amet)(?![A-Za-z])",
@@ -653,7 +796,8 @@ export const PACKS_BY_ID = {
           "html",
           "jsx",
           "docx",
-          "pptx"
+          "pptx",
+          "pdf"
         ],
         "patterns": [
           "(?:^|\\n)\\s*(?:Certainly|Sure|Absolutely|Of course|Happy to help|Glad to help)[!,.]?\\s+(?:[Hh]ere(?:'s| is| are)|[Bb]elow is)\\b",
@@ -697,7 +841,8 @@ export const PACKS_BY_ID = {
         "probe": "office-markdown-leak",
         "modalities": [
           "docx",
-          "pptx"
+          "pptx",
+          "pdf"
         ],
         "message": {
           "en": "Raw Markdown syntax (`**bold**` or `## heading`) pasted unrendered into Word or PowerPoint.",
@@ -752,7 +897,7 @@ export const PACKS_BY_ID = {
   "deck-and-ui": {
     "schema": "dislop.pack/2",
     "id": "deck-and-ui",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "tier": "taste",
     "extends": [
       "core"
@@ -762,15 +907,17 @@ export const PACKS_BY_ID = {
       "zh": "演示文稿、Web 界面与平面视觉"
     },
     "summary": {
-      "en": "Flags PowerPoint slide word-walls, bullet overload, autofit text shrink, weak topic titles, default purple-pink AI gradients, pill-badge soup, triple nested cards, and prompt-echo chrome.",
-      "zh": "检查幻灯片文字墙、要点过多、字号自动缩排、空泛标题，以及网页里的默认紫粉渐变、满屏胶囊标签、三层套盒与提示词营销徽章。"
+      "en": "Flags PowerPoint and PDF slide word-walls, autofit text shrink, generic titles, Web UI neon gradients, glow orbs, emoji chrome, icon-tile grids, SVG layout defects, and raster image AI workflow/palette slop.",
+      "zh": "检查 PPT 与横版 PDF 文字墙、自动缩排、空泛标题，以及网页里的紫粉渐变、霓虹光球、Emoji 图标堆砌、模板卡格、SVG 排版缺陷和图片工作流残留与塑料配色。"
     },
     "modalities": [
       "html",
       "css",
       "jsx",
       "svg",
-      "pptx"
+      "pptx",
+      "pdf",
+      "image"
     ],
     "thresholds": {
       "maxSlideWords": 120,
@@ -787,7 +934,8 @@ export const PACKS_BY_ID = {
         "family": "deck/density",
         "probe": "slide-word-wall",
         "modalities": [
-          "pptx"
+          "pptx",
+          "pdf"
         ],
         "message": {
           "en": "Slide exceeds readable copy budget (> 120 Latin words or > 280 Chinese characters).",
@@ -902,7 +1050,8 @@ export const PACKS_BY_ID = {
           "html",
           "css",
           "jsx",
-          "svg"
+          "svg",
+          "pdf"
         ],
         "message": {
           "en": "Default purple/indigo-to-pink generator gradient or gradient-clipped display headline.",
@@ -1018,6 +1167,208 @@ export const PACKS_BY_ID = {
           "note": {
             "en": "Name the supported file formats instead of boasting about intelligence.",
             "zh": "直接列出支持的文件格式，不贴自我标榜的口号签。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "ui-glow-blob-chrome",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "ui/slop-chrome",
+        "probe": "ui-glow-blob-chrome",
+        "modalities": [
+          "html",
+          "css",
+          "jsx",
+          "svg"
+        ],
+        "message": {
+          "en": "Decorative ambient blur orbs (`blur-3xl`), neon box-shadows, pulsing `animate-ping` pill dots, or heavy SVG glow filters.",
+          "zh": "堆砌装饰性环境光晕球（`blur-3xl`）、霓虹色阴影、闪烁 `animate-ping` 小圆点或重度 SVG 发光滤镜。"
+        },
+        "deletionTest": {
+          "en": "Delete decorative blur orbs and colored glow shadows; separate layers with solid surface tokens and crisp 1px borders.",
+          "zh": "删掉无功能的光晕球和霓虹发光阴影，改用单调阶梯底色和 1px 实线分隔层次。"
+        },
+        "exemplar": {
+          "bad": "<div class=\"blur-3xl rounded-full bg-purple-500/30\"></div><button class=\"shadow-indigo-500/50\">Launch</button>",
+          "trap": "<div class=\"blur-3xl rounded-full bg-amber-500/20\"></div><button class=\"shadow-teal-500/50\">Launch</button>",
+          "good": "<section class=\"surface-sheet border\"><button class=\"btn-primary\">Launch</button></section>",
+          "note": {
+            "en": "Swapping purple glow for teal glow repeats the same decorative haze; use solid ink contrast.",
+            "zh": "把紫色光晕换成青色光晕还是同一种发光套路，直接去掉模糊光斑即可。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "ui-emoji-icon-chrome",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "ui/slop-chrome",
+        "probe": "ui-emoji-icon-chrome",
+        "modalities": [
+          "html",
+          "jsx",
+          "svg"
+        ],
+        "message": {
+          "en": "Three or more decorative AI stock emojis (`🚀`, `✨`, `⚡`, `🛡️`) used as interface or heading icons.",
+          "zh": "在界面标题、按钮或卡片里堆砌 3 处及以上通用 Emoji（如 `🚀`、`✨`、`⚡`、`🛡️`）充当图标。"
+        },
+        "deletionTest": {
+          "en": "Strip decorative emojis from headings and controls; use plain typography or a consistent single-stroke SVG icon set.",
+          "zh": "删去标题与按钮里的装饰 Emoji，改用纯文字层级或统一线宽的单色矢量图标。"
+        },
+        "exemplar": {
+          "bad": "<h3>🚀 Fast</h3><h3>⚡ Sync</h3><h3>🛡️ Safe</h3>",
+          "trap": "<h3>🌟 Fast</h3><h3>💎 Sync</h3><h3>🎯 Safe</h3>",
+          "good": "<h3>Sub-50 ms checks</h3><h3>Local sync</h3><h3>Offline by default</h3>",
+          "note": {
+            "en": "Swapping rockets for sparkles and gems still looks like generated filler; plain concrete headings read faster.",
+            "zh": "把火箭换成星星和钻石仍是生成式拼贴味，直接用具体小标题更利落。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "ui-template-card-grid",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "ui/slop-chrome",
+        "probe": "ui-template-card-grid",
+        "modalities": [
+          "html",
+          "jsx"
+        ],
+        "message": {
+          "en": "Stock generator UI boilerplate: tinted rounded-square icon tiles (>= 3), fake macOS 3-dot window chrome, or sequential `01`/`02`/`03` eyebrow kickers.",
+          "zh": "命中生成式界面三大件：彩色圆角方块图标卡（>= 3 组）、假 macOS 三色窗口圆点或 `01`/`02`/`03` 编号眉题。"
+        },
+        "deletionTest": {
+          "en": "Remove fake window dots, sequential numeric kickers, and tinted icon tiles; organize cards with real headings and alignment.",
+          "zh": "删去假窗口圆点、编号眉题和马卡龙图标块，靠真实小标题和对齐建立网格秩序。"
+        },
+        "exemplar": {
+          "bad": "<div class=\"rounded-xl w-10 h-10 bg-indigo-50\">A</div><div class=\"rounded-xl w-10 h-10 bg-purple-50\">B</div><div class=\"rounded-xl w-10 h-10 bg-pink-50\">C</div>",
+          "trap": "<div><span>01</span><h3>Speed</h3><span>02</span><h3>Scale</h3><span>03</span><h3>Trust</h3></div>",
+          "good": "<section class=\"grid\"><div><h3>CLI</h3><p>Checks Markdown and PPTX locally.</p></div><div><h3>MCP</h3><p>Connects to coding agents.</p></div></section>",
+          "note": {
+            "en": "Replacing tinted icon tiles with `01`/`02`/`03` kickers swaps one boilerplate chrome for another.",
+            "zh": "把彩色图标块换成 `01`/`02`/`03` 编号眉题只是换了另一种模板壳。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "svg-layout-slop",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "graphic/svg-structure",
+        "probe": "svg-layout-slop",
+        "modalities": [
+          "svg"
+        ],
+        "message": {
+          "en": "SVG graphic has structural generation defects: missing `viewBox` on a large canvas, overlapping `<text>` coordinates, or >= 2 orphaned `<defs>` entries.",
+          "zh": "SVG 平面图形存在生成式结构缺陷：大画布缺失 `viewBox`、文字坐标重叠或 `<defs>` 中残留 2 处及以上孤立未用定义。"
+        },
+        "deletionTest": {
+          "en": "Add an explicit `viewBox`, separate `<text>` coordinates cleanly, and delete unused gradients or filters from `<defs>`.",
+          "zh": "补齐显式 `viewBox`，拉开重叠文字坐标，并清理 `<defs>` 里未被引用的冗余渐变与滤镜。"
+        },
+        "exemplar": {
+          "bad": "<svg width=\"640\" height=\"360\"><text x=\"40\" y=\"50\">Step 1</text><text x=\"42\" y=\"52\">Overlap</text></svg>",
+          "trap": "<svg viewBox=\"0 0 640 360\" width=\"640\" height=\"360\"><defs><linearGradient id=\"u1\"/><linearGradient id=\"u2\"/></defs><rect width=\"640\" height=\"360\"/></svg>",
+          "good": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 360\" width=\"640\" height=\"360\"><text x=\"40\" y=\"50\">Step 1</text><text x=\"40\" y=\"96\">Step 2</text></svg>",
+          "note": {
+            "en": "Non-icon SVGs need a responsive `viewBox`, non-overlapping text coordinates, and zero orphaned `<defs>` bloat.",
+            "zh": "非小图标画布应声明 `viewBox`、保证文字坐标不碰撞，并删去未被引用的 `<defs>`。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "image-ai-workflow-residue",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "graphic/image-residue",
+        "probe": "image-ai-workflow-residue",
+        "modalities": [
+          "image"
+        ],
+        "message": {
+          "en": "Raster image embeds unstripped AI generation prompt/workflow parameters (warning) or explicit synthetic provenance tags (info — retain required legal disclosures).",
+          "zh": "图片文件内嵌了未清理的生成提示词/工作流参数（提醒），或带有显式 AI 生成来源标识（提示：合规场景请保留法定标识，重点复核成图质感）。"
+        },
+        "deletionTest": {
+          "en": "Strip accidental raw prompt/seed workflow JSON before shipping assets; keep legally required C2PA or IPTC `trainedAlgorithmicMedia` disclosures intact.",
+          "zh": "交付前清理意外残留的提示词与工作流 JSON；属于法规要求的 C2PA 或 `trainedAlgorithmicMedia` 标识请勿私自剥除，仅作质感复核。"
+        },
+        "exemplar": {
+          "bad": "PNG tEXt chunk `parameters`: `masterpiece, neon glow\\nNegative prompt: blurry\\nSteps: 28, Sampler: Euler a, CFG scale: 7`",
+          "trap": "Stripping legal C2PA / `trainedAlgorithmicMedia` provenance tags instead of inspecting or re-shooting the asset",
+          "good": "Clean PNG/JPEG export with raw prompt/node-graph chunks removed and natural photographic or editorial raster assets",
+          "note": {
+            "en": "Removing leaked ComfyUI/A1111 prompt strings protects internal workflows; never strip legally mandated AI disclosures.",
+            "zh": "清理工作流参数块可避免提示词与节点图外泄；面向公众分发的合成图片应依法保留来源标识。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "image-ai-palette-slop",
+        "tier": "taste",
+        "severity": "info",
+        "family": "graphic/image-aesthetics",
+        "probe": "image-ai-palette-slop",
+        "modalities": [
+          "image"
+        ],
+        "message": {
+          "en": "PNG pixel profile matches default AI-slop aesthetics: dominant neon purple-indigo-pink palette or hyper-saturated airbrushed plastic sheen.",
+          "zh": "PNG 像素分布呈现典型生成式视觉套路：高占比蓝紫霓虹主色，或大面积高饱和光滑“塑料感”涂抹。"
+        },
+        "deletionTest": {
+          "en": "Review the rendered image for plastic skin/surfaces or generic neon-purple backdrops; re-grade toward natural micro-contrast and restrained accents.",
+          "zh": "人工复核图片是否存在塑料反光质感或默认黑底蓝紫霓虹，改用自然材质细节与克制配色。"
+        },
+        "exemplar": {
+          "bad": "1024x1024 dark-mode hero PNG with 42% #0B0B14 dark backdrop and 28% glowing #7C3AED/#EC4899 purple-pink pixels",
+          "trap": "1024x1024 PNG pushing every surface to 92% saturation with airbrushed zero-texture gradients",
+          "good": "1024x1024 PNG on #F6F7F5 paper ground with crisp ink typography and <= 5% single vermilion accent",
+          "note": {
+            "en": "Pixel heuristics are advisory signals; crisp UI screenshots on neutral grounds stay cleanly below thresholds.",
+            "zh": "像素分布仅作温和提示，白底或克制暗底的正常 UI 截图不会误报。"
+          },
+          "source": "original"
+        }
+      },
+      {
+        "id": "pdf-visual-layout-slop",
+        "tier": "taste",
+        "severity": "warning",
+        "family": "graphic/pdf-layout",
+        "probe": "pdf-visual-layout-slop",
+        "modalities": [
+          "pdf"
+        ],
+        "message": {
+          "en": "PDF slide/poster layout exhibits synthetic template defects: multi-page raster-only slides, collapsed font hierarchy, crushed < 9.5pt body copy, or 4+ consecutive identical landscape slide skeletons.",
+          "zh": "PDF 演示页或海报存在排版缺陷：多页全图无可选文字、横版页字阶扁平或正文缩至 < 9.5pt，或连续 4 页及以上同骨架纯字横版页。"
+        },
+        "deletionTest": {
+          "en": "Export slides with selectable vector text, restore a >= 1.2x title-to-body type scale, keep body type >= 11pt, and vary layout structure across slides.",
+          "zh": "导出可选择矢量文本而非整页贴图，拉开至少 1.2 倍的标题与正文字号阶梯（正文 >= 11pt），并穿插表格或图表。"
+        },
+        "exemplar": {
+          "bad": "4-page landscape 960x540 PDF deck where every slide is a single rasterized PNG image with 0 selectable text operators",
+          "trap": "4-page landscape PDF deck shrinking all body text to 8.5pt with 10pt titles (1.17x ratio) to cram paragraphs",
+          "good": "5-page landscape PDF deck with 28pt assertion headlines, 13pt body copy, and alternating tables and charts",
+          "note": {
+            "en": "Portrait prose reports and single-page portfolios are exempt from landscape slide density and monotony rules.",
+            "zh": "竖版长文报告与单页作品集豁免横版幻灯片单调与文字墙检查。"
           },
           "source": "original"
         }
@@ -1921,6 +2272,83 @@ export const RULE_UI_META = {
       "good": "<span class=\"section-meta\">本地离线运行</span>"
     }
   },
+  "ui-glow-blob-chrome": {
+    "lang": "both",
+    "title": {
+      "zh": "霓虹光晕球与闪烁圆点",
+      "en": "Ambient glow orbs & pulsing dots"
+    },
+    "zhEx": {
+      "bad": "<div class=\"blur-3xl rounded-full bg-purple-500/30\"></div><button class=\"shadow-indigo-500/50\">启动</button>",
+      "good": "<section class=\"surface-sheet border\"><button class=\"btn-primary\">运行检查</button></section>"
+    }
+  },
+  "ui-emoji-icon-chrome": {
+    "lang": "both",
+    "title": {
+      "zh": "界面标题堆砌通用 Emoji",
+      "en": "Decorative emoji UI chrome"
+    },
+    "zhEx": {
+      "bad": "<h3>🚀 极速启动</h3><h3>⚡ 智能同步</h3><h3>🛡️ 安全加固</h3>",
+      "good": "<h3>50 毫秒本地检查</h3><h3>增量同步</h3><h3>离线零上传</h3>"
+    }
+  },
+  "ui-template-card-grid": {
+    "lang": "both",
+    "title": {
+      "zh": "彩色图标方块与假窗口三点",
+      "en": "Icon-tile grid & fake window dots"
+    },
+    "zhEx": {
+      "bad": "<div class=\"rounded-xl w-10 h-10 bg-indigo-50\">A</div><div class=\"rounded-xl w-10 h-10 bg-purple-50\">B</div><div class=\"rounded-xl w-10 h-10 bg-pink-50\">C</div>",
+      "good": "<section class=\"grid\"><div><h3>命令行</h3><p>本地检查文稿与幻灯片。</p></div></section>"
+    }
+  },
+  "svg-layout-slop": {
+    "lang": "both",
+    "title": {
+      "zh": "SVG 缺 viewBox 或文字重叠",
+      "en": "SVG missing viewBox or text overlap"
+    },
+    "zhEx": {
+      "bad": "<svg width=\"640\" height=\"360\"><text x=\"40\" y=\"50\">步骤一</text><text x=\"42\" y=\"52\">重叠字</text></svg>",
+      "good": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 360\" width=\"640\" height=\"360\"><text x=\"40\" y=\"50\">步骤一</text><text x=\"40\" y=\"96\">步骤二</text></svg>"
+    }
+  },
+  "image-ai-workflow-residue": {
+    "lang": "both",
+    "title": {
+      "zh": "图片残留生成参数或来源标识",
+      "en": "Image AI workflow residue & provenance"
+    },
+    "zhEx": {
+      "bad": "PNG 文本块残留 `Negative prompt: blurry\\nSteps: 28, CFG scale: 7` 生成参数。",
+      "good": "交付前剥除内部提示词与节点图 JSON，依法保留面向公众的来源声明。"
+    }
+  },
+  "image-ai-palette-slop": {
+    "lang": "both",
+    "title": {
+      "zh": "PNG 霓虹紫粉或高饱和塑料质感",
+      "en": "PNG neon purple palette or plastic sheen"
+    },
+    "zhEx": {
+      "bad": "暗底上高占比紫粉霓虹渐变，或缺乏自然微对比的光滑高饱和表面。",
+      "good": "克制底色配自然纹理细节，关键强调色控制在局部。"
+    }
+  },
+  "pdf-visual-layout-slop": {
+    "lang": "both",
+    "title": {
+      "zh": "PDF 纯图幻灯片或字阶扁平",
+      "en": "PDF raster slides or flat typography"
+    },
+    "zhEx": {
+      "bad": "连续多页横版 PDF 全是整页位图，或把正文缩到 8.5pt 挤满纯字页面。",
+      "good": "保留可选矢量文字，保持 1.2 倍以上标题正文字号阶梯并穿插图表。"
+    }
+  },
   "cooccurrence-slop-cluster": {
     "lang": "both",
     "title": {
@@ -2003,6 +2431,39 @@ export const RULE_UI_META = {
       "bad": "The platform focuses on improving overall developer productivity. System modules maintain clean architectural boundaries. Team workflows follow consistent operational standards. Product releases progress steadily toward core goals. Customer feedback reflects positive adoption trends.",
       "trap": "Productivity rises. Boundaries hold. Releases ship.",
       "good": "Cutting the home bundle from 420 KB to 145 KB dropped mobile first paint to 0.9s, and 3 backend engineers now rotate weekly via `ops/oncall.yaml`."
+    }
+  },
+  "zh-dev-jargon": {
+    "lang": "zh",
+    "title": {
+      "zh": "中文研发与产品自嗨黑话",
+      "en": "Chinese dev/product buzzword cluster"
+    }
+  },
+  "zh-exclamation": {
+    "lang": "zh",
+    "title": {
+      "zh": "中文正文鸡血感叹号",
+      "en": "Chinese hype exclamation marks"
+    }
+  },
+  "zh-mega-sentence": {
+    "lang": "zh",
+    "title": {
+      "zh": "中文超长一逗到底单句",
+      "en": "Chinese mega run-on sentence"
+    }
+  },
+  "unsourced-statistic": {
+    "lang": "both",
+    "title": {
+      "zh": "无基线/出处的百分比宣称",
+      "en": "Unsourced percentage claim"
+    },
+    "zhEx": {
+      "bad": "接入该工作流后，团队交付效率提升 45%，运营成本节省 30%。",
+      "trap": "效率暴涨。成本骤降。交付跃迁。",
+      "good": "在 12 个仓库的 112 份样本实测中，人工复核耗时从 18 分钟降到 10 分钟（按 CI 日志统计）。"
     }
   },
   "literary-semicolon-tricolon": {

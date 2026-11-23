@@ -1,7 +1,7 @@
 {
   "name": "dislop",
   "version": "0.7.1",
-  "description": "Linter for AI Slop. Combines vetted community rules (7 packs, 42 rules, 53 patterns) across pure-doc Skill, local offline CLI, and Official Cloud MCP.",
+  "description": "Cutting AI slop is real productivity. Linter for AI Slop with vetted rules (7 packs, 53 rules, 65 patterns) across pure-doc Skill, offline CLI, and Official Cloud MCP.",
   "author": {
     "name": "dislop-ai",
     "url": "https://dislop.com"

@@ -1,10 +1,10 @@
 # dislop for VS Code & Open VSX
 
-Linter for AI Slop built on `src/core.mjs` — helps you (and your agent) catch and fix AI-sounding text and template layouts locally.
+Cutting AI slop is real productivity. Linter for AI Slop built on `src/core.mjs` — helps you (and your agent) catch and fix AI-sounding text and template layouts locally.
 
 ## Preview
 
-![dislop auditing a launch note across three states](https://dislop.com/assets/demos/proof-cycle-en-v1.gif)
+![dislop auditing a launch note across three states](https://dislop.com/assets/demos/proof-cycle-en-v2.gif)
 
 ## Features
 

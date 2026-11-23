@@ -1,24 +1,51 @@
 import {
   analyzeTextProfile,
+  auditImageDocument,
   auditOoxmlEntries,
+  auditPdfDocument,
   auditText,
+  defaultPackForModality,
   detectModality,
   extractVoiceProfileOffline,
   resolveEffectivePack,
 } from "./engine/core.mjs";
+import { auditPatterns } from "./engine/pattern-engine.mjs";
+import { PATTERN_BANKS } from "./engine/patterns-data.mjs";
+import { analyzeDocumentWithPocketModels, predictPackWithPocketRouter, setPocketModelBundle } from "./engine/pocket-model.mjs";
+import { parseBrowserImageBuffer, parseBrowserPdfBuffer, readBrowserZipXmlEntries } from "./engine/binary-browser.mjs";
 import { PACKS_BY_ID, RULE_UI_META } from "./engine/packs-data.mjs";
+
+let pocketModelReady = false;
+let pocketModelPromise = null;
+function ensurePocketModelLoaded() {
+  if (pocketModelReady) return Promise.resolve(true);
+  if (!pocketModelPromise) {
+    pocketModelPromise = import("./engine/pocket-model-data.mjs")
+      .then((mod) => {
+        if (mod?.POCKET_MODEL_BUNDLE) {
+          setPocketModelBundle(mod.POCKET_MODEL_BUNDLE);
+          pocketModelReady = true;
+        }
+        return pocketModelReady;
+      })
+      .catch(() => false);
+  }
+  return pocketModelPromise;
+}
 
 // ---------- Native Bilingual Copy (Default ZH, Native EN — Zero Translationese) ----------
 
 const I18N = {
   zh: {
-    "page.title": "dislop — AI 味检查工具（Linter for AI Slop）",
+    "page.title": "dislop — 去 AI 味才是真正的生产力！",
     "nav.skip": "跳至正文",
+    "nav.signIn": "登录 · 30 免费额度",
     "nav.cases": "案例",
     "nav.workbench": "在线试",
     "nav.surfaces": "怎么用",
     "nav.pricing": "开源与云端",
-    "nav.awesome": "87 条清单",
+    "nav.guides": "指南",
+    "nav.awesome": "工具清单",
     "nav.rules": "规则",
     "nav.github": "GitHub ★",
     "theme.dark": "深色",
@@ -27,71 +54,97 @@ const I18N = {
     "btn.copied": "已复制",
 
     "lead.strike": "好的，以下是为您润色后的版本。",
-    "lead.title": "帮你（的 Agent）挑出并改掉文档、网页和 PPT 里的 AI 味",
+    "lead.title": "去 AI 味才是真正的生产力！",
     "lead.sub":
-      "专用的 AI 味检查工具（Linter for AI Slop）。整合社区验证过的去味规则、语料经验与 87 条精选工具，一行命令接入主流 Coding Agent、办公 Agent 与编辑器；CLI 与本地插件可纯本地零上传，下方工作台可随时切换本地检查与云增强（MCP）模式。",
+      "专用的 AI 味检查工具。整合社区验证过的去味规则、语料经验与 90 条精选工具，一行命令接进主流 Coding Agent、办公 Agent 与编辑器，在文档、网页和 PPT 发出前标出硬伤、套话和模板布局。",
     "lead.promptLabel": "或者免安装：复制这句话直接发给任意联网 AI / Agent",
     "lead.promptText":
       "先读 https://dislop.com/llms.txt，按里面整理的文案和设计去 AI 味规矩与检查方法，帮我把接下来这份稿子发之前过一遍。",
     "lead.copyPromptBtn": "复制发给 AI",
-    "lead.cta": "在工作台试用（本地 / 云增强）↓",
+    "lead.cta": "在工作台试用（本地 / 云端）↓",
     "lead.cloudBtn": "免费领 30 额度远程 MCP 密钥",
-    "lead.installBtn": "装进 Agent / 编辑器（可纯本地）",
+    "lead.installBtn": "装进 Agent / 编辑器（本地离线）",
     "lead.awesomeBtn": "工具清单 →",
     "lead.starBtn": "GitHub ★",
-    "lead.reassure": "CLI 与本地插件纯本地运行、零上传；网页工作台支持本地规则检查与云增强（MCP）模式切换。",
+    "lead.reassure": "CLI 与本地插件纯本地运行、零上传；下方工作台支持切换本地检查与云端审校。",
 
     "hp.tabBad": "原稿",
     "hp.tabTrap": "换了种 AI 味",
     "hp.tabGood": "改干净了",
+    "hp.pauseBtn": "暂停演示",
+    "hp.playBtn": "自动演示",
     "hp.meta": "用同一个检查引擎实时跑的",
     "hp.openWb": "在下面工作台打开 →",
 
-    "m1.title": "1. 集成社区优质成果",
-    "m1.desc": "整合经过核验的开源去味项目、语料经验与 87 条精选工具，覆盖文稿、网页和 Word/PPT，不用自己到处搜集拼凑。",
-    "m2.title": "2. 多端与多场景兼容",
-    "m2.desc": "内置研发、商务、前端与演示等 7 套场景包，提供 Skill、Plugin、CLI 与 MCP，一行命令接入 Codex、Claude Code、Cursor、WorkBuddy 等 Agent 与编辑器。",
-    "m3.title": "3. 本地离线 + 云增强 MCP 切换",
-    "m3.desc": "CLI 与本地插件纯本地运行、零上传；在工作台或远程 MCP 切到云增强模式，即可直接用大模型深层审校、一键改写并同步个人文风（每月 30 免费额度）。",
+    "m1.title": "社区规则和工具一处拿全",
+    "m1.desc": "整合经过核验的去味规则、语料经验与 90 条精选工具，覆盖文稿、网页和 Word/PPT，不用自己到处搜集拼凑。",
+    "m2.title": "一行命令接入主流 Agent 与编辑器",
+    "m2.desc": "内置 7 套场景包，支持 Codex、Claude Code、Cursor、WorkBuddy 等工具，在终端、编辑器或 CI 里都能直接跑。",
+    "m3.title": "稿子默认留在你电脑上",
+    "m3.desc": "CLI 与本地插件在自己电脑上跑，不上传文稿；切到工作台或远程 MCP 的云端模式，可调用多模型深度审校与一键改写。",
 
-    "cases.title": "三个真实案例：为什么删了套词还是像 AI",
+    "cases.title": "三组对照：为什么删了套词还是像 AI",
     "cases.desc":
       "删掉“抓手”“赋能”这类高频词之后，模型常会换成“不是 A，而是 B”这类反转口号，或者写出规则报 0 问题、读起来依然像推销稿的句子。下面三组对照可以直接试，也可以一键复制分享。",
     "cases.readAll": "看全部对照案例（.md）→",
 
-    "demos.title": "6 秒看懂怎么查：从原稿到改干净",
+    "demos.title": "6 秒看懂怎么查：从文字、网页到 PPT 和 Agent 闭环",
     "demos.desc":
-      "四段动画对应四个最常见场景：三态文字校样、终端离线检查、浏览器工作台实操，以及网页模板味清理。全部本地渲染，无外域请求。",
-    "demos.guideLink": "GIF 制作与规范 →",
-    "demos.c1Title": "1. 三态文字校样：防改过头换成反转口号",
+      "六段动画对应六个真实场景，全部离线渲染并内置无损动态 WebP 与 GIF 回退，零外域请求。点击卡片下方按钮可随时定格、重播或放大查看。",
+    "demos.guideLink": "动画与 GIF 制作规范 →",
+    "demos.c1Title": "1. 同一段话的三个版本：防改过头换成反转口号",
+    "demos.c1Badge": "3 步对照 · 6.8s",
     "demos.c1Desc": "先用红实线划掉开头寒暄，再用蓝虚线抓出“不是……而是……”反转口号，最后只留动作和 45 秒真实指标。",
     "demos.c2Title": "2. 命令行门禁：Node 与 Python 结果一致",
+    "demos.c2Badge": "CLI 离线 · 6.4s",
     "demos.c2Desc": "本地跑 dislop check --profile，硬伤直接返回退出码 1 卡住 CI，顺带输出句长起伏与具体度体检。",
     "demos.c3Title": "3. 浏览器离线工作台：真机操作实录",
-    "demos.c3Desc": "就是本页上方的工作台。贴稿子、点切规则包、实时对齐右侧行号批注，全程在当前标签页内完成。",
+    "demos.c3Badge": "真机实录 · 6.8s",
+    "demos.c3Desc": "就是本页上方的工作台。贴稿子、点切规则包、实时对齐右侧行号批注与 5 轴体检，全程在当前标签页完成。",
     "demos.c4Title": "4. 网页与组件：清掉默认紫粉模板和死按钮",
+    "demos.c4Badge": "网页去模板 · 6.8s",
     "demos.c4Desc": "直接扫 HTML/CSS/JSX 里的渐变标题、装饰徽章、胶囊堆叠和 href=\"#\" 假按钮，退回干净可用的界面。",
+    "demos.c5Title": "5. Word / PPT 检查：揪出裸星号、字墙和过程标题",
+    "demos.c5Badge": "PPTX 实检 · 6.8s",
+    "demos.c5Desc": "直接解包 .pptx 检查未渲染的 **加粗** 符号、单页字墙、68% 自动缩字与空泛标题，改回结论先行的干净页。",
+    "demos.c6Title": "6. 编码 Agent + CI 闭环：写前读 Skill，提交前过门禁",
+    "demos.c6Badge": "Agent 闭环 · 6.8s",
+    "demos.c6Desc": "Agent 先读取纯文档 SKILL.md，再用 --changed origin/main 拦下 PR 寒暄与复读 diff，修完复检确认数字零丢失。",
+    "demos.pause": "定格",
+    "demos.play": "播放",
+    "demos.replay": "重播",
+    "demos.zoom": "放大看",
+    "demos.close": "关闭",
 
-    "wb.heading": "直接在这里试一试（支持粘贴或拖拽本地文件）",
-    "wb.packLabel": "内置场景包（0 联网）：",
-    "pack.brief": "工作文档 / 方案",
-    "pack.eng": "研发文档 / PR / 复盘",
-    "pack.reg": "对外发布 / 严谨合规",
-    "pack.exec": "汇报 PPT / 结论页",
-    "pack.essay": "随笔 / 长文",
-    "pack.ui": "网页与组件",
-    "wb.openFile": "打开本地文件（.md / .html / .docx / .pptx）",
+    "wb.heading": "在线试用",
+    "wb.subhint": "粘贴文字，或把文档 / 网页 / PPT / PDF / 图片拖进稿纸",
+    "wb.packLabel": "场景包：",
+    "pack.auto": "自动识别",
+    "pack.brief": "工作文档",
+    "pack.eng": "研发文档与复盘",
+    "pack.reg": "对外合规",
+    "pack.exec": "管理汇报",
+    "pack.essay": "随笔长文",
+    "pack.ui": "PPT 和网页",
+    "wb.openFile": "打开本地文件",
     "wb.specimensTitle": "示例",
-    "wb.privacyNote": "本地基础检查在当前标签页运行；登录后点击下方云增强（MCP）按钮时才会调用官方零训练模型端点，不存草稿。",
+    "wb.privacyNote": "本地检查在当前标签页完成。点下方云端按钮（审校、改写、提炼文风）并登录后，才会经我们的服务端发给付费版 Google Gemini 接口；Google 不拿它训练，我们不存草稿。",
     "wb.jumpNotes": "看批注详情 ↓",
-    "ai.reviewBtn": "云端深度审校 · MCP（1 额度）",
-    "ai.deslopBtn": "云端改写 · MCP（2 额度）",
-    "ai.anonHint": "本地检查免登录零上传 · 云端审校与改写需登录（每月免费 30 额度）",
-    "ai.claimLink": "领免费密钥 →",
-    "voice.drawerTitle": "可选：提取个人文风（支持本地统计，或云端 AI 提炼）",
-    "voice.drawerDesc": "贴入 1–3 段你自己写过的干净文字（用空行隔开）。点「本地统计文风」在当前标签页完成；也可登录免费密钥调用云端模型提炼并跨端同步。",
+    "wb.offlinePill": "当前标签页离线运行 · 0 上传",
+    "wb.editHint": "直接粘贴或修改原文，右侧批注会实时更新；按 ⌘/Ctrl+Enter 或切回「标出问题」查看划线。",
+    "wb.copyDraft": "复制正文",
+    "wb.shareLink": "生成分享链接",
+    "wb.copyAgentBrief": "复制给 Agent 改稿",
+    "ai.reviewBtn": "云端审校（1 额度）",
+    "ai.deslopBtn": "云端改写（2 额度）",
+    "ai.trackChanges": "保留 Word 修订标记",
+    "ai.anonHint": "本地检查免登录 · 云端审校需免费登录（每月 30 额度，同账号可用于远程 MCP）",
+    "ai.claimLink": "登录 / 绑定密钥",
+    "ai.lowCreditLink": "额度偏低 · 预约扩容 ↓",
+    "voice.drawerTitle": "可选：提取个人文风（支持本地统计，或云端提炼）",
+    "voice.drawerDesc": "贴入 1–3 段你自己写过的干净文字（用空行隔开）。点「本地统计文风」在当前标签页完成；保存的文风会在点「云端改写」时自动套用。",
     "voice.offlineBtn": "本地统计文风（0 额度 · 不联网）",
-    "voice.extractBtn": "云端 AI 提炼文风（2 额度）",
+    "voice.extractBtn": "云端提炼文风（2 额度）",
     "voice.clearBtn": "清除已保存文风",
     "wb.modeProof": "标出问题",
     "wb.modeEdit": "编辑原文",
@@ -100,22 +153,22 @@ const I18N = {
     "wb.tryTrap": "看换了种 AI 味的",
     "wb.reset": "还原",
     "wb.voiceTitle": "5 轴节奏与细节体检",
-    "wb.nudgeText": "试完觉得顺手？需要绝对离线可装开源 Skill / CLI；想让办公与编码 Agent 接入多模型深度审校，10 秒登录领免费 30 额度官方 MCP。",
-    "wb.nudgeCloud": "领免费 30 额度 ↓",
+    "wb.nudgeText": "想在自己电脑上离线查，就装开源 Skill 或 CLI。想让 Agent 用云端审校，登录后每月有 30 免费额度。",
+    "wb.nudgeCloud": "验证码登录 · 30 免费额度",
     "wb.nudgeInstall": "装开源 Skill / CLI ↓",
     "wb.nudgeCopy": "复制发给 AI",
     "wb.nudgeStar": "GitHub ★",
-    "legend.error": "红实线：AI 残留硬伤",
-    "legend.warn": "蓝虚线：套话与模板味",
+    "legend.error": "红实线：硬伤",
+    "legend.warn": "蓝虚线：提醒（套话与模板味）",
 
     "surf.title": "怎么用：纯文档 Skill → 开源本地 CLI → 官方云端 MCP",
     "surf.desc":
-      "产品分为三层：纯文档 Skill（动笔前避坑）、开源本地 CLI（零依赖快检与 CI 门禁）、官方云端 MCP（https://dislop.com/mcp，免配本地环境做多模型分文体审校）。",
+      "三种用法按需选：纯文档 Skill 在动笔前避坑，开源本地 CLI 在终端和 CI 做离线检查，官方云端 MCP（https://dislop.com/mcp）免装环境做多模型审校。",
     "surf.readTools": "完整接入文档（.md）→",
     "surf.w1Title": "1. 开源纯文档 Skill（动笔前防呆）",
     "surf.w1Desc": "按文体整理的写作与界面避坑参考卡，不含可执行脚本。装进 Claude Code、Codex、Cursor 或 Antigravity 后，动笔前读取，写完调用本地 CLI 自检。",
     "surf.w2Title": "2. 开源本地 CLI 与插件（零依赖快检）",
-    "surf.w2Desc": "< 250 KB 零依赖直接内置全部 7 套规则包，断网毫秒级查文档、Word、PPT 与 Git 改动；适合终端、编辑器与 CI，开发者也可配自有密钥做深度审校。",
+    "surf.w2Desc": "安装包不到 250 KB，零依赖，内置全部 7 套规则包。断网也能查文档、Word、PPT 和 Git 改动，适合终端、编辑器和 CI，开发者也可以配自己的模型密钥。",
     "surf.w3Title": "3. 官方云端 MCP（办公与编码 Agent 直连）",
     "surf.w3Desc": "在 WorkBuddy、千问、Claude Cowork 或编辑器里直连 https://dislop.com/mcp，登录领每月 30 免费额度，做多模型分文体审校并返回结构化改法。",
     "surf.w4Title": "4. 网页工作台与一句话读规则",
@@ -125,40 +178,46 @@ const I18N = {
     "snip.localMcp": "官方 MCP",
     "snip.cli": "命令行",
 
-    "price.title": "开源本地免费，云端按需升级",
+    "price.title": "本地工具都免费，只有云端审校要用额度",
     "price.desc":
-      "Skill、CLI 与规则库按 Apache-2.0 开源，支持纯本地离线运行、零上传。需要大模型深层文风审校、复检改写与官方云端 MCP 时，可在登录工作台或 Agent 授权后使用（免费版每月 30 次额度，付费端点不用于模型训练）。",
+      "Skill、CLI 与规则库按 Apache-2.0 开源，纯本地离线运行、不上传文稿。需要多模型深层审校、复检改写与远程 MCP 时，可在登录工作台后使用（免费版每月 30 额度，付费版模型接口不拿你的稿子训练）。",
     "price.benchLink": "看 5 模型实测对比 →",
     "price.t1Name": "开源本地（Skill + CLI）",
     "price.t1Price": "$0 · 永久免费",
-    "price.t1Sub": "适合重视数据隐私的个人、研发团队与内网环境，代码与规则全部开源透明。",
+    "price.t1Sub": "适合稿子不能上传的场景，比如内网和私有仓库。代码和规则都开源。",
     "price.t1F1": "纯文档 Agent Skill（不含脚本）与开源本地 CLI（Apache-2.0）",
-    "price.t1F2": "全量内置 7 套场景与行业包（42 条规则），离线查文档、Word、PPT 与 PR",
+    "price.t1F2": "全量内置 7 套场景与行业包（53 条规则），离线查文档、Word、PPT、PDF、图片与网页",
     "price.t1F3": "内置 5 轴节奏体检、14.6 KB 轻量本地模型（--ml）与 dislop voice 离线个人文风",
     "price.t1F4": "零联网零上传；开发者也可配自有密钥做单步审校",
     "price.t1Cta": "安装 Skill / CLI ↑",
     "price.t2Name": "云端免费版（远程 MCP）",
     "price.t2Price": "$0 · 30 额度 / 月",
-    "price.t2Sub": "邮箱领取免费密钥，无需绑卡，立即在官网工作台或远程 MCP 使用。",
-    "price.t2F1": "直连 https://dislop.com/mcp，免本地装环境（单次最长 12,000 字）",
+    "price.t2Sub": "邮箱验证码登录，免密码免绑卡，立即在网页工作台或远程 MCP 使用。",
+    "price.t2F1": "直连 https://dislop.com/mcp，支持 OAuth 免填密钥或生成 API 密钥（单次最长 12,000 字）",
     "price.t2F2": "云增强审校（1 额度）：查出推销腔、官话与套话，给出具体改法",
     "price.t2F3": "云增强改写（2 额度）：自动改写后复检，核对原稿数字与限定词",
-    "price.t2F4": "个人文风提取（2 额度）：1–3 篇旧稿提炼专属文风，工作台与远程 MCP 均可用",
-    "price.t2Cta": "下方 10 秒免费领密钥 ↓",
-    "price.t3Name": "Pro · 按量包 · Team（早鸟预约）",
+    "price.t2F4": "Word/PPT 原排版去味与个人文风（2–3 额度）：保留样式与修订，云端文风同步给远程 MCP",
+    "price.t2Cta": "下方 10 秒验证码登录 ↓",
+    "price.t3Name": "Pro · 按量包 · Team（预约）",
     "price.t3Price": "$12/月 · $10 按量",
-    "price.t3Sub": "高频写作选 Pro 更划算（比按量省 36%）；低频偶尔用可选永不过期的按量包。",
+    "price.t3Sub": "经常写选 Pro，每额度比按量省 36%；偶尔用买按量包，额度不过期。",
     "price.t3F1": "Pro（$12/月）：1,500 额度/月（约 $0.008/额度），长文不限字数 + 10 份个人文风",
-    "price.t3F2": "按量额度包（$10 / 800 额度）：一次购买永不过期，低频重度用户友好",
+    "price.t3F2": "按量额度包（$10 / 800 额度）：一次买断，额度不过期，适合偶尔用的人",
     "price.t3F3": "Team（$29/席位/月）：5,000 额度 + 团队共享品牌文风与 PR 审核",
-    "price.t3F4": "统一使用 Google Gemini 付费级端点，不存草稿、绝不用于模型训练",
+    "price.t3F4": "统一调用 Google Gemini 付费版接口，不存草稿，不拿你的稿子训练",
     "price.t3Cta": "预约开通通知 ↓",
 
-    "cloud.tokenTitle": "免费领取 30 额度 + 远程 MCP 密钥",
-    "cloud.tokenDesc": "输入邮箱立即生成专属密钥，自动同步到上方工作台，无需绑卡（服务端不存明文与草稿，详见页面底部隐私说明）。",
-    "cloud.tokenBtn": "领取免费密钥",
+    "cloud.tokenTitle": "登录领取每月 30 免费额度 · 管理远程 MCP",
+    "cloud.tokenDesc": "邮箱 6 位验证码登录，免密码免绑卡。登录后可直接在工作台审校与改写 Word/PPT，也能管理 MCP 密钥、已连应用与云端文风（不存草稿，详见底部隐私说明）。",
+    "cloud.tokenBtn": "发验证码",
+    "cloud.otpVerifyBtn": "验证并登录",
+    "cloud.otpChangeBtn": "换个邮箱",
+    "cloud.githubBtn": "用 GitHub 账号登录",
+    "cloud.googleBtn": "用 Google 账号登录",
+    "cloud.legacyKeySummary": "已有 dslp_... 密钥？点此直接绑定",
+    "cloud.legacyKeyBtn": "验证并绑定",
     "cloud.wlTitle": "预约 Pro / 按量包 / Team",
-    "cloud.wlDesc": "自助支付即将上线。留下邮箱和需要的方案，上线第一时间通知并附赠早鸟体验额度。",
+    "cloud.wlDesc": "自助支付还没上线。留下邮箱和想用的方案，上线后通知你。",
     "cloud.planPro": "Pro（$12/月 · 1,500 额度）",
     "cloud.planCredits": "按量包（$10 / 800 额度 · 永不过期）",
     "cloud.planTeam": "Team（$29/席位 · 团队文风）",
@@ -173,18 +232,18 @@ const I18N = {
     "ep.taskEdit": "任务卡：随笔与长文",
     "ep.taskGate": "任务卡：发稿前 AI 残留硬伤检查",
     "ep.skill": "跨宿主 Agent Skill",
-    "ep.awesome": "87 条工具清单 JSON",
+    "ep.awesome": "90 条工具清单 JSON",
     "ep.brief": "产品定义（定位 / 用户 / 卖点）",
     "ep.method": "文案与设计基准",
-    "ep.full": "单次拉取的全部 42 条规则",
+    "ep.full": "单次拉取的全部 53 条规则",
 
-    "awesome.title": "去 AI 味工具清单：87 个核验工具与参考资料",
+    "awesome.title": "去 AI 味工具清单：90 个核验工具与参考资料",
     "awesome.desc":
-      "除了 dislop 自己，我们也维护了一份按场景整理的去 AI 味资源索引，包含成熟检查器、中英文写作规范、代码提交治理规则和实证论文。全部链接在 2026-11-21 逐条核过一遍。",
+      "除了 dislop 自己，我们也维护了一份按场景整理的去 AI 味资源索引，包含 Vale、Impeccable 等常用工具、中英文写作规范、代码 PR 治理规则和实证论文。全部链接在 2026-11-21 逐条核过一遍。",
     "awesome.openFull": "打开完整清单 →",
     "awesome.ecoTitle": "按用途筛选，也可以直接给 Agent 读",
     "awesome.ecoDesc": "按写作、网页、代码、研究分类筛选，或者只看能本地自动检查的工具。AI 检测器和规避工具单独放在最下面做对照。",
-    "awesome.browseBtn": "在线筛选 87 条清单 →",
+    "awesome.browseBtn": "在线筛选 90 条清单 →",
     "awesome.ghBtn": "GitHub 中文版",
     "awesome.shareBtn": "复制清单推荐语",
     "awesome.posTitle": "不想长成 AI 模板？看看这些设计参考",
@@ -196,7 +255,7 @@ const I18N = {
     "stat.zh": "条中文 / 多语种",
 
     "share.title": "觉得顺手？发给同事，或者去 GitHub 收藏",
-    "share.desc": "纯文档 Skill、开源本地 CLI 与全部 42 条内置规则按 Apache-2.0 开源，支持纯本地零上传；网页工作台与官方云端 MCP 登录后可使用多模型深层审校，且不存草稿。",
+    "share.desc": "Skill、本地 CLI 和 53 条内置规则按 Apache-2.0 开源，可纯本地离线运行；网页工作台和官方云端 MCP 登录后可使用多模型审校，不存草稿。",
     "share.c1Title": "一键分享给团队或朋友",
     "share.c1Desc": "复制一段直白不浮夸的介绍（带官网试用链接、案例页和工具清单），直接贴到群聊或文档里就行。",
     "share.copySiteBtn": "复制项目推荐语",
@@ -217,9 +276,9 @@ const I18N = {
     "cov.colScope": "查什么",
     "cov.colStatus": "现状",
     "cov.r1Name": "文稿与研发文档",
-    "cov.r1Scope": "开头寒暄、未填占位符、公文黑话、“不是 A，而是 B”套句、三段分号推销句、自问自答、五连逗号句、同构句首、句长齐平空话、PR 摘要壳与浅层复盘归因。",
+    "cov.r1Scope": "开头寒暄、未填占位符、公文黑话、“不是 A，而是 B”套句、三段分号推销句、自问自答、五连逗号句、同构句首、句长齐平空话、PR 摘要复读与浅层复盘归因。",
     "cov.r2Name": "Word 和 PPT",
-    "cov.r2Scope": "贴进文档没渲染的 Markdown 星号、正文套话、PPT 单页字墙、要点过多、文字自动缩太小、过程标签式标题与连续 4 页同版式。",
+    "cov.r2Scope": "贴进文档没渲染的 Markdown 星号、正文套话、PPT 单页字墙、要点超过 6 条、文字自动缩得太小、空泛标题（如“背景”“概述”）与连续 4 页同版式。",
     "cov.r4Name": "网页与组件",
     "cov.r4Scope": "点不动的空链接和占位按钮、默认紫粉渐变、满屏胶囊标签、三层套盒、把提示词口号印成装饰徽章。",
     "cov.r5Name": "Git 改动与 PR",
@@ -231,7 +290,7 @@ const I18N = {
     "status.partialVoice": "本地与云端均可用",
     "status.notYet": "还没上线（原型阶段）",
 
-    "rules.title": "全部 42 条内置规则明细（7 套场景包）",
+    "rules.title": "全部 53 条内置规则明细（7 套场景包）",
     "rules.desc": "平时不需要背规则，直接交给 Agent 或贴进工作台就行。想逐条查判断依据、看正反例或者点「试试 ↑」加载单条规则时，展开下面这张表。",
     "rules.readCases": "单文件拉取全部规则（llms-full.txt）→",
     "rules.foldTitle": "展开查看内置规则明细与在线筛选",
@@ -243,7 +302,7 @@ const I18N = {
     "rules.filterAll": "全部",
     "rules.filterCore": "交付底线",
     "rules.filterBrief": "工作文档",
-    "rules.filterEng": "研发复盘",
+    "rules.filterEng": "研发文档与复盘",
     "rules.filterReg": "对外合规",
     "rules.filterEssay": "随笔长文",
     "rules.filterUi": "PPT 和网页",
@@ -252,10 +311,10 @@ const I18N = {
     "rules.colPack": "分类",
     "rules.colMod": "格式",
     "rules.colWhy": "查什么 / 怎么判断",
-    "rules.colEx": "原句 → 改坏 → 改好",
+    "rules.colEx": "原句 → 换了种 AI 味 → 改好",
 
-    "pos.norm-zurich": "苏黎世独立设计事务所，以极克制的模数网格见长。",
-    "pos.stiftung-buchkunst": "世界最美的书评选档案：看页边距、版心比例与长篇阅读怎么拉开呼吸感。",
+    "pos.norm-zurich": "苏黎世独立设计事务所，用严格的模数网格排版。",
+    "pos.stiftung-buchkunst": "世界最美的书评选档案：看页边距、版心比例与长篇阅读怎么排得不挤。",
     "pos.fonts-in-use": "真实印刷品与网页里的字体搭配库。",
     "pos.dinamo": "瑞士独立字厂，看可变字重与大号字阶怎么撑起实用界面。",
     "pos.the-type": "中文排印评论，细聊标点挤压、混排细节与出版规范。",
@@ -263,20 +322,24 @@ const I18N = {
 
     "footer.selfAudit": "这个页面自己也跑过 dislop check site/，0 处问题。",
     "footer.agentHint": "给 Agent 读的话，从 /llms.txt 开始。",
+    "footer.guides": "实用指南",
     "footer.awesome": "工具清单",
+    "footer.rules": "全部规则",
     "footer.privacy": "隐私与数据边界",
     "footer.roadmap": "路线图",
     "footer.brand": "文案基准",
     "footer.design": "视觉规范",
   },
   en: {
-    "page.title": "dislop — Linter for AI Slop",
+    "page.title": "dislop — Cutting AI slop is real productivity.",
     "nav.skip": "Skip to main content",
+    "nav.signIn": "Sign in · 30 free",
     "nav.cases": "Cases",
     "nav.workbench": "Try it",
     "nav.surfaces": "How to use",
     "nav.pricing": "Open & Cloud",
-    "nav.awesome": "87 tools",
+    "nav.guides": "Guides",
+    "nav.awesome": "Directory",
     "nav.rules": "Rules",
     "nav.github": "GitHub ★",
     "theme.dark": "Dark",
@@ -285,9 +348,9 @@ const I18N = {
     "btn.copied": "Copied",
 
     "lead.strike": "Certainly! Here is your polished draft.",
-    "lead.title": "Linter for AI Slop in docs, web pages, and slides",
+    "lead.title": "Cutting AI slop is real productivity.",
     "lead.sub":
-      "Helps you (and your agent) catch and fix AI-sounding text and template layouts before sending. Combines vetted community rules and 87 curated tools across Skill, Plugin, CLI, and MCP. Run completely offline locally, or switch to Cloud MCP mode in the workbench below.",
+      "A dedicated linter for AI slop. Catches AI-sounding prose, filler phrases, and stock layouts in docs, web pages, and slides before you ship. Connects to coding agents, office agents, and editors in one command, locally offline or via Cloud MCP.",
     "lead.promptLabel": "Or zero install: copy this line into any web-capable AI / coding agent",
     "lead.promptText":
       "Read https://dislop.com/llms.txt and follow its writing and design anti-slop rules and checks before delivering my next doc, slide deck, or web page.",
@@ -295,80 +358,106 @@ const I18N = {
     "lead.cta": "Try in workbench (Local / Cloud) ↓",
     "lead.cloudBtn": "Free 30-credit Remote MCP key",
     "lead.installBtn": "Install for Agent / Editor (runs offline)",
-    "lead.awesomeBtn": "87-tool directory →",
+    "lead.awesomeBtn": "90-tool directory →",
     "lead.starBtn": "GitHub ★",
-    "lead.reassure": "CLI and local plugins run completely offline with zero uploads. The browser workbench switches between local rule checks and Cloud MCP mode.",
+    "lead.reassure": "CLI and local plugins run offline on your machine with zero uploads; the workbench switches between local checks and Cloud MCP.",
 
     "hp.tabBad": "Original",
     "hp.tabTrap": "Still sounds like AI",
     "hp.tabGood": "Cleaned up",
+    "hp.pauseBtn": "Pause",
+    "hp.playBtn": "Auto-play",
     "hp.meta": "Running live on the same linter engine",
     "hp.openWb": "Open in workbench ↓",
 
-    "m1.title": "1. Curated community work",
-    "m1.desc": "Combines vetted open-source rules, corpus findings, and 87 curated tools across docs, web UI, Word, and PowerPoint, without hunting down scattered prompts.",
-    "m2.title": "2. Broad host and scenario fit",
-    "m2.desc": "Ships 7 domain packs across Skill, Plugin, CLI, and MCP, connecting to Codex, Claude Code, Cursor, Claude Cowork, and editors in one command.",
-    "m3.title": "3. Local offline + Cloud MCP toggle",
-    "m3.desc": "CLI and local plugins run on your machine with zero uploads. Switch to Cloud MCP in the workbench or an office agent for deeper review, rewrites, and synced style (30 free credits/mo).",
+    "m1.title": "Community rules and tools in one place",
+    "m1.desc": "Brings together vetted open-source rules, corpus findings, and 90 curated tools across docs, web UI, Word, and PowerPoint.",
+    "m2.title": "Works in Codex, Claude Code, Cursor, and editors",
+    "m2.desc": "Ships 7 domain packs across Skill, Plugin, CLI, and MCP, connecting to coding agents, office agents, and CI in one command.",
+    "m3.title": "Your drafts stay on your machine by default",
+    "m3.desc": "CLI and local plugins stay on your machine with zero uploads. Switch to Cloud MCP when you want multi-model review, rewrites, and synced style.",
 
-    "cases.title": "Three real cases: why cutting buzzwords still sounds like AI",
+    "cases.title": "Three before/after cases: why cutting buzzwords still sounds like AI",
     "cases.desc":
       "After cutting cliché nouns, models often fall back on contrast slogans ('Not X, but Y') or pitch cadence that passes basic checks with 0 issues. Try them live or copy any case to share.",
     "cases.readAll": "All contrast cases (.md) →",
 
-    "demos.title": "Four 6-second loops: from raw draft to clean copy",
+    "demos.title": "Six 6-second loops: prose, CLI, web UI, PPTX & agent gate",
     "demos.desc":
-      "Every GIF is rendered offline from the real rules and browser workbench, covering 3-state proofing, CLI gating, interactive browser checks, and UI template cleanup.",
-    "demos.guideLink": "GIF production guide →",
-    "demos.c1Title": "1. 3-state galley proof: catch fallback slogans too",
-    "demos.c1Desc": "Strikes the leftover chatbot greeting in red, flags a 'Not X, but Y' rewrite in blue, then settles on plain prose with numbers intact.",
+      "Every clip is rendered offline from the real rules and browser workbench, shipped as lossless animated WebP with GIF and reduced-motion poster fallbacks. Use the controls below each card to pause, replay, or zoom.",
+    "demos.guideLink": "Animation & GIF guide →",
+    "demos.c1Title": "1. Three states of one note: catching 2nd-order slop",
+    "demos.c1Badge": "3-state proof · 6.8s",
+    "demos.c1Desc": "Strikes the leftover chat greeting in red, catches the 'Not X, but Y' slogan in blue, and ends clean at 12 minutes and 500,000 rows.",
     "demos.c2Title": "2. Offline CLI gate: Node & Python parity",
-    "demos.c2Desc": "Run dislop check --profile in CI or pre-commit—core artifacts exit 1 alongside 5-axis rhythm and concreteness telemetry.",
-    "demos.c3Title": "3. Live browser workbench capture",
-    "demos.c3Desc": "Real Playwright capture of the offline workbench above: switching from draft to fallback slogan to clean copy in this tab.",
-    "demos.c4Title": "4. Web & UI: strip AI gradients and dead links",
-    "demos.c4Desc": "Flags purple-pink gradients, pill-badge walls, prompt-echo stickers, and dead href=\"#\" controls before handing off to a plain 1px sheet.",
+    "demos.c2Badge": "Offline CLI · 6.4s",
+    "demos.c2Desc": "Runs dislop check --profile locally: core artifacts exit 1 to block CI while rhythm and concreteness telemetry prints inline.",
+    "demos.c3Title": "3. Zero-upload browser workbench in action",
+    "demos.c3Badge": "Live DOM · 6.8s",
+    "demos.c3Desc": "Live capture of the workbench above: toggle between draft, 2nd-order slop, and clean copy with 5-axis telemetry.",
+    "demos.c4Title": "4. Web UI audit: strip gradients & dead controls",
+    "demos.c4Badge": "UI audit · 6.8s",
+    "demos.c4Desc": "Flags indigo-purple gradients, prompt-echo badges, pill walls, and dead href='#' buttons before switching to a 1px paper sheet.",
+    "demos.c5Title": "5. PPTX & DOCX audit: catch walls & shrunk text",
+    "demos.c5Badge": "PPTX audit · 6.8s",
+    "demos.c5Desc": "Unpacks .pptx slides locally to flag raw **markdown** leaks, word walls, 68% autofit shrink, and process titles.",
+    "demos.c6Title": "6. Coding Agent + CI loop: Skill, diff gate & re-check",
+    "demos.c6Badge": "Agent loop · 6.8s",
+    "demos.c6Desc": "Agent reads pure-Markdown SKILL.md, gates changed PR lines with exit 1, and re-checks the clean edit to confirm metrics stay intact.",
+    "demos.pause": "Pause",
+    "demos.play": "Play",
+    "demos.replay": "Replay",
+    "demos.zoom": "Zoom",
+    "demos.close": "Close",
 
-    "wb.heading": "Try it right here (paste text or drop a local file)",
-    "wb.packLabel": "Built-in pack (0 network):",
-    "pack.brief": "Work doc / spec",
-    "pack.eng": "Engineering RFC / PR / postmortem",
-    "pack.reg": "External & regulated copy",
-    "pack.exec": "Executive slide deck",
-    "pack.essay": "Essay / longform",
-    "pack.ui": "Web UI & components",
-    "wb.openFile": "Open a local file (.md / .html / .docx / .pptx)",
+    "wb.heading": "Try it live",
+    "wb.subhint": "Paste text or drop a Markdown, HTML, SVG, Office, PDF, or image file",
+    "wb.packLabel": "Pack:",
+    "pack.auto": "Auto-detect",
+    "pack.brief": "Work docs",
+    "pack.eng": "Engineering",
+    "pack.reg": "Regulated",
+    "pack.exec": "Exec decks",
+    "pack.essay": "Essays",
+    "pack.ui": "Slides & UI",
+    "wb.openFile": "Open local file",
     "wb.specimensTitle": "Examples",
-    "wb.privacyNote": "Local checks run in this browser tab. Clicking Cloud MCP buttons below requires a free key and sends the draft to our paid-tier zero-training model endpoint with no draft storage.",
-    "wb.jumpNotes": "Jump to margin notes ↓",
-    "ai.reviewBtn": "Cloud Review · MCP (1 credit)",
-    "ai.deslopBtn": "Cloud Rewrite · MCP (2 credits)",
-    "ai.anonHint": "Local checks need no sign-in · Sign in for Cloud AI (30 free credits/mo)",
-    "ai.claimLink": "Get free key →",
+    "wb.privacyNote": "Local checks stay in this tab. Cloud buttons (review, rewrite, style extract) send your draft through our server to the paid Google Gemini API. Google does not train on it, and we do not store it.",
+    "wb.jumpNotes": "Jump to notes ↓",
+    "wb.offlinePill": "Offline in this tab · 0 uploads",
+    "wb.editHint": "Paste or edit your draft here; margin notes update live. Press Cmd/Ctrl+Enter or switch back to Highlights.",
+    "wb.copyDraft": "Copy text",
+    "wb.shareLink": "Copy share link",
+    "wb.copyAgentBrief": "Copy for Agent",
+    "ai.reviewBtn": "Cloud Review (1 credit)",
+    "ai.deslopBtn": "Cloud Rewrite (2 credits)",
+    "ai.trackChanges": "Keep Word Track Changes",
+    "ai.anonHint": "Local checks stay offline · Cloud Review needs free sign-in (30/mo, also works in Remote MCP)",
+    "ai.claimLink": "Sign in / bind key",
+    "ai.lowCreditLink": "Low credits · join waitlist ↓",
     "voice.drawerTitle": "Optional: extract personal style (local stats or Cloud AI)",
-    "voice.drawerDesc": "Paste 1-3 clean paragraphs you wrote (separated by blank lines). 'Local style stats' runs in this tab with zero uploads, or use a free key for Cloud AI extraction.",
+    "voice.drawerDesc": "Paste 1-3 clean paragraphs you wrote (separated by blank lines). 'Local style stats' runs in this tab with zero uploads; any saved profile is applied automatically by Cloud Rewrite.",
     "voice.offlineBtn": "Local style stats (0 credits · offline)",
-    "voice.extractBtn": "Cloud AI style extract (2 credits)",
+    "voice.extractBtn": "Cloud style extract (2 credits)",
     "voice.clearBtn": "Clear saved style",
     "wb.modeProof": "Highlights",
     "wb.modeEdit": "Edit text",
     "wb.pasteOwn": "Paste my draft",
     "wb.applyClean": "Clean version",
-    "wb.tryTrap": "Fallback AI slogan",
+    "wb.tryTrap": "Still sounds like AI",
     "wb.reset": "Reset",
     "wb.voiceTitle": "5-axis rhythm & detail check",
-    "wb.nudgeText": "Like how it feels? Install the open-source pure-doc Skill + offline CLI for local privacy, or claim a free 30-credit Official Cloud MCP key for genre-aware multi-model review.",
-    "wb.nudgeCloud": "Claim 30 free credits ↓",
+    "wb.nudgeText": "To check offline on your machine, install the Skill or CLI. For cloud review in your agent, sign in for 30 free credits a month.",
+    "wb.nudgeCloud": "Sign in · 30 free credits",
     "wb.nudgeInstall": "Install open-source Skill / CLI ↓",
     "wb.nudgeCopy": "Copy for AI",
     "wb.nudgeStar": "GitHub ★",
-    "legend.error": "Red solid: AI artifact",
-    "legend.warn": "Blue dashed: cliché / template slop",
+    "legend.error": "Red solid: hard bug",
+    "legend.warn": "Blue dashed: warning (cliché / template)",
 
     "surf.title": "How to use it: pure-doc Skill -> local CLI -> Official Cloud MCP",
     "surf.desc":
-      "Three clear layers: a pure-Markdown Skill for drafting prevention, an open-source offline CLI for fast deterministic checks and CI, and Official Cloud MCP (https://dislop.com/mcp) for zero-setup genre-aware multi-model review.",
+      "Three ways to run dislop: a Markdown-only Skill to prevent clichés before drafting, an open-source offline CLI for fast checks and CI, and Official Cloud MCP (https://dislop.com/mcp) for multi-model review by genre.",
     "surf.readTools": "Full setup guide (.md) →",
     "surf.w1Title": "1. Open-Source Pure-Doc Skill (drafting guardrails)",
     "surf.w1Desc": "Genre-specific writing and UI reference cards with zero bundled scripts. Install into Claude Code, Codex, Cursor, or Antigravity to prevent clichés upfront and run local CLI checks afterward.",
@@ -383,40 +472,46 @@ const I18N = {
     "snip.localMcp": "Official MCP",
     "snip.cli": "CLI",
 
-    "price.title": "Free open-source local tools, optional cloud MCP",
+    "price.title": "Only cloud review costs credits",
     "price.desc":
-      "The pure-doc Skill, CLI, and all 7 scenario packs (42 rules) are Apache-2.0 open source and run completely offline locally. Sign in for Official Cloud MCP or web workbench deep review and layout-preserving Office cleanup (30 free credits/mo, zero training).",
+      "The pure-doc Skill, CLI, and all 7 scenario packs (53 rules) are Apache-2.0 open source and run offline locally. Sign in for Official Cloud MCP or workbench deep review and layout-preserving Office cleanup (30 free credits/mo; the paid API doesn't train on your text).",
     "price.benchLink": "Read 5-model benchmark →",
     "price.t1Name": "Open Source Local (Skill + CLI)",
     "price.t1Price": "$0 · Forever free",
-    "price.t1Sub": "Built for privacy-first writers, air-gapped repos, and engineering teams. Full transparency, zero uploads.",
+    "price.t1Sub": "For drafts that can't leave your machine: offline setups, private repos, and internal docs. All code and rules are open source.",
     "price.t1F1": "Pure-Markdown Agent Skill (no scripts) & local CLI (Apache-2.0)",
-    "price.t1F2": "All 7 domain packs (42 rules) bundled offline for Markdown, HTML/CSS, DOCX, PPTX & PRs",
+    "price.t1F2": "All 7 domain packs (53 rules) bundled offline for Markdown, HTML/CSS/SVG, images, DOCX, PPTX & PDF",
     "price.t1F3": "Built-in 5-axis rhythm telemetry, 14.6 KB Pocket ML (--ml) & offline dislop voice",
     "price.t1F4": "Zero network during check; developers can also plug in their own model key",
     "price.t1Cta": "Install Skill / CLI ↑",
     "price.t2Name": "Cloud Free (Remote MCP)",
     "price.t2Price": "$0 · 30 credits / mo",
-    "price.t2Sub": "Enter your email for a free key—no card required—for Remote MCP and the web workbench.",
-    "price.t2F1": "Direct https://dislop.com/mcp endpoint with zero local setup (up to 12,000 chars/call)",
+    "price.t2Sub": "Sign in with a 6-digit email code—no password or card—for the web workbench and Remote MCP.",
+    "price.t2F1": "Connect https://dislop.com/mcp via zero-config OAuth or API keys (up to 12,000 chars/call)",
     "price.t2F2": "Cloud Review (1 credit): catches pitch cadence, filler, and clichés with concrete edits",
     "price.t2F3": "Cloud Rewrite (2 credits): plain rewrite that re-checks rules, numbers, and qualifiers",
-    "price.t2F4": "Style Extract (2 credits): build a reusable style profile in the workbench or Remote MCP",
-    "price.t2Cta": "Claim free key below ↓",
-    "price.t3Name": "Pro · Credit Packs · Team (Early Access)",
+    "price.t2F4": "Layout-preserving Word/PPT & voice profiles (2-3 credits): keeps formatting and syncs style to MCP",
+    "price.t2Cta": "Sign in below ↓",
+    "price.t3Name": "Pro · Credit Packs · Team (Waitlist)",
     "price.t3Price": "$12/mo · $10 PAYGO",
-    "price.t3Sub": "Regular writers save 36% with Pro; occasional heavy users can buy credits that never expire.",
+    "price.t3Sub": "If you write often, Pro costs 36% less per credit. If you only need it now and then, credit packs never expire.",
     "price.t3F1": "Pro ($12/mo): 1,500 monthly credits (~$0.008/cr), unlimited length + 10 voice profiles",
-    "price.t3F2": "PAYGO Pack ($10 / 800 credits): one-time credit top-up that never expires",
+    "price.t3F2": "PAYGO Pack ($10 / 800 credits): one-time purchase; credits never expire",
     "price.t3F3": "Team ($29/seat/mo): 5,000 credits, shared brand voice cards, and PR review tooling",
-    "price.t3F4": "Paid-tier Google Gemini API only—no draft logging and never used for training",
-    "price.t3Cta": "Join early access ↓",
+    "price.t3F4": "Paid-tier Google Gemini API only—no draft storage and never used for training",
+    "price.t3Cta": "Join waitlist ↓",
 
-    "cloud.tokenTitle": "Claim 30 free credits + Remote MCP key",
-    "cloud.tokenDesc": "Enter your email to generate a free key immediately and unlock 30 monthly credits in the workbench above (no card, no draft storage—see Privacy in the footer).",
-    "cloud.tokenBtn": "Get free key",
+    "cloud.tokenTitle": "Sign in for 30 free credits/mo & Remote MCP",
+    "cloud.tokenDesc": "Passwordless 6-digit email code sign-in, no card required. Review and rewrite text or Word/PPT files, manage API keys, connected MCP apps, and saved voice cards (zero draft storage).",
+    "cloud.tokenBtn": "Send code",
+    "cloud.otpVerifyBtn": "Verify & sign in",
+    "cloud.otpChangeBtn": "Change email",
+    "cloud.githubBtn": "Continue with GitHub",
+    "cloud.googleBtn": "Continue with Google",
+    "cloud.legacyKeySummary": "Already have a dslp_... key? Bind it here",
+    "cloud.legacyKeyBtn": "Verify & bind",
     "cloud.wlTitle": "Join Pro / Credit Pack / Team waitlist",
-    "cloud.wlDesc": "Self-serve billing opens shortly. Leave your email and preferred plan to get early access and bonus launch credits.",
+    "cloud.wlDesc": "Self-serve billing isn't live yet. Leave your email and preferred plan, and we'll notify you when it opens.",
     "cloud.planPro": "Pro ($12/mo · 1,500 credits)",
     "cloud.planCredits": "PAYGO Pack ($10 / 800 credits · never expires)",
     "cloud.planTeam": "Team ($29/seat · shared voice)",
@@ -431,18 +526,18 @@ const I18N = {
     "ep.taskEdit": "Guide: essays & longform",
     "ep.taskGate": "Guide: pre-release AI artifact checks",
     "ep.skill": "Cross-host Agent Skill",
-    "ep.awesome": "Raw JSON for 87 anti-slop tools",
+    "ep.awesome": "Raw JSON for 90 anti-slop tools",
     "ep.brief": "Product brief (positioning & pitch)",
     "ep.method": "Voice & design guide",
-    "ep.full": "All 42 rules in one file",
+    "ep.full": "All 53 rules in one file",
 
-    "awesome.title": "Awesome Anti-Slop: 87 checked tools, guides & papers",
+    "awesome.title": "Awesome Anti-Slop: 90 checked tools, guides & papers",
     "awesome.desc":
       "Beyond dislop itself, we maintain a verified directory of anti-slop tools, writing guides, UI rules, PR policies, and papers—including Vale and Impeccable. Every link was checked on 2026-11-21.",
     "awesome.openFull": "Open full list →",
     "awesome.ecoTitle": "Filter by use case, or feed it to an agent",
     "awesome.ecoDesc": "Filter by writing, web UI, code, or research, or show only tools with automated checks. Detectors and bypass tools are kept separate at the bottom.",
-    "awesome.browseBtn": "Filter all 87 entries →",
+    "awesome.browseBtn": "Filter all 90 entries →",
     "awesome.ghBtn": "View on GitHub",
     "awesome.shareBtn": "Copy list blurb",
     "awesome.posTitle": "Design references that don't look like AI templates",
@@ -454,9 +549,9 @@ const I18N = {
     "stat.zh": "zh / multilingual",
 
     "share.title": "Found this useful? Share it or bookmark the repo",
-    "share.desc": "The pure-Markdown Skill, local CLI, and all 42 built-in rules are Apache-2.0 open source and run offline with zero uploads; sign in on the web workbench or Official Cloud MCP for multi-model deep review with no draft storage.",
+    "share.desc": "The Markdown Skill, local CLI, and all 53 rules are Apache-2.0 open source and run offline with zero uploads. Sign in on the workbench or Official Cloud MCP for multi-model review without draft storage.",
     "share.c1Title": "Share with a teammate or friend",
-    "share.c1Desc": "Copy a plain, no-hype blurb with the live workbench, real cases, and curated tool directory.",
+    "share.c1Desc": "Copy a plain, no-hype blurb with the live workbench, before/after cases, and tool directory.",
     "share.copySiteBtn": "Copy project blurb",
     "share.copyCasesBtn": "Copy cases link",
     "share.c2Title": "Star dislop on GitHub",
@@ -489,7 +584,7 @@ const I18N = {
     "status.partialVoice": "Live offline & cloud",
     "status.notYet": "Not shipped (prototype)",
 
-    "rules.title": "All 42 built-in rules (7 scenario packs)",
+    "rules.title": "All 53 built-in rules (7 scenario packs)",
     "rules.desc": "You don't need to memorize rules—just hand dislop to your agent or paste into the workbench. Expand the table below whenever you want exact rule details or to test a single rule.",
     "rules.readCases": "Single-file rule digest (llms-full.txt) →",
     "rules.foldTitle": "Expand built-in rules and filter online",
@@ -510,10 +605,10 @@ const I18N = {
     "rules.colPack": "Group",
     "rules.colMod": "Formats",
     "rules.colWhy": "What it checks / how to judge",
-    "rules.colEx": "Before → Bad edit → After",
+    "rules.colEx": "Before → Still sounds like AI → After",
 
     "pos.norm-zurich": "Strict modular graphic systems, micro-typographic rules, and structural restraint.",
-    "pos.stiftung-buchkunst": "Book proportion, margin choreography, and pacing principles transferable to reports, PDFs, and decks.",
+    "pos.stiftung-buchkunst": "Book proportions, margins, and pacing you can reuse in reports, PDFs, and slide decks.",
     "pos.fonts-in-use": "Real-world typography pairings across books, posters, and interfaces.",
     "pos.dinamo": "Independent Swiss foundry demonstrating typographic scale, variable axes, and clean utility UI.",
     "pos.the-type": "Chinese and multilingual typography critique, CJK punctuation mechanics, and editorial layout standards.",
@@ -521,7 +616,9 @@ const I18N = {
 
     "footer.selfAudit": "This site passes dislop check site/ with 0 issues.",
     "footer.agentHint": "For agents, start at /llms.txt.",
+    "footer.guides": "Guides",
     "footer.awesome": "Awesome list",
+    "footer.rules": "All rules",
     "footer.privacy": "Privacy",
     "footer.roadmap": "Roadmap",
     "footer.brand": "Voice guide",
@@ -562,7 +659,7 @@ const HERO_PROOF_BY_LANG = {
   },
 };
 
-// ---------- Language-Pure Workbench Specimens (7 ZH + 7 EN, ZERO Mixing) ----------
+// ---------- Language-Pure Workbench Specimens (8 ZH + 8 EN, ZERO Mixing) ----------
 
 const SPECIMENS_BY_LANG = {
   zh: [
@@ -592,108 +689,9 @@ const SPECIMENS_BY_LANG = {
       ].join("\n"),
     },
     {
-      id: "essay",
-      num: "02",
-      label: "随笔与长文",
-      pack: "literary-essay",
-      filename: "winter-note.md",
-      modality: "markdown",
-      bad: [
-        "冬至那天下了初雪,院子里的腊梅开了 3 朵;香气一直飘到走廊。",
-        "",
-        "老周留下的那把旧刨子不是工具，而是手艺人的尊严。",
-        "",
-        "傍晚 18:30，修表匠把拆下的 3 枚铜齿轮泡进煤油皿里，关掉台灯。这或许就是慢工出细活在喧嚣时代真正的意义所在。",
-      ].join("\n"),
-      trap: [
-        "冬至那天下了初雪，院子里的腊梅开了 3 朵；香气一直飘到走廊。",
-        "",
-        "老周的旧刨子不是木头，而是时间本身。",
-        "",
-        "傍晚 18:30，修表匠把拆下的 3 枚铜齿轮泡进煤油皿里，关掉台灯。",
-      ].join("\n"),
-      good: [
-        "冬至那天下了初雪，院子里的腊梅开了 3 朵；香气一直飘到走廊。",
-        "",
-        "老周留下的那把旧刨子刃口磨窄了一半，松木柄被手汗浸得发亮。",
-        "",
-        "傍晚 18:30，修表匠把拆下的 3 枚铜齿轮泡进煤油皿里，关掉台灯。",
-      ].join("\n"),
-    },
-    {
-      id: "ui-chrome",
-      num: "03",
-      label: "网页模板味",
-      pack: "deck-and-ui",
-      filename: "landing-card.html",
-      modality: "html",
-      bad: [
-        '<div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">',
-        '  <span class="badge">AI 强力驱动</span>',
-        "  <h2>1.2 秒查完 48 份演示文稿</h2>",
-        '  <a href="#">下载完整报告</a>',
-        "</div>",
-      ].join("\n"),
-      trap: [
-        '<div class="surface-card">',
-        '  <span class="badge">零幻觉保证</span>',
-        "  <h2>1.2 秒查完 48 份演示文稿</h2>",
-        '  <a href="./report.html">下载完整报告</a>',
-        "</div>",
-      ].join("\n"),
-      good: [
-        '<div class="surface-card">',
-        "  <h2>1.2 秒查完 48 份演示文稿</h2>",
-        '  <a href="./report.html">下载完整报告</a>',
-        "</div>",
-      ].join("\n"),
-    },
-    {
-      id: "second-order",
-      num: "04",
-      label: "四字排比与二阶腔",
-      pack: "business-brief",
-      filename: "sla-update.md",
-      modality: "markdown",
-      bad: [
-        "新版网关具备精准高效、安全可靠、灵活易用的特性，单节点支持 8000 QPS。",
-        "",
-        "数据显示，大多数团队在发稿前都不会检查套话。",
-      ].join("\n"),
-      trap: [
-        "新版网关单节点支持 8000 QPS。这不是一次普通升级，而是系统架构的质变。",
-      ].join("\n"),
-      good: [
-        "新版网关单节点支持 8000 QPS，上游超时 2 秒后自动熔断。",
-        "",
-        "我们在 2026 年 3 月抽查的 40 份发布说明里，有 28 份留着未清理的套话。",
-      ].join("\n"),
-    },
-    {
-      id: "clean-nearmiss",
-      num: "05",
-      label: "看着像套话，其实不是",
-      pack: "business-brief",
-      filename: "clean-chinese.md",
-      modality: "markdown",
-      bad: [
-        "她抓手机拍下黑板上的推导过程，默认超时不是 30 秒，而是 300 秒。",
-        "",
-        "北京大学、清华大学、复旦大学三校联合公开了这份语料，单次推理平均延迟降至 18 毫秒。",
-      ].join("\n"),
-      trap: [
-        "这不是一份普通的语料，而是学术协作的新起点。",
-      ].join("\n"),
-      good: [
-        "她抓手机拍下黑板上的推导过程，默认超时不是 30 秒，而是 300 秒。",
-        "",
-        "北京大学、清华大学、复旦大学三校联合公开了这份语料，单次推理平均延迟降至 18 毫秒。",
-      ].join("\n"),
-    },
-    {
       id: "eng-postmortem",
-      num: "06",
-      label: "研发 PR 与故障复盘",
+      num: "02",
+      label: "研发 PR 与复盘",
       pack: "engineering-spec",
       filename: "postmortem-412.md",
       modality: "markdown",
@@ -722,9 +720,115 @@ const SPECIMENS_BY_LANG = {
       ].join("\n"),
     },
     {
+      id: "ui-chrome",
+      num: "03",
+      label: "网页与 SVG 模板味",
+      pack: "deck-and-ui",
+      filename: "landing-card.html",
+      modality: "html",
+      bad: [
+        '<div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">',
+        '  <div class="blur-3xl rounded-full bg-purple-500/30"></div>',
+        '  <span class="badge">AI 强力驱动</span>',
+        "  <h2>🚀 1.2 秒查完 48 份演示文稿</h2>",
+        '  <a href="#">下载完整报告</a>',
+        "</div>",
+      ].join("\n"),
+      trap: [
+        '<div class="surface-card">',
+        '  <span class="badge">零幻觉保证</span>',
+        "  <h2>1.2 秒查完 48 份演示文稿</h2>",
+        '  <a href="./report.html">下载完整报告</a>',
+        "</div>",
+      ].join("\n"),
+      good: [
+        '<div class="surface-card">',
+        "  <h2>1.2 秒查完 48 份演示文稿</h2>",
+        '  <a href="./report.html">下载完整报告</a>',
+        "</div>",
+      ].join("\n"),
+    },
+    {
+      id: "exec-deck",
+      num: "04",
+      label: "管理汇报提纲",
+      pack: "executive-deck",
+      filename: "q3-retention-slides.md",
+      modality: "markdown",
+      bad: [
+        "## 关于第三季度客户留存的分析汇报",
+        "",
+        "- **洞察**：全面复盘转化链路。",
+        "- **协同**：推动跨部门机制。",
+        "- **赋能**：打磨新客引导体验。",
+        "- **闭环**：建立周度追踪看板。",
+        "- **沉淀**：形成标准化方法论。",
+      ].join("\n"),
+      trap: [
+        "## 客户留存全面跃迁阶段性进展汇报",
+        "",
+        "- **战略**：全面赋能续费体验。",
+        "- **抓手**：持续打造增长飞轮。",
+      ].join("\n"),
+      good: [
+        "## Q3 老客月留存从 72% 升至 81%",
+        "",
+        "- 注册后 48 小时内加配首条规则的团队，次月续费率高出 19 个百分点。",
+        "- 客服把配置指导缩成 3 步清单后，首次配置耗时从 24 分钟降到 8 分钟。",
+      ].join("\n"),
+    },
+    {
+      id: "stealth-vapor",
+      num: "05",
+      label: "表面像真话的空话",
+      pack: "business-brief",
+      filename: "stealth-vapor.md",
+      modality: "markdown",
+      bad: [
+        "在当今快速变化的数字环境中，这一流程的推进往往能够为团队带来稳步提升的协作体验，并在很大程度上促进整体效能的持续优化。",
+        "",
+        "与此同时，相关团队能够更加平稳有序地推进日常协作，为后续项目落地奠定更加坚实的基础，在潜移默化中提升整体交付稳定性。",
+      ].join("\n"),
+      trap: [
+        "新流程上线后，团队沟通效率迈上了新台阶。跨部门合作正迎来前所未有的新气象，各项工作在有条不紊中持续向好。",
+      ].join("\n"),
+      good: [
+        "周一改用新的工单分流表后，客服把超时工单从 42 条压到 7 条。后端张工今天下午 4 点前把重试上限从 5 次调成 2 次，下周再看一周报警数。",
+      ].join("\n"),
+    },
+    {
+      id: "essay",
+      num: "06",
+      label: "随笔与长文",
+      pack: "literary-essay",
+      filename: "winter-note.md",
+      modality: "markdown",
+      bad: [
+        "冬至那天下了初雪,院子里的腊梅开了 3 朵;香气一直飘到走廊。",
+        "",
+        "老周留下的那把旧刨子不是工具，而是手艺人的尊严。",
+        "",
+        "傍晚 18:30，修表匠把拆下的 3 枚铜齿轮泡进煤油皿里，关掉台灯。这或许就是慢工出细活在喧嚣时代真正的意义所在。",
+      ].join("\n"),
+      trap: [
+        "冬至那天下了初雪，院子里的腊梅开了 3 朵；香气一直飘到走廊。",
+        "",
+        "老周的旧刨子不是木头，而是时间本身。",
+        "",
+        "傍晚 18:30，修表匠把拆下的 3 枚铜齿轮泡进煤油皿里，关掉台灯。",
+      ].join("\n"),
+      good: [
+        "冬至那天下了初雪，院子里的腊梅开了 3 朵；香气一直飘到走廊。",
+        "",
+        "老周留下的那把旧刨子刃口磨窄了一半，松木柄被手汗浸得发亮。",
+        "",
+        "傍晚 18:30，修表匠把拆下的 3 枚铜齿轮泡进煤油皿里，关掉台灯。",
+      ].join("\n"),
+    },
+    {
       id: "reg-external",
       num: "07",
-      label: "对外发布与严谨合规",
+      label: "对外合规",
       pack: "regulated-comms",
       filename: "security-brief.md",
       modality: "markdown",
@@ -736,6 +840,27 @@ const SPECIMENS_BY_LANG = {
       ].join("\n"),
       good: [
         "新备份架构采用同城双活与离线快照，合同承诺月度可用性至少 99.95%。大表导出改为流式分页读取。",
+      ].join("\n"),
+    },
+    {
+      id: "clean-nearmiss",
+      num: "08",
+      label: "看着像套话，其实不是",
+      pack: "business-brief",
+      filename: "clean-chinese.md",
+      modality: "markdown",
+      bad: [
+        "她抓手机拍下黑板上的推导过程，默认超时不是 30 秒，而是 300 秒。",
+        "",
+        "北京大学、清华大学、复旦大学三校联合公开了这份语料，单次推理平均延迟降至 18 毫秒。",
+      ].join("\n"),
+      trap: [
+        "这不是一份普通的语料，而是学术协作的新起点。",
+      ].join("\n"),
+      good: [
+        "她抓手机拍下黑板上的推导过程，默认超时不是 30 秒，而是 300 秒。",
+        "",
+        "北京大学、清华大学、复旦大学三校联合公开了这份语料，单次推理平均延迟降至 18 毫秒。",
       ].join("\n"),
     },
   ],
@@ -766,100 +891,9 @@ const SPECIMENS_BY_LANG = {
       ].join("\n"),
     },
     {
-      id: "essay",
-      num: "02",
-      label: "Narrative essay",
-      pack: "literary-essay",
-      filename: "ferry-deck.md",
-      modality: "markdown",
-      bad: [
-        "The station clock — brass-rimmed — stopped at 4:10 — right before the rain — leaving the platform quiet — and empty.",
-        "",
-        "At 6:15 a.m., the ferry deck smelled of wet rope and diesel. Ultimately, this reminds us that departures are always quieter than arrivals.",
-      ].join("\n"),
-      trap: [
-        "The brass-rimmed station clock stopped at 4:10 right before the rain, leaving the platform quiet.",
-        "",
-        "At 6:15 a.m., the ferry deck smelled of wet rope and diesel. It wasn't just a crossing — it was a reckoning.",
-      ].join("\n"),
-      good: [
-        "The brass-rimmed station clock stopped at 4:10 right before the rain, leaving the platform quiet.",
-        "",
-        "At 6:15 a.m., the ferry deck smelled of wet rope and diesel.",
-      ].join("\n"),
-    },
-    {
-      id: "ui-chrome",
-      num: "03",
-      label: "Web page & UI",
-      pack: "deck-and-ui",
-      filename: "hero-card.html",
-      modality: "html",
-      bad: [
-        '<div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">',
-        '  <span class="badge">AI-Powered · Zero Hallucination</span>',
-        "  <h2>Audit 48 slide decks in 1.2 seconds</h2>",
-        '  <a href="#">Download report</a>',
-        "</div>",
-      ].join("\n"),
-      trap: [
-        '<div class="surface-card">',
-        '  <span class="badge">Supercharge Your Workflow</span>',
-        "  <h2>Audit 48 slide decks in 1.2 seconds</h2>",
-        '  <a href="./report.html">Download report</a>',
-        "</div>",
-      ].join("\n"),
-      good: [
-        '<div class="surface-card">',
-        "  <h2>Audit 48 slide decks in 1.2 seconds</h2>",
-        '  <a href="./report.html">Download report</a>',
-        "</div>",
-      ].join("\n"),
-    },
-    {
-      id: "second-order",
-      num: "04",
-      label: "Staccato & bullet walls",
-      pack: "business-brief",
-      filename: "sla-note.md",
-      modality: "markdown",
-      bad: [
-        "Studies show that 70% of decks pack too much text onto one slide.",
-        "",
-        "Signals drop. Audits stall. Launches slip.",
-      ].join("\n"),
-      trap: [
-        "This isn't just a deck linter — it's a new standard for clear slides.",
-      ].join("\n"),
-      good: [
-        "In our audit of 48 internal Q3 decks, 31 had at least one slide over 120 words.",
-      ].join("\n"),
-    },
-    {
-      id: "clean-nearmiss",
-      num: "05",
-      label: "Looks like slop, isn't",
-      pack: "business-brief",
-      filename: "clean-english.md",
-      modality: "markdown",
-      bad: [
-        "The Delve debugger inspected a 19th-century wool tapestry archive on 2026-10-15.",
-        "",
-        "The bug is not in `parser.py`, but in `loader.py` line 42.",
-      ].join("\n"),
-      trap: [
-        "This isn't just speed — it's clarity.",
-      ].join("\n"),
-      good: [
-        "The Delve debugger inspected a 19th-century wool tapestry archive on 2026-10-15.",
-        "",
-        "The bug is not in `parser.py`, but in `loader.py` line 42.",
-      ].join("\n"),
-    },
-    {
       id: "eng-postmortem",
-      num: "06",
-      label: "Engineering PR & postmortem",
+      num: "02",
+      label: "PR & postmortem",
       pack: "engineering-spec",
       filename: "postmortem-412.md",
       modality: "markdown",
@@ -888,9 +922,107 @@ const SPECIMENS_BY_LANG = {
       ].join("\n"),
     },
     {
+      id: "ui-chrome",
+      num: "03",
+      label: "Web page & UI",
+      pack: "deck-and-ui",
+      filename: "hero-card.html",
+      modality: "html",
+      bad: [
+        '<div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">',
+        '  <div class="blur-3xl rounded-full bg-purple-500/30"></div>',
+        '  <span class="badge">AI-Powered · Zero Hallucination</span>',
+        "  <h2>🚀 Audit 48 slide decks in 1.2 seconds</h2>",
+        '  <a href="#">Download report</a>',
+        "</div>",
+      ].join("\n"),
+      trap: [
+        '<div class="surface-card">',
+        '  <span class="badge">Supercharge Your Workflow</span>',
+        "  <h2>Audit 48 slide decks in 1.2 seconds</h2>",
+        '  <a href="./report.html">Download report</a>',
+        "</div>",
+      ].join("\n"),
+      good: [
+        '<div class="surface-card">',
+        "  <h2>Audit 48 slide decks in 1.2 seconds</h2>",
+        '  <a href="./report.html">Download report</a>',
+        "</div>",
+      ].join("\n"),
+    },
+    {
+      id: "exec-deck",
+      num: "04",
+      label: "Exec deck outline",
+      pack: "executive-deck",
+      filename: "q3-retention-slides.md",
+      modality: "markdown",
+      bad: [
+        "## Analysis of Q3 Customer Retention",
+        "",
+        "- Aligned cross-functional priorities across onboarding and account teams.",
+        "- Enhanced lifecycle communication touchpoints for mid-market accounts.",
+        "- Streamlined internal handoff checklists during quarterly renewals.",
+      ].join("\n"),
+      trap: [
+        "## Overview of Retention Roadmap",
+        "",
+        "- **Alignment**: Streamlined cross-functional workflows.",
+        "- **Impact**: Unlocked sustainable quarterly retention.",
+      ].join("\n"),
+      good: [
+        "## Q3 Net Retention Rose from 88% to 94%",
+        "",
+        "- Teams finishing setup within 48 hours renew at 96% vs 71% for slower accounts.",
+        "- Cutting onboarding to a 3-step checklist dropped setup time from 24 to 8 minutes.",
+      ].join("\n"),
+    },
+    {
+      id: "stealth-vapor",
+      num: "05",
+      label: "Polite empty prose",
+      pack: "business-brief",
+      filename: "stealth-vapor.md",
+      modality: "markdown",
+      bad: [
+        "This workflow upgrade plays an important role in supporting steady operational progress across distributed teams. By maintaining shared visibility, it helps stakeholders cultivate greater confidence while preserving consistent execution standards.",
+        "",
+        "Furthermore, structured documentation provides meaningful context for daily reviews and minimizes unexpected friction when additional resources are required.",
+      ].join("\n"),
+      trap: [
+        "Teams often notice smoother alignment across departments when shared documentation helps everyone focus on steady progress. Rather than isolated assumptions, consistent review habits support long-term visibility across quarterly planning cycles.",
+      ].join("\n"),
+      good: [
+        "We split triage into P0 and P1 queues on Monday, cutting first-response time from 110s to 42s across 312 tickets. Next Tuesday @ops-oncall will drop the retry cap from 5 to 2 in `queue.yaml`.",
+      ].join("\n"),
+    },
+    {
+      id: "essay",
+      num: "06",
+      label: "Narrative essay",
+      pack: "literary-essay",
+      filename: "ferry-deck.md",
+      modality: "markdown",
+      bad: [
+        "The station clock — brass-rimmed — stopped at 4:10 — right before the rain — leaving the platform quiet — and empty.",
+        "",
+        "At 6:15 a.m., the ferry deck smelled of wet rope and diesel. Ultimately, this reminds us that departures are always quieter than arrivals.",
+      ].join("\n"),
+      trap: [
+        "The brass-rimmed station clock stopped at 4:10 right before the rain, leaving the platform quiet.",
+        "",
+        "At 6:15 a.m., the ferry deck smelled of wet rope and diesel. It wasn't just a crossing — it was a reckoning.",
+      ].join("\n"),
+      good: [
+        "The brass-rimmed station clock stopped at 4:10 right before the rain, leaving the platform quiet.",
+        "",
+        "At 6:15 a.m., the ferry deck smelled of wet rope and diesel.",
+      ].join("\n"),
+    },
+    {
       id: "reg-external",
       num: "07",
-      label: "External & regulated copy",
+      label: "Regulated copy",
       pack: "regulated-comms",
       filename: "security-brief.md",
       modality: "markdown",
@@ -902,6 +1034,27 @@ const SPECIMENS_BY_LANG = {
       ].join("\n"),
       good: [
         "Vault backups use AES-256 encryption at rest with monthly uptime at least 99.95%. Incident triage now indexes trace IDs directly at ingest.",
+      ].join("\n"),
+    },
+    {
+      id: "clean-nearmiss",
+      num: "08",
+      label: "Looks like slop, isn't",
+      pack: "business-brief",
+      filename: "clean-english.md",
+      modality: "markdown",
+      bad: [
+        "The Delve debugger inspected a 19th-century wool tapestry archive on 2026-10-15.",
+        "",
+        "The bug is not in `parser.py`, but in `loader.py` line 42.",
+      ].join("\n"),
+      trap: [
+        "This isn't just speed — it's clarity.",
+      ].join("\n"),
+      good: [
+        "The Delve debugger inspected a 19th-century wool tapestry archive on 2026-10-15.",
+        "",
+        "The bug is not in `parser.py`, but in `loader.py` line 42.",
       ].join("\n"),
     },
   ],
@@ -923,7 +1076,7 @@ const CASES_BY_LANG = {
         },
         {
           cls: "is-trap",
-          label: "改过头（掉进反转口号）",
+          label: "换了种 AI 味（掉进反转口号）",
           text: "这绝非一次普通升级，而是结算架构的效率跃迁，性能实现数倍提升。",
         },
         {
@@ -938,14 +1091,14 @@ const CASES_BY_LANG = {
       shareText: [
         "看一个发版简报去 AI 味对照：",
         "原稿：好的，以下是 Q4 结算引擎升级说明。值得注意的是，本次以异步化为核心抓手，全面赋能商户体验。峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，一致性达 99.99%。",
-        "改过头：这绝非一次普通升级，而是结算架构的效率跃迁，性能实现数倍提升。",
+        "换了种 AI 味：这绝非一次普通升级，而是结算架构的效率跃迁，性能实现数倍提升。",
         "改干净：Q4 结算引擎改为全链路异步化后，峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，数据一致性 99.99%。",
         "在线试查与一键去味：https://dislop.com/#workbench",
       ].join("\n"),
     },
     {
       id: "autopsy",
-      kicker: "案例 02 · 真实自查（句式推销味）",
+      kicker: "案例 02 · 上一版首屏复盘（句式推销味）",
       title: "检查报 0 处问题，但我们自己上一版首屏照样像 AI",
       steps: [
         {
@@ -1008,7 +1161,7 @@ const CASES_BY_LANG = {
         },
         {
           cls: "is-trap",
-          label: "Overcorrected (dropped numbers + fallback slogan)",
+          label: "Still sounds like AI (dropped numbers + fallback slogan)",
           text: "This isn't just an upgrade — it's a new standard for blazing-fast settlement.",
         },
         {
@@ -1023,14 +1176,14 @@ const CASES_BY_LANG = {
       shareText: [
         "Quick AI-slop before/after:",
         "Before: Happy to help! Below is the Q4 settlement note. In today's fast-paced landscape, async queues supercharge throughput from 1,200 to 4,800 TPS and cut p99 latency from 210ms to 42ms.",
-        "Overcorrected: This isn't just an upgrade — it's a new standard for blazing-fast settlement.",
+        "Still sounds like AI: This isn't just an upgrade — it's a new standard for blazing-fast settlement.",
         "After: Switching the Q4 settlement engine to async queues raised peak throughput from 1,200 to 4,800 TPS and cut p99 latency from 210ms to 42ms.",
-        "Try drafts offline or run 1-click AI rewrite: https://dislop.com/?lang=en#workbench",
+        "Try drafts offline or run 1-click AI rewrite: https://dislop.com/#workbench",
       ].join("\n"),
     },
     {
       id: "autopsy",
-      kicker: "Case 02 · Real self-audit (pitch cadence)",
+      kicker: "Case 02 · Previous hero audit (pitch cadence)",
       title: "0 linter findings, yet our own previous hero still sounded like AI",
       steps: [
         {
@@ -1084,13 +1237,13 @@ const CASES_BY_LANG = {
 
 const SHARE_BLURBS_BY_LANG = {
   zh: {
-    site: "分享一个 AI 味检查工具 dislop（Linter for AI Slop）：整合了 87 条精选去味工具和社区规则，帮你（的 Agent）在文档、网页和 PPT 发出前挑出并改掉 AI 味，一行命令就能接进 Codex / Claude Code / Cursor / WorkBuddy 等，支持纯本地离线运行。官网：https://dislop.com GitHub：https://github.com/dislop-ai/dislop",
-    awesome: "整理了一份 87 条去 AI 味工具与资料清单（Awesome Anti-Slop），涵盖中英文写作规范、Vale / Impeccable 等自动检查器、网页设计规则、PR 治理和论文，支持在线筛选也提供给 Agent 读的 JSON：https://dislop.com/awesome/ （GitHub：https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md）",
+    site: "去 AI 味才是真正的生产力！分享一个专用 AI 味检查工具 dislop：整合了 90 条精选去味工具和社区规则，帮你（的 Agent）在文档、网页和 PPT 发出前挑出并改掉 AI 味，一行命令接进 Codex / Claude Code / Cursor / WorkBuddy 等，支持纯本地离线运行。官网：https://dislop.com GitHub：https://github.com/dislop-ai/dislop",
+    awesome: "去 AI 味才是真正的生产力！整理了一份 90 条去 AI 味工具与资料清单（Awesome Anti-Slop），涵盖中英文写作规范、Vale / Impeccable 等自动检查器、网页设计规则、PR 治理和论文，支持在线筛选也提供给 Agent 读的 JSON：https://dislop.com/awesome/ （GitHub：https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md）",
     cases: "https://dislop.com/#cases",
   },
   en: {
-    site: "Checking out dislop — a dedicated linter for AI slop. It brings together vetted community rules and 87 curated tools to help your agent find and fix AI slop in docs, web UI, and slides. Connects to Codex, Claude Code, Cursor, and office agents in one command and can run offline: https://dislop.com (GitHub: https://github.com/dislop-ai/dislop)",
-    awesome: "Awesome Anti-Slop: 87 verified anti-slop tools, writing guides, UI standards, PR policies, and papers with an offline filter UI and agent-ready JSON: https://dislop.com/awesome/ (GitHub: https://github.com/dislop-ai/dislop/tree/main/awesome)",
+    site: "Cutting AI slop is real productivity. Check out dislop — a dedicated linter for AI slop with vetted community rules and 90 curated tools across docs, web UI, and slides. Connects to Codex, Claude Code, Cursor, and office agents in one command and runs offline: https://dislop.com (GitHub: https://github.com/dislop-ai/dislop)",
+    awesome: "Awesome Anti-Slop: 90 verified anti-slop tools, writing guides, UI standards, PR policies, and papers with a browser filter UI and agent-ready JSON: https://dislop.com/awesome/ (GitHub: https://github.com/dislop-ai/dislop/tree/main/awesome)",
     cases: "https://dislop.com/#cases",
   },
 };
@@ -1184,7 +1337,7 @@ Read https://dislop.com/llms.txt and follow its anti-slop rules before we ship t
     skill: `# Install the pure-Markdown cross-host Agent Skill (no bundled scripts)
 npx skills add dislop-ai/dislop
 
-# Runs 100% locally after install (0 network calls, 0 WebFetch prompts):
+# Runs locally on your machine after install (0 network calls, 0 WebFetch prompts):
 # 1. Loads the matching local reference card before drafting (skills/dislop/references/*.md)
 # 2. Runs npx dislop check afterward when a local shell is available`,
     plugin: `# Install as a Claude Code Plugin (pure-doc SKILL.md + Official Cloud MCP)
@@ -1258,7 +1411,7 @@ const PACK_LABELS = {
   zh: {
     core: "交付底线",
     "business-brief": "工作文档",
-    "engineering-spec": "研发复盘",
+    "engineering-spec": "研发文档与复盘",
     "regulated-comms": "对外合规",
     "literary-essay": "随笔长文",
     "deck-and-ui": "PPT 和网页",
@@ -1294,22 +1447,60 @@ function safeSetStorage(key, value) {
 }
 
 function detectInitialLang() {
+  if (typeof window.__DISLOP_RESOLVE_LANG__ === "function") {
+    let intlLocale = "";
+    try {
+      intlLocale = Intl.DateTimeFormat().resolvedOptions().locale || "";
+    } catch {
+      intlLocale = "";
+    }
+    return window.__DISLOP_RESOLVE_LANG__({
+      search: window.location ? window.location.search : "",
+      stored: safeGetStorage("dislop-lang"),
+      languages: window.navigator?.languages,
+      language: window.navigator?.language || "",
+      intlLocale,
+    });
+  }
   try {
     const param = new URLSearchParams(window.location.search).get("lang");
-    if (param === "en" || param === "zh") return param;
+    if (param) {
+      const norm = String(param).trim().toLowerCase();
+      if (/^zh\b/.test(norm)) return "zh";
+      if (/^en\b/.test(norm)) return "en";
+    }
   } catch {
     // ignore URL parsing errors
   }
   const stored = safeGetStorage("dislop-lang");
   if (stored === "en" || stored === "zh") return stored;
-  const navLang = String(window.navigator?.language || "").toLowerCase();
-  if (navLang && !navLang.startsWith("zh")) return "en";
-  return "zh";
+  const nav = window.navigator || {};
+  const list = Array.isArray(nav.languages) && nav.languages.length > 0 ? nav.languages : nav.language ? [nav.language] : [];
+  for (const raw of list) {
+    const tag = String(raw || "").trim().toLowerCase();
+    if (/^zh\b/.test(tag)) return "zh";
+    if (/^en\b/.test(tag)) return "en";
+  }
+  if (list.length > 0) return "en";
+  try {
+    const intlLocale = Intl.DateTimeFormat().resolvedOptions().locale || "";
+    if (/^zh\b/i.test(intlLocale)) return "zh";
+  } catch {
+    // ignore Intl error
+  }
+  return "en";
 }
 
 let currentLang = detectInitialLang();
 let currentTheme = "light";
 let heroProofState = "bad";
+const prefersReducedMotion =
+  typeof window !== "undefined" &&
+  window.matchMedia &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let heroProofAutoplay = !prefersReducedMotion;
+let heroProofTimer = null;
+const pausedDemoSlugs = new Set();
 let activeSpecimenIdx = 0;
 let activeSpecimen = SPECIMENS_BY_LANG[currentLang][0];
 let customRuleTitle = null;
@@ -1318,6 +1509,7 @@ let currentText = activeSpecimen.bad;
 let currentFilename = activeSpecimen.filename;
 let currentModality = activeSpecimen.modality;
 let currentPackId = activeSpecimen.pack;
+let lastResolvedPackInfo = { packId: activeSpecimen.pack, source: "specimen" };
 let viewMode = "proof";
 let focusedFindingIdx = -1;
 let binaryAuditResult = null;
@@ -1332,58 +1524,83 @@ let highlightedRuleId = null;
 let activeSnippet = "prompt";
 const copyTimers = new WeakMap();
 
-// ---------- Browser-Native ZIP Reader (`DecompressionStream`) ----------
+const BINARY_MODALITIES = new Set(["docx", "pptx", "pdf", "image"]);
+const TEXT_PROSE_MODALITIES = new Set(["markdown", "text"]);
+const UI_CODE_MODALITIES = new Set(["html", "css", "jsx", "tsx", "svg"]);
 
-async function readBrowserZipXmlEntries(arrayBuffer) {
-  const bytes = new Uint8Array(arrayBuffer);
-  const view = new DataView(arrayBuffer);
-  if (bytes.length < 22 || bytes[0] !== 0x50 || bytes[1] !== 0x4b) {
-    throw new Error("Invalid ZIP header");
+function resolveWorkbenchPack(packSelection, text, modality) {
+  if (packSelection && packSelection !== "auto") {
+    return { packId: packSelection, source: "manual" };
   }
-  let eocd = -1;
-  const minOff = Math.max(0, bytes.length - 65557);
-  for (let i = bytes.length - 22; i >= minOff; i -= 1) {
-    if (view.getUint32(i, true) === 0x06054b50) {
-      eocd = i;
-      break;
+  if (modality && !TEXT_PROSE_MODALITIES.has(modality)) {
+    return { packId: defaultPackForModality(modality), source: "auto-modality" };
+  }
+  if (pocketModelReady && String(text || "").trim().length >= 20) {
+    try {
+      const routed = predictPackWithPocketRouter(text);
+      if (routed?.recommendedPack && PACKS_BY_ID[routed.recommendedPack]) {
+        return {
+          packId: routed.recommendedPack,
+          source: "auto-router",
+          confidence: routed.confidence || 0,
+        };
+      }
+    } catch {
+      // fallback to default modality pack
     }
   }
-  if (eocd === -1) throw new Error("Missing ZIP central directory");
-  const total = view.getUint16(eocd + 10, true);
-  const cdOffset = view.getUint32(eocd + 16, true);
-  const decoder = new TextDecoder("utf-8");
-  const entries = {};
-  let ptr = cdOffset;
+  return { packId: defaultPackForModality(modality || "markdown"), source: "auto-default" };
+}
 
-  for (let i = 0; i < total && ptr + 46 <= bytes.length; i += 1) {
-    if (view.getUint32(ptr, true) !== 0x02014b50) break;
-    const method = view.getUint16(ptr + 10, true);
-    const compSize = view.getUint32(ptr + 20, true);
-    const nameLen = view.getUint16(ptr + 28, true);
-    const extraLen = view.getUint16(ptr + 30, true);
-    const commentLen = view.getUint16(ptr + 32, true);
-    const localOff = view.getUint32(ptr + 42, true);
-    const name = decoder.decode(bytes.subarray(ptr + 46, ptr + 46 + nameLen));
-    ptr += 46 + nameLen + extraLen + commentLen;
+function collectUnifiedOfflineAudit(text, { filename, modality, packId, pack }) {
+  const baseRes = auditText(text, { filename, modality, pack });
+  const rawFindings = withUtf16Spans(text, [...(baseRes.findings || [])]);
+  const seenKeys = new Set(
+    rawFindings.map((f) => `${f.ruleId}|${f.line || 1}|${String(f.match || "").slice(0, 32)}`)
+  );
 
-    if (!/\.(?:xml|rels)$/i.test(name)) continue;
-    const lNameLen = view.getUint16(localOff + 26, true);
-    const lExtraLen = view.getUint16(localOff + 28, true);
-    const dataStart = localOff + 30 + lNameLen + lExtraLen;
-    const slice = bytes.subarray(dataStart, dataStart + compSize);
+  // Extended pattern-bank probes (deduplicated against core + scenario pack rules)
+  try {
+    const patRes = auditPatterns(text, {
+      filename,
+      modality,
+      banks: PATTERN_BANKS,
+    });
+    for (const pf of patRes.findings || []) {
+      const dedupKey = `${pf.ruleId}|${pf.line || 1}|${String(pf.match || "").slice(0, 32)}`;
+      if (seenKeys.has(dedupKey)) continue;
+      if (rawFindings.some((rf) => rf.ruleId === pf.ruleId && Math.abs((rf.line || 1) - (pf.line || 1)) <= 1)) {
+        continue;
+      }
+      seenKeys.add(dedupKey);
+      const utf16Span = pf.span
+        ? withUtf16Spans(text, [pf])[0]?.span
+        : resolveUtf16SpanFromLineColMatch(text, pf.line, pf.col, pf.match);
+      rawFindings.push({
+        ...pf,
+        isPatternProbe: true,
+        ...(utf16Span ? { span: utf16Span } : {}),
+      });
+    }
+  } catch {
+    // keep deterministic base findings if pattern probe skips
+  }
 
-    if (method === 0) {
-      entries[name] = decoder.decode(slice);
-    } else if (method === 8 && typeof DecompressionStream !== "undefined") {
-      const ds = new DecompressionStream("deflate-raw");
-      const writer = ds.writable.getWriter();
-      writer.write(slice);
-      writer.close();
-      const buf = await new Response(ds.readable).arrayBuffer();
-      entries[name] = decoder.decode(buf);
+  let pocketMl = null;
+  if (pocketModelReady && TEXT_PROSE_MODALITIES.has(modality) && String(text || "").trim().length > 0) {
+    try {
+      pocketMl = analyzeDocumentWithPocketModels(text);
+    } catch {
+      pocketMl = null;
     }
   }
-  return entries;
+
+  return {
+    findings: rawFindings,
+    skipped: baseRes.skipped || [],
+    pocketMl,
+    effectivePackId: packId,
+  };
 }
 
 // ---------- Local Rhythm Stats ----------
@@ -1477,8 +1694,8 @@ function setViewMode(mode) {
   editBtn.disabled = Boolean(binaryAuditResult);
   editBtn.title = binaryAuditResult
     ? currentLang === "zh"
-      ? "Word / PPT 文件为只读体检，请修改原文件后重新打开"
-      : "Binary files (DOCX/PPTX) are read-only here; edit the source file and re-open"
+      ? "本地二进制文件（Word / PPT / PDF / 图片）为只读体检，请修改原文件后重新打开"
+      : "Local binary files (Word / PPT / PDF / image) are read-only here; edit the source file and re-open"
     : "";
 }
 
@@ -1523,7 +1740,7 @@ function renderAnnotatedLine(lineText, lineGlobalStart, findings, focusIdx = foc
         end: e - lineGlobalStart,
         cls: f.severity === "error" ? "mark-span mark-error" : "mark-span mark-warn",
         findingIdx: idx,
-        title: RULE_UI_META[f.ruleId]?.title?.[currentLang] || f.ruleId,
+        title: getRuleUiTitle(f.ruleId, currentLang),
       });
     }
   });
@@ -1579,6 +1796,58 @@ function renderHeroProof() {
     btn.classList.toggle("is-active", active);
     btn.setAttribute("aria-selected", String(active));
   });
+  updateHeroAutoplayButton();
+}
+
+function updateHeroAutoplayButton() {
+  const dict = I18N[currentLang] || I18N.zh;
+  const btn = document.getElementById("hp-autoplay-btn");
+  if (btn) {
+    btn.setAttribute("aria-pressed", String(heroProofAutoplay));
+    btn.textContent = heroProofAutoplay ? dict["hp.pauseBtn"] : dict["hp.playBtn"];
+  }
+  const bar = document.getElementById("hero-proof-progress-bar");
+  if (bar) {
+    const pct = heroProofState === "bad" ? "33.3%" : heroProofState === "trap" ? "66.6%" : "100%";
+    bar.style.transition = prefersReducedMotion ? "none" : "width 240ms ease-out";
+    bar.style.width = pct;
+  }
+}
+
+function setHeroProofState(nextState, fromAuto = false) {
+  if (!fromAuto) {
+    heroProofAutoplay = false;
+    stopHeroProofTimer();
+  }
+  heroProofState = nextState;
+  const stageEl = document.getElementById("hero-proof-stage");
+  if (stageEl && !prefersReducedMotion) {
+    stageEl.classList.add("is-swapping");
+    window.setTimeout(() => {
+      renderHeroProof();
+      stageEl.classList.remove("is-swapping");
+    }, 90);
+  } else {
+    renderHeroProof();
+  }
+}
+
+function stopHeroProofTimer() {
+  if (heroProofTimer) {
+    window.clearInterval(heroProofTimer);
+    heroProofTimer = null;
+  }
+}
+
+function startHeroProofTimer() {
+  stopHeroProofTimer();
+  if (!heroProofAutoplay || prefersReducedMotion) return;
+  const order = ["bad", "trap", "good"];
+  heroProofTimer = window.setInterval(() => {
+    const idx = order.indexOf(heroProofState);
+    const next = order[(idx + 1) % order.length];
+    setHeroProofState(next, true);
+  }, 3200);
 }
 
 // ---------- Workbench Renderers ----------
@@ -1612,6 +1881,7 @@ function renderSpecimenRail() {
       activeSpecimenIdx = idx;
       activeSpecimen = sp;
       lastUploadedFile = null;
+      lastUploadedBinaryBuffer = null;
       uploadedOriginalText = null;
       binaryAuditResult = null;
       customRuleTitle = null;
@@ -1644,16 +1914,282 @@ function buildRhythmCellHtml({ label, state, tone, pct, tip }) {
   </div>`;
 }
 
-function renderVoiceMeter(text, modality, isBinary) {
+const PATTERN_PROBE_META = {
+  "composite-multi-signal": {
+    title: { zh: "多维弱信号叠加", en: "Multi-signal AI cluster" },
+  },
+  "comma-chain-runon": {
+    title: { zh: "超长逗号链", en: "Run-on comma chain" },
+  },
+  "low-burstiness-vapor": {
+    title: { zh: "句长过度均匀", en: "Monotone sentence rhythm" },
+  },
+  "opener-anaphora-monotony": {
+    title: { zh: "连续同句首起笔", en: "Repeated sentence openers" },
+  },
+  "inline-bold-saturation": {
+    title: { zh: "段内加粗过密", en: "Inline bold confetti" },
+  },
+  "paragraph-length-uniformity": {
+    title: { zh: "段落字数高度均一", en: "Uniform paragraph lengths" },
+  },
+  "discourse-marker-cluster": {
+    title: { zh: "机械过渡词堆叠", en: "Stacked transition signposts" },
+  },
+  "zh-ai-calque-cluster": {
+    title: { zh: "中文翻译腔与空洞套语", en: "Chinese AI calque cluster" },
+  },
+  "en-ai-phrase-cluster": {
+    title: { zh: "高频英文 AI 词汇聚集", en: "Dense AI vocabulary cluster" },
+  },
+  "concession-symmetry-frame": {
+    title: { zh: "两面端水让步句式", en: "Formulaic both-sides frame" },
+  },
+  "pull-quote-closer": {
+    title: { zh: "段尾强行金句收尾", en: "Poster-style pull-quote closer" },
+  },
+  "rhetorical-qa-cadence": {
+    title: { zh: "主持词式自问自答", en: "Staged rhetorical Q&A" },
+  },
+  "ui-glassmorphism-overuse": {
+    title: { zh: "毛玻璃半透明面板堆砌", en: "Overused glassmorphism panels" },
+  },
+  "ui-accent-stripe-card": {
+    title: { zh: "卡片左侧粗彩条堆叠", en: "Repeated left accent stripes" },
+  },
+  "pptx-layout-monotony": {
+    title: { zh: "连续多页纯字相同版式", en: "Consecutive identical slide layouts" },
+  },
+  "ui-gen2-tasteful-slop": {
+    title: { zh: "精致模板套路组合", en: "Tasteful AI template cluster" },
+  },
+};
+
+function getRuleUiTitle(ruleId, lang = currentLang) {
+  return RULE_UI_META[ruleId]?.title?.[lang] || PATTERN_PROBE_META[ruleId]?.title?.[lang] || ruleId;
+}
+
+function pickLocalizedField(val, lang = currentLang) {
+  if (val && typeof val === "object") {
+    return val[lang] || val.en || val.zh || "";
+  }
+  return typeof val === "string" ? val : "";
+}
+
+function resolveUtf16SpanFromLineColMatch(text, lineNum, colNum, matchStr) {
+  if (!text) return null;
+  const targetLine = Math.max(1, Number(lineNum) || 1);
+  let lineStart = 0;
+  let curLine = 1;
+  while (curLine < targetLine && lineStart < text.length) {
+    const nl = text.indexOf("\n", lineStart);
+    if (nl === -1) break;
+    lineStart = nl + 1;
+    curLine += 1;
+  }
+  const nlEnd = text.indexOf("\n", lineStart);
+  const lineEnd = nlEnd === -1 ? text.length : nlEnd;
+  const lineStr = text.slice(lineStart, lineEnd);
+  if (!lineStr.trim()) return null;
+
+  const rawMatch = String(matchStr || "").trim();
+  const candidates = [];
+  if (rawMatch) {
+    candidates.push(rawMatch);
+    if (rawMatch.length > 48) candidates.push(rawMatch.slice(0, 48));
+    if (rawMatch.length > 24) candidates.push(rawMatch.slice(0, 24));
+  }
+
+  const colHint = Math.max(0, (Number(colNum) || 1) - 1);
+  for (const probe of candidates) {
+    let pos = text.indexOf(probe, Math.min(text.length, lineStart + Math.max(0, colHint - 2)));
+    if (pos === -1) pos = text.indexOf(probe, lineStart);
+    if (pos !== -1) {
+      return { start: pos, end: pos + probe.length };
+    }
+  }
+
+  const firstNonWs = lineStr.search(/\S/);
+  const start = lineStart + (firstNonWs >= 0 ? firstNonWs : 0);
+  const end = Math.max(start + 1, lineEnd);
+  return { start, end };
+}
+
+function inferPastedTextModality(text, selectedPackId) {
+  if (selectedPackId && selectedPackId !== "auto" && selectedPackId !== "deck-and-ui") {
+    return "markdown";
+  }
+  const s = String(text || "").trim();
+  if (!s) return selectedPackId === "deck-and-ui" ? "html" : "markdown";
+  if (/^<\s*svg\b/i.test(s) || /<\s*svg\b[\s\S]*<\/\s*svg\s*>/i.test(s)) {
+    return "svg";
+  }
+  if (
+    /<!doctype\s+html/i.test(s) ||
+    /<\s*(html|head|body|div|section|main|header|footer|button|article|nav|style|script)\b/i.test(s) ||
+    /\bclassName\s*=/.test(s) ||
+    /\bbackdrop-blur\b/.test(s)
+  ) {
+    return "html";
+  }
+  if (
+    !/^#{1,6}\s/m.test(s) &&
+    /(?:^|\n)\s*(?::root|@media|@keyframes|[.#*a-zA-Z][\w\s,.:>+~[\]=*()-]*)\{[^}]*:[^}]+;[^}]*\}/m.test(s)
+  ) {
+    return "css";
+  }
+  return selectedPackId === "deck-and-ui" ? "html" : "markdown";
+}
+
+function localizeBinaryModalityLabel(mod, isZh) {
+  switch (String(mod || "").toLowerCase()) {
+    case "image":
+      return isZh ? "图片" : "Image";
+    case "pdf":
+      return isZh ? "PDF 文档" : "PDF";
+    case "docx":
+      return isZh ? "Word 文档 (.docx)" : "Word (.docx)";
+    case "pptx":
+      return isZh ? "PPT 演示 (.pptx)" : "PowerPoint (.pptx)";
+    case "svg":
+      return "SVG";
+    default:
+      return String(mod || "").toUpperCase();
+  }
+}
+
+function localizeFindingLocationForUi(loc, lang) {
+  const s = String(loc || "");
+  if (lang !== "zh" || !s) return s;
+  if (s === "metadata") return "元数据";
+  if (s === "pixels") return "像素采样";
+  if (/^slide\s+(\d+)$/i.test(s)) return s.replace(/^slide\s+(\d+)$/i, "第 $1 页");
+  if (/^page\s+(\d+)$/i.test(s)) return s.replace(/^page\s+(\d+)$/i, "第 $1 页");
+  if (/^para\s+(\d+)$/i.test(s)) return s.replace(/^para\s+(\d+)$/i, "第 $1 段");
+  return s;
+}
+
+function localizeFindingMatchForUi(matchStr, lang) {
+  const s = String(matchStr || "");
+  if (lang !== "zh" || !s) return s;
+  if (s === "C2PA / AI provenance manifest present") {
+    return "包含 C2PA / AI 来源清单（按规范保留）";
+  }
+  const autofit = s.match(/^normAutofit\s+fontScale=(\d+%)$/i);
+  if (autofit) {
+    return `启用自动缩字（字号被压至 ${autofit[1]}）`;
+  }
+  const wcMatch = s.match(/^(\d+)\s+words\s*\/\s*(\d+)\s+CJK chars$/i);
+  if (wcMatch) {
+    return `${wcMatch[1]} 个英文词 / ${wcMatch[2]} 个中文字符`;
+  }
+  const bullets = s.match(/^(\d+)\s+bullet items$/i);
+  if (bullets) {
+    return `单页堆叠 ${bullets[1]} 条要点`;
+  }
+  const slideMono = s.match(/^(\d+)\s+consecutive identical slide layouts\b/i);
+  if (slideMono) {
+    return `连续 ${slideMono[1]} 页幻灯片套用相同纯字版式`;
+  }
+  const pdfMono = s.match(/^(\d+)\s+consecutive identical plain-text landscape PDF pages\b/i);
+  if (pdfMono) {
+    return `连续 ${pdfMono[1]} 页横版纯文字 PDF 页面版式相同`;
+  }
+  const rgbFills = s.match(/^(\d+)\s+neon purple-pink RGB fills\/shadings$/i);
+  if (rgbFills) {
+    return `含 ${rgbFills[1]} 处紫粉霓虹填充或渐变`;
+  }
+  const fontCollapse = s.match(/^font hierarchy collapsed\s*\(min=([\d.]+)pt,\s*max=([\d.]+)pt,\s*words=(\d+)\)$/i);
+  if (fontCollapse) {
+    return `字号层级塌缩（最小 ${fontCollapse[1]}pt / 最大 ${fontCollapse[2]}pt，共 ${fontCollapse[3]} 词）`;
+  }
+  const rasterPages = s.match(/^(\d+)\s+raster-only landscape pages with zero selectable text$/i);
+  if (rasterPages) {
+    return `${rasterPages[1]} 页横版页面全为整图（无可选文字）`;
+  }
+  const pxMatch = s.match(/^(\d+)x(\d+)\s*\(([^)]+)\)$/);
+  if (pxMatch) {
+    const keyMap = {
+      neonPurple: "紫粉霓虹",
+      highSat: "高饱和",
+      smooth: "平滑过渡",
+      gridLines: "网格线",
+      darkBg: "暗色背景",
+    };
+    const parts = pxMatch[3].split(",").map((part) => {
+      const m = part.trim().match(/^([a-zA-Z]+)=(.+)$/);
+      if (!m) return part.trim();
+      return `${keyMap[m[1]] || m[1]} ${m[2]}`;
+    });
+    return `${pxMatch[1]}×${pxMatch[2]} 像素（${parts.join(" · ")}）`;
+  }
+  return s;
+}
+
+function localizeSkippedReasonForUi(reason, lang) {
+  const s = String(reason || "");
+  if (lang !== "zh" || !s) return s;
+  if (s === "Encrypted PDF cannot be audited offline") {
+    return "PDF 已加密，无法离线读取正文与排版，已跳过。";
+  }
+  if (s.includes("Hidden slide (show=0)")) {
+    return "隐藏页（show=0）不参与正文密度规则检查。";
+  }
+  if (s === "Unparseable PDF file") {
+    return "无法解析该 PDF 文件。";
+  }
+  if (s === "Missing page objects inside PDF") {
+    return "PDF 内未找到可识别的页面对象。";
+  }
+  if (s === "Unparseable image file") {
+    return "无法解析该图片文件。";
+  }
+  const uninsp = s.match(/^Uninspectable\s+([a-zA-Z0-9_-]+):\s*(.+)$/);
+  if (uninsp) {
+    const modLabel = localizeBinaryModalityLabel(uninsp[1], true);
+    let detail = uninsp[2];
+    if (detail.includes("word/document.xml")) {
+      detail = "压缩包内缺少有效的 word/document.xml";
+    } else if (detail.includes("ppt/presentation.xml")) {
+      detail = "压缩包内缺少有效的幻灯片 XML";
+    } else if (detail.includes("valid UTF-8")) {
+      detail = "文件不是有效的 UTF-8 文本";
+    } else if (/decompress|deflate|zip/i.test(detail)) {
+      detail = "压缩数据损坏或无法解压";
+    }
+    return `无法离线读取该${modLabel}文件：${detail}`;
+  }
+  return s;
+}
+
+function renderVoiceMeter(text, modality, isBinary, pocketMl = null) {
   const valuesEl = document.getElementById("voice-meter-values");
   const subEl = document.getElementById("voice-meter-summary");
   if (!valuesEl) return;
   const isZh = currentLang === "zh";
 
   if (isBinary) {
+    if (modality === "image") {
+      if (subEl) subEl.textContent = isZh ? "图片像素与元数据检查 · 0 上传" : "Image pixel & metadata check · 0 uploads";
+      valuesEl.innerHTML = `<div class="rhythm-empty">${
+        isZh
+          ? "图片检查配色分布、尺寸与来源元数据，不统计散文句长节奏。"
+          : "Image files run pixel sampling and metadata checks in RAM rather than prose rhythm gauges."
+      }</div>`;
+      return;
+    }
+    if (modality === "pdf") {
+      if (subEl) subEl.textContent = isZh ? "PDF 版式与文本检查 · 0 上传" : "PDF layout & text check · 0 uploads";
+      valuesEl.innerHTML = `<div class="rhythm-empty">${
+        isZh
+          ? "PDF 检查页数、字号阶梯、纯图页与加密状态，不统计散文句长节奏。"
+          : "PDF files inspect page dimensions, font scale, and raster ratio rather than prose rhythm gauges."
+      }</div>`;
+      return;
+    }
     if (subEl) subEl.textContent = isZh ? "本地内存检查 · 0 上传" : "Local browser RAM · 0 uploads";
     valuesEl.innerHTML = `<div class="rhythm-empty">${
-      isZh ? "Word / PPT 文档仅做结构与正文体检，不统计散文句长节奏。" : "Rhythm gauges apply to editable prose drafts; Office files run structure & text checks."
+      isZh ? "Word / PPT 文档仅做结构与正文体检，不统计散文句长节奏。" : "Office files run structure & text checks rather than prose rhythm gauges."
     }</div>`;
     return;
   }
@@ -1734,30 +2270,31 @@ function renderVoiceMeter(text, modality, isBinary) {
     punctPct = 55;
   }
 
-  const riskScore = p.telemetryRisk.score;
-  const riskLevel = p.telemetryRisk.level;
-  const riskTone = riskLevel === "high" ? "bad" : riskLevel === "medium" ? "warn" : "good";
-  const riskState = isZh
-    ? `${riskScore}/100 ${riskLevel === "high" ? "高" : riskLevel === "medium" ? "中" : "低"}`
-    : `${riskScore}/100 ${riskLevel}`;
+  const mlScore = pocketMl?.wholeTextScore?.eligible ? Math.round((pocketMl.documentProbability ?? 0) * 100) : null;
+  const combinedRisk = mlScore !== null ? Math.max(p.telemetryRisk.score, mlScore) : p.telemetryRisk.score;
+  const naturalPct = Math.max(8, 100 - combinedRisk);
+  const naturalTone = combinedRisk >= 68 ? "bad" : combinedRisk >= 42 ? "warn" : "good";
+  const naturalState = isZh
+    ? `${naturalPct}/100 ${naturalTone === "good" ? "自然" : naturalTone === "warn" ? "略模板" : "偏机械"}`
+    : `${naturalPct}/100 ${naturalTone === "good" ? "high" : naturalTone === "warn" ? "fair" : "low"}`;
 
   valuesEl.innerHTML = [
     buildRhythmCellHtml({
-      label: isZh ? "句长起伏" : "Sentence cadence",
+      label: isZh ? "句长起伏" : "Cadence",
       state: cadenceState,
       tone: cadenceTone,
       pct: cadencePct,
       tip: isZh ? "长短句交替越自然，越不容易读出机器匀速感" : "Varied short and long sentences read more naturally than uniform length",
     }),
     buildRhythmCellHtml({
-      label: isZh ? "具体细节" : "Concrete detail",
+      label: isZh ? "具体细节" : "Details",
       state: detailState,
       tone: detailTone,
       pct: detailPct,
       tip: isZh ? "数字、时间、单位、代码或配置项等可核对锚点数量" : "Count of checkable numbers, dates, units, paths, and code tokens",
     }),
     buildRhythmCellHtml({
-      label: isZh ? "用词变化" : "Word variety",
+      label: isZh ? "用词变化" : "Variety",
       state: varietyState,
       tone: varietyTone,
       pct: varietyPct,
@@ -1771,90 +2308,341 @@ function renderVoiceMeter(text, modality, isBinary) {
       tip: isZh ? "检查单句多重分号排比与高频破折号插话" : "Watches for multi-semicolon pitch clauses and heavy em-dash habits",
     }),
     buildRhythmCellHtml({
-      label: isZh ? "套路风险" : "Template risk",
-      state: riskState,
-      tone: riskTone,
-      pct: Math.max(10, riskScore),
-      tip: isZh ? "综合句式骨架复读、匀速空话与标点密度计算的模板痕迹分（越低越好）" : "Combined structural repetition and uniform-cadence risk score (lower is cleaner)",
+      label: isZh ? "文风自然度" : "Naturalness",
+      state: naturalState,
+      tone: naturalTone,
+      pct: naturalPct,
+      tip: isZh ? "综合句式骨架、匀速空话与本地风格模型的自然度判断（越高越像人写）" : "Combined naturalness score from structural telemetry and the local style model (higher reads more human)",
     }),
   ].join("");
 }
 
+let lastRenderedAudit = { findings: [], skipped: [], pocketMl: null, packId: "business-brief" };
+let lastUploadedPreviewDataUrl = null;
+
+function formatBytesShort(bytes) {
+  if (!Number.isFinite(bytes) || bytes < 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function buildAgentFixBrief() {
+  const isZh = currentLang === "zh";
+  const packId = lastResolvedPackInfo?.packId || currentPackId || "business-brief";
+  const packLabel = PACK_LABELS[currentLang]?.[packId] || packId;
+  const effectiveRules = resolveEffectivePack(packId, PACKS_BY_ID).rules || [];
+  const findings = lastRenderedAudit?.findings || [];
+  const coverageWarnings = lastRenderedAudit?.coverageWarnings || [];
+  const skipped = lastRenderedAudit?.skipped || [];
+  const ml = lastRenderedAudit?.pocketMl || null;
+  const mlHigh = ml && ml.wholeTextScore?.eligible && ml.documentProbability >= (ml.threshold ?? 0.755);
+
+  const lines = [];
+  if (isZh) {
+    lines.push(`请按以下 dislop 检查结果帮我修改 ${currentFilename || "这份稿件"}（场景包：${packLabel} / ${packId}）：`);
+    if (findings.length === 0 && !mlHigh && coverageWarnings.length === 0 && skipped.length === 0) {
+      lines.push("- 当前未发现已知规则问题，请结合实际上下文确认事实与逻辑即可。");
+    } else {
+      findings.forEach((f, idx) => {
+        const title = getRuleUiTitle(f.ruleId, "zh");
+        const locRaw = typeof f.location === "string" && f.location ? f.location : `${f.line || 1}:${f.col || 1}`;
+        const loc = localizeFindingLocationForUi(locRaw, "zh");
+        const sev = f.severity === "error" ? "硬伤" : "提醒";
+        const ruleDef = effectiveRules.find((r) => r.id === f.ruleId);
+        const dt = pickLocalizedField(ruleDef?.deletionTest ?? f.deletionTest, "zh");
+        lines.push(`${idx + 1}. [${sev}] ${title} (${f.ruleId}) @ ${loc}`);
+        if (f.match) lines.push(`   命中：${localizeFindingMatchForUi(f.match, "zh")}`);
+        if (dt) lines.push(`   改法：${dt}`);
+      });
+      for (const s of skipped) {
+        lines.push(`- [跳过未查] ${s.file || currentFilename || "文件"}：${localizeSkippedReasonForUi(s.reason, "zh")}`);
+      }
+      for (const cw of coverageWarnings) {
+        const pList = Array.isArray(cw.pages) && cw.pages.length ? `第 ${cw.pages.join(", ")} 页` : "部分页面";
+        lines.push(`- [覆盖提示] ${pList}离线未提取出可选文字，请直接目视复核。`);
+      }
+      if (mlHigh) {
+        const drivers = (ml.wholeTextScore.topDrivers || []).map((d) => d.reason?.zh || d.feature).filter(Boolean);
+        lines.push(`- [本地风格模型 ${Math.round(ml.documentProbability * 100)}%] ${drivers.join("；")}`);
+      }
+    }
+    if (!binaryAuditResult && currentText.trim()) {
+      lines.push("", "原文：", "```", currentText.slice(0, 6000), "```");
+    }
+    lines.push("", "要求：改掉上述问题，保留原稿所有真实数字、日期、路径与限定词；不要换成“不是……而是……”反转口号或对称分号套话。");
+  } else {
+    lines.push(`Please revise ${currentFilename || "this draft"} based on these dislop findings (pack: ${packLabel} / ${packId}):`);
+    if (findings.length === 0 && !mlHigh && coverageWarnings.length === 0 && skipped.length === 0) {
+      lines.push("- No known patterns found; double-check facts and tone in context.");
+    } else {
+      findings.forEach((f, idx) => {
+        const title = getRuleUiTitle(f.ruleId, "en");
+        const loc = typeof f.location === "string" && f.location ? f.location : `${f.line || 1}:${f.col || 1}`;
+        const sev = f.severity === "error" ? "hard bug" : f.severity || "warning";
+        const ruleDef = effectiveRules.find((r) => r.id === f.ruleId);
+        const dt = pickLocalizedField(ruleDef?.deletionTest ?? f.deletionTest, "en");
+        lines.push(`${idx + 1}. [${sev}] ${title} (${f.ruleId}) @ ${loc}`);
+        if (f.match) lines.push(`   Match: ${f.match}`);
+        if (dt) lines.push(`   Check: ${dt}`);
+      });
+      for (const s of skipped) {
+        lines.push(`- [Skipped] ${s.file || currentFilename || "file"}: ${s.reason}`);
+      }
+      for (const cw of coverageWarnings) {
+        lines.push(`- [Coverage] ${cw.message}`);
+      }
+      if (mlHigh) {
+        const drivers = (ml.wholeTextScore.topDrivers || []).map((d) => d.reason?.en || d.feature).filter(Boolean);
+        lines.push(`- [Local style model ${Math.round(ml.documentProbability * 100)}%] ${drivers.join("; ")}`);
+      }
+    }
+    if (!binaryAuditResult && currentText.trim()) {
+      lines.push("", "Draft:", "```", currentText.slice(0, 6000), "```");
+    }
+    lines.push("", "Constraints: keep every number, date, qualifier, and path intact; do not swap clichés for 'Not X, but Y' slogans or 3-part semicolon pitches.");
+  }
+  return lines.join("\n");
+}
+
+function renderBinarySummaryCard(binRes) {
+  const box = document.getElementById("binary-summary-view");
+  if (!box) return;
+  if (!binRes) {
+    box.hidden = true;
+    box.innerHTML = "";
+    return;
+  }
+  const isZh = currentLang === "zh";
+  const meta = binRes.binaryMeta || {};
+  const rows = [];
+  rows.push([isZh ? "文件名" : "File", meta.filename || currentFilename || "—"]);
+  rows.push([
+    isZh ? "格式 / 大小" : "Format / Size",
+    `${localizeBinaryModalityLabel(meta.modality || currentModality || "", isZh)} · ${formatBytesShort(meta.sizeBytes)}`,
+  ]);
+  if (meta.modality === "pptx") {
+    rows.push([isZh ? "幻灯片页数" : "Slides", String(meta.slideCount ?? 0)]);
+    rows.push([isZh ? "检查范围" : "Scope", isZh ? "放映顺序文字、字墙、要点条数、自动缩排、标题与连续同版式" : "Slide text, word-walls, >6 bullets, autofit shrink, generic titles, 4+ layout monotony"]);
+  } else if (meta.modality === "docx") {
+    rows.push([isZh ? "XML 部件" : "XML parts", String(meta.xmlCount ?? 0)]);
+    rows.push([isZh ? "检查范围" : "Scope", isZh ? "合并段落、未渲染 Markdown 符号与正文套话（按段落定位）" : "Merged runs, raw Markdown asterisks, prose clichés (by paragraph)"]);
+  } else if (meta.modality === "pdf") {
+    rows.push([isZh ? "页数 / 状态" : "Pages / Status", meta.encrypted ? (isZh ? "已加密（跳过未查）" : "Encrypted (skipped)") : `${meta.pageCount ?? 0} ${isZh ? "页" : "pages"}`]);
+    rows.push([isZh ? "检查范围" : "Scope", isZh ? "横版幻灯片字墙、纯图页面、字号阶梯与紫粉填充；加密 PDF 跳过" : "Landscape slide word-walls, raster pages, flat type scale, purple fills"]);
+  } else if (meta.modality === "image") {
+    rows.push([isZh ? "图片尺寸" : "Dimensions", meta.width && meta.height ? `${meta.width} × ${meta.height} px (${String(meta.format || "").toUpperCase()})` : "—"]);
+    rows.push([
+      isZh ? "元数据 / 来源" : "Metadata / C2PA",
+      meta.hasC2pa
+        ? isZh
+          ? `发现 C2PA / 来源标识（已提示保留） · ${meta.metadataCount || 0} 条文本块`
+          : `C2PA / AI provenance present (keep per policy) · ${meta.metadataCount || 0} text chunks`
+        : isZh
+          ? `${meta.metadataCount || 0} 条文本块`
+          : `${meta.metadataCount || 0} text chunks`,
+    ]);
+    if (meta.pixelMetrics) {
+      const pm = meta.pixelMetrics;
+      rows.push([
+        isZh ? "像素配色采样" : "Pixel sampling",
+        isZh
+          ? `紫粉霓虹占比 ${Math.round(pm.neonPurpleRatio * 100)}% · 高饱和占比 ${Math.round(pm.highSatRatio * 100)}%`
+          : `Neon purple ${Math.round(pm.neonPurpleRatio * 100)}% · high saturation ${Math.round(pm.highSatRatio * 100)}%`,
+      ]);
+    }
+  }
+  if (Array.isArray(binRes.coverageWarnings) && binRes.coverageWarnings.length > 0) {
+    const pagesList = binRes.coverageWarnings.flatMap((cw) => cw.pages || []);
+    rows.push([
+      isZh ? "文字提取" : "Text extraction",
+      isZh
+        ? `第 ${pagesList.length ? pagesList.join("、") : "部分"} 页未读出可选文本，建议直接目视复核`
+        : `0 selectable characters extracted on page(s) ${pagesList.length ? pagesList.join(", ") : "?"}; inspect visually`,
+    ]);
+  }
+  if (meta.error) {
+    rows.push([isZh ? "读取异常" : "Read error", localizeSkippedReasonForUi(`Uninspectable ${meta.modality || "file"}: ${meta.error}`, currentLang)]);
+  }
+
+  const previewHtml =
+    lastUploadedPreviewDataUrl && (meta.modality === "image" || currentModality === "svg")
+      ? `<div class="binary-preview-wrap"><img src="${escapeHtmlSafe(lastUploadedPreviewDataUrl)}" alt="${escapeHtmlSafe(meta.filename || "preview")}"></div>`
+      : "";
+
+  box.hidden = false;
+  box.innerHTML = `
+    <div class="binary-summary-head">
+      <strong>${isZh ? "本地文件离线体检（当前标签页内存解析 · 0 上传）" : "Offline local file inspection (parsed in browser memory · 0 uploads)"}</strong>
+      <span class="binary-readonly-note">${
+        isZh
+          ? "二进制文件只读检查；顶部「编辑原文」与下方云端按钮仅对文本或网页草稿可用。"
+          : "Read-only offline inspection; Edit text and Cloud AI buttons apply only to text or markup drafts."
+      }</span>
+    </div>
+    ${previewHtml}
+    <dl class="binary-meta-grid">
+      ${rows.map(([k, v]) => `<div class="binary-meta-row"><dt>${escapeHtmlSafe(k)}</dt><dd>${escapeHtmlSafe(v)}</dd></div>`).join("")}
+    </dl>
+  `;
+}
+
 function renderWorkbench() {
-  const pack = resolveEffectivePack(currentPackId, PACKS_BY_ID);
+  const packInfo = binaryAuditResult
+    ? { packId: currentPackId === "auto" ? defaultPackForModality(currentModality) : currentPackId, source: currentPackId === "auto" ? "auto-modality" : "manual" }
+    : resolveWorkbenchPack(currentPackId, currentText, currentModality);
+  lastResolvedPackInfo = packInfo;
+  const pack = resolveEffectivePack(packInfo.packId, PACKS_BY_ID);
   const t0 = performance.now();
   const auditRes = binaryAuditResult
     ? binaryAuditResult
-    : auditText(currentText, {
+    : collectUnifiedOfflineAudit(currentText, {
         filename: currentFilename,
         modality: currentModality,
+        packId: packInfo.packId,
         pack,
       });
   const elapsedMs = (performance.now() - t0).toFixed(1);
-  const findings = binaryAuditResult
-    ? auditRes.findings || []
-    : withUtf16Spans(currentText, auditRes.findings);
+  const findings = auditRes.findings || [];
   const skipped = auditRes.skipped || [];
+  const coverageWarnings = auditRes.coverageWarnings || [];
+  const pocketMl = auditRes.pocketMl || null;
+  lastRenderedAudit = { findings, skipped, coverageWarnings, pocketMl, packId: packInfo.packId };
   if (focusedFindingIdx >= findings.length) {
     focusedFindingIdx = -1;
   }
 
   const proofView = document.getElementById("proof-view");
   const editArea = document.getElementById("edit-textarea");
+  const editHintEl = document.getElementById("wb-edit-hint");
   const summaryEl = document.getElementById("wb-summary");
   const mobileCountsEl = document.getElementById("wb-mobile-counts");
   const notesEl = document.getElementById("notes-container");
+  const docFileEl = document.getElementById("wb-doc-file");
+  const docPackEl = document.getElementById("wb-doc-pack");
+  const docStatsEl = document.getElementById("wb-doc-stats");
 
   setViewMode(viewMode);
+  const isCodeMod = UI_CODE_MODALITIES.has(currentModality);
+  proofView.classList.toggle("is-code", isCodeMod);
+  editArea.classList.toggle("is-code", isCodeMod);
+  if (editHintEl) {
+    editHintEl.hidden = !(viewMode === "edit" && !binaryAuditResult);
+  }
+
+  const packLabelText = PACK_LABELS[currentLang]?.[packInfo.packId] || packInfo.packId;
+  if (docFileEl) docFileEl.textContent = currentFilename || "draft.md";
+  if (docPackEl) {
+    const isAuto = currentPackId === "auto";
+    docPackEl.textContent = isAuto
+      ? currentLang === "zh"
+        ? `自动 → ${packLabelText}`
+        : `Auto → ${packLabelText}`
+      : packLabelText;
+  }
+  if (docStatsEl) {
+    if (binaryAuditResult) {
+      docStatsEl.textContent = formatBytesShort(binaryAuditResult.binaryMeta?.sizeBytes || 0) || String(currentModality).toUpperCase();
+    } else {
+      const lineCount = currentText ? currentText.split("\n").length : 0;
+      const charCount = currentText.length;
+      docStatsEl.textContent =
+        currentLang === "zh" ? `${lineCount} 行 · ${charCount} 字` : `${lineCount} lines · ${charCount} chars`;
+    }
+  }
+
   const goodBtn = document.getElementById("btn-apply-good");
   const trapBtn = document.getElementById("btn-apply-trap");
+  const copyDraftBtn = document.getElementById("btn-copy-draft");
+  const shareLinkBtn = document.getElementById("wb-share-link-btn");
+  const prevBtn = document.getElementById("btn-prev-finding");
+  const nextBtn = document.getElementById("btn-next-finding");
+  const canApplyGood = !lastUploadedFile && !binaryAuditResult && typeof activeSpecimen?.good === "string";
+  const canApplyTrap = !lastUploadedFile && !binaryAuditResult && typeof activeSpecimen?.trap === "string";
+  const isGoodActive = canApplyGood && currentText === activeSpecimen?.good;
+  const isTrapActive = canApplyTrap && currentText === activeSpecimen?.trap;
   if (goodBtn) {
-    goodBtn.disabled = Boolean(lastUploadedFile || binaryAuditResult || typeof activeSpecimen?.good !== "string");
+    goodBtn.disabled = !canApplyGood;
+    goodBtn.hidden = !canApplyGood;
+    goodBtn.classList.toggle("is-active", isGoodActive);
+    goodBtn.setAttribute("aria-pressed", String(isGoodActive));
   }
   if (trapBtn) {
-    trapBtn.disabled = Boolean(lastUploadedFile || binaryAuditResult || typeof activeSpecimen?.trap !== "string");
+    trapBtn.disabled = !canApplyTrap;
+    trapBtn.hidden = !canApplyTrap;
+    trapBtn.classList.toggle("is-active", isTrapActive);
+    trapBtn.setAttribute("aria-pressed", String(isTrapActive));
   }
+  if (copyDraftBtn) {
+    copyDraftBtn.disabled = Boolean(binaryAuditResult || !currentText.trim());
+  }
+  if (shareLinkBtn) {
+    shareLinkBtn.disabled = Boolean(binaryAuditResult || !currentText.trim());
+  }
+  if (prevBtn) prevBtn.disabled = findings.length === 0;
+  if (nextBtn) nextBtn.disabled = findings.length === 0;
 
   const errorsCount = findings.filter((f) => f.severity === "error").length;
   const queriesCount = findings.length - errorsCount;
 
   const isEmptySheet = !binaryAuditResult && currentText.trim().length === 0;
+  const mlHigh = Boolean(!isEmptySheet && pocketMl && pocketMl.wholeTextScore?.eligible && pocketMl.documentProbability >= (pocketMl.threshold ?? 0.755));
   if (isEmptySheet) {
     const emptyLabel = currentLang === "zh" ? "空稿纸 · 等你贴字进来" : "Blank sheet · paste a draft";
     summaryEl.innerHTML = `<span>${emptyLabel}</span><span>${elapsedMs} ms</span>`;
     if (mobileCountsEl) mobileCountsEl.textContent = emptyLabel;
+  } else if (findings.length === 0 && (skipped.length > 0 || coverageWarnings.length > 0)) {
+    const covLabel =
+      skipped.length > 0
+        ? currentLang === "zh"
+          ? `未完成完整检查 · ${skipped.length} 项跳过`
+          : `Incomplete scan · ${skipped.length} skipped`
+        : currentLang === "zh"
+          ? "部分页面未读出文字 · 请人工复核"
+          : "Unreadable PDF pages · inspect visually";
+    summaryEl.innerHTML = `<span>${covLabel}</span><span>${elapsedMs} ms</span>`;
+    if (mobileCountsEl) mobileCountsEl.textContent = covLabel;
   } else {
+    const mlTag = mlHigh ? (currentLang === "zh" ? " · 风格模型提示" : " · style note") : "";
     const countLabel =
       currentLang === "zh"
-        ? `${errorsCount} 处硬伤 · ${queriesCount} 条提醒`
-        : `${errorsCount} ${errorsCount === 1 ? "error" : "errors"} · ${queriesCount} ${queriesCount === 1 ? "warning" : "warnings"}`;
+        ? `${errorsCount} 处硬伤 · ${queriesCount} 条提醒${mlTag}`
+        : `${errorsCount} ${errorsCount === 1 ? "hard bug" : "hard bugs"} · ${queriesCount} ${queriesCount === 1 ? "warning" : "warnings"}${mlTag}`;
     summaryEl.innerHTML = `<span>${countLabel}</span><span>${elapsedMs} ms</span>`;
     if (mobileCountsEl) mobileCountsEl.textContent = countLabel;
   }
 
-  renderVoiceMeter(currentText, currentModality, Boolean(binaryAuditResult));
+  renderVoiceMeter(currentText, currentModality, Boolean(binaryAuditResult), pocketMl);
 
-  // Render Proof Sheet or Edit Mode
-  if (viewMode === "edit" && !binaryAuditResult) {
+  // Render Binary Card, Proof Sheet, or Edit Mode
+  if (binaryAuditResult) {
+    proofView.hidden = true;
+    editArea.hidden = true;
+    renderBinarySummaryCard(binaryAuditResult);
+  } else if (viewMode === "edit") {
+    renderBinarySummaryCard(null);
     proofView.hidden = true;
     editArea.hidden = false;
     if (editArea.value !== currentText) {
       editArea.value = currentText;
     }
   } else {
+    renderBinarySummaryCard(null);
     proofView.hidden = false;
     editArea.hidden = true;
 
+    const svgPreviewWrap =
+      currentModality === "svg" && lastUploadedPreviewDataUrl
+        ? `<li class="proof-line proof-svg-preview"><span class="line-num">SVG</span><span class="line-content"><img class="inline-svg-preview" src="${escapeHtmlSafe(lastUploadedPreviewDataUrl)}" alt="${escapeHtmlSafe(currentFilename || "svg")}"></span></li>`
+        : "";
     const lines = currentText.split("\n");
     let offset = 0;
     const htmlLines = lines.map((line, i) => {
-      const annotated = binaryAuditResult
-        ? escapeHtml(line)
-        : renderAnnotatedLine(line, offset, findings, focusedFindingIdx);
+      const annotated = renderAnnotatedLine(line, offset, findings, focusedFindingIdx);
       offset += line.length + 1;
       return `<li class="proof-line"><span class="line-num">${i + 1}</span><span class="line-content">${annotated}</span></li>`;
     });
-    proofView.innerHTML = htmlLines.join("");
+    proofView.innerHTML = svgPreviewWrap + htmlLines.join("");
 
     proofView.querySelectorAll("[data-finding-idx]").forEach((el) => {
       const focusHandler = () => {
@@ -1883,35 +2671,56 @@ function renderWorkbench() {
   for (const s of skipped) {
     cards.push(`<div class="note-card">
       <div class="note-head"><span class="sev-tag sev-warning">${currentLang === "zh" ? "跳过未查" : "Skipped"}</span><span class="note-loc">${escapeHtml(s.file)}</span></div>
-      <div class="note-why">${escapeHtml(s.reason)}</div>
+      <div class="note-why">${escapeHtml(localizeSkippedReasonForUi(s.reason, currentLang))}</div>
     </div>`);
   }
 
-  if (findings.length === 0 && skipped.length === 0) {
+  for (const cw of coverageWarnings) {
+    const pList = Array.isArray(cw.pages) && cw.pages.length ? cw.pages.join(currentLang === "zh" ? "、" : ", ") : "";
+    const covMsg =
+      currentLang === "zh"
+        ? `PDF ${pList ? `第 ${pList} 页` : "部分页面"}包含字体或压缩内容，但离线未能提取出可选文字，请直接目视核对或改用可复制文本导出。`
+        : cw.message;
+    cards.push(`<div class="note-card">
+      <div class="note-head"><span class="sev-tag sev-warning">${currentLang === "zh" ? "覆盖提示" : "Coverage"}</span><span class="note-loc">${escapeHtml(cw.file || currentFilename || "PDF")}</span></div>
+      <div class="note-why">${escapeHtml(covMsg)}</div>
+    </div>`);
+  }
+
+  if (findings.length === 0 && skipped.length === 0 && coverageWarnings.length === 0) {
     const cleanMsg = isEmptySheet
       ? currentLang === "zh"
         ? "这里还是空的。点「编辑原文」贴一段字，或者从左边选个例子。"
         : "Nothing here yet. Click 'Edit text' to paste a draft, or pick an example on the left."
       : !lastUploadedFile && !customRuleTitle && activeSpecimen?.id === "clean-nearmiss" && currentText === baselineText
         ? currentLang === "zh"
-          ? "0 处问题。“抓手机”是动作，“默认超时不是 30 秒，而是 300 秒”是真实纠偏，“北京大学、清华大学、复旦大学”是真实校名，不会被误伤。"
-          : "0 issues. 'Delve' is a debugger, 'wool tapestry' is literal, and the line-42 correction is factual, so nothing gets flagged."
-        : currentLang === "zh"
-          ? "没查出问题。"
-          : "No issues found.";
-    cards.push(`<div class="clean-sheet-msg">${escapeHtml(cleanMsg)}</div>`);
+          ? "未发现已知模式。“抓手机”是动作，“默认超时不是 30 秒，而是 300 秒”是真实纠偏，“北京大学、清华大学、复旦大学”是真实校名，不会被误伤。"
+          : "No known patterns found. 'Delve' is a debugger, 'wool tapestry' is literal, and the line-42 correction is factual, so nothing gets flagged."
+        : mlHigh
+          ? currentLang === "zh"
+            ? "固定规则未命中，但本地风格模型识别出较高的隐性模板腔，可参照下方特征补充具体事实后复检。"
+            : "Deterministic rules did not fire, but the local style model flagged elevated template prose below."
+          : currentLang === "zh"
+            ? "未发现已知模式（离线规则仅覆盖明确套话与硬伤，不代表深度内容质量无误）。"
+            : "No known patterns found (offline rules catch known defects and clichés, not deep editorial quality).";
+    cards.push(`<div class="clean-sheet-msg${mlHigh ? " is-ml-warn" : ""}">${escapeHtml(cleanMsg)}</div>`);
   }
 
-  findings.forEach((f, idx) => {
+  const orderedFindingEntries = [
+    ...findings.map((f, idx) => ({ f, idx })).filter(({ f }) => f.severity === "error"),
+    ...findings.map((f, idx) => ({ f, idx })).filter(({ f }) => f.severity !== "error"),
+  ];
+
+  orderedFindingEntries.forEach(({ f, idx }) => {
     const isErr = f.severity === "error";
     const ruleDef = (pack.rules || []).find((r) => r.id === f.ruleId);
-    const meta = RULE_UI_META[f.ruleId];
-    const plainTitle = meta?.title?.[currentLang] || f.ruleId;
-    const msg = ruleDef?.message?.[currentLang] || f.message || "";
-    const dt = ruleDef?.deletionTest?.[currentLang] || f.deletionTest || "";
+    const plainTitle = getRuleUiTitle(f.ruleId, currentLang);
+    const msg = pickLocalizedField(ruleDef?.message ?? f.message, currentLang);
+    const dt = pickLocalizedField(ruleDef?.deletionTest ?? f.deletionTest, currentLang);
     const ex = ruleDef ? getLocalizedExemplar(ruleDef, currentLang) : f.exemplar;
-    const loc = typeof f.location === "string" && f.location ? f.location : `${f.line || 1}:${f.col || 1}`;
-    const excerpt = f.match || "";
+    const locRaw = typeof f.location === "string" && f.location ? f.location : `${f.line || 1}:${f.col || 1}`;
+    const loc = localizeFindingLocationForUi(locRaw, currentLang);
+    const excerpt = localizeFindingMatchForUi(f.match || "", currentLang);
     const focusedCls = idx === focusedFindingIdx ? " is-focused" : "";
     const dotCls = isErr ? "is-error" : "is-warn";
 
@@ -1935,10 +2744,15 @@ function renderWorkbench() {
     const exHtml = ex
       ? `<div class="note-exemplar">
           <div><span class="ex-label">${currentLang === "zh" ? "原句：" : "Before:"}</span> ${escapeHtml(sanitizePublicExemplar(ex.bad))}</div>
-          ${ex.trap ? `<div><span class="ex-label">${currentLang === "zh" ? "改过头：" : "Overcorrected:"}</span> ${escapeHtml(sanitizePublicExemplar(ex.trap))}</div>` : ""}
+          ${ex.trap ? `<div><span class="ex-label">${currentLang === "zh" ? "换了种 AI 味：" : "Still sounds like AI:"}</span> ${escapeHtml(sanitizePublicExemplar(ex.trap))}</div>` : ""}
           <div><span class="ex-label">${currentLang === "zh" ? "改好：" : "After:"}</span> ${escapeHtml(sanitizePublicExemplar(ex.good))}</div>
         </div>`
       : "";
+
+    const hasDocPage = Boolean(RULE_UI_META[f.ruleId]) && !f.isPatternProbe;
+    const footerLinkHtml = hasDocPage
+      ? `<a href="#rule-${escapeHtml(f.ruleId)}">${escapeHtml(f.ruleId)}</a> · <a href="./rules/${escapeHtml(f.ruleId)}.md">.md</a>`
+      : `<span>${currentLang === "zh" ? "扩展文风探针" : "Extended style probe"} · ${escapeHtml(f.ruleId)}</span>`;
 
     cards.push(`<article class="note-card${focusedCls}" data-note-idx="${idx}">
       <div class="note-head">
@@ -1955,13 +2769,88 @@ function renderWorkbench() {
         <div class="note-why" style="margin-top:6px;">${formatRuleProseHtml(msg)}</div>
         ${exHtml}
         <div style="margin-top:6px;font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-3);">
-          <a href="#rule-${escapeHtml(f.ruleId)}">${escapeHtml(f.ruleId)}</a> · <a href="./rules/${escapeHtml(f.ruleId)}.md">.md</a>
+          ${footerLinkHtml}
         </div>
       </details>
     </article>`);
   });
 
+  if (!isEmptySheet && pocketMl && pocketMl.wholeTextScore?.eligible) {
+    const prob = pocketMl.documentProbability ?? 0;
+    const thr = pocketMl.threshold ?? 0.755;
+    const advThr = 0.62;
+    if (prob >= advThr) {
+      const isHigh = prob >= thr;
+      const pctStr = `${Math.round(prob * 100)}%`;
+      const rawDrivers = pocketMl.wholeTextScore.topDrivers || [];
+      const drivers = rawDrivers
+        .map((d) => d.reason?.[currentLang] || d.reason?.en || d.feature)
+        .filter(Boolean);
+      const flaggedPara = (pocketMl.paragraphs || []).find((p) => p.flagged);
+      let mlAdvice = "";
+      if (flaggedPara) {
+        const lineSpanZh =
+          flaggedPara.startLine === flaggedPara.endLine
+            ? `第 ${flaggedPara.startLine} 行`
+            : `第 ${flaggedPara.startLine}–${flaggedPara.endLine} 行`;
+        const lineSpanEn =
+          flaggedPara.startLine === flaggedPara.endLine
+            ? `line ${flaggedPara.startLine}`
+            : `lines ${flaggedPara.startLine}-${flaggedPara.endLine}`;
+        const needsDetail = rawDrivers.some((d) =>
+          String(d.feature || "").includes("concrete") || String(d.feature || "").includes("anchor") || String(d.feature || "").includes("density")
+        );
+        mlAdvice = currentLang === "zh"
+          ? needsDetail
+            ? `重点检查${lineSpanZh}段落，可补入具体数字、时间、文件名或明确结论。`
+            : `重点检查${lineSpanZh}段落，拆掉空泛套话或换回更直白的说法。`
+          : needsDetail
+            ? `Check ${lineSpanEn}: add concrete numbers, dates, file names, or direct actions.`
+            : `Check ${lineSpanEn}: cut vague framing and swap back plain spoken phrasing.`;
+      }
+      const mlActionHtml =
+        findings.length === 0 && mlHigh && !isCloudSignedIn()
+          ? `<div class="note-actions" style="margin-top:8px;"><button type="button" class="btn-primary ctrl-btn-sm" data-ml-cloud-signin style="min-height:30px;padding:4px 12px;font-size:0.78rem;">${
+              currentLang === "zh" ? "登录用云端大模型深度审校（送 30 额度）" : "Sign in for deep Cloud Review (30 free)"
+            }</button></div>`
+          : "";
+      cards.push(`<article class="note-card note-card-ml">
+        <div class="note-head">
+          <span style="display:inline-flex;align-items:center;gap:8px;font-weight:650;color:var(--ink);font-size:0.86rem;">
+            <span class="hero-note-dot is-warn"></span>${
+              currentLang === "zh"
+                ? isHigh
+                  ? "本地风格模型：疑似隐性 AI 空话"
+                  : "本地风格模型：略带模板节奏"
+                : isHigh
+                  ? "Local style model: likely stealth AI prose"
+                  : "Local style model: mild template cadence"
+            }
+          </span>
+          <span class="note-loc">${escapeHtml(currentLang === "zh" ? `AI 像真度 ${pctStr}` : `${pctStr} AI-like`)}</span>
+        </div>
+        ${
+          drivers.length
+            ? `<div class="note-test"><strong>${currentLang === "zh" ? "主要特征：" : "Signals:"}</strong> ${escapeHtml(drivers.join(currentLang === "zh" ? "；" : "; "))}</div>`
+            : ""
+        }
+        ${mlAdvice ? `<div class="note-why" style="margin-top:4px;">${escapeHtml(mlAdvice)}</div>` : ""}
+        ${mlActionHtml}
+      </article>`);
+    }
+  }
+
   notesEl.innerHTML = cards.join("");
+  notesEl.querySelector("[data-ml-cloud-signin]")?.addEventListener("click", () => {
+    pendingCloudAction = "review";
+    openAuthModal({
+      action: "review",
+      reasonMsg:
+        currentLang === "zh"
+          ? "固定规则 0 命中但局部结构偏空泛：登录后立刻调用云端大模型深查（每月 30 免费额度）。"
+          : "0 deterministic rule hits, but cadence reads templated: sign in to run deep Cloud Review (30 free credits/mo).",
+    });
+  });
   notesEl.querySelectorAll("[data-quick-strip]").forEach((btn) => {
     btn.addEventListener("click", (ev) => {
       ev.stopPropagation();
@@ -2016,11 +2905,16 @@ function renderWorkbench() {
 
   const nudgeEl = document.getElementById("wb-nudge-text");
   if (nudgeEl) {
-    if (!isEmptySheet && findings.length === 0 && skipped.length === 0) {
+    if (!isEmptySheet && findings.length === 0 && skipped.length === 0 && mlHigh) {
       nudgeEl.textContent =
         currentLang === "zh"
-          ? "检查通过（0 处问题）。装成 Skill / Plugin / MCP 让 Agent 下次自动跑，顺手去 GitHub 点个 Star 吧。"
-          : "Looks clean (0 issues). Install the Skill, Plugin, or MCP so your agent checks automatically next time, or star us on GitHub.";
+          ? "固定规则 0 命中，但本地风格模型提示隐性模板腔。可补充具体事实后复检，或点上方「复制给 Agent 改稿」。"
+          : "0 deterministic rule hits, but the local style model flagged stealth template prose. Add concrete facts or copy the fix brief to your agent.";
+    } else if (!isEmptySheet && findings.length === 0 && skipped.length === 0) {
+      nudgeEl.textContent =
+        currentLang === "zh"
+          ? "离线检查未发现已知模式。装成 Skill / Plugin / MCP 让 Agent 下次自动跑，顺手去 GitHub 点个 Star 吧。"
+          : "No known patterns found offline. Install the Skill, Plugin, or MCP so your agent checks automatically next time, or star us on GitHub.";
     } else if (!isEmptySheet && (lastUploadedFile || currentText !== baselineText)) {
       nudgeEl.textContent =
         currentLang === "zh"
@@ -2030,6 +2924,9 @@ function renderWorkbench() {
       nudgeEl.textContent = (I18N[currentLang] || I18N.zh)["wb.nudgeText"];
     }
   }
+  if (typeof syncAiButtonsForBinary === "function") {
+    syncAiButtonsForBinary();
+  }
 }
 
 // ---------- Real Cases Showcase (Language-Pure + Interactive Load & Share) ----------
@@ -2037,6 +2934,7 @@ function renderWorkbench() {
 function clearWorkbenchTransientPanels() {
   aiReqSeq += 1;
   preRewriteDraft = null;
+  lastUploadedPreviewDataUrl = null;
   const aiPanel = document.getElementById("ai-result-panel");
   if (aiPanel) {
     aiPanel.hidden = true;
@@ -2045,6 +2943,7 @@ function clearWorkbenchTransientPanels() {
   const appliedEl = document.getElementById("wb-applied-banner");
   if (appliedEl) {
     appliedEl.hidden = true;
+    appliedEl.classList.remove("is-error");
     appliedEl.innerHTML = "";
   }
 }
@@ -2063,6 +2962,7 @@ function loadSpecimenById(specimenId) {
   clearWorkbenchTransientPanels();
   binaryAuditResult = null;
   lastUploadedFile = null;
+  lastUploadedBinaryBuffer = null;
   uploadedOriginalText = null;
   customRuleTitle = null;
   activeSpecimenIdx = idx;
@@ -2090,6 +2990,7 @@ function loadCaseIntoWorkbench(caseObj) {
     clearWorkbenchTransientPanels();
     binaryAuditResult = null;
     lastUploadedFile = null;
+    lastUploadedBinaryBuffer = null;
     uploadedOriginalText = null;
     customRuleTitle = "case-doc";
     activeSpecimen = {
@@ -2229,8 +3130,11 @@ function loadRuleInWorkbench(ruleId) {
   }
 
   uploadSeq += 1;
+  clearWorkbenchTransientPanels();
+  clearSpecimenStateReset();
   binaryAuditResult = null;
   lastUploadedFile = null;
+  lastUploadedBinaryBuffer = null;
   uploadedOriginalText = null;
   customRuleTitle = rule.id;
   activeSpecimen = {
@@ -2338,7 +3242,7 @@ function renderRulesTable() {
       const packLabel = PACK_LABELS[currentLang]?.[pid] || pid;
 
       const badLabel = currentLang === "zh" ? "原句：" : "Before:";
-      const trapLabel = currentLang === "zh" ? "改过头：" : "Overcorrected:";
+      const trapLabel = currentLang === "zh" ? "换了种 AI 味：" : "Still sounds like AI:";
       const goodLabel = currentLang === "zh" ? "改好：" : "After:";
 
       rows.push(`<tr id="rule-${escapeHtml(r.id)}" class="rule-row${hashCls}" data-rule-lang="${escapeHtml(meta.lang)}">
@@ -2436,6 +3340,176 @@ function handleRuleHash() {
   }
 }
 
+const SHARE_ALLOWED_PACKS = new Set([
+  "auto",
+  "business-brief",
+  "engineering-spec",
+  "regulated-comms",
+  "executive-deck",
+  "literary-essay",
+  "deck-and-ui",
+]);
+const SHARE_ALLOWED_MODS = new Set(["markdown", "text", "html", "css", "svg"]);
+
+function bytesToBase64Url(bytes) {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64UrlToBytes(b64u) {
+  let b64 = String(b64u || "").replace(/-/g, "+").replace(/_/g, "/");
+  while (b64.length % 4) b64 += "=";
+  const binary = atob(b64);
+  const out = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    out[i] = binary.charCodeAt(i);
+  }
+  return out;
+}
+
+async function transformBytes(bytes, streamCtor) {
+  const ds = new streamCtor("deflate-raw");
+  const writer = ds.writable.getWriter();
+  const [buf] = await Promise.all([
+    new Response(ds.readable).arrayBuffer(),
+    (async () => {
+      await writer.write(bytes);
+      await writer.close();
+    })(),
+  ]);
+  return new Uint8Array(buf);
+}
+
+async function encodeShareHash(text, packId, modality) {
+  const payloadBytes = new TextEncoder().encode(
+    JSON.stringify({
+      p: SHARE_ALLOWED_PACKS.has(packId) ? packId : "auto",
+      m: SHARE_ALLOWED_MODS.has(modality) ? modality : "markdown",
+      t: text,
+    })
+  );
+  const hasCompression = typeof CompressionStream === "function" && typeof DecompressionStream === "function";
+  let token = "";
+  let maxLen = 800;
+  if (hasCompression) {
+    try {
+      const compressed = await transformBytes(payloadBytes, CompressionStream);
+      token = `v1.${bytesToBase64Url(compressed)}`;
+      maxLen = 3000;
+    } catch {
+      token = `v0.${bytesToBase64Url(payloadBytes)}`;
+      maxLen = 800;
+    }
+  } else {
+    token = `v0.${bytesToBase64Url(payloadBytes)}`;
+    maxLen = 800;
+  }
+  if (`#share=${token}`.length > maxLen) {
+    throw new Error("SHARE_TOO_LONG");
+  }
+  return token;
+}
+
+async function decodeShareHash(hash) {
+  const raw = String(hash || "").replace(/^#share=/, "");
+  let payloadBytes;
+  if (raw.startsWith("v1.")) {
+    if (typeof DecompressionStream !== "function") {
+      throw new Error("NO_DECOMPRESSION");
+    }
+    const compressed = base64UrlToBytes(raw.slice(3));
+    payloadBytes = await transformBytes(compressed, DecompressionStream);
+  } else if (raw.startsWith("v0.")) {
+    payloadBytes = base64UrlToBytes(raw.slice(3));
+  } else {
+    throw new Error("INVALID_VERSION");
+  }
+  const parsed = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(payloadBytes));
+  if (!parsed || typeof parsed.t !== "string") {
+    throw new Error("INVALID_PAYLOAD");
+  }
+  return {
+    pack: SHARE_ALLOWED_PACKS.has(parsed.p) ? parsed.p : "auto",
+    modality: SHARE_ALLOWED_MODS.has(parsed.m) ? parsed.m : "markdown",
+    text: parsed.t,
+  };
+}
+
+function showShareBanner(message, isError = false) {
+  const appliedEl = document.getElementById("wb-applied-banner");
+  if (!appliedEl) return;
+  appliedEl.hidden = false;
+  appliedEl.classList.toggle("is-error", Boolean(isError));
+  appliedEl.textContent = message;
+}
+
+async function applyShareHash(hash) {
+  try {
+    const decoded = await decodeShareHash(hash);
+    uploadSeq += 1;
+    clearWorkbenchTransientPanels();
+    clearSpecimenStateReset();
+    binaryAuditResult = null;
+    lastUploadedFile = null;
+    lastUploadedBinaryBuffer = null;
+    uploadedOriginalText = null;
+    customRuleTitle = "shared-draft";
+    currentPackId = decoded.pack;
+    currentModality = decoded.modality;
+    const ext = decoded.modality === "markdown" ? "md" : decoded.modality;
+    currentFilename = `shared-draft.${ext}`;
+    activeSpecimen = {
+      id: "shared-draft",
+      pack: decoded.pack,
+      filename: currentFilename,
+      modality: decoded.modality,
+      bad: decoded.text,
+      trap: null,
+      good: null,
+    };
+    baselineText = decoded.text;
+    currentText = decoded.text;
+    focusedFindingIdx = -1;
+    const packSelect = document.getElementById("pack-select");
+    if (packSelect) packSelect.value = decoded.pack;
+    setViewMode("proof");
+    updateSpecimenRailSelection();
+    renderWorkbench();
+    showShareBanner(
+      currentLang === "zh"
+        ? "已从分享链接载入稿件（仅在当前标签页离线打开，服务器不保存你的文字）。"
+        : "Loaded shared draft locally in this tab. Text stays in the URL hash and is not stored on our server."
+    );
+    document.getElementById("workbench")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch {
+    showShareBanner(
+      currentLang === "zh"
+        ? "这个分享链接不完整或已损坏，无法还原稿件。"
+        : "This share link is incomplete or corrupted and could not be decoded.",
+      true
+    );
+  }
+}
+
+async function handleWorkbenchHash() {
+  const hash = window.location.hash || "";
+  if (hash.startsWith("#try=")) {
+    const ruleId = decodeURIComponent(hash.slice("#try=".length)).trim();
+    if (ruleId && findRuleById(ruleId)) {
+      loadRuleInWorkbench(ruleId);
+      return;
+    }
+  }
+  if (hash.startsWith("#share=")) {
+    await applyShareHash(hash);
+    return;
+  }
+  handleRuleHash();
+}
+
 function selectSnippetTab(tabBtn, moveFocus = false) {
   const tabs = Array.from(document.querySelectorAll("[data-snippet]"));
   activeSnippet = tabBtn.getAttribute("data-snippet");
@@ -2513,7 +3587,6 @@ function updateThemeToggleLabel() {
 
 function applyI18n(isUserSwitch = false) {
   document.documentElement.lang = currentLang === "zh" ? "zh-CN" : "en";
-  safeSetStorage("dislop-lang", currentLang);
   const dict = I18N[currentLang] || I18N.zh;
   if (dict["page.title"]) document.title = dict["page.title"];
   document.querySelectorAll("[data-i18n]").forEach((el) => {
@@ -2525,31 +3598,53 @@ function applyI18n(isUserSwitch = false) {
   const strikeEl = document.getElementById("hero-strike-text");
   if (strikeEl) strikeEl.textContent = dict["lead.strike"];
 
-  // Switch demo GIFs and reduced-motion posters strictly between ZH and EN assets
+  // Switch demo WebP, GIFs, and reduced-motion posters strictly between ZH and EN assets (v2)
   const demoAlts = {
     zh: {
-      "proof-cycle": "dislop 三态印刷校样：标出 AI 寒暄与空话、拦下二阶口号、改干净后退出码 0",
+      "proof-cycle": "dislop 检查上线说明：标出 AI 寒暄与空话、拦下二阶口号、改干净后退出码 0",
       "cli-check": "dislop CLI 本地离线检查：原稿退出码 1，清掉套话后复检退出码 0",
       "workbench-live": "dislop.com 浏览器离线工作台真实操作：点击切换原稿、二阶 AI 味与改干净版本",
-      "ui-slop": "网页组件模板味排查：标出紫粉渐变、胶囊标签墙与空链接，改为冷白纸面 1px 校样",
+      "ui-slop": "网页组件模板味排查：标出紫粉渐变、胶囊标签墙与空链接，改为 1px 白底版式",
+      "deck-office": "dislop 检查 quarterly-review.pptx：标出裸 Markdown、字墙、缩排和过程标题后改为结论页",
+      "agent-workflow": "Agent 闭环工作流：加载 SKILL.md、增量门禁退出码 1、修复后复检退出码 0",
     },
     en: {
       "proof-cycle": "dislop 3-state proof: flagging chatbot artifact, catching 2nd-order slogan, passing with exit 0",
       "cli-check": "dislop CLI offline check: exit code 1 on draft and exit code 0 after cleanup",
       "workbench-live": "dislop.com browser workbench capture: checking draft, 2nd-order slop, and clean copy",
       "ui-slop": "UI template slop check: flagging AI gradient, pill wall, and dead href='#' control",
+      "deck-office": "dislop auditing quarterly-review.pptx for markdown leaks, word walls, autofit shrink, and process titles",
+      "agent-workflow": "Agent workflow loop: loading SKILL.md, PR diff gate exit 1, and passing re-check with exit 0",
     },
   };
-  document.querySelectorAll("img[data-demo-gif]").forEach((imgEl) => {
-    const slug = imgEl.getAttribute("data-demo-gif");
-    if (!slug) return;
-    imgEl.src = `./assets/demos/${slug}-${currentLang}-v1.gif`;
-    if (demoAlts[currentLang]?.[slug]) imgEl.alt = demoAlts[currentLang][slug];
-  });
   document.querySelectorAll("source[data-demo-poster]").forEach((srcEl) => {
     const slug = srcEl.getAttribute("data-demo-poster");
     if (!slug) return;
-    srcEl.srcset = `./assets/demos/${slug}-${currentLang}-v1-poster.png`;
+    srcEl.srcset = `./assets/demos/${slug}-${currentLang}-v2-poster.png`;
+  });
+  document.querySelectorAll("source[data-demo-webp]").forEach((srcEl) => {
+    const slug = srcEl.getAttribute("data-demo-webp");
+    if (!slug) return;
+    const isPaused = pausedDemoSlugs.has(slug);
+    srcEl.srcset = isPaused
+      ? `./assets/demos/${slug}-${currentLang}-v2-poster.png`
+      : `./assets/demos/${slug}-${currentLang}-v2.webp`;
+  });
+  document.querySelectorAll("img[data-demo-gif]").forEach((imgEl) => {
+    const slug = imgEl.getAttribute("data-demo-gif");
+    if (!slug) return;
+    const isPaused = pausedDemoSlugs.has(slug);
+    imgEl.src = isPaused
+      ? `./assets/demos/${slug}-${currentLang}-v2-poster.png`
+      : `./assets/demos/${slug}-${currentLang}-v2.gif`;
+    if (demoAlts[currentLang]?.[slug]) imgEl.alt = demoAlts[currentLang][slug];
+  });
+  document.querySelectorAll("[data-demo-toggle]").forEach((btn) => {
+    const slug = btn.getAttribute("data-demo-toggle");
+    if (!slug) return;
+    const isPaused = pausedDemoSlugs.has(slug);
+    btn.setAttribute("aria-pressed", String(isPaused));
+    btn.textContent = isPaused ? dict["demos.play"] : dict["demos.pause"];
   });
 
   // Footer agent hint with link
@@ -2569,11 +3664,15 @@ function applyI18n(isUserSwitch = false) {
         ? "https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md"
         : "https://github.com/dislop-ai/dislop/tree/main/awesome";
   }
-  document.querySelectorAll('a[href^="./awesome/"]').forEach((aEl) => {
-    const rawHref = aEl.getAttribute("href") || "./awesome/";
-    if (rawHref.endsWith(".json") || rawHref.endsWith(".md")) return;
-    aEl.setAttribute("href", currentLang === "en" ? "./awesome/?lang=en" : "./awesome/");
+  document.querySelectorAll('a[href="./awesome/"], a[href="./en/awesome/"], a[href^="./awesome/?"]').forEach((aEl) => {
+    aEl.setAttribute("href", currentLang === "en" ? "./en/awesome/" : "./awesome/");
   });
+  const navGuidesLink = document.getElementById("nav-guides-link");
+  if (navGuidesLink) navGuidesLink.href = currentLang === "en" ? "./en/guides/" : "./guides/";
+  const footerGuidesLink = document.getElementById("footer-guides-link");
+  if (footerGuidesLink) footerGuidesLink.href = currentLang === "en" ? "./en/guides/" : "./guides/";
+  const footerRulesLink = document.getElementById("footer-rules-link");
+  if (footerRulesLink) footerRulesLink.href = currentLang === "en" ? "./en/rules/" : "./rules/";
   const roadmapHref =
     currentLang === "zh"
       ? "https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md"
@@ -2604,6 +3703,15 @@ function applyI18n(isUserSwitch = false) {
   if (tokEmailEl) {
     tokEmailEl.placeholder =
       currentLang === "zh" ? "输入你的常用邮箱，例如 you@company.com" : "Enter your email, e.g. you@company.com";
+  }
+  const tokOtpEl = document.getElementById("token-otp-input");
+  if (tokOtpEl) {
+    tokOtpEl.placeholder =
+      currentLang === "zh" ? "输入邮件里的 6 位数字验证码" : "Enter 6-digit code from email";
+  }
+  const legacyKeyEl = document.getElementById("legacy-key-input");
+  if (legacyKeyEl) {
+    legacyKeyEl.placeholder = "dslp_...";
   }
   const wlEmailEl = document.getElementById("wl-email-input");
   if (wlEmailEl) {
@@ -2660,16 +3768,42 @@ function applyI18n(isUserSwitch = false) {
   renderCloudAccountState();
   renderSavedVoiceState(Boolean(isUserSwitch));
   syncAiButtonsForBinary();
+  document.documentElement.removeAttribute("data-lang-hydrating");
 }
 
 function syncAiButtonsForBinary() {
   const revBtn = document.getElementById("btn-ai-review");
   const desBtn = document.getElementById("btn-ai-deslop");
+  const tcWrap = document.getElementById("office-track-changes-wrap");
+  const isZh = currentLang === "zh";
+  const dict = I18N[currentLang] || I18N.zh;
   const isBin = Boolean(binaryAuditResult);
-  const tip =
-    currentLang === "zh"
-      ? "Word / PPT 文件仅在本地离线检查；请切换到文本或 HTML 样稿再使用云端 AI。"
-      : "Word/PowerPoint files run offline only; switch to a text or HTML draft to use Cloud AI.";
+  const isOffice = Boolean(isBin && (currentModality === "docx" || currentModality === "pptx") && lastUploadedBinaryBuffer);
+  if (tcWrap) {
+    tcWrap.hidden = !(isOffice && currentModality === "docx");
+  }
+
+  if (isOffice) {
+    const kindLabel = currentModality === "pptx" ? "PPT" : "Word";
+    if (revBtn) {
+      if (!cloudBusy) revBtn.disabled = false;
+      revBtn.removeAttribute("title");
+      revBtn.textContent = isZh ? `云端审校 ${kindLabel}（2 额度）` : `Cloud Review ${kindLabel} (2 credits)`;
+    }
+    if (desBtn) {
+      if (!cloudBusy) desBtn.disabled = false;
+      desBtn.removeAttribute("title");
+      desBtn.textContent = isZh ? `原排版改写 ${kindLabel}（3 额度）` : `Layout-safe Rewrite ${kindLabel} (3 credits)`;
+    }
+    return;
+  }
+
+  if (revBtn) revBtn.textContent = dict["ai.reviewBtn"] || (isZh ? "云端审校（1 额度）" : "Cloud Review (1 credit)");
+  if (desBtn) desBtn.textContent = dict["ai.deslopBtn"] || (isZh ? "云端改写（2 额度）" : "Cloud Rewrite (2 credits)");
+
+  const tip = isZh
+    ? "PDF / 图片仅在当前浏览器内存离线检查；上传 .docx / .pptx 或切回文本/HTML 可用云端 AI。"
+    : "PDF and image files run offline only; open a .docx / .pptx or text/HTML draft to use Cloud AI.";
   for (const btn of [revBtn, desBtn]) {
     if (!btn) continue;
     if (isBin) {
@@ -2686,9 +3820,56 @@ function syncAiButtonsForBinary() {
 
 const CLOUD_STORE_KEY = "dislop_cloud_account_v1";
 const VOICE_STORE_KEY = "dislop_voice_profile_v1";
+const ENTRY_SOURCE_KEY = "dislop_entry_source_v1";
+const PENDING_WB_KEY = "dislop_pending_wb_v1";
 let cloudBusy = false;
 let aiReqSeq = 0;
 let preRewriteDraft = null;
+let pendingCloudAction = null;
+let otpResendTimer = null;
+let modalOtpResendTimer = null;
+let lastUploadedBinaryBuffer = null;
+let cloudSessionState = {
+  loaded: false,
+  authenticated: false,
+  authMethod: null,
+  account: null,
+  methods: { emailOtp: true, google: false, github: false },
+};
+let activeHubTab = "keys";
+let cachedHubData = { keys: null, apps: null, voices: null, usage: null };
+
+function captureEntrySource() {
+  try {
+    const existing = window.sessionStorage?.getItem(ENTRY_SOURCE_KEY);
+    if (existing) return existing;
+    const params = new URLSearchParams(window.location.search || "");
+    let src = String(params.get("utm_source") || params.get("source") || "").trim().toLowerCase();
+    if (!src && document.referrer) {
+      try {
+        const refHost = new URL(document.referrer).hostname.toLowerCase();
+        if (refHost && refHost !== "dislop.com" && refHost !== "www.dislop.com" && refHost !== window.location.hostname) {
+          if (refHost.includes("github.")) src = "github";
+          else if (refHost === "t.co" || refHost === "x.com" || refHost === "twitter.com") src = "x";
+          else if (refHost.includes("google.")) src = "google";
+          else if (refHost.includes("bing.")) src = "bing";
+          else src = refHost.slice(0, 32);
+        }
+      } catch {
+        // ignore bad referrer URL
+      }
+    }
+    const clean = (src || "workbench").replace(/[^a-z0-9._:/-]+/g, "").slice(0, 32) || "workbench";
+    window.sessionStorage?.setItem(ENTRY_SOURCE_KEY, clean);
+    return clean;
+  } catch {
+    return "workbench";
+  }
+}
+
+function getEntrySource() {
+  return captureEntrySource();
+}
 
 function loadSavedVoiceProfile() {
   try {
@@ -2777,18 +3958,27 @@ function handleVoiceOfflineClick() {
 
 async function handleVoiceExtractClick() {
   const isZh = currentLang === "zh";
-  const savedAcct = loadSavedCloudAccount();
+  const active = getActiveCloudAccount();
   const outBox = document.getElementById("voice-output-box");
   const btn = document.getElementById("btn-voice-extract");
   if (!outBox) return;
 
-  if (!savedAcct?.token) {
+  if (!active) {
+    pendingCloudAction = "voice_extract";
     outBox.hidden = false;
     outBox.innerHTML = `<p class="ai-error-msg" style="margin:0 0 8px;">${
-      isZh ? "云端 AI 提炼需要先领取免费 30 额度密钥（也可直接点旁边「离线统计声纹」0 联网提取）。" : "Claim a free 30-credit key for Cloud AI extraction, or click 'Offline voice stats' right beside it."
-    }</p><a href="#cloud-token-box" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${
-      isZh ? "去下方 10 秒免费领密钥 ↓" : "Claim free key below ↓"
-    }</a>`;
+      isZh ? "云端 AI 提炼需要先用邮箱验证码登录（也可直接点旁边「本地统计文风」0 联网提取）。" : "Sign in with a 6-digit email code for Cloud AI extraction, or click 'Local style stats' right beside it."
+    }</p><button type="button" id="btn-voice-open-signin" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${
+      isZh ? "立即验证码登录" : "Sign in now"
+    }</button>`;
+    document.getElementById("btn-voice-open-signin")?.addEventListener("click", () => {
+      openAuthModal({
+        action: "voice_extract",
+        reasonMsg: isZh
+          ? "登录后立刻提炼个人写作风格并保存到云端账号（每月 30 免费额度）。"
+          : "Sign in to extract your personal style and save it to your account (30 free credits/mo).",
+      });
+    });
     return;
   }
 
@@ -2805,11 +3995,19 @@ async function handleVoiceExtractClick() {
   outBox.textContent = isZh ? "正在分析句长习惯与文风特征…" : "Analyzing sentence rhythm and voice profile...";
 
   try {
-    const resp = await fetch("/api/v1/voice/extract", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${savedAcct.token}` },
-      body: JSON.stringify({ samples, lang: isZh ? "zh" : "en" }),
-    });
+    const resp = await fetch(
+      "/api/v1/voice/extract",
+      buildCloudFetchInit({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          samples,
+          lang: isZh ? "zh" : "en",
+          source: getEntrySource(),
+          ...(active.mode === "session" ? { save: true } : {}),
+        },
+      })
+    );
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
       outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
@@ -2817,11 +4015,21 @@ async function handleVoiceExtractClick() {
     }
     updateCreditsFromBilling(data.billing);
     saveVoiceProfile(data.profile);
+    if (data.savedVoice) cachedHubData.voices = null;
     const habitsStr = formatVoiceHabits(data.profile?.sentenceHabits, isZh);
     outBox.hidden = false;
-    outBox.innerHTML = `<div><strong>${isZh ? "个人文风已保存，后续「AI 一键去味」将自动套用：" : "Personal voice saved and wired into AI Rewrite:"}</strong></div>
+    outBox.innerHTML = `<div><strong>${
+      data.savedVoice
+        ? isZh
+          ? "个人文风已保存到账号（工作台与远程 MCP 均自动可用）："
+          : "Personal voice saved to your account (active in workbench & Remote MCP):"
+        : isZh
+          ? "个人文风已保存，后续「云端改写」将自动套用："
+          : "Personal voice saved and wired into Cloud Rewrite:"
+    }</strong></div>
       <div style="margin-top:4px;">${escapeHtmlSafe(data.profile?.tone || "")}${habitsStr ? ` · ${escapeHtmlSafe(habitsStr)}` : ""}</div>`;
     renderSavedVoiceState();
+    if (active.mode === "session" && typeof renderAccountHub === "function") renderAccountHub();
   } catch (err) {
     outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
   } finally {
@@ -2852,6 +4060,227 @@ function saveCloudAccount(acct) {
   safeSetStorage(CLOUD_STORE_KEY, JSON.stringify(acct));
 }
 
+function getActiveCloudAccount() {
+  if (cloudSessionState.authenticated && cloudSessionState.account) {
+    return { mode: "session", ...cloudSessionState.account };
+  }
+  const saved = loadSavedCloudAccount();
+  if (saved?.token) {
+    return {
+      mode: "token",
+      token: saved.token,
+      email: saved.email || "",
+      plan: saved.plan || "free",
+      totalRemaining: saved.remaining ?? saved.monthlyQuota ?? 30,
+      monthlyQuota: saved.monthlyQuota ?? 30,
+      monthlyUsed: Math.max(0, (saved.monthlyQuota ?? 30) - (saved.remaining ?? saved.monthlyQuota ?? 30)),
+      bonusCredits: 0,
+    };
+  }
+  return null;
+}
+
+function isCloudSignedIn() {
+  return Boolean(getActiveCloudAccount());
+}
+
+function buildCloudFetchInit({ method = "POST", headers = {}, body = undefined } = {}) {
+  const hdrs = { ...headers };
+  if (!cloudSessionState.authenticated) {
+    const saved = loadSavedCloudAccount();
+    if (saved?.token && !hdrs.Authorization) {
+      hdrs.Authorization = `Bearer ${saved.token}`;
+    }
+  }
+  const init = {
+    method,
+    headers: hdrs,
+    credentials: "same-origin",
+  };
+  if (body !== undefined) {
+    init.body = typeof body === "string" ? body : JSON.stringify(body);
+  }
+  return init;
+}
+
+function syncCloudOAuthButtons() {
+  const oauthRow = document.getElementById("cloud-google-row");
+  const ghBtn = document.getElementById("cloud-github-btn");
+  const gBtn = document.getElementById("cloud-google-btn");
+  const isAuthed = isCloudSignedIn();
+  const hasGh = Boolean(cloudSessionState.methods?.github);
+  const hasG = Boolean(cloudSessionState.methods?.google);
+  if (ghBtn) {
+    ghBtn.hidden = !hasGh;
+    ghBtn.style.order = currentLang === "zh" ? "1" : "2";
+  }
+  if (gBtn) {
+    gBtn.hidden = !hasG;
+    gBtn.style.order = currentLang === "zh" ? "2" : "1";
+  }
+  if (oauthRow) {
+    oauthRow.hidden = isAuthed || (!hasGh && !hasG);
+  }
+}
+
+function savePendingWorkbenchIntent(action = pendingCloudAction) {
+  if (!action) return;
+  try {
+    const payload = {
+      action,
+      packId: currentPackId,
+      modality: currentModality,
+      filename: currentFilename,
+      isBinary: Boolean(binaryAuditResult),
+      isCustom: Boolean(customRuleTitle === "user-draft" || currentText !== baselineText || !lastUploadedFile),
+      text: !binaryAuditResult && currentText ? String(currentText).slice(0, 12000) : "",
+      voiceSamples:
+        action === "voice_extract" ? String(document.getElementById("voice-samples-input")?.value || "").slice(0, 6000) : "",
+      ts: Date.now(),
+    };
+    window.sessionStorage?.setItem(PENDING_WB_KEY, JSON.stringify(payload));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function clearPendingWorkbenchIntent() {
+  try {
+    window.sessionStorage?.removeItem(PENDING_WB_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+async function consumePendingWorkbenchIntent() {
+  let raw = "";
+  try {
+    raw = window.sessionStorage?.getItem(PENDING_WB_KEY) || "";
+  } catch {
+    raw = "";
+  }
+  if (!raw || !isCloudSignedIn()) return false;
+  clearPendingWorkbenchIntent();
+  let intent = null;
+  try {
+    intent = JSON.parse(raw);
+  } catch {
+    intent = null;
+  }
+  if (!intent || !intent.action || !intent.ts || Date.now() - Number(intent.ts) > 15 * 60_000) {
+    return false;
+  }
+  if (intent.action === "voice_extract" && intent.voiceSamples) {
+    const vsInput = document.getElementById("voice-samples-input");
+    const voiceDrawer = document.getElementById("voice-drawer");
+    if (vsInput) vsInput.value = intent.voiceSamples;
+    if (voiceDrawer) voiceDrawer.open = true;
+    pendingCloudAction = "voice_extract";
+    startPendingCloudContinuation();
+    return true;
+  }
+  if (!intent.isBinary && typeof intent.text === "string" && intent.text.trim()) {
+    uploadSeq += 1;
+    clearWorkbenchTransientPanels();
+    clearSpecimenStateReset();
+    binaryAuditResult = null;
+    lastUploadedFile = null;
+    lastUploadedBinaryBuffer = null;
+    uploadedOriginalText = null;
+    customRuleTitle = "user-draft";
+    currentPackId = PACKS_BY_ID[intent.packId] || intent.packId === "auto" ? intent.packId : "auto";
+    currentModality = intent.modality || inferPastedTextModality(intent.text, currentPackId);
+    currentFilename = intent.filename || `pasted-draft.${currentModality === "markdown" ? "md" : currentModality}`;
+    activeSpecimen = {
+      id: "user-draft",
+      pack: currentPackId,
+      filename: currentFilename,
+      modality: currentModality,
+      bad: intent.text,
+      trap: null,
+      good: null,
+    };
+    baselineText = intent.text;
+    currentText = intent.text;
+    focusedFindingIdx = -1;
+    const packSel = document.getElementById("pack-select");
+    if (packSel) packSel.value = currentPackId;
+    setViewMode("proof");
+    updateSpecimenRailSelection();
+    renderWorkbench();
+    document.getElementById("workbench")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    pendingCloudAction = intent.action;
+    startPendingCloudContinuation();
+    return true;
+  }
+  return false;
+}
+
+async function refreshCloudSession() {
+  try {
+    const resp = await fetch("/api/v1/auth/session", { credentials: "same-origin" });
+    if (!resp.ok) return false;
+    const data = await resp.json().catch(() => null);
+    if (!data || typeof data !== "object") return false;
+    cloudSessionState = {
+      loaded: true,
+      authenticated: Boolean(data.authenticated && data.account),
+      authMethod: data.authMethod || null,
+      account: data.account || null,
+      methods: data.methods || { emailOtp: true, google: false, github: false },
+    };
+    syncCloudOAuthButtons();
+    renderCloudAccountState();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function finalizePendingOAuthLinkIfNeeded() {
+  let linkMode = "";
+  try {
+    const params = new URLSearchParams(window.location.search || "");
+    const raw = params.get("auth") || "";
+    if (raw === "link" || raw === "github-link") linkMode = raw;
+  } catch {
+    linkMode = "";
+  }
+  if (!linkMode) return false;
+  const endpoint = linkMode === "github-link" ? "/api/v1/auth/github/link-confirm" : "/api/v1/auth/google/link-confirm";
+  try {
+    const resp = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({}),
+    });
+    if (resp.ok) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("auth");
+      url.searchParams.delete("next");
+      window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+      await refreshCloudSession();
+      return true;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+}
+
+function startPendingCloudContinuation() {
+  const act = pendingCloudAction;
+  pendingCloudAction = null;
+  clearPendingWorkbenchIntent();
+  if (!act) return;
+  if (act === "voice_extract") {
+    handleVoiceExtractClick();
+  } else if (act === "review" || act === "deslop") {
+    runCloudAction(act);
+  }
+}
+
 function escapeHtmlSafe(str) {
   return String(str ?? "")
     .replace(/&/g, "&amp;")
@@ -2861,42 +4290,77 @@ function escapeHtmlSafe(str) {
 }
 
 function renderCloudAccountState() {
-  const saved = loadSavedCloudAccount();
+  const active = getActiveCloudAccount();
   const quotaEl = document.getElementById("ai-quota-label");
   const tokenLinkEl = document.getElementById("ai-token-link");
+  const upgradeLinkEl = document.getElementById("ai-upgrade-link");
+  const topAcctBtn = document.getElementById("topbar-account-btn");
   const statusEl = document.getElementById("cloud-account-status");
+  const authPanelEl = document.getElementById("cloud-auth-panel");
+  const hubEl = document.getElementById("cloud-account-hub");
+  const googleRow = document.getElementById("cloud-google-row");
+  const wlEmailEl = document.getElementById("wl-email-input");
   const isZh = currentLang === "zh";
 
-  if (saved) {
-    const rem = saved.remaining ?? saved.monthlyQuota ?? 30;
+  if (active) {
+    const rem = Number(active.totalRemaining ?? active.monthlyQuota ?? 30);
+    const emailLabel = active.email || (isZh ? "已绑定密钥" : "Key active");
+    if (topAcctBtn) {
+      topAcctBtn.classList.add("is-signed-in");
+      const shortMail = emailLabel.includes("@") ? emailLabel.split("@")[0].slice(0, 12) : emailLabel.slice(0, 12);
+      topAcctBtn.textContent = isZh ? `${shortMail} · ${rem} 额度` : `${shortMail} · ${rem} cr`;
+    }
     if (quotaEl) {
       quotaEl.textContent = isZh
-        ? `已登录 ${saved.email} · 剩余 ${rem} 额度`
-        : `Signed in as ${saved.email} · ${rem} credits left`;
+        ? `已登录 ${emailLabel} · 剩余 ${rem} 额度`
+        : `Signed in as ${emailLabel} · ${rem} credits left`;
     }
     if (tokenLinkEl) {
-      tokenLinkEl.textContent = isZh ? "管理密钥 →" : "Manage key →";
+      tokenLinkEl.textContent = active.mode === "session" ? (isZh ? "账号与密钥" : "Account & keys") : isZh ? "管理绑定" : "Manage key";
     }
+    const nudgeCloudBtn = document.getElementById("wb-nudge-cloud-btn");
+    if (nudgeCloudBtn) {
+      nudgeCloudBtn.textContent = isZh ? "账号与密钥 ↓" : "Account & keys ↓";
+    }
+    if (upgradeLinkEl) {
+      upgradeLinkEl.hidden = !(active.plan === "free" && rem <= 5);
+    }
+    if (wlEmailEl && active.email && !wlEmailEl.value.trim()) {
+      wlEmailEl.value = active.email;
+    }
+    if (googleRow) googleRow.hidden = true;
+    syncCloudOAuthButtons();
+    if (authPanelEl) authPanelEl.hidden = active.mode === "session";
     if (statusEl) {
       statusEl.hidden = false;
-      statusEl.innerHTML = isZh
-        ? `<span>当前浏览器已绑定 <strong>${escapeHtmlSafe(saved.email)}</strong>（${escapeHtmlSafe(saved.plan || "free")} · 剩余 ${escapeHtmlSafe(rem)} 额度）</span><span class="quick-actions"><button type="button" id="btn-refresh-cloud-token" class="ctrl-btn ctrl-btn-sm">刷新额度</button><button type="button" id="btn-clear-cloud-token" class="ctrl-btn ctrl-btn-sm">退出本地绑定</button></span>`
-        : `<span>Active key for <strong>${escapeHtmlSafe(saved.email)}</strong> (${escapeHtmlSafe(saved.plan || "free")} · ${escapeHtmlSafe(rem)} credits left)</span><span class="quick-actions"><button type="button" id="btn-refresh-cloud-token" class="ctrl-btn ctrl-btn-sm">Refresh</button><button type="button" id="btn-clear-cloud-token" class="ctrl-btn ctrl-btn-sm">Sign out</button></span>`;
+      const modeNote =
+        active.mode === "session"
+          ? isZh
+            ? `已登录 <strong>${escapeHtmlSafe(emailLabel)}</strong>（${escapeHtmlSafe(active.plan || "free")} · 剩余 ${escapeHtmlSafe(rem)} 额度）`
+            : `Signed in as <strong>${escapeHtmlSafe(emailLabel)}</strong> (${escapeHtmlSafe(active.plan || "free")} · ${escapeHtmlSafe(rem)} credits left)`
+          : isZh
+            ? `已绑定密钥 <strong>${escapeHtmlSafe(emailLabel)}</strong>（剩余 ${escapeHtmlSafe(rem)} 额度；用邮箱验证码登录后可管理多密钥与已连应用）`
+            : `Bound key for <strong>${escapeHtmlSafe(emailLabel)}</strong> (${escapeHtmlSafe(rem)} credits left; sign in with email code for full Account Hub)`;
+      statusEl.innerHTML = `<span>${modeNote}</span><span class="quick-actions"><button type="button" id="btn-refresh-cloud-token" class="ctrl-btn ctrl-btn-sm">${isZh ? "刷新额度" : "Refresh"}</button><button type="button" id="btn-clear-cloud-token" class="ctrl-btn ctrl-btn-sm">${isZh ? "退出登录" : "Sign out"}</button></span>`;
       document.getElementById("btn-refresh-cloud-token")?.addEventListener("click", async (ev) => {
         const btn = ev.currentTarget;
         btn.disabled = true;
         try {
-          const resp = await fetch("/api/v1/account/me", { headers: { Authorization: `Bearer ${saved.token}` } });
-          const data = await resp.json().catch(() => ({}));
-          const stillSignedIn = loadSavedCloudAccount();
-          if (resp.ok && data.account && stillSignedIn && stillSignedIn.token === saved.token) {
-            saveCloudAccount({
-              ...stillSignedIn,
-              plan: data.account.plan,
-              remaining: data.account.totalRemaining,
-              monthlyQuota: data.account.monthlyQuota,
-            });
-            renderCloudAccountState();
+          if (active.mode === "session") {
+            await refreshCloudSession();
+          } else {
+            const resp = await fetch("/api/v1/account/me", { headers: { Authorization: `Bearer ${active.token}` } });
+            const data = await resp.json().catch(() => ({}));
+            const stillSignedIn = loadSavedCloudAccount();
+            if (resp.ok && data.account && stillSignedIn && stillSignedIn.token === active.token) {
+              saveCloudAccount({
+                ...stillSignedIn,
+                plan: data.account.plan,
+                remaining: data.account.totalRemaining,
+                monthlyQuota: data.account.monthlyQuota,
+              });
+              renderCloudAccountState();
+            }
           }
         } catch {
           // keep cached state on transient error
@@ -2904,47 +4368,76 @@ function renderCloudAccountState() {
           btn.disabled = false;
         }
       });
-      document.getElementById("btn-clear-cloud-token")?.addEventListener("click", () => {
+      document.getElementById("btn-clear-cloud-token")?.addEventListener("click", async () => {
+        if (active.mode === "session") {
+          await fetch("/api/v1/auth/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+          cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
+        }
         saveCloudAccount(null);
+        cachedHubData = { keys: null, apps: null, voices: null, usage: null };
         const out = document.getElementById("token-output-box");
         if (out) out.hidden = true;
         renderCloudAccountState();
       });
     }
+    if (hubEl) {
+      if (active.mode === "session" && typeof renderAccountHub === "function") {
+        hubEl.hidden = false;
+        renderAccountHub();
+      } else {
+        hubEl.hidden = true;
+        hubEl.innerHTML = "";
+      }
+    }
   } else {
+    if (topAcctBtn) {
+      topAcctBtn.classList.remove("is-signed-in");
+      topAcctBtn.textContent = I18N[currentLang]?.["nav.signIn"] || "登录 · 30 免费额度";
+    }
     if (quotaEl) {
-      quotaEl.textContent = isZh
-        ? "本地检查免登录零上传 · 云端审校与改写需登录（每月免费 30 额度）"
-        : "Local checks need no sign-in · Sign in for Cloud AI (30 free credits/mo)";
+      quotaEl.textContent =
+        I18N[currentLang]?.["ai.anonHint"] ||
+        "本地检查免登录 · 云端审校需免费登录（每月 30 额度，同账号可用于远程 MCP）";
     }
     if (tokenLinkEl) {
-      tokenLinkEl.textContent = isZh ? "领免费密钥 →" : "Get free key →";
+      tokenLinkEl.textContent = I18N[currentLang]?.["ai.claimLink"] || "登录 / 绑定密钥";
     }
+    const nudgeCloudBtn = document.getElementById("wb-nudge-cloud-btn");
+    if (nudgeCloudBtn) {
+      nudgeCloudBtn.textContent = I18N[currentLang]?.["wb.nudgeCloud"] || (isZh ? "验证码登录 · 30 免费额度" : "Sign in · 30 free credits");
+    }
+    if (upgradeLinkEl) upgradeLinkEl.hidden = true;
+    if (authPanelEl) authPanelEl.hidden = false;
+    syncCloudOAuthButtons();
     if (statusEl) {
       statusEl.hidden = true;
       statusEl.innerHTML = "";
+    }
+    if (hubEl) {
+      hubEl.hidden = true;
+      hubEl.innerHTML = "";
     }
   }
 }
 
 function updateCreditsFromBilling(billing) {
-  const saved = loadSavedCloudAccount();
-  if (billing?.mode === "account" && billing.account && saved) {
-    saveCloudAccount({
-      ...saved,
-      plan: billing.account.plan,
-      remaining: billing.account.totalRemaining,
-      monthlyQuota: billing.account.monthlyQuota,
-    });
-    renderCloudAccountState();
-  } else if (billing?.mode === "anonymous" && billing.anon) {
-    const quotaEl = document.getElementById("ai-quota-label");
-    if (quotaEl) {
-      quotaEl.textContent =
-        currentLang === "zh"
-          ? `今日匿名试用剩余 ${billing.anon.remaining} / ${billing.anon.limit} 额度 · 登录后每月 30 次`
-          : `Anonymous trial: ${billing.anon.remaining} / ${billing.anon.limit} credits left today · 30/mo with free token`;
+  if (billing?.mode === "account" && billing.account) {
+    if (cloudSessionState.authenticated && cloudSessionState.account) {
+      cloudSessionState.account = {
+        ...cloudSessionState.account,
+        ...billing.account,
+      };
     }
+    const saved = loadSavedCloudAccount();
+    if (saved) {
+      saveCloudAccount({
+        ...saved,
+        plan: billing.account.plan,
+        remaining: billing.account.totalRemaining,
+        monthlyQuota: billing.account.monthlyQuota,
+      });
+    }
+    renderCloudAccountState();
   }
 }
 
@@ -2961,31 +4454,1057 @@ function setAiButtonsBusy(busy, labelZh, labelEn) {
   }
 }
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve) => {
+    try {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+function clearSpecimenStateReset() {
+  lastUploadedPreviewDataUrl = null;
+  lastUploadedBinaryBuffer = null;
+}
+
+function arrayBufferToBase64(buf) {
+  const bytes = new Uint8Array(buf);
+  const chunkSize = 0x8000;
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+function base64ToUint8Array(b64) {
+  const clean = String(b64 || "").replace(/^data:[^;]+;base64,/, "").trim();
+  const bin = atob(clean);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i += 1) {
+    out[i] = bin.charCodeAt(i);
+  }
+  return out;
+}
+
+function focusDraftLineOrQuote(lineNum, quoteText = "") {
+  if (binaryAuditResult) return;
+  if (viewMode !== "proof") {
+    setViewMode("proof");
+    renderWorkbench();
+  }
+  const proofView = document.getElementById("proof-view");
+  if (!proofView) return;
+  const rows = proofView.querySelectorAll(".proof-line");
+  let targetRow = null;
+  if (Number.isFinite(Number(lineNum)) && Number(lineNum) >= 1 && rows[Number(lineNum) - 1]) {
+    targetRow = rows[Number(lineNum) - 1];
+  } else if (quoteText) {
+    const needle = String(quoteText).trim().slice(0, 32);
+    for (const r of rows) {
+      if ((r.textContent || "").includes(needle)) {
+        targetRow = r;
+        break;
+      }
+    }
+  }
+  if (targetRow) {
+    targetRow.scrollIntoView({ behavior: "smooth", block: "center" });
+    targetRow.style.outline = "2px solid var(--mark-warn)";
+    setTimeout(() => {
+      targetRow.style.outline = "";
+    }, 1800);
+  }
+}
+
+async function renderAccountHub() {
+  const hubEl = document.getElementById("cloud-account-hub");
+  const active = getActiveCloudAccount();
+  if (!hubEl || !active || active.mode !== "session") {
+    if (hubEl) {
+      hubEl.hidden = true;
+      hubEl.innerHTML = "";
+    }
+    return;
+  }
+  const isZh = currentLang === "zh";
+  const tabDefs = [
+    { id: "keys", label: isZh ? "MCP 接入与密钥" : "MCP & Keys" },
+    { id: "apps", label: isZh ? "已连应用" : "Connected Apps" },
+    { id: "voices", label: isZh ? "云端文风" : "Voice Cards" },
+    { id: "usage", label: isZh ? "用量与账号" : "Usage & Account" },
+  ];
+
+  hubEl.hidden = false;
+  hubEl.innerHTML = `
+    <div class="account-hub-tabs" role="tablist" aria-label="${isZh ? "账号控制台" : "Account hub"}">
+      ${tabDefs
+        .map(
+          (t) =>
+            `<button type="button" role="tab" aria-selected="${activeHubTab === t.id ? "true" : "false"}" class="ctrl-btn ctrl-btn-sm ${
+              activeHubTab === t.id ? "is-active" : ""
+            }" data-hub-tab="${t.id}">${escapeHtmlSafe(t.label)}</button>`
+        )
+        .join("")}
+    </div>
+    <div id="account-hub-body"><div class="ai-result-meta">${isZh ? "正在加载…" : "Loading..."}</div></div>
+  `;
+
+  hubEl.querySelectorAll("[data-hub-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeHubTab = btn.getAttribute("data-hub-tab") || "keys";
+      renderAccountHub();
+    });
+  });
+
+  const bodyEl = document.getElementById("account-hub-body");
+  if (!bodyEl) return;
+
+  if (activeHubTab === "keys") {
+    if (!cachedHubData.keys) {
+      const resp = await fetch("/api/v1/account/keys", { credentials: "same-origin" }).catch(() => null);
+      const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
+      cachedHubData.keys = Array.isArray(data.keys) ? data.keys : [];
+    }
+    const keys = cachedHubData.keys;
+    const mcpUrl = `${window.location.origin}/mcp`;
+    bodyEl.innerHTML = `
+      <p class="hub-section-note">${
+        isZh
+          ? `OAuth 2.1 免密钥端点（Claude Code / ChatGPT / Cursor / VS Code）：<code>${escapeHtmlSafe(mcpUrl)}</code>`
+          : `Zero-key OAuth 2.1 endpoint (Claude Code / ChatGPT / Cursor / VS Code): <code>${escapeHtmlSafe(mcpUrl)}</code>`
+      } <button type="button" id="hub-copy-mcp-url" class="ctrl-btn ctrl-btn-sm">${isZh ? "复制地址" : "Copy URL"}</button></p>
+      <form id="hub-new-key-form" class="cloud-inline-form">
+        <input type="text" id="hub-new-key-name" class="cloud-input" maxlength="40" placeholder="${isZh ? "新建密钥备注（如 Cursor / 笔记本）" : "Key label (e.g. Cursor / Laptop)"}">
+        <button type="submit" id="hub-new-key-btn" class="btn-primary" style="min-height:32px;padding:4px 12px;font-size:0.79rem;">${isZh ? "生成新密钥" : "Create API key"}</button>
+      </form>
+      <div id="hub-new-key-out" class="cloud-output-box" hidden></div>
+      <ul class="hub-list">
+        ${
+          keys.length === 0
+            ? `<li class="hub-list-row"><span>${isZh ? "暂未创建长期 API 密钥（用 OAuth 直连无需建密钥）。" : "No API keys yet (OAuth clients don't need one)."}</span></li>`
+            : keys
+                .map(
+                  (k) => `<li class="hub-list-row">
+                    <span><strong>${escapeHtmlSafe(k.name || "MCP Key")}</strong> · <code>${escapeHtmlSafe(k.prefix || "dslp_***")}</code> · ${escapeHtmlSafe(
+                    k.revokedAt ? (isZh ? "已撤销" : "revoked") : k.lastUsedDay ? `${isZh ? "最近使用" : "last used"} ${k.lastUsedDay}` : isZh ? "未使用" : "unused"
+                  )}</span>
+                    ${
+                      k.revokedAt
+                        ? ""
+                        : `<button type="button" class="ctrl-btn ctrl-btn-sm" data-revoke-key="${escapeHtmlSafe(k.keyId)}">${isZh ? "撤销" : "Revoke"}</button>`
+                    }
+                  </li>`
+                )
+                .join("")
+        }
+      </ul>
+    `;
+    document.getElementById("hub-copy-mcp-url")?.addEventListener("click", async (ev) => {
+      await copyTextWithFeedback(ev.currentTarget, mcpUrl);
+    });
+    document.getElementById("hub-new-key-form")?.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      const nameInput = document.getElementById("hub-new-key-name");
+      const outEl = document.getElementById("hub-new-key-out");
+      const btn = document.getElementById("hub-new-key-btn");
+      const name = String(nameInput?.value || "").trim() || "MCP Key";
+      if (btn) btn.disabled = true;
+      try {
+        const resp = await fetch("/api/v1/account/keys", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ name }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data.apiKey) {
+          if (outEl) {
+            outEl.hidden = false;
+            outEl.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
+          }
+          return;
+        }
+        cachedHubData.keys = null;
+        if (nameInput) nameInput.value = "";
+        const cfgStr = JSON.stringify(data.mcpConfig, null, 2);
+        if (outEl) {
+          outEl.hidden = false;
+          outEl.innerHTML = `<div><strong>${isZh ? "新密钥已生成（仅显示这一次，请立即复制保存）：" : "API key created (shown once—copy it now):"}</strong></div>
+            <div style="margin-top:4px;"><code>${escapeHtmlSafe(data.apiKey)}</code></div>
+            <pre class="cloud-output-pre">${escapeHtmlSafe(cfgStr)}</pre>
+            <div class="quick-actions" style="margin-top:6px;"><button type="button" id="hub-copy-key-cfg" class="ctrl-btn ctrl-btn-sm">${isZh ? "复制 MCP JSON" : "Copy MCP JSON"}</button></div>`;
+          document.getElementById("hub-copy-key-cfg")?.addEventListener("click", async (cEv) => {
+            await copyTextWithFeedback(cEv.currentTarget, cfgStr);
+          });
+        }
+        // Re-fetch keys list without wiping the newly generated key output box
+        const kResp = await fetch("/api/v1/account/keys", { credentials: "same-origin" }).catch(() => null);
+        const kData = kResp && kResp.ok ? await kResp.json().catch(() => ({})) : {};
+        cachedHubData.keys = Array.isArray(kData.keys) ? kData.keys : [];
+        const listEl = bodyEl.querySelector(".hub-list");
+        if (listEl) {
+          listEl.innerHTML = cachedHubData.keys
+            .map(
+              (k) => `<li class="hub-list-row">
+                <span><strong>${escapeHtmlSafe(k.name || "MCP Key")}</strong> · <code>${escapeHtmlSafe(k.prefix || "dslp_***")}</code></span>
+                ${k.revokedAt ? "" : `<button type="button" class="ctrl-btn ctrl-btn-sm" data-revoke-key="${escapeHtmlSafe(k.keyId)}">${isZh ? "撤销" : "Revoke"}</button>`}
+              </li>`
+            )
+            .join("");
+          listEl.querySelectorAll("[data-revoke-key]").forEach((rBtn) => {
+            rBtn.addEventListener("click", async () => {
+              const kid = rBtn.getAttribute("data-revoke-key");
+              if (!kid) return;
+              rBtn.disabled = true;
+              await fetch(`/api/v1/account/keys/${encodeURIComponent(kid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
+              cachedHubData.keys = null;
+              renderAccountHub();
+            });
+          });
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+    bodyEl.querySelectorAll("[data-revoke-key]").forEach((rBtn) => {
+      rBtn.addEventListener("click", async () => {
+        const kid = rBtn.getAttribute("data-revoke-key");
+        if (!kid) return;
+        rBtn.disabled = true;
+        await fetch(`/api/v1/account/keys/${encodeURIComponent(kid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
+        cachedHubData.keys = null;
+        renderAccountHub();
+      });
+    });
+    return;
+  }
+
+  if (activeHubTab === "apps") {
+    if (!cachedHubData.apps) {
+      const resp = await fetch("/api/v1/account/apps", { credentials: "same-origin" }).catch(() => null);
+      const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
+      cachedHubData.apps = Array.isArray(data.apps) ? data.apps : [];
+    }
+    const apps = cachedHubData.apps;
+    bodyEl.innerHTML = `
+      <p class="hub-section-note">${isZh ? "通过 OAuth 2.1 免密钥授权接入的编辑器或 Agent 会列在这里，可随时断开。" : "Editors and agents authorized via OAuth 2.1 appear here and can be revoked anytime."}</p>
+      <ul class="hub-list">
+        ${
+          apps.length === 0
+            ? `<li class="hub-list-row"><span>${isZh ? "暂无已连接的 OAuth 应用。" : "No connected OAuth apps yet."}</span></li>`
+            : apps
+                .map(
+                  (a) => `<li class="hub-list-row">
+                    <span><strong>${escapeHtmlSafe(a.clientName || a.clientId || "MCP Client")}</strong> · ${escapeHtmlSafe(String(a.createdAt || "").slice(0, 10))}</span>
+                    <button type="button" class="ctrl-btn ctrl-btn-sm" data-revoke-app="${escapeHtmlSafe(a.grantId)}">${isZh ? "断开授权" : "Disconnect"}</button>
+                  </li>`
+                )
+                .join("")
+        }
+      </ul>
+    `;
+    bodyEl.querySelectorAll("[data-revoke-app]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const gid = btn.getAttribute("data-revoke-app");
+        if (!gid) return;
+        btn.disabled = true;
+        await fetch(`/api/v1/account/apps/${encodeURIComponent(gid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
+        cachedHubData.apps = null;
+        renderAccountHub();
+      });
+    });
+    return;
+  }
+
+  if (activeHubTab === "voices") {
+    if (!cachedHubData.voices) {
+      const resp = await fetch("/api/v1/account/voices", { credentials: "same-origin" }).catch(() => null);
+      const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
+      cachedHubData.voices = Array.isArray(data.voices) ? data.voices : [];
+    }
+    const voices = cachedHubData.voices;
+    bodyEl.innerHTML = `
+      <p class="hub-section-note">${isZh ? "在工作台提炼的文风会自动存到账号里，你的远程 MCP 改稿也能直接复用。" : "Voice profiles saved in the workbench sync here and are reused by Remote MCP rewrites."}</p>
+      <ul class="hub-list">
+        ${
+          voices.length === 0
+            ? `<li class="hub-list-row"><span>${isZh ? "还没有云端文风卡。可在工作台下方「提取个人文风」抽屉里保存。" : "No saved voice cards yet. Extract one from the workbench style drawer."}</span></li>`
+            : voices
+                .map(
+                  (v) => `<li class="hub-list-row">
+                    <span><strong>${escapeHtmlSafe(v.name || "Personal voice")}</strong> (${escapeHtmlSafe(v.lang || "zh")}) · ${escapeHtmlSafe(v.tone || "")}</span>
+                    <span class="quick-actions">
+                      <button type="button" class="ctrl-btn ctrl-btn-sm" data-use-voice="${escapeHtmlSafe(v.voiceId || v.id)}">${isZh ? "工作台启用" : "Use now"}</button>
+                      <button type="button" class="ctrl-btn ctrl-btn-sm" data-del-voice="${escapeHtmlSafe(v.voiceId || v.id)}">${isZh ? "删除" : "Delete"}</button>
+                    </span>
+                  </li>`
+                )
+                .join("")
+        }
+      </ul>
+    `;
+    bodyEl.querySelectorAll("[data-use-voice]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const vid = btn.getAttribute("data-use-voice");
+        const found = voices.find((v) => (v.voiceId || v.id) === vid);
+        if (found) {
+          saveVoiceProfile({
+            tone: found.tone,
+            sentenceHabits: found.sentenceHabits,
+            preferredPatterns: found.preferredPatterns,
+            avoidPatterns: found.avoidPatterns,
+          });
+          renderSavedVoiceState(true);
+          btn.textContent = isZh ? "已启用" : "Active";
+        }
+      });
+    });
+    bodyEl.querySelectorAll("[data-del-voice]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const vid = btn.getAttribute("data-del-voice");
+        if (!vid) return;
+        btn.disabled = true;
+        await fetch(`/api/v1/account/voices/${encodeURIComponent(vid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
+        cachedHubData.voices = null;
+        renderAccountHub();
+      });
+    });
+    return;
+  }
+
+  // Usage & Account tab
+  if (!cachedHubData.usage) {
+    const resp = await fetch("/api/v1/account/usage?limit=15", { credentials: "same-origin" }).catch(() => null);
+    const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
+    cachedHubData.usage = Array.isArray(data.items) ? data.items : [];
+  }
+  const used = Number(active.monthlyUsed || 0);
+  const quota = Math.max(1, Number(active.monthlyQuota || 30));
+  const pct = Math.min(100, Math.round((used / quota) * 100));
+  const rem = Number(active.totalRemaining ?? Math.max(0, quota - used));
+  const items = cachedHubData.usage;
+  bodyEl.innerHTML = `
+    <div style="font-size:0.8rem;">
+      <strong>${isZh ? `本月已用 ${used} / ${quota} 额度` : `${used} / ${quota} monthly credits used`}</strong>${
+    active.bonusCredits ? (isZh ? ` · 永久加赠/按量包 ${active.bonusCredits}` : ` · ${active.bonusCredits} bonus credits`) : ""
+  } (${isZh ? `剩余 ${rem}` : `${rem} left`})
+    </div>
+    <div class="hub-quota-bar"><div class="hub-quota-fill ${rem <= 5 ? "is-low" : ""}" style="width:${pct}%"></div></div>
+    <div class="quick-actions" style="margin-bottom:8px;">
+      <button type="button" id="hub-logout-all-btn" class="ctrl-btn ctrl-btn-sm">${isZh ? "退出所有设备会话" : "Sign out all devices"}</button>
+    </div>
+    <ul class="hub-list">
+      ${
+        items.length === 0
+          ? `<li class="hub-list-row"><span>${isZh ? "本月还没有云端调用记录。" : "No cloud calls recorded yet."}</span></li>`
+          : items
+              .map(
+                (it) => `<li class="hub-list-row">
+                  <span><code>${escapeHtmlSafe(it.tool || "cloud")}</code> · -${escapeHtmlSafe(it.credits ?? 0)} ${isZh ? "额度" : "cr"}</span>
+                  <span style="color:var(--ink-2);">${escapeHtmlSafe(String(it.at || "").replace("T", " ").slice(0, 16))}</span>
+                </li>`
+              )
+              .join("")
+      }
+    </ul>
+    <details class="hub-danger-fold">
+      <summary>${isZh ? "永久注销账号与全部记录" : "Delete account permanently"}</summary>
+      <form id="hub-delete-acct-form" class="cloud-inline-form" style="margin-top:8px;">
+        <input type="email" id="hub-delete-confirm-email" class="cloud-input" required placeholder="${escapeHtmlSafe(active.email)}" aria-label="${isZh ? "确认邮箱" : "Confirm email"}">
+        <button type="submit" id="hub-delete-acct-btn" class="ctrl-btn ctrl-btn-sm">${isZh ? "确认注销" : "Delete account"}</button>
+      </form>
+      <div id="hub-delete-feedback" class="ai-result-meta" style="margin-top:6px;"></div>
+    </details>
+  `;
+  document.getElementById("hub-logout-all-btn")?.addEventListener("click", async (ev) => {
+    ev.currentTarget.disabled = true;
+    await fetch("/api/v1/auth/logout-all", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+    cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
+    saveCloudAccount(null);
+    cachedHubData = { keys: null, apps: null, voices: null, usage: null };
+    renderCloudAccountState();
+  });
+  document.getElementById("hub-delete-acct-form")?.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const confirmEmail = String(document.getElementById("hub-delete-confirm-email")?.value || "").trim();
+    const fb = document.getElementById("hub-delete-feedback");
+    const btn = document.getElementById("hub-delete-acct-btn");
+    if (!confirmEmail || !fb) return;
+    if (btn) btn.disabled = true;
+    try {
+      const resp = await fetch("/api/v1/account", {
+        method: "DELETE",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmEmail }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</span>`;
+        return;
+      }
+      cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
+      saveCloudAccount(null);
+      cachedHubData = { keys: null, apps: null, voices: null, usage: null };
+      renderCloudAccountState();
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
+function closeAuthModal({ clearPending = false } = {}) {
+  const backdrop = document.getElementById("auth-modal-backdrop");
+  if (backdrop) backdrop.hidden = true;
+  if (modalOtpResendTimer) {
+    clearInterval(modalOtpResendTimer);
+    modalOtpResendTimer = null;
+  }
+  if (clearPending) {
+    pendingCloudAction = null;
+    clearPendingWorkbenchIntent();
+  }
+}
+
+function openAuthModal({ reasonMsg = "", action = null } = {}) {
+  const backdrop = document.getElementById("auth-modal-backdrop");
+  const titleEl = document.getElementById("auth-modal-title");
+  const subEl = document.getElementById("auth-modal-sub");
+  const bodyEl = document.getElementById("auth-modal-body");
+  if (!backdrop || !bodyEl) {
+    openInlineCloudKeyPanelFallback(reasonMsg);
+    return;
+  }
+  const isZh = currentLang === "zh";
+  if (action) pendingCloudAction = action;
+  if (modalOtpResendTimer) {
+    clearInterval(modalOtpResendTimer);
+    modalOtpResendTimer = null;
+  }
+
+  const act = pendingCloudAction;
+  const titleMap = {
+    deslop: isZh ? "登录并立即执行云端改写" : "Sign in & run Cloud Rewrite",
+    review: isZh ? "登录并立即执行云端审校" : "Sign in & run Cloud Review",
+    voice_extract: isZh ? "登录并提炼个人文风" : "Sign in & extract voice profile",
+  };
+  if (titleEl) {
+    titleEl.textContent = titleMap[act] || (isZh ? "登录 / 注册 dislop 账号" : "Sign in or join dislop Cloud");
+  }
+  if (subEl) {
+    subEl.textContent = isZh
+      ? "登录即自动开通每月 30 免费额度 · 同一账号可用于远程 MCP，草稿不落盘。"
+      : "No separate signup step · 30 free monthly credits usable in Remote MCP, zero draft storage.";
+  }
+
+  const githubSvg =
+    '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>';
+  const googleSvg =
+    '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.83.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.97 10.72A5.41 5.41 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.82.96 4.05l3.01-2.33Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"/></svg>';
+
+  const hasGh = Boolean(cloudSessionState.methods?.github);
+  const hasG = Boolean(cloudSessionState.methods?.google);
+  const githubBtnHtml = hasGh
+    ? `<a href="/api/v1/auth/github/start?return=%2F%23workbench" class="auth-provider-btn" data-oauth-provider="github">${githubSvg}<span>${
+        isZh ? "使用 GitHub 一键继续" : "Continue with GitHub"
+      }</span></a>`
+    : "";
+  const googleBtnHtml = hasG
+    ? `<a href="/api/v1/auth/google/start?return=%2F%23workbench" class="auth-provider-btn" data-oauth-provider="google">${googleSvg}<span>${
+        isZh ? "使用 Google 一键继续" : "Continue with Google"
+      }</span></a>`
+    : "";
+
+  const otpFormHtml = `
+    <form id="auth-modal-otp-form" class="inline-auth-form">
+      <label class="inline-auth-label" for="auth-modal-email">${isZh ? "邮箱 6 位验证码（免密直连）" : "Email 6-digit code (passwordless)"}</label>
+      <div class="cloud-inline-form">
+        <input type="email" id="auth-modal-email" class="cloud-input" required autocomplete="email" placeholder="you@company.com">
+        <button type="submit" id="auth-modal-send-btn" class="btn-primary" style="min-height:36px;padding:5px 14px;font-size:0.82rem;">${
+          isZh ? "发验证码" : "Send code"
+        }</button>
+      </div>
+      <div id="auth-modal-otp-step" class="cloud-inline-form" hidden>
+        <input type="text" id="auth-modal-otp-code" class="cloud-input auth-otp-input" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="••••••" aria-label="${
+          isZh ? "6 位验证码" : "6-digit code"
+        }">
+        <button type="button" id="auth-modal-verify-btn" class="btn-primary" style="min-height:36px;padding:5px 14px;font-size:0.82rem;">${
+          isZh ? "验证并继续" : "Verify & continue"
+        }</button>
+        <button type="button" id="auth-modal-change-email" class="ctrl-btn ctrl-btn-sm">${isZh ? "换邮箱" : "Change"}</button>
+      </div>
+    </form>`;
+
+  const binaryNoteHtml = binaryAuditResult
+    ? `<p class="auth-modal-note">${
+        isZh
+          ? "提示：当前 Word / PPT 已加载在内存，用上方邮箱验证码可不刷新页面直接继续处理。"
+          : "Tip: your Word/PPT file stays loaded in browser RAM when using Email code sign-in below."
+      }</p>`
+    : "";
+  const reasonHtml = reasonMsg ? `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(reasonMsg)}</p>` : "";
+
+  let providersSection = "";
+  if (isZh) {
+    const topProviders = [githubBtnHtml].filter(Boolean).join("");
+    const bottomProviders = [googleBtnHtml].filter(Boolean).join("");
+    providersSection = `
+      ${topProviders ? `<div class="auth-provider-stack">${topProviders}</div>` : ""}
+      ${otpFormHtml}
+      ${bottomProviders ? `<div class="auth-divider"><span>或</span></div><div class="auth-provider-stack">${bottomProviders}</div>` : ""}`;
+  } else {
+    const topProviders = [googleBtnHtml, githubBtnHtml].filter(Boolean).join("");
+    providersSection = `
+      ${topProviders ? `<div class="auth-provider-stack">${topProviders}</div><div class="auth-divider"><span>or use email</span></div>` : ""}
+      ${otpFormHtml}`;
+  }
+
+  bodyEl.innerHTML = `
+    ${reasonHtml}
+    ${binaryNoteHtml}
+    ${providersSection}
+    <div id="auth-modal-feedback" class="ai-result-meta">${
+      isZh ? "支持直接粘贴 6 位数字验证码自动登录。" : "Paste your 6-digit code to sign in automatically."
+    }</div>
+    <details class="cloud-legacy-fold">
+      <summary>${isZh ? "已有 dslp_... 密钥？点此绑定" : "Already have a dslp_... API key?"}</summary>
+      <form id="auth-modal-key-form" class="cloud-inline-form" style="margin-top:8px;">
+        <input type="text" id="auth-modal-key-input" class="cloud-input" required placeholder="dslp_..." autocomplete="off">
+        <button type="submit" id="auth-modal-key-btn" class="ctrl-btn ctrl-btn-sm">${isZh ? "绑定" : "Bind"}</button>
+      </form>
+    </details>`;
+
+  backdrop.hidden = false;
+
+  bodyEl.querySelectorAll("[data-oauth-provider]").forEach((link) => {
+    link.addEventListener("click", () => {
+      savePendingWorkbenchIntent(pendingCloudAction);
+    });
+  });
+
+  const emailEl = document.getElementById("auth-modal-email");
+  const otpInput = document.getElementById("auth-modal-otp-code");
+  const otpStep = document.getElementById("auth-modal-otp-step");
+  const sendBtn = document.getElementById("auth-modal-send-btn");
+  const verifyBtn = document.getElementById("auth-modal-verify-btn");
+  const fb = document.getElementById("auth-modal-feedback");
+
+  let modalVerifyInFlight = false;
+  const submitModalOtpVerify = async () => {
+    if (modalVerifyInFlight) return;
+    const email = String(emailEl?.value || "").trim();
+    const code = String(otpInput?.value || "").replace(/\D/g, "").slice(0, 6);
+    if (!email || code.length !== 6 || !fb) return;
+    modalVerifyInFlight = true;
+    if (verifyBtn) verifyBtn.disabled = true;
+    fb.textContent = isZh ? "正在验证 6 位验证码…" : "Verifying 6-digit code...";
+    try {
+      const resp = await fetch("/api/v1/auth/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ email, code, lang: isZh ? "zh" : "en", source: getEntrySource() }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.account) {
+        fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</span>`;
+        return;
+      }
+      cloudSessionState = {
+        ...cloudSessionState,
+        loaded: true,
+        authenticated: true,
+        authMethod: "email_otp",
+        account: data.account,
+      };
+      await finalizePendingOAuthLinkIfNeeded();
+      closeAuthModal({ clearPending: false });
+      renderCloudAccountState();
+      if (pendingCloudAction) {
+        startPendingCloudContinuation();
+      }
+    } catch (err) {
+      fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(err.message || "Network error")}</span>`;
+    } finally {
+      modalVerifyInFlight = false;
+      if (verifyBtn) verifyBtn.disabled = false;
+    }
+  };
+
+  document.getElementById("auth-modal-otp-form")?.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const email = String(emailEl?.value || "").trim();
+    if (!email || !fb) return;
+    if (sendBtn) sendBtn.disabled = true;
+    fb.textContent = isZh ? "正在发送 6 位验证码…" : "Sending 6-digit code...";
+    try {
+      const resp = await fetch("/api/v1/auth/otp/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ email, lang: isZh ? "zh" : "en" }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</span>`;
+        if (sendBtn) sendBtn.disabled = false;
+        return;
+      }
+      if (emailEl) emailEl.readOnly = true;
+      if (otpStep) otpStep.hidden = false;
+      if (otpInput) {
+        otpInput.value = "";
+        otpInput.focus();
+      }
+      if (modalOtpResendTimer) clearInterval(modalOtpResendTimer);
+      let left = 60;
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = isZh ? `${left}s` : `${left}s`;
+        modalOtpResendTimer = setInterval(() => {
+          left -= 1;
+          if (left <= 0) {
+            clearInterval(modalOtpResendTimer);
+            modalOtpResendTimer = null;
+            sendBtn.disabled = false;
+            sendBtn.textContent = isZh ? "重发验证码" : "Resend";
+          } else {
+            sendBtn.textContent = `${left}s`;
+          }
+        }, 1000);
+      }
+      fb.textContent =
+        data.message || (isZh ? "验证码已发送，输入或粘贴 6 位数字即可自动登录。" : "Code sent — enter or paste 6 digits to continue.");
+    } catch (err) {
+      fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(err.message || "Network error")}</span>`;
+      if (sendBtn) sendBtn.disabled = false;
+    }
+  });
+
+  otpInput?.addEventListener("input", () => {
+    const cleaned = String(otpInput.value || "").replace(/\D/g, "").slice(0, 6);
+    if (otpInput.value !== cleaned) otpInput.value = cleaned;
+    if (cleaned.length === 6) {
+      submitModalOtpVerify();
+    }
+  });
+  otpInput?.addEventListener("paste", (ev) => {
+    const txt = ev.clipboardData?.getData("text/plain") || "";
+    const digits = txt.replace(/\D/g, "").slice(0, 6);
+    if (digits) {
+      ev.preventDefault();
+      otpInput.value = digits;
+      if (digits.length === 6) {
+        submitModalOtpVerify();
+      }
+    }
+  });
+  otpInput?.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      submitModalOtpVerify();
+    }
+  });
+  verifyBtn?.addEventListener("click", submitModalOtpVerify);
+  document.getElementById("auth-modal-change-email")?.addEventListener("click", () => {
+    if (modalOtpResendTimer) {
+      clearInterval(modalOtpResendTimer);
+      modalOtpResendTimer = null;
+    }
+    if (emailEl) {
+      emailEl.readOnly = false;
+      emailEl.focus();
+    }
+    if (otpStep) otpStep.hidden = true;
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.textContent = isZh ? "发验证码" : "Send code";
+    }
+    if (fb) fb.textContent = isZh ? "请输入新的邮箱地址。" : "Enter another email address.";
+  });
+
+  document.getElementById("auth-modal-key-form")?.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const rawKey = String(document.getElementById("auth-modal-key-input")?.value || "").trim();
+    const btn = document.getElementById("auth-modal-key-btn");
+    if (!rawKey || !fb) return;
+    if (btn) btn.disabled = true;
+    fb.textContent = isZh ? "正在校验密钥…" : "Verifying key...";
+    try {
+      const resp = await fetch("/api/v1/account/me", { headers: { Authorization: `Bearer ${rawKey}` } });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.account) {
+        fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || (isZh ? "密钥无效或已失效" : "Invalid or expired key"))}</span>`;
+        return;
+      }
+      saveCloudAccount({
+        token: rawKey,
+        email: data.account.email,
+        plan: data.account.plan,
+        remaining: data.account.totalRemaining,
+        monthlyQuota: data.account.monthlyQuota,
+      });
+      closeAuthModal({ clearPending: false });
+      renderCloudAccountState();
+      if (pendingCloudAction) {
+        startPendingCloudContinuation();
+      }
+    } catch (err) {
+      fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(err.message || "Network error")}</span>`;
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+
+  setTimeout(() => {
+    const focusTarget = isZh
+      ? document.getElementById("auth-modal-email")
+      : document.querySelector("#auth-modal-body [data-oauth-provider]") || document.getElementById("auth-modal-email");
+    focusTarget?.focus();
+  }, 20);
+}
+
+function openInlineCloudKeyPanelFallback(reasonMsg = "") {
+  const panel = document.getElementById("ai-result-panel");
+  if (!panel) return;
+  const isZh = currentLang === "zh";
+  const active = getActiveCloudAccount();
+  panel.hidden = false;
+  if (active) {
+    panel.innerHTML = `
+      <div class="cloud-status-bar">
+        <span>${
+          isZh
+            ? `当前已登录 <strong>${escapeHtmlSafe(active.email)}</strong> · 剩余 ${escapeHtmlSafe(active.totalRemaining ?? 30)} 额度`
+            : `Signed in as <strong>${escapeHtmlSafe(active.email)}</strong> · ${escapeHtmlSafe(active.totalRemaining ?? 30)} credits left`
+        }</span>
+        <span class="quick-actions">
+          <a href="#cloud-token-box" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;">${isZh ? "管理账号与密钥 ↓" : "Manage account ↓"}</a>
+          <button type="button" id="inline-clear-key-btn" class="ctrl-btn ctrl-btn-sm">${isZh ? "退出登录" : "Sign out"}</button>
+          <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Close"}</button>
+        </span>
+      </div>`;
+    document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
+      panel.hidden = true;
+    });
+    document.getElementById("inline-clear-key-btn")?.addEventListener("click", async () => {
+      if (cloudSessionState.authenticated) {
+        await fetch("/api/v1/auth/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+        cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
+      }
+      saveCloudAccount(null);
+      cachedHubData = { keys: null, apps: null, voices: null, usage: null };
+      renderCloudAccountState();
+      panel.hidden = true;
+    });
+    return;
+  }
+  panel.innerHTML = `<p class="ai-error-msg">${escapeHtmlSafe(reasonMsg || (isZh ? "请先登录后再使用云端 AI。" : "Sign in first to use Cloud AI."))}</p>`;
+}
+
+function openInlineCloudKeyPanel(reasonMsg = "") {
+  if (!isCloudSignedIn()) {
+    openAuthModal({ reasonMsg, action: pendingCloudAction });
+    return;
+  }
+  openInlineCloudKeyPanelFallback(reasonMsg);
+}
+
+function openQuotaUpgradePanel(message = "") {
+  const panel = document.getElementById("ai-result-panel");
+  if (!panel) return;
+  const isZh = currentLang === "zh";
+  const active = getActiveCloudAccount();
+  panel.hidden = false;
+  panel.innerHTML = `
+    <div class="ai-result-head">
+      <span class="ai-result-title">${isZh ? "本月云端免费额度已用完（本地离线检查仍永久免费）" : "Monthly cloud credits used up (local checks stay unlimited)"}</span>
+      <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
+    </div>
+    ${message ? `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>` : ""}
+    <div class="upgrade-box">
+      <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${
+        isZh
+          ? "左侧全部离线规则检查、5 轴节奏体检和命令行（npx dislop check .）依然不限次使用。如需更多云端审校与 Word/PPT 原排版处理，可以直接预约："
+          : "All local rules, 5-axis telemetry, and CLI checks (npx dislop check .) stay unlimited. To reserve higher cloud capacity:"
+      }</p>
+      <form id="inline-upgrade-waitlist-form" class="cloud-inline-form">
+        <select id="inline-wl-plan" class="pack-select" aria-label="${isZh ? "选择方案" : "Select plan"}">
+          <option value="pro">${isZh ? "Pro（$12/月 · 1,500 额度）" : "Pro ($12/mo · 1,500 credits)"}</option>
+          <option value="credits">${isZh ? "按量包（$10 / 800 额度 · 不过期）" : "PAYGO ($10 / 800 credits · never expires)"}</option>
+          <option value="team">${isZh ? "Team（$29/席位 · 团队文风）" : "Team ($29/seat · shared voice)"}</option>
+        </select>
+        <input type="email" id="inline-wl-email" class="cloud-input" required value="${escapeHtmlSafe(active?.email || "")}" placeholder="you@company.com">
+        <button type="submit" id="inline-wl-submit" class="btn-primary" style="min-height:34px;padding:5px 12px;font-size:0.8rem;">${isZh ? "一键预约扩容" : "Request upgrade"}</button>
+      </form>
+      <div id="inline-wl-feedback" class="ai-result-meta" style="margin-top:8px;"></div>
+    </div>
+  `;
+  document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
+    panel.hidden = true;
+  });
+  document.getElementById("inline-upgrade-waitlist-form")?.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const plan = document.getElementById("inline-wl-plan")?.value || "pro";
+    const email = String(document.getElementById("inline-wl-email")?.value || "").trim();
+    const btn = document.getElementById("inline-wl-submit");
+    const fb = document.getElementById("inline-wl-feedback");
+    if (!email || !fb) return;
+    if (btn) btn.disabled = true;
+    fb.textContent = isZh ? "正在登记预约…" : "Submitting request...";
+    try {
+      const resp = await fetch("/api/v1/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, plan, note: "exhausted_credits_inline", source: getEntrySource() }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</span>`;
+        return;
+      }
+      fb.textContent = isZh
+        ? `已登记 ${data.email}（${data.plan}），我们会邮件联系你开通或补充测试额度。`
+        : `Saved ${data.email} (${data.plan}). We will email you with early access or top-up credits.`;
+    } catch (err) {
+      fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(err.message || "Network error")}</span>`;
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
 function renderAiError(errCode, message) {
   const panel = document.getElementById("ai-result-panel");
   if (!panel) return;
+  if (errCode === "insufficient_credits") {
+    openQuotaUpgradePanel(message);
+    return;
+  }
+  const needsToken = errCode === "auth_required" || errCode === "unauthorized" || errCode === "invalid_token";
+  if (needsToken) {
+    openInlineCloudKeyPanel(message);
+    return;
+  }
   panel.hidden = false;
+  panel.innerHTML = `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>`;
+}
+
+function normalizeCloudFindingItem(f, isZh) {
+  const rev = f?.revision || null;
+  const act = String(rev?.kind || f?.action || "edit");
+  const actionMapZh = { edit: "改措辞", rewrite: "重写", ask: "先核实" };
+  const actLabel = isZh ? actionMapZh[act] || act : act;
+  const quote = f?.anchor?.quote || f?.quote || rev?.find || "";
+  const lineNum = f?.anchor?.line || "";
+  const segId = f?.segmentId || f?.anchor?.segmentId || f?.location || "";
+  const label = f?.ruleId || f?.lens || f?.layer || (isZh ? "文风与结构" : "style");
+  let suggestion = f?.suggestion || "";
+  if (!suggestion && rev) {
+    if (rev.kind === "edit") {
+      suggestion = rev.replace ? rev.replace : isZh ? "直接删掉这段" : "Delete this phrase";
+    } else if (rev.kind === "rewrite") {
+      suggestion = rev.instruction || "";
+    } else if (rev.kind === "ask") {
+      suggestion = rev.question || "";
+    }
+  }
+  return {
+    act,
+    actLabel,
+    label,
+    quote,
+    lineNum,
+    segId,
+    why: f?.why || "",
+    suggestion,
+  };
+}
+
+async function runOfficeCloudAction(kind) {
   const isZh = currentLang === "zh";
-  const needsToken =
-    errCode === "auth_required" ||
-    errCode === "anon_limit_reached" ||
-    errCode === "anon_text_too_long" ||
-    errCode === "insufficient_credits";
-  const ctaHtml = needsToken
-    ? `<div class="quick-actions"><a href="#cloud-token-box" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${isZh ? "免费领取 30 额度密钥 ↓" : "Claim free 30-credit key ↓"}</a></div>`
-    : "";
-  panel.innerHTML = `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>${ctaHtml}`;
+  const mod = currentModality === "pptx" ? "pptx" : "docx";
+  if (!lastUploadedBinaryBuffer || lastUploadedBinaryBuffer.byteLength === 0) {
+    renderAiError("empty", isZh ? "请先重新选择本地 Word 或 PPT 文件。" : "Re-open your local Word or PowerPoint file first.");
+    return;
+  }
+  if (lastUploadedBinaryBuffer.byteLength > 9 * 1024 * 1024) {
+    renderAiError(
+      "file_too_large",
+      isZh ? "文件超过 9 MiB 云端处理上限；请使用本地离线 CLI（dislop check）处理大文件。" : "File exceeds the 9 MiB cloud limit; use the offline CLI (dislop check) for large decks or docs."
+    );
+    return;
+  }
+  const active = getActiveCloudAccount();
+  if (!active) {
+    openAuthModal({ action: kind });
+    return;
+  }
+
+  const endpoint = kind === "review" ? "/api/v1/office/review" : "/api/v1/office/deslop";
+  const trackChanges = mod === "docx" && Boolean(document.getElementById("office-track-changes")?.checked);
+  const reqId = ++aiReqSeq;
+  setAiButtonsBusy(
+    true,
+    kind === "review" ? `正在审校 ${mod.toUpperCase()} 正文结构与套话…` : `正在原排版改写 ${mod.toUpperCase()} 并校验数字…`,
+    kind === "review" ? `Reviewing ${mod.toUpperCase()} segments...` : `Running layout-safe ${mod.toUpperCase()} rewrite...`
+  );
+
+  try {
+    const savedVoice = kind === "deslop" ? loadSavedVoiceProfile() : null;
+    const resp = await fetch(
+      endpoint,
+      buildCloudFetchInit({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          fileBase64: arrayBufferToBase64(lastUploadedBinaryBuffer),
+          filename: currentFilename || `draft.${mod}`,
+          kind: mod,
+          lang: isZh ? "zh" : "en",
+          trackChanges,
+          source: getEntrySource(),
+          ...(savedVoice ? { voiceProfile: savedVoice } : {}),
+        },
+      })
+    );
+    const data = await resp.json().catch(() => ({}));
+    if (reqId !== aiReqSeq) return;
+    if (!resp.ok) {
+      renderAiError(data.error || "request_failed", data.message || `HTTP ${resp.status}`);
+      return;
+    }
+
+    updateCreditsFromBilling(data.billing);
+    cachedHubData.usage = null;
+    const panel = document.getElementById("ai-result-panel");
+    if (!panel) return;
+    panel.hidden = false;
+
+    if (kind === "review") {
+      const findings = Array.isArray(data.findings) ? data.findings : [];
+      const normalized = findings.map((f) => normalizeCloudFindingItem(f, isZh));
+      const summary = data.summary || (isZh ? `共发现 ${normalized.length} 处可改项。` : `Found ${normalized.length} item(s).`);
+      const itemsHtml = normalized.length
+        ? `<ul class="finding-review-list">${normalized
+            .map(
+              (n) => `<li class="finding-review-item">
+                <div class="finding-review-head">
+                  <span class="finding-action-tag">${escapeHtmlSafe(n.actLabel)}</span>
+                  <strong>${escapeHtmlSafe(n.label)}</strong>
+                  ${n.segId ? `<span style="color:var(--ink-2);">${escapeHtmlSafe(n.segId)}</span>` : ""}
+                </div>
+                ${n.quote ? `<div style="font-family:var(--font-mono);font-size:0.76rem;color:var(--ink-2);margin-bottom:4px;">${escapeHtmlSafe(n.quote)}</div>` : ""}
+                <div>${escapeHtmlSafe(n.why)}${n.suggestion ? ` → <strong>${escapeHtmlSafe(n.suggestion)}</strong>` : ""}</div>
+              </li>`
+            )
+            .join("")}</ul>`
+        : `<p class="hub-section-note">${isZh ? "未检出明显 AI 套话或硬伤。" : "No obvious AI clichés or artifacts found."}</p>`;
+      const briefText = [
+        summary,
+        ...normalized.map((n, i) => `${i + 1}. [${n.segId || n.act}] ${n.quote ? `"${n.quote}" — ` : ""}${n.why} -> ${n.suggestion || n.why}`),
+      ]
+        .filter(Boolean)
+        .join("\n");
+      panel.innerHTML = `
+        <div class="ai-result-head">
+          <span class="ai-result-title">${isZh ? `${mod.toUpperCase()} 云端审校结果` : `${mod.toUpperCase()} Cloud Review`}</span>
+          <span class="ai-result-meta">-${escapeHtmlSafe(data.creditWeight ?? 2)} ${isZh ? "额度" : "cr"}</span>
+        </div>
+        <p style="margin:0 0 8px;">${escapeHtmlSafe(summary)}</p>
+        ${itemsHtml}
+        <div class="quick-actions">
+          <button type="button" id="btn-ai-copy-review" class="ctrl-btn ctrl-btn-sm">${isZh ? "复制审校清单" : "Copy review brief"}</button>
+          <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
+        </div>`;
+      document.getElementById("btn-ai-copy-review")?.addEventListener("click", async (ev) => {
+        await copyTextWithFeedback(ev.currentTarget, briefText);
+      });
+      document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
+        panel.hidden = true;
+      });
+    } else {
+      const outcomes = Array.isArray(data.segmentOutcomes) ? data.segmentOutcomes : [];
+      const changed = outcomes.filter((o) => o.status === "changed").length;
+      const rejected = outcomes.filter((o) => o.status === "rejected");
+      const unchanged = Math.max(0, outcomes.length - changed - rejected.length);
+      const outName = `cleaned-${(currentFilename || `draft.${mod}`).replace(/[^A-Za-z0-9._\u4e00-\u9fff-]/g, "_")}`;
+      const rejectedHtml = rejected.length
+        ? `<ul class="ai-changes-list">${rejected
+            .slice(0, 6)
+            .map((r) => `<li>${escapeHtmlSafe(r.id)}: ${isZh ? "已保留原文（" : "kept original ("}${escapeHtmlSafe(r.reason || "guard")})</li>`)
+            .join("")}</ul>`
+        : "";
+      panel.innerHTML = `
+        <div class="ai-result-head">
+          <span class="ai-result-title">${isZh ? `${mod.toUpperCase()} 原排版改写完成` : `Layout-safe ${mod.toUpperCase()} rewrite ready`}</span>
+          <span class="ai-result-meta">${
+            isZh
+              ? `已改 ${changed} 段 · 保留 ${unchanged} 段 · 护栏跳过 ${rejected.length} 段${data.trackChanges ? " · 含 Word 修订" : ""}`
+              : `${changed} changed · ${unchanged} unchanged · ${rejected.length} kept by guard${data.trackChanges ? " · Track Changes" : ""}`
+          }</span>
+        </div>
+        ${rejectedHtml}
+        <div class="quick-actions">
+          ${
+            data.fileBase64
+              ? `<button type="button" id="btn-office-download" class="btn-primary" style="min-height:32px;padding:5px 14px;font-size:0.82rem;">${
+                  isZh ? `下载改后 ${mod.toUpperCase()}` : `Download cleaned ${mod.toUpperCase()}`
+                }</button>`
+              : ""
+          }
+          <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
+        </div>`;
+      document.getElementById("btn-office-download")?.addEventListener("click", () => {
+        if (!data.fileBase64) return;
+        const mime =
+          mod === "pptx"
+            ? "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        const blob = new Blob([base64ToUint8Array(data.fileBase64)], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = outName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 15000);
+      });
+      document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
+        panel.hidden = true;
+      });
+    }
+  } catch (err) {
+    renderAiError(
+      "network_error",
+      isZh ? `无法连接云端端点：${err.message || "请稍后重试"}` : `Could not reach cloud endpoint: ${err.message || "retry later"}`
+    );
+  } finally {
+    cloudBusy = false;
+    syncAiButtonsForBinary();
+  }
 }
 
 async function runCloudAction(kind) {
   if (cloudBusy) return;
   const isZh = currentLang === "zh";
   if (binaryAuditResult) {
+    if (currentModality === "docx" || currentModality === "pptx") {
+      await runOfficeCloudAction(kind);
+      return;
+    }
     renderAiError(
       "binary_unsupported",
       isZh
-        ? "网页 AI 审校和一键去味目前支持文本、Markdown 与 HTML。Word / PPT 可继续用左侧离线检查。"
-        : "Web AI review and rewrite currently support text, Markdown, and HTML. Word and PowerPoint files run offline above."
+        ? "PDF 与图片仅支持上方本地离线检查；文本、Markdown、HTML 与 Word/PPT 可使用云端 AI。"
+        : "PDF and image files run offline above; Cloud AI supports text, Markdown, HTML, Word, and PowerPoint."
     );
     return;
   }
@@ -2996,17 +5515,11 @@ async function runCloudAction(kind) {
   }
 
   const endpoint = kind === "review" ? "/api/v1/review" : "/api/v1/deslop";
-  const saved = loadSavedCloudAccount();
-  if (!saved?.token) {
-    renderAiError(
-      "auth_required",
-      isZh
-        ? "云端深度审校与改写需要先在下方免费领取 30 额度密钥（无需绑卡，本地基础检查无需登录）。"
-        : "Claim a free 30-credit key below to run Cloud Review or Rewrite (no card required; local checks stay free without sign-in)."
-    );
+  const active = getActiveCloudAccount();
+  if (!active) {
+    openAuthModal({ action: kind });
     return;
   }
-  const headers = { "Content-Type": "application/json", Authorization: `Bearer ${saved.token}` };
   const reqId = ++aiReqSeq;
   const sourceSnapshot = currentText;
   const localPack = resolveEffectivePack(currentPackId || "business-brief", PACKS_BY_ID);
@@ -3014,24 +5527,28 @@ async function runCloudAction(kind) {
 
   setAiButtonsBusy(
     true,
-    kind === "review" ? "正在调用 AI 深度审校（通常 1–2 秒）…" : "正在调用 AI 一键去味并自动复检数字与规则（通常 5–8 秒）…",
-    kind === "review" ? "Running AI 3rd-order review (typically 1-2s)..." : "Running self-healing AI rewrite + post-check (typically 5-8s)..."
+    kind === "review" ? "正在调用云端审校（通常 1–2 秒）…" : "正在调用云端改写并自动核对数字与规则（通常 5–8 秒）…",
+    kind === "review" ? "Running Cloud Review (typically 1-2s)..." : "Running Cloud Rewrite and re-checking (typically 5-8s)..."
   );
 
   try {
     const savedVoice = kind === "deslop" ? loadSavedVoiceProfile() : null;
-    const resp = await fetch(endpoint, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        text,
-        filename: currentFilename || "draft.md",
-        modality: currentModality || "markdown",
-        pack: currentPackId || "business-brief",
-        lang: currentLang === "zh" ? "zh" : "en",
-        ...(savedVoice ? { voiceProfile: savedVoice } : {}),
-      }),
-    });
+    const resp = await fetch(
+      endpoint,
+      buildCloudFetchInit({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          text,
+          filename: currentFilename || "draft.md",
+          modality: currentModality || "markdown",
+          pack: currentPackId || "business-brief",
+          lang: currentLang === "zh" ? "zh" : "en",
+          source: getEntrySource(),
+          ...(savedVoice ? { voiceProfile: savedVoice } : {}),
+        },
+      })
+    );
     const data = await resp.json().catch(() => ({}));
     if (reqId !== aiReqSeq) return;
     if (!resp.ok) {
@@ -3045,31 +5562,85 @@ async function runCloudAction(kind) {
     panel.hidden = false;
 
     if (kind === "review") {
-      const level = data.llmReview?.aiFlavorLevel || "medium";
-      const summary = data.llmReview?.summary || "";
-      const issues = Array.isArray(data.llmReview?.issues) ? data.llmReview.issues : [];
-      const itemsHtml = issues.length
-        ? `<ul class="ai-changes-list">${issues
-            .map(
-              (it) =>
-                `<li><strong>${escapeHtmlSafe(it.layer || it.category || (isZh ? "结构与文风" : "style"))}</strong>：${escapeHtmlSafe(it.why || "")}${it.fix ? ` → ${escapeHtmlSafe(it.fix)}` : ""}</li>`
-            )
-            .join("")}</ul>`
-        : "";
+      cachedHubData.usage = null;
+      const structured = Array.isArray(data.findings) && data.findings.length > 0 ? data.findings : null;
+      const level = data.aiFlavorLevel || data.llmReview?.aiFlavorLevel || "medium";
+      const summary = data.summary || data.llmReview?.summary || "";
+      let itemsHtml = "";
+      let reviewAgentText = summary;
+
+      if (structured) {
+        const normalized = structured.map((f) => normalizeCloudFindingItem(f, isZh));
+        itemsHtml = `<ul class="finding-review-list">${normalized
+          .map(
+            (n) => `<li class="finding-review-item">
+              <div class="finding-review-head">
+                <span class="finding-action-tag">${escapeHtmlSafe(n.actLabel)}</span>
+                <strong>${escapeHtmlSafe(n.label)}</strong>
+                ${n.lineNum ? `<span style="color:var(--ink-2);">L${escapeHtmlSafe(n.lineNum)}</span>` : ""}
+              </div>
+              ${
+                n.quote
+                  ? `<button type="button" class="finding-quote-btn" data-jump-line="${escapeHtmlSafe(n.lineNum)}" data-jump-quote="${escapeHtmlSafe(n.quote)}">${escapeHtmlSafe(n.quote)}</button>`
+                  : ""
+              }
+              <div>${escapeHtmlSafe(n.why)}${n.suggestion ? ` → <strong>${escapeHtmlSafe(n.suggestion)}</strong>` : ""}</div>
+            </li>`
+          )
+          .join("")}</ul>`;
+        reviewAgentText = [
+          summary,
+          ...normalized.map(
+            (n, i) =>
+              `${i + 1}. [${n.act}${n.lineNum ? ` L${n.lineNum}` : ""}] ${n.quote ? `"${n.quote}" — ` : ""}${n.why}${
+                n.suggestion ? ` -> ${n.suggestion}` : ""
+              }`
+          ),
+        ]
+          .filter(Boolean)
+          .join("\n");
+      } else {
+        const issues = Array.isArray(data.llmReview?.issues) ? data.llmReview.issues : [];
+        itemsHtml = issues.length
+          ? `<ul class="ai-changes-list">${issues
+              .map(
+                (it) =>
+                  `<li><strong>${escapeHtmlSafe(it.layer || it.category || (isZh ? "结构与文风" : "style"))}</strong>：${escapeHtmlSafe(it.why || "")}${it.fix ? ` → ${escapeHtmlSafe(it.fix)}` : ""}</li>`
+              )
+              .join("")}</ul>`
+          : "";
+        reviewAgentText = [
+          summary,
+          ...issues.map((it, i) => `${i + 1}. [${it.layer || it.category || "style"}] ${it.why || ""}${it.fix ? ` -> ${it.fix}` : ""}`),
+        ]
+          .filter(Boolean)
+          .join("\n");
+      }
+
       panel.innerHTML = `
         <div class="ai-result-head">
-          <span class="ai-result-title">${isZh ? `AI 深度审校（AI 味等级：${escapeHtmlSafe(level)}）` : `AI Review (slop level: ${escapeHtmlSafe(level)})`}</span>
-          <span class="ai-result-meta">${escapeHtmlSafe(data.model || "")} · -${escapeHtmlSafe(data.creditWeight ?? 1)} ${isZh ? "额度" : "cr"}</span>
+          <span class="ai-result-title">${isZh ? `云端审校结果（AI 味：${escapeHtmlSafe(level)}）` : `Cloud Review (slop level: ${escapeHtmlSafe(level)})`}</span>
+          <span class="ai-result-meta">${escapeHtmlSafe(data.model || "")}${data.register ? ` · ${escapeHtmlSafe(data.register)}` : ""} · -${escapeHtmlSafe(data.creditWeight ?? 1)} ${isZh ? "额度" : "cr"}</span>
         </div>
         <p style="margin:0 0 8px;">${escapeHtmlSafe(summary)}</p>
         ${itemsHtml}
         <div class="quick-actions">
+          <button type="button" id="btn-ai-copy-review" class="ctrl-btn ctrl-btn-sm">${isZh ? "复制审校建议给 Agent" : "Copy review for Agent"}</button>
           <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
         </div>`;
+      panel.querySelectorAll("[data-jump-quote]").forEach((qBtn) => {
+        qBtn.addEventListener("click", () => {
+          focusDraftLineOrQuote(qBtn.getAttribute("data-jump-line"), qBtn.getAttribute("data-jump-quote"));
+        });
+      });
+      document.getElementById("btn-ai-copy-review")?.addEventListener("click", async (ev) => {
+        await copyTextWithFeedback(ev.currentTarget, reviewAgentText);
+      });
       document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
         panel.hidden = true;
       });
     } else {
+      cachedHubData.usage = null;
       const revised = String(data.revised || "");
       const localAfterCount = (auditText(revised, { filename: currentFilename || "draft.md", modality: currentModality || "markdown", pack: localPack }).findings || []).length;
       const hasNumDiff = Boolean(data.numericDiff && Array.isArray(data.numericDiff.missing) && Array.isArray(data.numericDiff.added));
@@ -3089,7 +5660,7 @@ async function runCloudAction(kind) {
 
       panel.innerHTML = `
         <div class="ai-result-head">
-          <span class="ai-result-title">${isZh ? "AI 一键去味结果" : "AI Self-Healing Rewrite"}</span>
+          <span class="ai-result-title">${isZh ? "云端改写结果" : "Cloud Rewrite"}</span>
           <span class="ai-result-meta">${escapeHtmlSafe(statusMeta)}</span>
         </div>
         <div class="ai-result-text" id="ai-revised-output">${escapeHtmlSafe(revised)}</div>
@@ -3146,10 +5717,7 @@ async function runCloudAction(kind) {
     );
   } finally {
     cloudBusy = false;
-    const revBtn = document.getElementById("btn-ai-review");
-    const desBtn = document.getElementById("btn-ai-deslop");
-    if (revBtn) revBtn.disabled = false;
-    if (desBtn) desBtn.disabled = false;
+    syncAiButtonsForBinary();
   }
 }
 
@@ -3158,19 +5726,22 @@ async function handleFreeTokenSubmit(e) {
   const isZh = currentLang === "zh";
   const emailInput = document.getElementById("token-email-input");
   const submitBtn = document.getElementById("token-submit-btn");
+  const otpStep = document.getElementById("token-otp-step");
+  const otpInput = document.getElementById("token-otp-input");
   const outBox = document.getElementById("token-output-box");
   const email = String(emailInput?.value || "").trim();
   if (!email || !outBox) return;
 
   if (submitBtn) submitBtn.disabled = true;
   outBox.hidden = false;
-  outBox.textContent = isZh ? "正在生成专属密钥…" : "Generating API key...";
+  outBox.textContent = isZh ? "正在发送 6 位登录验证码…" : "Sending 6-digit verification code...";
 
   try {
-    const resp = await fetch("/api/v1/auth/register", {
+    const resp = await fetch("/api/v1/auth/otp/request", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      credentials: "same-origin",
+      body: JSON.stringify({ email, lang: isZh ? "zh" : "en" }),
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
@@ -3178,32 +5749,127 @@ async function handleFreeTokenSubmit(e) {
       return;
     }
 
+    if (emailInput) emailInput.readOnly = true;
+    if (otpStep) otpStep.hidden = false;
+    if (otpInput) {
+      otpInput.value = "";
+      otpInput.focus();
+    }
+    if (otpResendTimer) clearInterval(otpResendTimer);
+    let leftSec = 60;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = isZh ? `${leftSec} 秒后可重发` : `Resend (${leftSec}s)`;
+      otpResendTimer = setInterval(() => {
+        leftSec -= 1;
+        if (leftSec <= 0) {
+          clearInterval(otpResendTimer);
+          otpResendTimer = null;
+          submitBtn.disabled = false;
+          submitBtn.textContent = I18N[currentLang]?.["cloud.tokenBtn"] || (isZh ? "发验证码" : "Send code");
+        } else {
+          submitBtn.textContent = isZh ? `${leftSec} 秒后可重发` : `Resend (${leftSec}s)`;
+        }
+      }, 1000);
+    }
+    outBox.textContent =
+      data.message ||
+      (isZh ? "验证码已发往你的邮箱（10 分钟内有效），填入上方即可登录。" : "Check your email for the 6-digit code (valid 10 min) and enter it above.");
+  } catch (err) {
+    outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
+    if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
+async function handleOtpVerifySubmit() {
+  const isZh = currentLang === "zh";
+  const emailInput = document.getElementById("token-email-input");
+  const otpInput = document.getElementById("token-otp-input");
+  const verifyBtn = document.getElementById("token-otp-verify-btn");
+  const outBox = document.getElementById("token-output-box");
+  const email = String(emailInput?.value || "").trim();
+  const code = String(otpInput?.value || "").trim();
+  if (!email || !code || !outBox) return;
+
+  if (verifyBtn) verifyBtn.disabled = true;
+  outBox.hidden = false;
+  outBox.textContent = isZh ? "正在验证…" : "Verifying...";
+
+  try {
+    const resp = await fetch("/api/v1/auth/otp/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ email, code, lang: isZh ? "zh" : "en", source: getEntrySource() }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data.account) {
+      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
+      return;
+    }
+    if (otpResendTimer) {
+      clearInterval(otpResendTimer);
+      otpResendTimer = null;
+    }
+    if (emailInput) emailInput.readOnly = false;
+    const otpStep = document.getElementById("token-otp-step");
+    if (otpStep) otpStep.hidden = true;
+    const submitBtn = document.getElementById("token-submit-btn");
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = I18N[currentLang]?.["cloud.tokenBtn"] || (isZh ? "发验证码" : "Send code");
+    }
+
+    cloudSessionState = {
+      ...cloudSessionState,
+      loaded: true,
+      authenticated: true,
+      authMethod: "email_otp",
+      account: data.account,
+    };
+    await finalizePendingOAuthLinkIfNeeded();
+    outBox.hidden = true;
+    renderCloudAccountState();
+    startPendingCloudContinuation();
+  } catch (err) {
+    outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
+  } finally {
+    if (verifyBtn) verifyBtn.disabled = false;
+  }
+}
+
+async function handleLegacyKeyBindSubmit(e) {
+  e.preventDefault();
+  const isZh = currentLang === "zh";
+  const input = document.getElementById("legacy-key-input");
+  const btn = document.getElementById("legacy-key-btn");
+  const outBox = document.getElementById("token-output-box");
+  const rawKey = String(input?.value || "").trim();
+  if (!rawKey || !outBox) return;
+  if (btn) btn.disabled = true;
+  outBox.hidden = false;
+  outBox.textContent = isZh ? "正在校验密钥…" : "Verifying key...";
+  try {
+    const resp = await fetch("/api/v1/account/me", { headers: { Authorization: `Bearer ${rawKey}` } });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data.account) {
+      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || (isZh ? "密钥无效或已失效" : "Invalid or expired key"))}</p>`;
+      return;
+    }
     saveCloudAccount({
-      token: data.apiKey,
+      token: rawKey,
       email: data.account.email,
       plan: data.account.plan,
       remaining: data.account.totalRemaining,
       monthlyQuota: data.account.monthlyQuota,
     });
+    if (input) input.value = "";
+    outBox.hidden = true;
     renderCloudAccountState();
-
-    const mcpJsonStr = JSON.stringify(data.mcpConfig, null, 2);
-    outBox.innerHTML = `
-      <div><strong>${isZh ? "已自动绑定到本页工作台（每月 30 额度）" : "Saved to this browser (30 monthly credits active)"}</strong></div>
-      <div style="margin-top:6px;">${isZh ? "专属密钥：" : "API key:"} <code>${escapeHtmlSafe(data.apiKey)}</code></div>
-      <div style="margin-top:6px;font-size:0.78rem;color:var(--ink-2);">${isZh ? "远程 HTTP MCP 配置（粘进 Claude Code / Cursor / Codex）：" : "Remote HTTP MCP config (paste into Claude Code / Cursor / Codex):"}</div>
-      <pre class="cloud-output-pre" id="generated-mcp-config">${escapeHtmlSafe(mcpJsonStr)}</pre>
-      <div class="quick-actions" style="margin-top:8px;">
-        <a href="#workbench" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;">${isZh ? "返回工作台立即试用 ↑" : "Back to workbench ↑"}</a>
-        <button type="button" id="btn-copy-mcp-cfg" class="ctrl-btn ctrl-btn-sm">${isZh ? "复制远程 MCP 配置" : "Copy Remote MCP JSON"}</button>
-      </div>`;
-    document.getElementById("btn-copy-mcp-cfg")?.addEventListener("click", async (ev) => {
-      await copyTextWithFeedback(ev.currentTarget, mcpJsonStr);
-    });
   } catch (err) {
     outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    if (btn) btn.disabled = false;
   }
 }
 
@@ -3225,7 +5891,7 @@ async function handleWaitlistSubmit(e) {
     const resp = await fetch("/api/v1/waitlist", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, plan, note }),
+      body: JSON.stringify({ email, plan, note, source: getEntrySource() }),
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
@@ -3270,12 +5936,93 @@ function init() {
     applyI18n(true);
   });
 
-  // Hero 3-state Proof Card tabs
+  // Hero 3-state Proof Card tabs & autoplay toggle
   document.querySelectorAll("[data-hero-state]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      heroProofState = btn.getAttribute("data-hero-state") || "bad";
-      renderHeroProof();
+      const next = btn.getAttribute("data-hero-state") || "bad";
+      setHeroProofState(next, false);
     });
+  });
+
+  document.getElementById("hp-autoplay-btn")?.addEventListener("click", () => {
+    heroProofAutoplay = !heroProofAutoplay;
+    if (heroProofAutoplay) {
+      startHeroProofTimer();
+    } else {
+      stopHeroProofTimer();
+    }
+    updateHeroAutoplayButton();
+  });
+
+  // Demo cards: Pause/Play poster swap, Replay, and native <dialog> Lightbox
+  function setDemoCardPaused(slug, paused) {
+    if (paused) pausedDemoSlugs.add(slug);
+    else pausedDemoSlugs.delete(slug);
+    const dict = I18N[currentLang] || I18N.zh;
+    const card = document.querySelector(`[data-demo-card="${slug}"]`);
+    if (!card) return;
+    const webp = card.querySelector(`source[data-demo-webp="${slug}"]`);
+    const img = card.querySelector(`img[data-demo-gif="${slug}"]`);
+    const btn = card.querySelector(`[data-demo-toggle="${slug}"]`);
+    if (webp) {
+      webp.srcset = paused
+        ? `./assets/demos/${slug}-${currentLang}-v2-poster.png`
+        : `./assets/demos/${slug}-${currentLang}-v2.webp`;
+    }
+    if (img) {
+      img.src = paused
+        ? `./assets/demos/${slug}-${currentLang}-v2-poster.png`
+        : `./assets/demos/${slug}-${currentLang}-v2.gif`;
+    }
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(paused));
+      btn.textContent = paused ? dict["demos.play"] : dict["demos.pause"];
+    }
+  }
+
+  document.querySelectorAll("[data-demo-toggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const slug = btn.getAttribute("data-demo-toggle");
+      if (!slug) return;
+      setDemoCardPaused(slug, !pausedDemoSlugs.has(slug));
+    });
+  });
+
+  document.querySelectorAll("[data-demo-replay]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const slug = btn.getAttribute("data-demo-replay");
+      if (!slug) return;
+      setDemoCardPaused(slug, false);
+      const card = document.querySelector(`[data-demo-card="${slug}"]`);
+      const webp = card?.querySelector(`source[data-demo-webp="${slug}"]`);
+      const img = card?.querySelector(`img[data-demo-gif="${slug}"]`);
+      const bust = `?r=${Date.now()}`;
+      if (webp) webp.srcset = `./assets/demos/${slug}-${currentLang}-v2.webp${bust}`;
+      if (img) img.src = `./assets/demos/${slug}-${currentLang}-v2.gif${bust}`;
+    });
+  });
+
+  const lightbox = document.getElementById("demo-lightbox");
+  const lightboxTitle = document.getElementById("demo-lightbox-title");
+  const lightboxImg = document.getElementById("demo-lightbox-img");
+  document.querySelectorAll("[data-demo-zoom]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const slug = btn.getAttribute("data-demo-zoom");
+      if (!slug || !lightbox || !lightboxImg) return;
+      const card = document.querySelector(`[data-demo-card="${slug}"]`);
+      const titleText = card?.querySelector(".demo-cap-title")?.textContent || slug;
+      const altText = card?.querySelector("img")?.alt || titleText;
+      if (lightboxTitle) lightboxTitle.textContent = titleText;
+      lightboxImg.src = `./assets/demos/${slug}-${currentLang}-v2.webp`;
+      lightboxImg.alt = altText;
+      if (typeof lightbox.showModal === "function") lightbox.showModal();
+    });
+  });
+  document.getElementById("demo-lightbox-close")?.addEventListener("click", () => {
+    lightbox?.close();
+  });
+  lightbox?.addEventListener("click", (e) => {
+    if (e.target === lightbox) lightbox.close();
   });
 
   document.getElementById("hero-open-wb")?.addEventListener("click", () => {
@@ -3353,6 +6100,13 @@ function init() {
     if (binaryAuditResult) return;
     clearWorkbenchTransientPanels();
     currentText = e.target.value;
+    if (activeSpecimen && activeSpecimen.id === "user-draft" && (currentPackId === "auto" || currentPackId === "deck-and-ui")) {
+      const inferred = inferPastedTextModality(currentText, currentPackId);
+      currentModality = inferred;
+      currentFilename = `my-draft.${inferred === "markdown" ? "md" : inferred}`;
+      activeSpecimen.modality = inferred;
+      activeSpecimen.filename = currentFilename;
+    }
     renderWorkbench();
   });
 
@@ -3372,8 +6126,10 @@ function init() {
 
   document.getElementById("btn-paste-own")?.addEventListener("click", () => {
     uploadSeq += 1;
+    clearWorkbenchTransientPanels();
     binaryAuditResult = null;
     lastUploadedFile = null;
+    lastUploadedBinaryBuffer = null;
     uploadedOriginalText = null;
     customRuleTitle = "user-draft";
     currentModality = currentPackId === "deck-and-ui" ? "html" : "markdown";
@@ -3433,6 +6189,7 @@ function init() {
       return;
     }
     uploadSeq += 1;
+    clearWorkbenchTransientPanels();
     binaryAuditResult = null;
     currentFilename = activeSpecimen.filename;
     currentModality = activeSpecimen.modality;
@@ -3450,29 +6207,37 @@ function init() {
     if (!mod) {
       const appliedEl = document.getElementById("wb-applied-banner");
       if (appliedEl) {
+        appliedEl.classList.add("is-error");
         appliedEl.hidden = false;
         appliedEl.textContent =
           currentLang === "zh"
-            ? `暂不支持打开 ${file.name}。请选择 .md、.txt、.html、.css、.jsx、.tsx、.svg、.docx 或 .pptx 文件。`
-            : `Unsupported file type: ${file.name}. Open a .md, .txt, .html, .css, .jsx, .tsx, .svg, .docx, or .pptx file.`;
+            ? `暂不支持打开 ${file.name}。支持 .md、.mdx、.txt、.html、.css、.jsx、.tsx、.svg、.docx、.pptx、.pdf、.png、.jpg、.webp。`
+            : `Unsupported file type: ${file.name}. Open a .md, .mdx, .txt, .html, .css, .jsx, .tsx, .svg, .docx, .pptx, .pdf, .png, .jpg, or .webp file.`;
       }
       return;
     }
     const token = ++uploadSeq;
-    const nextPackId =
-      autoSelectPack && (mod === "pptx" || mod === "html" || mod === "css" || mod === "jsx" || mod === "svg")
-        ? "deck-and-ui"
-        : currentPackId;
-    const pack = resolveEffectivePack(nextPackId, PACKS_BY_ID);
+    clearWorkbenchTransientPanels();
+    const isBinaryMod = BINARY_MODALITIES.has(mod);
+    const nextPackId = autoSelectPack
+      ? isBinaryMod || UI_CODE_MODALITIES.has(mod)
+        ? defaultPackForModality(mod)
+        : "auto"
+      : currentPackId;
+    const resolvedPackId = nextPackId === "auto" ? defaultPackForModality(mod) : nextPackId;
+    const pack = resolveEffectivePack(resolvedPackId, PACKS_BY_ID);
 
     let nextBinaryResult = null;
     let nextOriginalText = null;
     let nextBaselineText = "";
     let nextCurrentText = "";
+    let nextBinaryBuffer = null;
 
+    let previewDataUrl = null;
     try {
       if (mod === "docx" || mod === "pptx") {
         const buf = await file.arrayBuffer();
+        nextBinaryBuffer = buf;
         const entries = await readBrowserZipXmlEntries(buf);
         const hasExpectedXml =
           mod === "docx"
@@ -3487,11 +6252,70 @@ function init() {
           );
         }
         const res = auditOoxmlEntries(entries, { filename: file.name, modality: mod, pack });
-        nextBinaryResult = res;
+        const slideCount = Object.keys(entries).filter((k) => /^ppt\/slides\/slide\d+\.xml$/i.test(k)).length;
+        nextBinaryResult = {
+          ...res,
+          binaryMeta: {
+            modality: mod,
+            filename: file.name,
+            sizeBytes: file.size,
+            slideCount,
+            xmlCount: Object.keys(entries).length,
+          },
+        };
         nextCurrentText =
           currentLang === "zh"
             ? `[已在标签页内存检查本地 ${mod.toUpperCase()}：${file.name}]\n检出：${res.findings.length} 处`
             : `[Inspected local ${mod.toUpperCase()} in browser memory: ${file.name}]\nFindings: ${res.findings.length}`;
+      } else if (mod === "image") {
+        const buf = await file.arrayBuffer();
+        const parsedImg = await parseBrowserImageBuffer(buf);
+        const res = auditImageDocument(parsedImg, { filename: file.name, pack });
+        if (file.size <= 4 * 1024 * 1024) {
+          previewDataUrl = await readFileAsDataUrl(file);
+        }
+        nextBinaryResult = {
+          ...res,
+          binaryMeta: {
+            modality: "image",
+            filename: file.name,
+            sizeBytes: file.size,
+            format: parsedImg.format,
+            width: parsedImg.width,
+            height: parsedImg.height,
+            hasC2pa: parsedImg.hasC2pa,
+            metadataCount: parsedImg.metadataTexts?.length || 0,
+            pixelMetrics: parsedImg.pixelMetrics || null,
+          },
+        };
+        nextCurrentText =
+          currentLang === "zh"
+            ? `[已在标签页内存检查本地图片：${file.name} (${parsedImg.width}×${parsedImg.height})]\n检出：${res.findings.length} 处`
+            : `[Inspected local image in browser memory: ${file.name} (${parsedImg.width}x${parsedImg.height})]\nFindings: ${res.findings.length}`;
+      } else if (mod === "pdf") {
+        const buf = await file.arrayBuffer();
+        const parsedPdf = await parseBrowserPdfBuffer(buf);
+        const res = auditPdfDocument(parsedPdf, { filename: file.name, pack });
+        nextBinaryResult = {
+          ...res,
+          coverageWarnings: res.coverageWarnings || [],
+          binaryMeta: {
+            modality: "pdf",
+            filename: file.name,
+            sizeBytes: file.size,
+            encrypted: Boolean(parsedPdf.encrypted),
+            pageCount: parsedPdf.pageCount || 0,
+            hasFonts: Boolean(parsedPdf.hasFonts),
+            hasCompressedStreams: Boolean(parsedPdf.hasCompressedStreams),
+          },
+        };
+        nextCurrentText = parsedPdf.encrypted
+          ? currentLang === "zh"
+            ? `[PDF 已加密，无法读取内容，已诚实跳过：${file.name}]`
+            : `[Encrypted PDF skipped honestly: ${file.name}]`
+          : currentLang === "zh"
+            ? `[已在标签页内存检查本地 PDF：${file.name}（共 ${parsedPdf.pageCount} 页）]\n检出：${res.findings.length} 处`
+            : `[Inspected local PDF in browser memory: ${file.name} (${parsedPdf.pageCount} pages)]\nFindings: ${res.findings.length}`;
       } else {
         const buf = await file.arrayBuffer();
         let text;
@@ -3503,11 +6327,15 @@ function init() {
         nextOriginalText = text;
         nextBaselineText = text;
         nextCurrentText = text;
+        if (mod === "svg" && file.size <= 512 * 1024) {
+          previewDataUrl = await readFileAsDataUrl(file);
+        }
       }
     } catch (err) {
       nextBinaryResult = {
         findings: [],
         skipped: [{ file: file.name, reason: `Uninspectable ${mod.toUpperCase()}: ${err.message}` }],
+        binaryMeta: { modality: mod, filename: file.name, sizeBytes: file.size, error: err.message },
       };
       nextCurrentText = `Could not inspect ${file.name}: ${err.message}`;
     }
@@ -3515,6 +6343,8 @@ function init() {
     if (token !== uploadSeq) return;
 
     lastUploadedFile = file;
+    lastUploadedBinaryBuffer = nextBinaryBuffer;
+    lastUploadedPreviewDataUrl = previewDataUrl;
     customRuleTitle = null;
     currentFilename = file.name;
     currentModality = mod;
@@ -3570,11 +6400,12 @@ function init() {
       if (!detectModality(file.name)) {
         const appliedEl = document.getElementById("wb-applied-banner");
         if (appliedEl) {
+          appliedEl.classList.add("is-error");
           appliedEl.hidden = false;
           appliedEl.textContent =
             currentLang === "zh"
-              ? `暂不支持拖入 ${file.name}。请拖入 .md、.txt、.html、.css、.jsx、.tsx、.svg、.docx 或 .pptx 文件。`
-              : `Unsupported file type: ${file.name}. Drop a .md, .txt, .html, .css, .jsx, .tsx, .svg, .docx, or .pptx file.`;
+              ? `暂不支持拖入 ${file.name}。支持 .md、.mdx、.txt、.html、.css、.jsx、.tsx、.svg、.docx、.pptx、.pdf、.png、.jpg、.webp。`
+              : `Unsupported file type: ${file.name}. Drop a .md, .mdx, .txt, .html, .css, .jsx, .tsx, .svg, .docx, .pptx, .pdf, .png, .jpg, or .webp file.`;
         }
         return;
       }
@@ -3662,6 +6493,124 @@ function init() {
     });
   });
 
+  document.getElementById("btn-copy-draft")?.addEventListener("click", async (ev) => {
+    if (binaryAuditResult || !currentText.trim()) return;
+    await copyTextWithFeedback(ev.currentTarget, currentText);
+  });
+
+  document.getElementById("wb-share-link-btn")?.addEventListener("click", async (ev) => {
+    if (binaryAuditResult || !currentText.trim()) return;
+    const btn = ev.currentTarget;
+    try {
+      const token = await encodeShareHash(currentText, currentPackId, currentModality);
+      const url = `${window.location.origin}/?lang=${currentLang}#share=${token}`;
+      await copyTextWithFeedback(btn, url);
+      showShareBanner(
+        currentLang === "zh"
+          ? "已复制离线分享链接：原文只保存在链接 # 后，不上传服务器；只有拿到链接的人看得到。"
+          : "Share link copied. Your text stays inside the # URL hash offline — nothing is uploaded or stored on our server."
+      );
+    } catch (err) {
+      const tooLong = err && err.message === "SHARE_TOO_LONG";
+      showShareBanner(
+        tooLong
+          ? currentLang === "zh"
+            ? "当前文稿较长，超出了离线分享链接的长度上限，请删减几句或改用「复制正文」。"
+            : "Draft is too long for an offline share URL. Trim a few sentences or use Copy text."
+          : currentLang === "zh"
+            ? "生成分享链接失败，请改用「复制正文」。"
+            : "Could not encode share link. Please use Copy text instead.",
+        true
+      );
+    }
+  });
+
+  document.getElementById("btn-copy-agent-brief")?.addEventListener("click", async (ev) => {
+    await copyTextWithFeedback(ev.currentTarget, buildAgentFixBrief());
+  });
+
+  const stepFinding = (delta) => {
+    const count = lastRenderedAudit?.findings?.length || 0;
+    if (count === 0) return;
+    if (focusedFindingIdx < 0 || focusedFindingIdx >= count) {
+      focusedFindingIdx = delta > 0 ? 0 : count - 1;
+    } else {
+      focusedFindingIdx = (focusedFindingIdx + delta + count) % count;
+    }
+    if (viewMode === "edit" && !binaryAuditResult) setViewMode("proof");
+    renderWorkbench();
+    const notesEl = document.getElementById("notes-container");
+    const proofView = document.getElementById("proof-view");
+    notesEl?.querySelector(`[data-note-idx="${focusedFindingIdx}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    proofView?.querySelector(`[data-finding-idx="${focusedFindingIdx}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
+
+  document.getElementById("btn-prev-finding")?.addEventListener("click", () => stepFinding(-1));
+  document.getElementById("btn-next-finding")?.addEventListener("click", () => stepFinding(1));
+  document.getElementById("ai-token-link")?.addEventListener("click", () => {
+    if (isCloudSignedIn()) {
+      openInlineCloudKeyPanelFallback();
+    } else {
+      openAuthModal();
+    }
+  });
+  document.getElementById("wb-nudge-cloud-btn")?.addEventListener("click", () => {
+    if (isCloudSignedIn()) {
+      document.getElementById("cloud-token-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      openAuthModal();
+    }
+  });
+  document.getElementById("auth-modal-close")?.addEventListener("click", () => closeAuthModal({ clearPending: true }));
+  document.getElementById("auth-modal-backdrop")?.addEventListener("click", (ev) => {
+    if (ev.target === ev.currentTarget) closeAuthModal({ clearPending: true });
+  });
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") {
+      const modal = document.getElementById("auth-modal-backdrop");
+      if (modal && !modal.hidden) closeAuthModal({ clearPending: true });
+    }
+  });
+
+  // Paste directly into workbench when not typing in another field
+  document.addEventListener("paste", (ev) => {
+    const active = document.activeElement;
+    if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) return;
+    const wbEl = document.getElementById("workbench");
+    if (!wbEl) return;
+    const rect = wbEl.getBoundingClientRect();
+    const wbInView = rect.bottom > 0 && rect.top < window.innerHeight;
+    if (!wbInView && !wbEl.contains(active)) return;
+    const pasted = ev.clipboardData?.getData("text/plain");
+    if (!pasted || !pasted.trim()) return;
+    ev.preventDefault();
+    uploadSeq += 1;
+    clearWorkbenchTransientPanels();
+    clearSpecimenStateReset();
+    binaryAuditResult = null;
+    lastUploadedFile = null;
+    lastUploadedBinaryBuffer = null;
+    uploadedOriginalText = null;
+    customRuleTitle = "user-draft";
+    currentModality = inferPastedTextModality(pasted, currentPackId);
+    currentFilename = `pasted-draft.${currentModality === "markdown" ? "md" : currentModality}`;
+    activeSpecimen = {
+      id: "user-draft",
+      pack: currentPackId,
+      filename: currentFilename,
+      modality: currentModality,
+      bad: pasted,
+      trap: null,
+      good: null,
+    };
+    baselineText = pasted;
+    currentText = pasted;
+    focusedFindingIdx = -1;
+    setViewMode("proof");
+    updateSpecimenRailSelection();
+    renderWorkbench();
+  });
+
   document.getElementById("btn-ai-review")?.addEventListener("click", () => runCloudAction("review"));
   document.getElementById("btn-ai-deslop")?.addEventListener("click", () => runCloudAction("deslop"));
   document.getElementById("btn-voice-offline")?.addEventListener("click", handleVoiceOfflineClick);
@@ -3671,12 +6620,104 @@ function init() {
     renderSavedVoiceState();
   });
   document.getElementById("free-token-form")?.addEventListener("submit", handleFreeTokenSubmit);
+  document.getElementById("token-otp-verify-btn")?.addEventListener("click", handleOtpVerifySubmit);
+  document.getElementById("token-otp-input")?.addEventListener("input", (ev) => {
+    const inp = ev.currentTarget;
+    const cleaned = String(inp.value || "").replace(/\D/g, "").slice(0, 6);
+    if (inp.value !== cleaned) inp.value = cleaned;
+    if (cleaned.length === 6) {
+      handleOtpVerifySubmit();
+    }
+  });
+  document.getElementById("token-otp-input")?.addEventListener("paste", (ev) => {
+    const inp = ev.currentTarget;
+    const digits = String(ev.clipboardData?.getData("text/plain") || "").replace(/\D/g, "").slice(0, 6);
+    if (digits) {
+      ev.preventDefault();
+      inp.value = digits;
+      if (digits.length === 6) {
+        handleOtpVerifySubmit();
+      }
+    }
+  });
+  document.getElementById("token-otp-input")?.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      handleOtpVerifySubmit();
+    }
+  });
+  document.getElementById("token-otp-change-btn")?.addEventListener("click", () => {
+    if (otpResendTimer) {
+      clearInterval(otpResendTimer);
+      otpResendTimer = null;
+    }
+    const emailInput = document.getElementById("token-email-input");
+    const submitBtn = document.getElementById("token-submit-btn");
+    const otpStep = document.getElementById("token-otp-step");
+    const outBox = document.getElementById("token-output-box");
+    if (emailInput) {
+      emailInput.readOnly = false;
+      emailInput.focus();
+    }
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = I18N[currentLang]?.["cloud.tokenBtn"] || (currentLang === "zh" ? "发验证码" : "Send code");
+    }
+    if (otpStep) otpStep.hidden = true;
+    if (outBox) outBox.hidden = true;
+  });
+  document.getElementById("legacy-key-bind-form")?.addEventListener("submit", handleLegacyKeyBindSubmit);
+  document.getElementById("topbar-account-btn")?.addEventListener("click", () => {
+    if (isCloudSignedIn()) {
+      document.getElementById("cloud-token-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      openAuthModal();
+    }
+  });
   document.getElementById("waitlist-form")?.addEventListener("submit", handleWaitlistSubmit);
 
-  window.addEventListener("hashchange", handleRuleHash);
+  captureEntrySource();
+  try {
+    const hash = String(window.location.hash || "");
+    const params = new URLSearchParams(window.location.search || "");
+    const outBox = document.getElementById("token-output-box");
+    const authParam = params.get("auth") || "";
+    if (hash.startsWith("#auth-error=") && outBox) {
+      const code = decodeURIComponent(hash.slice("#auth-error=".length));
+      outBox.hidden = false;
+      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${
+        currentLang === "zh" ? `登录未完成（${escapeHtmlSafe(code)}），请改用邮箱验证码登录。` : `Sign-in failed (${escapeHtmlSafe(code)}). Use email code sign-in below.`
+      }</p>`;
+      document.getElementById("cloud-token-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if ((authParam === "link" || authParam === "github-link") && outBox) {
+      const providerName = authParam === "github-link" ? "GitHub" : "Google";
+      outBox.hidden = false;
+      outBox.textContent =
+        currentLang === "zh"
+          ? `检测到同邮箱已有账号。用下方邮箱验证码验证一次后，会自动绑定你的 ${providerName} 账号。`
+          : `An account already exists for this email. Verify with a 6-digit email code below to finish linking ${providerName}.`;
+    }
+  } catch {
+    // ignore URL parsing errors
+  }
+
+  window.addEventListener("hashchange", () => {
+    handleWorkbenchHash();
+  });
 
   applyI18n(false);
-  handleRuleHash();
+  startHeroProofTimer();
+  (async () => {
+    await refreshCloudSession();
+    await finalizePendingOAuthLinkIfNeeded();
+    await consumePendingWorkbenchIntent();
+  })();
+  handleWorkbenchHash();
+  ensurePocketModelLoaded().then((loaded) => {
+    if (loaded && !binaryAuditResult) {
+      renderWorkbench();
+    }
+  });
 }
 
 init();

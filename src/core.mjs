@@ -24,6 +24,12 @@ const EXT_TO_MODALITY = {
   ".svg": "svg",
   ".docx": "docx",
   ".pptx": "pptx",
+  ".pdf": "pdf",
+  ".png": "image",
+  ".jpg": "image",
+  ".jpeg": "image",
+  ".webp": "image",
+  ".gif": "image",
 };
 
 export function detectModality(filename = "") {
@@ -35,10 +41,88 @@ export function detectModality(filename = "") {
 }
 
 export function defaultPackForModality(modality) {
-  if (modality === "html" || modality === "css" || modality === "jsx" || modality === "svg" || modality === "pptx") {
+  if (
+    modality === "html" ||
+    modality === "css" ||
+    modality === "jsx" ||
+    modality === "svg" ||
+    modality === "pptx" ||
+    modality === "pdf" ||
+    modality === "image"
+  ) {
     return "deck-and-ui";
   }
   return "business-brief";
+}
+
+export function codePointLength(str) {
+  let count = 0;
+  const s = String(str || "");
+  for (let i = 0; i < s.length; i += 1) {
+    const c = s.charCodeAt(i);
+    if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) {
+      const c2 = s.charCodeAt(i + 1);
+      if (c2 >= 0xdc00 && c2 <= 0xdfff) i += 1;
+    }
+    count += 1;
+  }
+  return count;
+}
+
+export function sliceCodepoints(str, maxCp) {
+  const s = String(str || "");
+  if (maxCp <= 0) return "";
+  let count = 0;
+  let i = 0;
+  while (i < s.length && count < maxCp) {
+    const c = s.charCodeAt(i);
+    if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) {
+      const c2 = s.charCodeAt(i + 1);
+      if (c2 >= 0xdc00 && c2 <= 0xdfff) i += 2;
+      else i += 1;
+    } else {
+      i += 1;
+    }
+    count += 1;
+  }
+  return s.slice(0, i);
+}
+
+export function isLongFormHtmlDocument(rawHtml) {
+  const raw = String(rawHtml || "");
+  if (!raw.trim()) return false;
+  if (/(?:class\s*=\s*["'][^"']*\b(?:reveal|slides)\b|data-slide\b)/i.test(raw)) return false;
+  const slideCls = raw.match(/class\s*=\s*["'][^"']*\bslide\b/gi) || [];
+  if (slideCls.length >= 2) return false;
+  const zones = buildZones(raw, "html");
+  const visible = zones.proseLogical ?? zones.prose;
+  const cjkChars = (visible.match(/[\u4e00-\u9fff]/gu) || []).length;
+  const enWords = visible.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
+  if (cjkChars >= 600 || enWords >= 250) return true;
+  const blocks = visible.split(/\n+| {5,}/).map((b) => b.trim()).filter(Boolean);
+  let substantialBlocks = 0;
+  for (const blk of blocks) {
+    const blkCjk = (blk.match(/[\u4e00-\u9fff]/gu) || []).length;
+    const blkEn = blk.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
+    if (blkCjk >= 20 || blkEn >= 14) substantialBlocks += 1;
+    if (substantialBlocks >= 2) return true;
+  }
+  return false;
+}
+
+export function hasEmbeddedUiMarkup(rawMarkdown) {
+  let s = maskMarkdownFences(String(rawMarkdown || ""), new Set());
+  s = s.replace(/`[^`\n]+`/g, " ");
+  const uiTags = s.match(/<(?:(?:div|section|article|header|nav|button)\b[^>]*(?:class(?:Name)?=|style=)|a\b[^>]*(?:class(?:Name)?=|style=|href=["'](?:#|javascript:|\s*["']))|svg\b[^>]*>)/gi) || [];
+  return uiTags.length >= 2;
+}
+
+export function computeRulesetHash(pack) {
+  const parts = (pack?.rules || [])
+    .map((r) => `${r.id}:${r.severity || "warning"}`)
+    .sort()
+    .join("|");
+  return fnv1aHex(`${ENGINE_VERSION}|${pack?.id || ""}|${parts}`);
 }
 
 export function resolveEffectivePack(packId, packsById, config = {}) {
@@ -173,31 +257,77 @@ function buildCodePointPrefix(text) {
   return prefix;
 }
 
-function isSentenceBreakAt(text, idx) {
+export function isSentenceBreakAt(text, idx) {
   const ch = text[idx];
   if (!ch || !/[\n.!?。！？]/.test(ch)) return false;
   if (ch !== ".") return true;
   const prev = idx > 0 ? text[idx - 1] : "";
   const next = idx + 1 < text.length ? text[idx + 1] : "";
-  if (/\d/.test(prev) && /\d/.test(next)) return false;
+  if (/[0-9]/.test(prev) && /[0-9]/.test(next)) return false;
+  if (/[A-Za-z0-9_-]/.test(prev) && /[a-z0-9]/.test(next)) return false;
   const beforeWord = text.slice(Math.max(0, idx - 6), idx);
   if (/(?:^|\s)(?:vs|v|approx|e\.g|i\.e)$/i.test(beforeWord)) return false;
   return true;
 }
 
-function enclosingSentence(text, start, end) {
-  let left = start;
-  while (left > 0 && !isSentenceBreakAt(text, left - 1)) {
-    left -= 1;
+function buildSentenceBreakIndices(text) {
+  const breaks = [];
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i];
+    if (ch === "\n" || ch === "." || ch === "!" || ch === "?" || ch === "。" || ch === "！" || ch === "？") {
+      if (isSentenceBreakAt(text, i)) breaks.push(i);
+    }
   }
-  let right = end;
-  while (right < text.length && !isSentenceBreakAt(text, right)) {
-    right += 1;
+  return breaks;
+}
+
+function enclosingSentence(text, start, end, breakIndices = null) {
+  let left = 0;
+  let right = text.length;
+  if (Array.isArray(breakIndices) && breakIndices.length > 0) {
+    // Upper bound for last break strictly before `start`
+    let lo = 0;
+    let hi = breakIndices.length - 1;
+    let prevBreak = -1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (breakIndices[mid] < start) {
+        prevBreak = breakIndices[mid];
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    if (prevBreak !== -1) left = prevBreak + 1;
+
+    // Lower bound for first break >= end
+    lo = 0;
+    hi = breakIndices.length - 1;
+    let nextBreak = -1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (breakIndices[mid] >= end) {
+        nextBreak = breakIndices[mid];
+        hi = mid - 1;
+      } else {
+        lo = mid + 1;
+      }
+    }
+    if (nextBreak !== -1) right = nextBreak;
+  } else {
+    left = start;
+    while (left > 0 && !isSentenceBreakAt(text, left - 1)) {
+      left -= 1;
+    }
+    right = end;
+    while (right < text.length && !isSentenceBreakAt(text, right)) {
+      right += 1;
+    }
   }
   if (right < text.length && /[.!?。！？]/.test(text[right])) {
     right += 1;
   }
-  return text.slice(left, right).trim().slice(0, 240);
+  return sliceCodepoints(text.slice(left, right).trim(), 240);
 }
 
 /**
@@ -246,11 +376,138 @@ export function parseSuppressions(text) {
   return { byTargetLine, directives };
 }
 
+const HTML_ENTITY_NAMED = {
+  lt: "<",
+  gt: ">",
+  amp: "&",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+  mdash: "—",
+  ndash: "–",
+  hellip: "…",
+};
+
+const HTML_ENTITY_RE = /&(?:#([0-9]+)|#x([0-9a-fA-F]+)|lt|gt|amp|quot|apos|nbsp|mdash|ndash|hellip);/gi;
+
+function decodeEntityToken(m, dec, hex) {
+  if (dec) {
+    const cp = Number(dec);
+    return cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : " ";
+  }
+  if (hex) {
+    const cp = parseInt(hex, 16);
+    return cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : " ";
+  }
+  return HTML_ENTITY_NAMED[m.slice(1, -1).toLowerCase()] || null;
+}
+
+function decodeHtmlEntitiesPreservingLength(str) {
+  return String(str).replace(HTML_ENTITY_RE, (m, dec, hex) => {
+    const ch = decodeEntityToken(m, dec, hex);
+    if (!ch) return m;
+    if (ch.length <= m.length) return ch + " ".repeat(m.length - ch.length);
+    return sliceCodepoints(ch, 1) + " ".repeat(Math.max(0, m.length - sliceCodepoints(ch, 1).length));
+  });
+}
+
+function decodeHtmlWithOffsetMap(str) {
+  const s = String(str || "");
+  if (!s.includes("&")) return null;
+  let out = "";
+  const mapStarts = [];
+  const mapEnds = [];
+  let last = 0;
+  let matchedAny = false;
+  HTML_ENTITY_RE.lastIndex = 0;
+  let m;
+  while ((m = HTML_ENTITY_RE.exec(s)) !== null) {
+    for (let k = last; k < m.index; k += 1) {
+      out += s[k];
+      mapStarts.push(k);
+      mapEnds.push(k + 1);
+    }
+    const ch = decodeEntityToken(m[0], m[1], m[2]);
+    if (ch !== null) {
+      matchedAny = true;
+      for (let u = 0; u < ch.length; u += 1) {
+        out += ch[u];
+        mapStarts.push(m.index);
+        mapEnds.push(m.index + m[0].length);
+      }
+    } else {
+      for (let k = m.index; k < m.index + m[0].length; k += 1) {
+        out += s[k];
+        mapStarts.push(k);
+        mapEnds.push(k + 1);
+      }
+    }
+    last = m.index + m[0].length;
+  }
+  if (!matchedAny) return null;
+  for (let k = last; k < s.length; k += 1) {
+    out += s[k];
+    mapStarts.push(k);
+    mapEnds.push(k + 1);
+  }
+  return { text: out, mapStarts, mapEnds };
+}
+
+function maskMarkdownFences(text, proseFenceSet) {
+  const lines = text.split("\n");
+  const out = [];
+  let fenceChar = null;
+  let fenceLen = 0;
+  let keepBody = false;
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const rawLine = lines[i];
+    const noCr = rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine;
+    const cr = rawLine.endsWith("\r") ? "\r" : "";
+    const trimmed = noCr.trim();
+
+    if (!fenceChar) {
+      const m = noCr.match(/^[ \t]*(`{3,}|~{3,})(.*)$/);
+      if (m) {
+        fenceChar = m[1][0];
+        fenceLen = m[1].length;
+        const lang = m[2].trim().split(/\s+/)[0].toLowerCase();
+        keepBody = proseFenceSet.size > 0 && proseFenceSet.has(lang);
+        out.push(" ".repeat(noCr.length) + cr);
+        continue;
+      }
+      out.push(rawLine);
+    } else {
+      const closeRe = new RegExp(`^[ \\t]*${fenceChar}{${fenceLen},}[ \\t]*$`);
+      if (closeRe.test(trimmed)) {
+        fenceChar = null;
+        fenceLen = 0;
+        keepBody = false;
+        out.push(" ".repeat(noCr.length) + cr);
+      } else if (keepBody) {
+        out.push(rawLine);
+      } else {
+        out.push(" ".repeat(noCr.length) + cr);
+      }
+    }
+  }
+  return out.join("\n");
+}
+
+const HTML_BLOCK_BREAK_TAG_RE = /^<\/(?:p|div|li|td|th|tr|h[1-6]|section|article|header|footer|aside|blockquote|dt|dd|button|title)\b|^<br\b/i;
+
 /**
  * Build length-preserving masked views so character offsets match raw text 1:1.
  */
-export function buildZones(rawText, modality) {
+export function buildZones(rawText, modality, options = {}) {
   const normText = String(rawText || "").replace(/\uFEFF/g, " ");
+  const proseFenceSet = new Set(
+    Array.isArray(options?.proseFences)
+      ? options.proseFences.map((s) => String(s || "").trim().toLowerCase()).filter(Boolean)
+      : []
+  );
+  const maskBlockquotes = options?.maskBlockquotes !== false;
+
   // Raw zone masks only inline dislop-ignore comment directives themselves
   const raw = normText
     .replace(/<!--\s*dislop-[\s\S]*?-->/gi, preserveLinesBlank)
@@ -271,35 +528,49 @@ export function buildZones(rawText, modality) {
   if (modality === "markdown" || modality === "text") {
     // YAML frontmatter
     prose = prose.replace(/^---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?=\r?\n|$)/, preserveLinesBlank);
-    // Fenced code blocks (closed pairs first, then any unclosed trailing fence)
-    prose = prose.replace(/```[\s\S]*?```/g, preserveLinesBlank);
-    prose = prose.replace(/~~~[\s\S]*?~~~/g, preserveLinesBlank);
-    prose = prose.replace(/^[ \t]*```[\s\S]*$/m, preserveLinesBlank);
-    prose = prose.replace(/^[ \t]*~~~[\s\S]*$/m, preserveLinesBlank);
+    // Fenced code blocks (supports optional proseFences allowlist)
+    prose = maskMarkdownFences(prose, proseFenceSet);
     // Inline code spans & strikethrough
     prose = prose.replace(/`[^`\n]+`/g, preserveLinesBlank);
     prose = prose.replace(/~~[^~\n]+~~/g, preserveLinesBlank);
     // Blockquotes (quoted external material)
-    prose = prose.replace(/^[ \t]*>.*$/gm, preserveLinesBlank);
-    // Markdown link targets ](url) while keeping visible [label]
-    prose = prose.replace(/\]\([^)\n]+\)/g, (m) => "]" + preserveLinesBlank(m.slice(1)));
-  } else if (modality === "html" || modality === "jsx" || modality === "svg") {
-    // Strip tags in prose zone while preserving inner text offsets
-    prose = prose.replace(/<[^>]+>/g, preserveLinesBlank);
+    if (maskBlockquotes) {
+      prose = prose.replace(/^[ \t]*>.*$/gm, preserveLinesBlank);
+    } else {
+      prose = prose.replace(/^[ \t]*(?:>[ \t]?)+/gm, preserveLinesBlank);
+    }
+    // Markdown link targets ](url) while keeping visible [label] and opening `(` for link lookahead
+    prose = prose.replace(/\]\([^)\n]+\)/g, (m) => "](" + preserveLinesBlank(m.slice(2)));
+  }
+  let proseLogical = null;
+  let proseMap = null;
+  if (modality === "html" || modality === "jsx" || modality === "svg") {
+    // Strip tags in prose zone while preserving offsets and inserting newlines at block boundaries
+    prose = prose.replace(/<[^>]+>/g, (tag) => {
+      if (HTML_BLOCK_BREAK_TAG_RE.test(tag) && tag.length >= 1) {
+        return preserveLinesBlank(tag.slice(0, -1)) + "\n";
+      }
+      return preserveLinesBlank(tag);
+    });
+    const decoded = decodeHtmlWithOffsetMap(prose);
+    if (decoded) {
+      proseLogical = decoded.text.replace(/https?:\/\/[^\s)>"'`]+/g, (u) => " ".repeat(u.length));
+      proseMap = { starts: decoded.mapStarts, ends: decoded.mapEnds };
+    }
+    prose = decodeHtmlEntitiesPreservingLength(prose);
   }
   // Mask bare URLs in prose
   prose = prose.replace(/https?:\/\/[^\s)>"'`]+/g, preserveLinesBlank);
 
   if (modality === "html" || modality === "jsx" || modality === "svg") {
-    uiText = uiText.replace(/<[^>]+>/g, (tag) => {
-      return preserveLinesBlank(tag);
-    });
+    uiText = uiText.replace(/<[^>]+>/g, (tag) => preserveLinesBlank(tag));
+    uiText = decodeHtmlEntitiesPreservingLength(uiText);
   }
 
-  return { raw, prose, "ui-text": uiText };
+  return { raw, prose, proseLogical, proseMap, "ui-text": uiText };
 }
 
-function isAllowedMatch(matchText, allowList = []) {
+export function isAllowedMatch(matchText, allowList = []) {
   if (!allowList || allowList.length === 0) return false;
   const lower = matchText.toLowerCase();
   return allowList.some((item) => lower.includes(String(item).toLowerCase()));
@@ -309,22 +580,40 @@ function isAllowedMatch(matchText, allowList = []) {
 
 function probeNegationPivot(proseText, rawText) {
   const hits = [];
-  // Chinese: 这不是/这绝非/并非只是/不仅仅是 A，而是/更是 B / 与其说 A，不如说 B
-  const zhRegex = /(?:(?:这|那|它)?(?:(?:并)?不(?:是|只是|仅仅?是)|绝非|并非(?:只是)?)|与其说是?)([^，。！？；\n]{1,22})[，,；—]+\s*(?:而是|更是|不如说是?)([^。！？；\n]{1,28})/gu;
-  const zhRhetoricalHead = /^(?:(?:这|那|它)|绝非|并非|与其|并?不(?:只是|仅仅?是))/;
+  const checkConcreteZh = (clauseA, clauseB, rawSlice) =>
+    (/\d/.test(clauseA) && /\d/.test(clauseB)) ||
+    /`/.test(rawSlice) ||
+    /\.[a-z]{2,4}\b/i.test(rawSlice) ||
+    /(?:第一次|第二次|站台|号楼|排第|星期|周[一二三四五六日天])/.test(rawSlice);
+
+  // Chinese 3-part: (这/那/它)(既)不是 A，也不是 B，而是/更是 C
+  const zhTripleRegex = /(?:(?:这|那|它)?(?:既)?(?:并)?不(?:是|只是|仅仅?是)|绝非|并非(?:只是)?)([^，。！？；\n]{1,22})[，,；—]+\s*也(?:并)?不(?:是|只是|仅仅?是)([^，。！？；\n]{1,22})[，,；—]+\s*(?:而是|更是)([^。！？；\n]{1,28})/gu;
+  // Chinese 2-part: 不是/绝非/并非/与其说/不仅(让/使/能/可以/在于/停留在)/不在(于)/不(搞/做/靠) A，而是/更是/不如说/而是在(于) B
+  const zhRegex = /(?:(?:这|那|它)?(?:(?:并)?不(?:是|只是|仅仅?是|仅(?:让|使|能|可以|在于|停留在)|在(?:于)?|搞|做|靠)|绝非|并非(?:只是)?)|与其说是?)([^，。！？；\n]{1,22})[，,；—]+\s*(?:而(?:是在(?:于)?|是|靠)|更(?:是|能|在于|让|使)|不如说是?)([^。！？；\n]{1,28})/gu;
+  const zhRhetoricalHead = /^(?:(?:这|那|它)|绝非|并非|与其|并?不(?:只是|仅仅?是|仅(?:让|使|能|可以|在于|停留在)|在(?:于)?|搞|做|靠))/;
   const zhFactualRootCause = /(?:报错|故障|原因|超时|磁盘|内存|耗尽|端口|进程|导致|因为|[A-Za-z_][A-Za-z0-9_-]{2,})/;
+  const coveredSpans = [];
+
   let m;
+  while ((m = zhTripleRegex.exec(proseText)) !== null) {
+    const clauseA = (m[1] || "").trim();
+    const clauseB = (m[2] || "").trim();
+    const clauseC = (m[3] || "").trim();
+    const rawSlice = rawText.slice(m.index, m.index + m[0].length);
+    if (checkConcreteZh(clauseA + clauseB, clauseC, rawSlice) || clauseC.length > 26 || !clauseA || !clauseB || !clauseC) {
+      continue;
+    }
+    coveredSpans.push([m.index, m.index + m[0].length]);
+    hits.push({ index: m.index, length: m[0].length });
+  }
+
   while ((m = zhRegex.exec(proseText)) !== null) {
+    if (coveredSpans.some(([s, e]) => m.index >= s && m.index < e)) continue;
     const clauseA = (m[1] || "").trim();
     const clauseB = (m[2] || "").trim();
     const rawSlice = rawText.slice(m.index, m.index + m[0].length);
     const contextBefore = rawText.slice(Math.max(0, m.index - 12), m.index);
-    const bothHaveConcrete =
-      (/\d/.test(clauseA) && /\d/.test(clauseB)) ||
-      /`/.test(rawSlice) ||
-      /\.[a-z]{2,4}\b/i.test(rawSlice) ||
-      /(?:第一次|第二次|站台|号楼|排第|星期|周[一二三四五六日天])/.test(rawSlice);
-    if (bothHaveConcrete || clauseB.length > 26 || !clauseA || !clauseB) {
+    if (checkConcreteZh(clauseA, clauseB, rawSlice) || clauseB.length > 26 || !clauseA || !clauseB) {
       continue;
     }
     if (!zhRhetoricalHead.test(m[0]) && zhFactualRootCause.test(contextBefore + rawSlice)) {
@@ -359,38 +648,49 @@ function probeStaccatoRun(proseText) {
     // Skip headings, lists, tables
     if (/^(?:#{1,6}\s|[-*+]\s|\d+[.)]\s|\|)/.test(trimmed)) continue;
 
-    // Collect sentences with offsets inside paragraph
-    const sentRegex = /[^.!?。！？\n]+[.!?。！？]/gu;
+    // Collect sentences with offsets inside paragraph using decimal/version-safe boundary checks
     const sentences = [];
-    let sm;
-    while ((sm = sentRegex.exec(para)) !== null) {
-      const s = sm[0].trim();
-      if (!s) continue;
+    let i = 0;
+    const n = para.length;
+    while (i < n) {
+      while (i < n && /[\s\r\n]/.test(para[i])) i += 1;
+      if (i >= n) break;
+      const segStart = i;
+      while (i < n && para[i] !== "\n" && !(isSentenceBreakAt(para, i) && para[i] !== "\n")) {
+        i += 1;
+      }
+      if (i >= n || para[i] === "\n") {
+        // Non-terminated line fragment breaks any staccato run
+        sentences.push({ start: pm.index + segStart, end: pm.index + i, isShort: false });
+        if (i < n && para[i] === "\n") i += 1;
+        continue;
+      }
+      while (i < n && /[.!?。！？]/.test(para[i])) i += 1;
+      const s = para.slice(segStart, i).trim();
       const body = s.replace(/[.!?。！？]+$/u, "").trim();
-      if (!body) continue;
-      const cjkCount = (body.match(/[\u4e00-\u9fff]/gu) || []).length;
-      const enWords = body.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
-      const isShort =
-        (cjkCount >= 2 && cjkCount <= 6 && enWords <= 1 && !/[，,：:；;]/.test(body)) ||
-        (cjkCount === 0 && enWords >= 2 && enWords <= 4 && !/[,:;]/.test(body));
-      sentences.push({
-        start: pm.index + sm.index + sm[0].indexOf(s),
-        end: pm.index + sm.index + sm[0].indexOf(s) + s.length,
-        isShort,
-      });
+      if (body) {
+        const cjkCount = (body.match(/[\u4e00-\u9fff]/gu) || []).length;
+        const enWords = body.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
+        const isShort =
+          (cjkCount >= 2 && cjkCount <= 6 && enWords <= 1 && !/[，,：:；;]/.test(body)) ||
+          (cjkCount === 0 && enWords >= 2 && enWords <= 4 && !/[,:;]/.test(body));
+        const leadInSeg = para.slice(segStart, i).indexOf(s);
+        const start = pm.index + segStart + Math.max(0, leadInSeg);
+        sentences.push({ start, end: start + s.length, isShort });
+      }
     }
 
     let runStart = -1;
     let runCount = 0;
-    for (let i = 0; i <= sentences.length; i += 1) {
-      const cur = sentences[i];
+    for (let k = 0; k <= sentences.length; k += 1) {
+      const cur = sentences[k];
       if (cur && cur.isShort) {
-        if (runCount === 0) runStart = i;
+        if (runCount === 0) runStart = k;
         runCount += 1;
       } else {
         if (runCount >= 3) {
           const first = sentences[runStart];
-          const last = sentences[i - 1];
+          const last = sentences[k - 1];
           hits.push({ index: first.start, length: last.end - first.start });
         }
         runCount = 0;
@@ -400,21 +700,34 @@ function probeStaccatoRun(proseText) {
   return hits;
 }
 
+const ZH_TRIAD_SLOGAN_ROOTS = /(?:高效|精准|全面|智能|可靠|协同|赋能|闭环|引领|抓手|稳健|灵活|深度|多元|生态|敏捷|极致|易用|统筹|兼顾|推进|提质|增效|创新|优质|卓越|无缝|安全|稳定|科学|规范|统一|便捷|智慧|领先|透明|可控|弹性|全方位|立体)/u;
+
 function probeZhFourCharTriad(proseText) {
   const hits = [];
-  const triadRegex = /(?:^|[，。！？；：、“‘（\s]|(?:实现|具备|坚持|保持|做到|形成|打造|追求|提供|确保|了|是|的|以|向|为))([\u4e00-\u9fff]{4})[、，,]\s*([\u4e00-\u9fff]{4})[、，,]\s*([\u4e00-\u9fff]{4})(?=$|[，。！？；：、”’）\s]|[的地等])/gu;
-  const entitySuffix = /(?:大学|学院|学校|公司|集团|银行|医院|中心|委员|政府|部门|机场|车站|高速|铁路|[省市区县镇乡])$/u;
+  const triadRegex = /(?:^|[，。！？；：、“‘（\s]|(?:实现|具备|坚持|保持|做到|形成|打造|追求|提供|确保|了|是|的|以|向|为))([\u4e00-\u9fff]{4})[、，,·・]\s*([\u4e00-\u9fff]{4})[、，,·・]\s*([\u4e00-\u9fff]{4})(?=$|[，。！？；：、”’）\s·・]|[的地等])/gu;
+  const entitySuffix = /(?:大学|学院|学校|公司|集团|银行|医院|中心|委员|政府|部门|机场|车站|高速|铁路|[省市区县镇乡]|编号|日期|时间|记录|清单|台账|出处|明细|汇总|报表|状态|字段|开关|配置|步骤|检查|规则|目录|路径|文档|手册|模板|脚本|接口|模块|节点|日志|指标|参数|列表|表格|工作表|表|拓扑|矩阵|样例|资产|结果|组合|读取|创建|输入|输出|去重|占用|冲回)$/u;
   const brokenSlice = /[的了在或与及把被]/u;
   let m;
   while ((m = triadRegex.exec(proseText)) !== null) {
     const items = [m[1], m[2], m[3]];
     if (items.some((w) => entitySuffix.test(w) || brokenSlice.test(w))) continue;
-    const triadStr = `${m[1]}${proseText.slice(m.index).match(/[、，,]/)[0]}${m[2]}`;
     const startOffset = m.index + m[0].indexOf(m[1]);
+    const endOffset = m.index + m[0].length;
     const prevChar = startOffset > 0 ? proseText[startOffset - 1] : "";
     if (prevChar === "《") continue;
-    void triadStr;
-    hits.push({ index: startOffset, length: m.index + m[0].length - startOffset });
+    const before = proseText.slice(Math.max(0, startOffset - 24), startOffset);
+    const after = proseText.slice(endOffset, Math.min(proseText.length, endOffset + 24));
+    // Exempt 4+ item enumerations
+    if (/[\u4e00-\u9fff]{4}\s*[、，,·・]\s*$/.test(before) || /^\s*[、，,·・]\s*[\u4e00-\u9fff]{4}/.test(after)) {
+      continue;
+    }
+    // Exempt explicit technical/field enumeration context
+    if (/(?:包括|包含|涵盖|设有|分为|列出|涉及|字段为|表名为|包含如下)[：:]?\s*$/.test(before) && /^\s*等/.test(after)) {
+      continue;
+    }
+    const sloganMatches = items.filter((w) => ZH_TRIAD_SLOGAN_ROOTS.test(w)).length;
+    if (sloganMatches < 2) continue;
+    hits.push({ index: startOffset, length: endOffset - startOffset });
   }
   return hits;
 }
@@ -444,15 +757,16 @@ function probeUnsourcedAttribution(proseText, rawText) {
 
 function probeBoldLeadListWall(proseText, rawText, minRun = 4) {
   const hits = [];
-  const lines = rawText.split(/\r?\n/);
+  const rawLines = rawText.split("\n");
   let offset = 0;
   let runStartOffset = 0;
   let runEndOffset = 0;
   let runCount = 0;
 
-  for (let i = 0; i <= lines.length; i += 1) {
-    const line = i < lines.length ? lines[i] : "";
-    const proseLine = i < lines.length ? proseText.slice(offset, offset + line.length) : "";
+  for (let i = 0; i <= rawLines.length; i += 1) {
+    const rawLine = i < rawLines.length ? rawLines[i] : "";
+    const line = rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine;
+    const proseLine = i < rawLines.length ? proseText.slice(offset, offset + line.length) : "";
     const isBullet =
       proseLine.trim().length > 0 &&
       /^\s*(?:[-*+]|\d+[.)])\s+\*\*([^*\n`]{2,36})\*\*\s*[:：—-]/.test(line);
@@ -460,13 +774,13 @@ function probeBoldLeadListWall(proseText, rawText, minRun = 4) {
       if (runCount === 0) runStartOffset = offset + line.search(/\S/);
       runCount += 1;
       runEndOffset = offset + line.length;
-    } else if (i === lines.length || line.trim() !== "") {
+    } else if (i === rawLines.length || line.trim() !== "") {
       if (runCount >= minRun) {
         hits.push({ index: runStartOffset, length: runEndOffset - runStartOffset });
       }
       runCount = 0;
     }
-    offset += line.length + 1;
+    offset += rawLine.length + 1;
   }
   return hits;
 }
@@ -566,24 +880,112 @@ function countTextUnits(s) {
   return countTextUnitsTenths(s) / 10;
 }
 
+export function stripParentheticals(str) {
+  const out = [];
+  let depth = 0;
+  for (let i = 0; i < str.length; i += 1) {
+    const ch = str[i];
+    if (ch === "(" || ch === "（") {
+      depth += 1;
+      out.push(" ");
+    } else if ((ch === ")" || ch === "）") && depth > 0) {
+      depth -= 1;
+      out.push(" ");
+    } else if (depth > 0 && ch !== "\n" && ch !== "\r") {
+      out.push(" ");
+    } else {
+      out.push(ch);
+    }
+  }
+  return out.join("");
+}
+
 function countConcretenessAnchors(rawSlice) {
   // Strip HTML comments before counting concrete anchors
   const s = String(rawSlice || "").replace(/<!--[\s\S]*?-->/g, " ");
   let count = 0;
   count += (s.match(/(?<![A-Za-z0-9_])\d+(?:[.,:]\d+)?%?(?![A-Za-z0-9_])/g) || []).length;
+  count += (s.match(/(?<![A-Za-z0-9_])[A-Z]{1,4}-?\d{1,3}(?![A-Za-z0-9_])/g) || []).length;
   count += (s.match(/`[^`\n]+`/g) || []).length;
   count += (s.match(/[/\\][A-Za-z0-9._-]+\.[a-z]{1,5}(?![A-Za-z0-9_])/gi) || []).length;
   count += (s.match(/(?<![A-Za-z0-9_])(?:PR\s*#?\d+|v\d+\.\d+|HTTP\s*\d{3}|UTC|Q[1-4])(?![A-Za-z0-9_])/g) || []).length;
   count += (
     s.match(
-      /(?:[一二三四五六七八九十两百千万]+[天月年次个张条座块斤米秒分时]|周[一二三四五六日天]|昨天|昨晚|今早|上周|下周|去年|前年|清晨|傍晚|凌晨|午后|十月|十一月|十二月)/gu
+      /(?:[一二三四五六七八九十两百千万]+[天月年次个张条座块斤米秒分时人颗枚格炉瓶对]|周[一二三四五六日天]|昨天|昨晚|今早|上周|下周|去年|前年|清晨|傍晚|凌晨|午后|十月|十一月|十二月)/gu
     ) || []
   ).length;
+  count += (s.match(/《[^》\n]{1,32}》/gu) || []).length;
+  count += (s.match(/[「『“"][\u4e00-\u9fffA-Za-z0-9_/-]{1,16}[」』”"]/gu) || []).length;
+  count += (s.match(/(?:点击|打开|勾选|切换|输入|选择|保存|导出|上传|下载|复制|粘贴|刷新|重启|执行|登录|填写|核对)/gu) || []).length;
   return count;
 }
 
 function isStructuredLine(trimmedLine) {
   return /^(?:#{1,6}\s|[-*+]\s|\d+[.)]\s|\||>)/.test(trimmedLine);
+}
+
+/**
+ * Extract substantive Markdown list items and explanatory table cells with exact source offsets.
+ */
+function extractStructuredProseBlocks(proseText, rawText) {
+  const items = [];
+  let pos = 0;
+  const n = proseText.length;
+  while (pos <= n) {
+    const nl = proseText.indexOf("\n", pos);
+    const lineEnd = nl === -1 ? n : nl;
+    const lineProse = proseText.slice(pos, lineEnd);
+    const lineRaw = rawText.slice(pos, lineEnd);
+    const listMatch = lineProse.match(/^(\s*(?:[-*+]|\d+[.)])\s+)(.+)$/);
+    if (listMatch) {
+      const bodyStart = pos + listMatch[1].length;
+      const bodyText = listMatch[2];
+      const trimmed = bodyText.trim();
+      const cjk = (trimmed.match(/[\u4e00-\u9fff]/gu) || []).length;
+      const en = trimmed.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
+      if (cjk >= 24 || en >= 15) {
+        items.push({
+          start: bodyStart + Math.max(0, bodyText.indexOf(trimmed)),
+          end: lineEnd,
+          base: bodyStart,
+          text: bodyText,
+          trimmed,
+          rawSlice: rawText.slice(bodyStart, lineEnd),
+          isListItem: true,
+          isTableCell: false,
+        });
+      }
+    } else if (/^\s*\|/.test(lineRaw) && !/^\s*\|[\s:|-]+\|?\s*$/.test(lineRaw)) {
+      let cellPos = 0;
+      while (cellPos < lineProse.length) {
+        const pipeIdx = lineProse.indexOf("|", cellPos);
+        if (pipeIdx === -1) break;
+        const nextPipe = lineProse.indexOf("|", pipeIdx + 1);
+        if (nextPipe === -1) break;
+        const cellRaw = lineProse.slice(pipeIdx + 1, nextPipe);
+        const trimmed = cellRaw.trim();
+        const cjk = (trimmed.match(/[\u4e00-\u9fff]/gu) || []).length;
+        const en = trimmed.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
+        if (cjk >= 15 || en >= 10) {
+          const base = pos + pipeIdx + 1;
+          items.push({
+            start: base + Math.max(0, cellRaw.indexOf(trimmed)),
+            end: pos + nextPipe,
+            base,
+            text: cellRaw,
+            trimmed,
+            rawSlice: rawText.slice(base, pos + nextPipe),
+            isListItem: false,
+            isTableCell: true,
+          });
+        }
+        cellPos = nextPipe;
+      }
+    }
+    if (nl === -1) break;
+    pos = nl + 1;
+  }
+  return items;
 }
 
 /**
@@ -638,7 +1040,7 @@ function extractProseParagraphs(proseText, rawText) {
 }
 
 /**
- * Linear O(n) sentence splitter with exact source offsets — zero regex backtracking.
+ * Linear O(n) sentence splitter with exact source offsets — decimal/version-safe & zero backtracking.
  */
 function splitProseSentencesWithOffsets(para) {
   const out = [];
@@ -646,7 +1048,6 @@ function splitProseSentencesWithOffsets(para) {
   const base = para.base ?? (para.end - text.length);
   const n = text.length;
   let i = 0;
-  const isEndPunct = (ch) => ch === "。" || ch === "！" || ch === "？" || ch === "." || ch === "!" || ch === "?";
 
   while (i < n) {
     while (i < n && (text[i] === "\n" || text[i] === "\r" || text[i] === " " || text[i] === "\t")) {
@@ -654,11 +1055,15 @@ function splitProseSentencesWithOffsets(para) {
     }
     if (i >= n) break;
     const segStart = i;
-    while (i < n && text[i] !== "\n" && !isEndPunct(text[i])) {
+    const startedBold = text.slice(segStart, segStart + 2) === "**";
+    while (i < n && !(isSentenceBreakAt(text, i))) {
       i += 1;
     }
-    while (i < n && isEndPunct(text[i])) {
+    while (i < n && text[i] !== "\n" && isSentenceBreakAt(text, i)) {
       i += 1;
+    }
+    if (startedBold && text.slice(i, i + 2) === "**") {
+      i += 2;
     }
     let segEnd = i;
     while (segEnd > segStart && (text[segEnd - 1] === " " || text[segEnd - 1] === "\t" || text[segEnd - 1] === "\r")) {
@@ -674,10 +1079,10 @@ function splitProseSentencesWithOffsets(para) {
 
 function probeCooccurrenceSlopCluster(proseText, rawText) {
   const hits = [];
-  const paras = extractProseParagraphs(proseText, rawText);
+  const blocks = [...extractProseParagraphs(proseText, rawText), ...extractStructuredProseBlocks(proseText, rawText)];
   const enSciRobustRe =
     /(?<![A-Za-z0-9_])(?:robust\s+(?:estimator|regression|standard|statistics|variance|backoff|retry|inference|control|error\s+handling|parser|parsing|validation|recovery|fallback)|comprehensive\s+test(?:s|\s+suite)?)(?![A-Za-z0-9_])/gi;
-  for (const para of paras) {
+  for (const para of blocks) {
     const found = new Map();
     const paraBase = para.base;
     for (const term of ZH_SUBTLE_MARKERS) {
@@ -712,12 +1117,43 @@ function probeCooccurrenceSlopCluster(proseText, rawText) {
   return hits;
 }
 
+function hasIsomorphicClauseHead(clauses) {
+  const leadVerbs = /^(?:把|将|通过|让|使|对|按|负责|支持|提供|确保|实现|帮助|提升|优化|构建|打造)/u;
+  const keys = [];
+  for (const cl of clauses) {
+    const t = cl.trim().replace(/^[\s*"“「『(（]+/, "");
+    if (!t) continue;
+    const vm = t.match(leadVerbs);
+    if (vm) {
+      keys.push(`zhv:${vm[0]}`);
+      continue;
+    }
+    const zhm = t.match(/^[\u4e00-\u9fff]{2}/u);
+    if (zhm) {
+      keys.push(`zh2:${zhm[0]}`);
+      continue;
+    }
+    const enm = t.match(/^([A-Za-z]{2,})/);
+    if (enm) keys.push(`en:${enm[1].toLowerCase()}`);
+  }
+  const counts = new Map();
+  for (const k of keys) {
+    counts.set(k, (counts.get(k) || 0) + 1);
+    if (counts.get(k) >= 2) return true;
+  }
+  return false;
+}
+
 function probeSemicolonTricolon(proseText, rawText) {
   const hits = [];
-  const paras = extractProseParagraphs(proseText, rawText);
+  const blocks = [
+    ...extractProseParagraphs(proseText, rawText),
+    ...extractStructuredProseBlocks(proseText, rawText).filter((b) => b.isListItem),
+  ];
   const legalGuard = /(?<![A-Za-z0-9_])(?:shall|must|hereby|pursuant\s+to|provided\s+that)(?![A-Za-z0-9_])|(?:应当|须于|不得|依照)/i;
-  for (const para of paras) {
-    // Mask parenthetical citations/quotes at paragraph level so abbreviations like `et al.` never break parens
+  const checklistLeadRe = /^\s*(?:\d+[.)、）]|[（(]\d+[)）]|第[一二三四五六七八九十\d]+[步项条点]|先|随后|接着|然后|最后|若|如果|当|检查\s*\d|步骤\s*\d|step\s*\d|first\b|then\b|finally\b)/i;
+
+  for (const para of blocks) {
     const maskedPara = para.text
       .replace(/\([^)\n]*[;；][^)\n]*\)/g, (m) => " ".repeat(m.length))
       .replace(/（[^）\n]*[;；][^）\n]*）/g, (m) => " ".repeat(m.length))
@@ -730,10 +1166,21 @@ function probeSemicolonTricolon(proseText, rawText) {
       if (/^[^;；。！？.!?\n]{2,32}[：:]/.test(s.text)) continue;
       if (legalGuard.test(s.text)) continue;
       const rawSent = rawText.slice(s.start, s.end);
-      const techRefs = (rawSent.match(/`[^`\n]+`|\]\([^)\n]+\)/g) || []).length;
+      const techRefs = (rawSent.match(/`[^`\n]+`|\]\([^)\n]+\)|<code\b[^>]*>[\s\S]*?<\/code>/gi) || []).length;
       if (techRefs >= 2) continue;
-      const semis = (s.text.match(/[;；]/g) || []).length;
-      if (semis >= 2) {
+      const clauses = s.text.split(/[;；]/).map((c) => c.trim()).filter(Boolean);
+      if (clauses.length < 3) continue;
+      // Exempt step-by-step checklists or temporal progressions
+      const checklistCount = clauses.filter((c) => checklistLeadRe.test(c)).length;
+      if (checklistCount >= 2) continue;
+      if (/^先/.test(clauses[0]) && clauses.some((c) => /^(?:再|随后|接着|然后|最后)/.test(c))) continue;
+
+      const lens = clauses.map((c) => Math.max(10, countTextUnitsTenths(c)));
+      const mean = lens.reduce((a, b) => a + b, 0) / lens.length;
+      const variance = lens.reduce((a, b) => a + (b - mean) ** 2, 0) / lens.length;
+      const cv = mean > 0 ? Math.sqrt(variance) / mean : 1.0;
+      const iso = hasIsomorphicClauseHead(clauses);
+      if (cv < 0.28 || (cv < 0.40 && iso)) {
         hits.push({ index: s.start, length: Math.min(140, s.text.length) });
       }
     }
@@ -778,15 +1225,16 @@ function probeRhetoricalQaCadence(proseText, rawText) {
 
 function probeCommaChainRunon(proseText, rawText) {
   const hits = [];
-  const paras = extractProseParagraphs(proseText, rawText);
-  for (const para of paras) {
+  const blocks = [
+    ...extractProseParagraphs(proseText, rawText),
+    ...extractStructuredProseBlocks(proseText, rawText).filter((b) => b.isListItem),
+  ];
+  for (const para of blocks) {
     const sents = splitProseSentencesWithOffsets(para);
     for (const s of sents) {
-      // Strip numeric thousands separators (1,200) and parenthetical lists before counting commas
-      const cleaned = s.text
-        .replace(/(\d),(\d{3})(?!\d)/g, "$1$2")
-        .replace(/\([^)\n]{1,60}\)/g, " ")
-        .replace(/（[^）\n]{1,60}）/g, " ");
+      if (para.isListItem && /`[^`\n]+`/.test(rawText.slice(s.start, s.start + s.text.length))) continue;
+      // Strip numeric thousands separators (1,200) and nested parenthetical lists before counting commas
+      const cleaned = stripParentheticals(s.text.replace(/(\d),(\d{3})(?!\d)/g, "$1$2"));
       const commas = (cleaned.match(/[，,]/g) || []).length;
       if (commas < 5) continue;
       const parts = cleaned.split(/[，,]/).map((p) => p.trim()).filter(Boolean);
@@ -858,8 +1306,12 @@ function probeNarrativeSandwichFrame(proseText, rawText) {
 
 function classifyOpenerSkeleton(text, explicitOnly = false) {
   const s = text.trim();
-  // Skip key-value metadata lines like "Atomic card: [...]" or "来源：..."
-  if (/^[A-Za-z][A-Za-z0-9 _-]{1,28}:\s/.test(s) || /^[\u4e00-\u9fff]{2,8}：/.test(s)) {
+  // Skip key-value metadata lines ("Atomic card: [...]", "来源：...") and numbered card headers ("控制栓 01 ...")
+  if (
+    /^[A-Za-z][A-Za-z0-9 _-]{1,28}:\s/.test(s) ||
+    /^[\u4e00-\u9fff]{2,8}：/.test(s) ||
+    /^[\u4e00-\u9fffA-Za-z0-9_-]{2,10}\s*0?\d+(?:\s|$|[·：:.-])/.test(s)
+  ) {
     return null;
   }
   if (/^在[\u4e00-\u9fff]{2,6}方面[，,]/.test(s)) return "ZH_ZAI_X_FANGMIAN";
@@ -926,9 +1378,15 @@ function probeTemplateSkeletonEcho(proseText, rawText) {
     return false;
   }
 
+  // Sliding window of 5 adjacent paragraphs so distant unrelated sections never collide
   if (paras.length >= 3) {
-    if (checkItems(paras.map((p) => ({ start: p.start, text: p.trimmed })), false, false)) {
-      return hits;
+    const paraItems = paras.map((p) => ({ start: p.start, text: p.trimmed }));
+    if (paraItems.length <= 5) {
+      if (checkItems(paraItems, false, false)) return hits;
+    } else {
+      for (let w = 0; w <= paraItems.length - 5; w += 1) {
+        if (checkItems(paraItems.slice(w, w + 5), false, false)) return hits;
+      }
     }
   }
   const allSents = [];
@@ -968,16 +1426,218 @@ function probeLowBurstinessVapor(proseText, rawText) {
   return [];
 }
 
+const ZH_AI_SLOP_JARGON_TERMS = [
+  "全闭环", "形成闭环", "商业闭环", "深度赋能", "全面赋能", "价值跃迁", "范式跃迁", "范式转移",
+  "底层逻辑", "顶层设计", "多维协同", "生态共赢", "无缝衔接", "无缝融合", "丝滑", "满血",
+  "降维打击", "一剑封喉", "一步到位", "心智占领", "颗粒度对齐", "铁律", "彻底根治",
+  "重塑格局", "破局", "降本增效", "护城河", "天花板", "深水区", "王炸", "硬核",
+  "暴雷", "翻车", "崩塌", "雕花", "破框", "无缝", "跃迁",
+];
+const ZH_INDUSTRY_AMBIGUOUS_TERMS = [
+  "闭环", "收口", "兜底", "打通", "落盘", "拉齐", "死线", "根治",
+];
+const ZH_DEV_ZERO_RE = /零(?:幻觉|侵入|摩擦|失误|死角|妥协|门槛|负担|缺陷|暴雷|翻车)/gu;
+const ZH_DEV_HUA_RE = /(?:体系|精细|常态|全链路|数智|智能|生态|矩阵|范式|极致|平台|中台)化/gu;
+const ZH_DEV_STORAGE_RE = /WAL|fsync|快照|持久化|落盘到\s*[A-Za-z0-9_./-]+|写入(?:磁盘|日志|文件)|事务日志/i;
+const ZH_DEV_HARDWARE_CTRL_RE = /(?:位置|速度|电流|力矩|伺服|PID|反馈|外环|内环)闭环|编码器|控制柜/;
+const ZH_DEV_GROUNDED_FILE_RE = /`[^`\n]+`|[A-Za-z0-9_/-]+\.(?:py|js|ts|mjs|go|rs|sql|json|yaml|yml|log|md)\b/i;
+
+function probeZhDevJargon(proseText, rawText) {
+  const hits = [];
+  const blocks = [
+    ...extractProseParagraphs(proseText, rawText),
+    ...extractStructuredProseBlocks(proseText, rawText).filter((b) => b.isTableCell),
+  ];
+  for (const para of blocks) {
+    const aiSlopHits = new Map();
+    const industryHits = new Map();
+    const base = para.base;
+    const ctxSlice = para.rawSlice || para.text;
+    const isStorageCtx = ZH_DEV_STORAGE_RE.test(ctxSlice);
+    const isHardwareCtrl = ZH_DEV_HARDWARE_CTRL_RE.test(ctxSlice);
+
+    for (const term of ZH_AI_SLOP_JARGON_TERMS) {
+      const idx = para.text.indexOf(term);
+      if (idx !== -1 && !aiSlopHits.has(term)) {
+        aiSlopHits.set(term, { start: base + idx, end: base + idx + term.length });
+      }
+    }
+    let m;
+    ZH_DEV_ZERO_RE.lastIndex = 0;
+    while ((m = ZH_DEV_ZERO_RE.exec(para.text)) !== null) {
+      if (!aiSlopHits.has(m[0])) aiSlopHits.set(m[0], { start: base + m.index, end: base + m.index + m[0].length });
+    }
+    ZH_DEV_HUA_RE.lastIndex = 0;
+    while ((m = ZH_DEV_HUA_RE.exec(para.text)) !== null) {
+      if (!aiSlopHits.has(m[0])) aiSlopHits.set(m[0], { start: base + m.index, end: base + m.index + m[0].length });
+    }
+
+    for (const term of ZH_INDUSTRY_AMBIGUOUS_TERMS) {
+      if (term === "落盘" && isStorageCtx) continue;
+      if (term === "闭环" && isHardwareCtrl) continue;
+      let coveredByAiTerm = false;
+      for (const aiKey of aiSlopHits.keys()) {
+        if (aiKey.includes(term)) {
+          coveredByAiTerm = true;
+          break;
+        }
+      }
+      if (coveredByAiTerm) continue;
+      const idx = para.text.indexOf(term);
+      if (idx !== -1 && !industryHits.has(term)) {
+        industryHits.set(term, { start: base + idx, end: base + idx + term.length });
+      }
+    }
+
+    const groundedDomain =
+      countConcretenessAnchors(ctxSlice) >= 2 || ZH_DEV_GROUNDED_FILE_RE.test(ctxSlice);
+    let activeSpans = null;
+    if (groundedDomain) {
+      if (aiSlopHits.size >= 3) {
+        activeSpans = Array.from(aiSlopHits.values());
+      }
+    } else if (aiSlopHits.size >= 1 && aiSlopHits.size + industryHits.size >= 3) {
+      activeSpans = [...aiSlopHits.values(), ...industryHits.values()];
+    }
+
+    if (activeSpans && activeSpans.length > 0) {
+      activeSpans.sort((a, b) => a.start - b.start);
+      const first = activeSpans[0].start;
+      const last = activeSpans[activeSpans.length - 1].end;
+      hits.push({ index: first, length: Math.min(140, Math.max(1, last - first)) });
+    }
+  }
+  return hits;
+}
+
+const ZH_EXCLAMATION_HYPE_RE = /(?:太棒了|千万不要|一定要|震撼|重磅|惊艳|必看|立即开启|彻底告别|强力推荐|绝对不能|不可错过)/;
+
+function probeZhExclamation(proseText, rawText) {
+  const allMarks = [];
+  const hypeHits = [];
+  const paras = extractProseParagraphs(proseText, rawText);
+  for (const para of paras) {
+    const trimP = para.trimmed;
+    const paraCjk = (trimP.match(/[\u4e00-\u9fff]/gu) || []).length;
+    // Exempt short standalone taglines (< 20 CJK chars) and example prompt lines
+    if (paraCjk < 20) continue;
+    if (/^(?:示例|例句|提示词|prompt)(?:[\s:：]|$)/i.test(trimP)) continue;
+    // Mask quoted speech & parenthetical asides inside paragraph
+    const masked = stripParentheticals(
+      para.text
+        .replace(/“[^”\n]*”/g, (m) => " ".repeat(m.length))
+        .replace(/「[^」\n]*」/g, (m) => " ".repeat(m.length))
+        .replace(/"[^"\n]*"/g, (m) => " ".repeat(m.length))
+    );
+    const maskedPara = { ...para, text: masked };
+    for (const s of splitProseSentencesWithOffsets(maskedPara)) {
+      const re = /[\u4e00-\u9fff][！!]/gu;
+      let m;
+      while ((m = re.exec(s.text)) !== null) {
+        const hit = { index: s.start + m.index, length: m[0].length };
+        allMarks.push(hit);
+        if (ZH_EXCLAMATION_HYPE_RE.test(s.text)) {
+          hypeHits.push(hit);
+        }
+      }
+    }
+  }
+  if (allMarks.length >= 2) return allMarks;
+  return hypeHits;
+}
+
+function probeZhMegaSentence(proseText, rawText) {
+  const hits = [];
+  const paras = extractProseParagraphs(proseText, rawText);
+  for (const para of paras) {
+    const paraCjk = (para.text.match(/[\u4e00-\u9fff]/gu) || []).length;
+    const paraSemis = (para.text.match(/[;；]/g) || []).length;
+    const sents = splitProseSentencesWithOffsets(para);
+    let sentHit = false;
+    for (const s of sents) {
+      const sCjk = (s.text.match(/[\u4e00-\u9fff]/gu) || []).length;
+      const visibleCompactedLen = codePointLength(s.text.replace(/[ \t]{2,}/g, " ").trim());
+      if (sCjk > 180 || (sCjk >= 120 && visibleCompactedLen > 180)) {
+        hits.push({ index: s.start, length: Math.min(140, s.text.length) });
+        sentHit = true;
+      }
+    }
+    if (!sentHit && paraCjk > 600 && paraSemis >= 3) {
+      hits.push({ index: para.start, length: Math.min(140, para.trimmed.length) });
+    }
+  }
+  return hits;
+}
+
+const UNSOURCED_STAT_MEASUREMENT_RE =
+  /(?:从|由)\s*\d[\d.,]*\S{0,8}(?:到|至|降到|降至|升至|压缩至|缩减至)\s*\d|\bfrom\s+\d[\d.,]*\S{0,8}\s+to\s+\d|(?<![A-Za-z0-9_])(?:n\s*=\s*\d+|benchmark|dataset|sample|audit|log|metric|F1|FPR|Recall|Precision|p95|p99|SLA|SLO|RPO|RTO|uptime|availability|contract|CPU|RAM|memory|disk|coverage|confidence|threshold|CI|eval)(?![A-Za-z0-9_])|(?:实测|压测|基准|抽样|样本|日志|监控|报表|账单|测试集|留出集|置信|阈值|覆盖率|分位|召回|误报|命中|耗时|延迟|错误率|成功率|一致率|配额|折扣|比例|占比|权重|可用率|可用性|增长率|合同|协议|条款)/i;
+
+const UNSOURCED_STAT_DIRECTIVE_RE =
+  /^\s*(?:Set|Configure|Keep|Ensure|Allow|Leave|Pass|Use|Pick|Select|Adjust|Limit|Clamp|Require|设置|保持|确保|调整|限制|允许|预留)\b|(?:must|should|need\s+to)\s+be\s+(?:at\s+least|no\s+more\s+than|under|over)\b/i;
+
+function probeUnsourcedStatistic(proseText, rawText, proseMap = null) {
+  const hits = [];
+  const patterns = [
+    /(?:高达|多达|超过|近|约|至少|足足|整整|提升(?:了)?|提高(?:了)?|降低(?:了)?|减少(?:了)?|节省(?:了)?|缩短(?:了)?|增长(?:了)?|暴涨(?:了)?)\s*\d+(?:\.\d+)?%/gu,
+    /\b(?:up\s+to|over|nearly|more\s+than|at\s+least|as\s+much\s+as|by)\s+\d+(?:\.\d+)?%/giu,
+  ];
+  const breaks = buildSentenceBreakIndices(proseText);
+  for (const re of patterns) {
+    let m;
+    while ((m = re.exec(proseText)) !== null) {
+      // Bound check to the enclosing sentence in proseText + corresponding raw slice
+      let left = 0;
+      let right = proseText.length;
+      for (let bIdx = breaks.length - 1; bIdx >= 0; bIdx -= 1) {
+        if (breaks[bIdx] < m.index) {
+          left = breaks[bIdx] + 1;
+          break;
+        }
+      }
+      for (let bIdx = 0; bIdx < breaks.length; bIdx += 1) {
+        if (breaks[bIdx] >= m.index + m[0].length) {
+          right = breaks[bIdx] + 1;
+          break;
+        }
+      }
+      const sentProse = proseText.slice(left, right);
+      if (UNSOURCED_STAT_DIRECTIVE_RE.test(sentProse) && !/(?:提升|提高|降低|减少|节省|缩短|增长|暴涨|faster|improve|reduce|save)/i.test(sentProse)) {
+        continue;
+      }
+      const rawStart = proseMap ? proseMap.starts[left] ?? left : left;
+      const rawEnd = proseMap ? proseMap.ends[Math.max(left, right - 1)] ?? right : right;
+      const win = `${sentProse}\n${rawText.slice(rawStart, rawEnd)}`;
+      const hasSource =
+        /\[\^?\d+\]/.test(win) ||
+        /\]\([^)]+\)/.test(win) ||
+        /https?:\/\//.test(win) ||
+        /\([^()\n]{2,40},\s*(?:19|20)\d{2}[a-z]?\)/.test(win) ||
+        /《[^》\n]{2,30}》/.test(win) ||
+        /(?:见|参见|详见)\s*\[/.test(win) ||
+        UNSOURCED_STAT_MEASUREMENT_RE.test(win);
+      if (!hasSource) {
+        hits.push({ index: m.index, length: m[0].length });
+      }
+    }
+  }
+  return hits;
+}
+
 /**
  * Compute an explainable 5-axis offline statistical & structural text profile.
  * Zero external dependencies; identical math in `src/core.mjs` and `src/dislop/engine.py`.
  */
-export function analyzeTextProfile(text, { modality = "markdown" } = {}) {
+export function analyzeTextProfile(text, { modality = "markdown", config = {} } = {}) {
   // Normalize CRLF -> LF for statistical calculations so Node and Python agree on Windows files
   const raw = String(text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-  const zones = buildZones(raw, modality);
-  const prose = zones.prose || "";
-  const paras = extractProseParagraphs(prose, raw);
+  const zones = buildZones(raw, modality, {
+    proseFences: config?.proseFences,
+    maskBlockquotes: config?.maskBlockquotes,
+  });
+  const prose = zones.proseLogical ?? zones.prose ?? "";
+  const rawForProbes = zones.proseLogical ? prose : raw;
+  const paras = extractProseParagraphs(prose, rawForProbes);
+  const structBlocks = extractStructuredProseBlocks(prose, rawForProbes);
   const sents = [];
   for (const para of paras) {
     for (const s of splitProseSentencesWithOffsets(para)) {
@@ -1006,6 +1666,13 @@ export function analyzeTextProfile(text, { modality = "markdown" } = {}) {
   const joinedProse = paras.map((p) => p.trimmed).join("\n");
   const totalTenths = Math.max(10, countTextUnitsTenths(joinedProse));
   const totalUnits = totalTenths / 10;
+
+  const totalRawChars = codePointLength(raw.replace(/\s+/g, ""));
+  const scannedChars =
+    paras.reduce((acc, p) => acc + codePointLength(p.trimmed.replace(/\s+/g, "")), 0) +
+    structBlocks.reduce((acc, b) => acc + codePointLength(b.trimmed.replace(/\s+/g, "")), 0);
+  const proseCoverage =
+    totalRawChars > 0 ? roundNonNeg(Math.min(1, scannedChars / totalRawChars), 2) : 1;
 
   // Lexical diversity (TTR + Moving-Average TTR window 25 step 5) + bigram echo + char Shannon entropy
   const tokens = (joinedProse.toLowerCase().match(/[\u4e00-\u9fff]|[a-z]{2,}/gu) || []);
@@ -1048,8 +1715,13 @@ export function analyzeTextProfile(text, { modality = "markdown" } = {}) {
   let maxSemi = 0;
   let maxComma = 0;
   for (const s of sents) {
-    const sc = (s.text.replace(/\([^)\n]*[;；][^)\n]*\)/g, " ").match(/[;；]/g) || []).length;
-    const cc = (s.text.replace(/(\d),(\d{3})(?!\d)/g, "$1$2").replace(/\([^)\n]{1,60}\)/g, " ").match(/[，,]/g) || []).length;
+    const sc = (
+      s.text
+        .replace(/\([^)\n]*[;；][^)\n]*\)/g, " ")
+        .replace(/（[^）\n]*[;；][^）\n]*）/g, " ")
+        .match(/[;；]/g) || []
+    ).length;
+    const cc = (stripParentheticals(s.text.replace(/(\d),(\d{3})(?!\d)/g, "$1$2")).match(/[，,]/g) || []).length;
     if (sc > maxSemi) maxSemi = sc;
     if (cc > maxComma) maxComma = cc;
   }
@@ -1086,6 +1758,7 @@ export function analyzeTextProfile(text, { modality = "markdown" } = {}) {
     sentenceCount: nSents,
     paragraphCount: paras.length,
     unitCount: roundNonNeg(totalUnits, 1),
+    proseCoverage,
     burstiness: {
       meanLength: roundNonNeg(meanLen, 1),
       cv: roundNonNeg(cv, 2),
@@ -1098,6 +1771,7 @@ export function analyzeTextProfile(text, { modality = "markdown" } = {}) {
       bigramEcho: roundNonNeg(bigramEcho, 2),
       charEntropy: roundNonNeg(charEntropy, 2),
       cooccurrenceClusters: coocHits,
+      termConsistencySafe: concretenessStatus === "grounded" && coocHits === 0 && skelHits === 0,
     },
     concreteness: {
       anchorCount,
@@ -1194,9 +1868,16 @@ function probeUiDeadControl(rawText) {
       hits.push({ index: m.index, length: m[0].length, severity: "error" });
       continue;
     }
-    const staticDisabled = /\bdisabled(?:\s*=\s*(?:""|"disabled"|'disabled'|\{true\}))?(?=[\s/>]|$)/i.test(attrs);
-    const hasReason = /\b(?:title|aria-describedby|data-allow-disabled)\b/i.test(attrs);
-    if (staticDisabled && !hasReason) {
+    const staticDisabled = /(?<![A-Za-z0-9_-])disabled(?:\s*=\s*(?:""|"disabled"|'disabled'|"true"|'true'|\{true\}))?(?=[\s/>]|$)/i.test(attrs);
+    const hasReason = /(?<![A-Za-z0-9_-])(?:title|aria-describedby|data-allow-disabled)\s*=/i.test(attrs);
+    const isPagerAction =
+      /(?:^|[\s_-])(?:prev|previous|next|first|last|pager|pagination|page-\d|step-\d|go\s+back|back\s+(?:page|to)|forward)(?=[\s_-]|$)|上一页|下一页|首页|末页|上一步|下一步/i.test(
+        `${attrs.replace(/\bdata-[a-z0-9_-]*title\s*=\s*["'][^"']*["']/gi, "")} ${inner}`
+      );
+    const beforeTagCtx = clean.slice(Math.max(0, m.index - 220), m.index);
+    const inPaginationContainer = /<(?:nav|div|ul|section)\b[^>]*\b(?:aria-label\s*=\s*["'][^"']*pagination|class(?:Name)?\s*=\s*["'][^"']*(?:pagination|pager))/i.test(beforeTagCtx) && !/<\/(?:nav|ul)\b/i.test(beforeTagCtx);
+    const isPagerOrStepper = isPagerAction || inPaginationContainer;
+    if (staticDisabled && !hasReason && !isPagerOrStepper) {
       hits.push({ index: m.index, length: m[0].length, severity: "warning" });
     }
   }
@@ -1227,11 +1908,28 @@ function probeUiAiGradient(rawText) {
       const rgb = parseColorRgb(hx);
       if (!rgb) continue;
       const [h, s] = rgbToHsl(rgb);
-      if (h >= 245 && h <= 345 && s >= 45) purplePinkStops += 1;
+      if (h >= 235 && h <= 345 && s >= 45) purplePinkStops += 1;
     }
     const nearSlice = clean.slice(m.index, Math.min(clean.length, m.index + m[0].length + 120));
     const isClipText = /background-clip\s*:\s*text/i.test(nearSlice);
     if (purplePinkStops >= 2 || isClipText) {
+      hits.push({ index: m.index, length: m[0].length });
+    }
+  }
+
+  // 3. SVG <linearGradient> / <radialGradient> with >= 2 purple/indigo/pink stops
+  const svgGradRe = /<(linearGradient|radialGradient)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+  while ((m = svgGradRe.exec(clean)) !== null) {
+    const body = m[2] || "";
+    const colorTokens = body.match(/#[0-9a-fA-F]{3,6}\b|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)/gi) || [];
+    let purplePinkStops = 0;
+    for (const tok of colorTokens) {
+      const rgb = parseColorRgb(tok);
+      if (!rgb) continue;
+      const [h, s] = rgbToHsl(rgb);
+      if (h >= 235 && h <= 345 && s >= 45) purplePinkStops += 1;
+    }
+    if (purplePinkStops >= 2) {
       hits.push({ index: m.index, length: m[0].length });
     }
   }
@@ -1257,13 +1955,64 @@ function probeUiPillSoup(rawText, maxPills = 6) {
     if (wh && wh[1] === wh[2]) continue;
     matches.push({ index: m.index, length: m[0].length });
   }
+
+  // Also detect pill-shaped <rect> elements inside inline <svg> posters/diagrams
+  const svgRe = /<svg\b[^>]*>([\s\S]*?)<\/svg>/gi;
+  while ((m = svgRe.exec(clean)) !== null) {
+    const svgStart = m.index;
+    const svgChunk = m[0];
+    const rectRe = /<rect\b([^>]*)\/?>/gi;
+    let rm;
+    while ((rm = rectRe.exec(svgChunk)) !== null) {
+      const attrs = rm[1] || "";
+      const wm = attrs.match(/(?<![A-Za-z0-9_-])width\s*=\s*["']?(\d+(?:\.\d+)?)/i);
+      const hm = attrs.match(/(?<![A-Za-z0-9_-])height\s*=\s*["']?(\d+(?:\.\d+)?)/i);
+      const rxm = attrs.match(/(?<![A-Za-z0-9_-])r[xy]\s*=\s*["']?(\d+(?:\.\d+)?)/i);
+      if (!wm || !hm || !rxm) continue;
+      const w = Number(wm[1]);
+      const h = Number(hm[1]);
+      const rx = Number(rxm[1]);
+      if (w >= 36 && h >= 14 && h <= 44 && w >= h * 1.5 && rx >= h * 0.35) {
+        matches.push({ index: svgStart + rm.index, length: rm[0].length });
+      }
+    }
+  }
+
   if (matches.length > maxPills) {
+    matches.sort((a, b) => a.index - b.index);
     return [matches[0]];
   }
   return [];
 }
 
+function extractCssBoxClasses(rawText) {
+  const boxClasses = new Set();
+  const styleRe = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
+  let sm;
+  while ((sm = styleRe.exec(rawText)) !== null) {
+    const css = sm[1] || "";
+    const ruleRe = /([^{}]+)\{([^{}]+)\}/g;
+    let rm;
+    while ((rm = ruleRe.exec(css)) !== null) {
+      const sel = rm[1] || "";
+      const decl = rm[2] || "";
+      const hasBorderOrShadow =
+        /(?:^|[;\s])(?:border|box-shadow)\s*:\s*(?!none\b|0\b)/i.test(decl) &&
+        !/(?:^|[;\s])border\s*:\s*(?:none|0)\b/i.test(decl);
+      const hasRadius = /(?:^|[;\s])border-radius\s*:\s*(?!0(?:px)?\b)/i.test(decl);
+      const hasPad = /(?:^|[;\s])padding(?:-(?:top|right|bottom|left|inline|block))?\s*:\s*(?!0(?:px)?\b)/i.test(decl);
+      if (hasBorderOrShadow && hasRadius && hasPad) {
+        for (const clsMatch of sel.matchAll(/\.([A-Za-z_-][A-Za-z0-9_-]*)/g)) {
+          boxClasses.add(clsMatch[1]);
+        }
+      }
+    }
+  }
+  return boxClasses;
+}
+
 function probeUiBoxInBox(rawText) {
+  const boxCssClasses = extractCssBoxClasses(rawText);
   const clean = rawText
     .replace(/<!--\s*dislop-quote-start\s*-->[\s\S]*?<!--\s*dislop-quote-end\s*-->/gi, preserveLinesBlank)
     .replace(/<!--[\s\S]*?-->/g, preserveLinesBlank)
@@ -1288,10 +2037,14 @@ function probeUiBoxInBox(rawText) {
       }
       continue;
     }
-    const hasBorderOrShadow = /\b(?:border(?:-[a-z0-9]+)?| ring-1|shadow(?:-[a-z]+)?)\b|border\s*:/i.test(attrs) && !/\bborder-(?:t|b|l|r|0|none)\b/.test(attrs);
+    const clsAttr = attrs.match(/\bclass(?:Name)?\s*=\s*["']([^"']+)["']/i);
+    const hasCssBox = clsAttr ? clsAttr[1].split(/\s+/).some((c) => boxCssClasses.has(c)) : false;
+    const hasBorderOrShadow =
+      (/\b(?:border(?:-[a-z0-9]+)?|ring-1|shadow(?:-[a-z]+)?)\b|border\s*:/i.test(attrs)) &&
+      !/\bborder-(?:t|b|l|r|0|none)\b/i.test(attrs);
     const hasRadius = /\brounded(?:-[a-z0-9]+)?\b|border-radius\s*:/i.test(attrs) && !/\brounded-none\b/.test(attrs);
     const hasPad = /\bp[xy]?-\d|padding\s*:/i.test(attrs);
-    const isBox = hasBorderOrShadow && hasRadius && hasPad;
+    const isBox = hasCssBox || (hasBorderOrShadow && hasRadius && hasPad);
     const boxDepth = (stack.length > 0 ? stack[stack.length - 1].boxDepth : 0) + (isBox ? 1 : 0);
 
     if (isBox && boxDepth >= 3 && hits.length === 0) {
@@ -1301,6 +2054,313 @@ function probeUiBoxInBox(rawText) {
       stack.push({ tag, boxDepth });
     }
   }
+  return hits;
+}
+
+function maskUiVisualMarkup(rawText) {
+  return String(rawText || "")
+    .replace(/<!--\s*dislop-quote-start\s*-->[\s\S]*?<!--\s*dislop-quote-end\s*-->/gi, preserveLinesBlank)
+    .replace(/<!--[\s\S]*?-->/g, preserveLinesBlank)
+    .replace(/\/\*[\s\S]*?\*\//g, preserveLinesBlank)
+    .replace(/<(script|code|pre)\b[^>]*>[\s\S]*?<\/\1>/gi, preserveLinesBlank);
+}
+
+function probeUiGlowBlobChrome(rawText) {
+  const clean = maskUiVisualMarkup(rawText);
+  const hits = [];
+  const seen = new Set();
+  const pushHit = (index, length) => {
+    const key = `${index}:${length}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      hits.push({ index, length });
+    }
+  };
+
+  // 1. Tailwind ambient blur orbs (blur-3xl / blur-[>=40px]) with rounded-full / neon tint / radial-gradient
+  const tagBlurRe = /<[a-zA-Z][a-zA-Z0-9-]*\b[^>]*\b(?:blur-3xl|blur-\[(\d+)px\])[^>]*>/gi;
+  let m;
+  while ((m = tagBlurRe.exec(clean)) !== null) {
+    const px = m[1] ? Number(m[1]) : 64;
+    if (px < 40) continue;
+    const tag = m[0];
+    if (/\b(?:rounded-full|indigo-|purple-|violet-|pink-|fuchsia-|cyan-)\b|radial-gradient/i.test(tag)) {
+      pushHit(m.index, tag.length);
+    }
+  }
+
+  // 2. CSS filter: blur(>=40px) paired with circular / radial-gradient / neon tint
+  const cssBlurRe = /filter\s*:\s*blur\(\s*(\d+)px\s*\)/gi;
+  while ((m = cssBlurRe.exec(clean)) !== null) {
+    if (Number(m[1]) < 40) continue;
+    const winStart = Math.max(0, m.index - 220);
+    const winEnd = Math.min(clean.length, m.index + m[0].length + 220);
+    const ctx = clean.slice(winStart, winEnd);
+    if (/border-radius\s*:\s*(?:50%|999\d*px)|radial-gradient|#[0-9a-fA-F]{6}/i.test(ctx)) {
+      pushHit(m.index, m[0].length);
+    }
+  }
+
+  // 3. Neon colored shadow glow (Tailwind or CSS box-shadow)
+  const twShadowRe = /\bshadow-(?:indigo|purple|violet|pink|fuchsia|cyan)-[45]00(?:\/\d+)?\b/gi;
+  while ((m = twShadowRe.exec(clean)) !== null) {
+    pushHit(m.index, m[0].length);
+  }
+  const cssShadowRe = /box-shadow\s*:[^;\n]{0,160}/gi;
+  while ((m = cssShadowRe.exec(clean)) !== null) {
+    const decl = m[0];
+    if (!/\b(?:1[5-9]|[2-9]\d)px\b/.test(decl)) continue;
+    const colMatches = decl.match(/#[0-9a-fA-F]{3,6}\b|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}[^)]*\)/gi) || [];
+    for (const cTok of colMatches) {
+      const rgbMatch = cTok.match(/rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/i);
+      const rgb = rgbMatch ? [Number(rgbMatch[1]), Number(rgbMatch[2]), Number(rgbMatch[3])] : parseColorRgb(cTok);
+      if (!rgb) continue;
+      const [h, s] = rgbToHsl(rgb);
+      if (s >= 55 && ((h >= 175 && h <= 210) || (h >= 245 && h <= 345))) {
+        pushHit(m.index, decl.length);
+        break;
+      }
+    }
+  }
+
+  // 4. Pulsing badge dot (`animate-ping` in `rounded-full`)
+  const pingRe = /<[^>]*\banimate-ping\b[^>]*>/gi;
+  while ((m = pingRe.exec(clean)) !== null) {
+    const ctx = clean.slice(Math.max(0, m.index - 140), Math.min(clean.length, m.index + m[0].length + 140));
+    if (/\brounded-full\b/.test(ctx)) {
+      pushHit(m.index, m[0].length);
+    }
+  }
+
+  // 5. SVG excessive glow / drop-shadow filters
+  const svgRe = /<svg\b[^>]*>[\s\S]*?<\/svg>/gi;
+  while ((m = svgRe.exec(clean)) !== null) {
+    const svgBody = m[0];
+    const blurTags = svgBody.match(/<(?:feGaussianBlur|feDropShadow)\b/gi) || [];
+    const heavyBlur = /<(?:feGaussianBlur|feDropShadow)\b[^>]*\bstdDeviation\s*=\s*["']\s*(?:[89]|\d{2,})(?:\.\d+)?/i.test(svgBody);
+    if (blurTags.length >= 2 || heavyBlur) {
+      const firstFilter = svgBody.match(/<(?:feGaussianBlur|feDropShadow)\b[^>]*>/i);
+      const idx = firstFilter ? m.index + svgBody.indexOf(firstFilter[0]) : m.index;
+      const len = firstFilter ? firstFilter[0].length : 32;
+      pushHit(idx, len);
+    }
+  }
+
+  return hits;
+}
+
+function probeUiEmojiIconChrome(rawText) {
+  const clean = maskUiVisualMarkup(rawText).replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, preserveLinesBlank);
+  const emojiClass = "[\\u{1F680}\\u2728\\u26A1\\u{1F525}\\u{1F4A1}\\u{1F3AF}\\u{1F6E1}\\u2699\\u{1F4C8}\\u{1F916}\\u{1F48E}\\u{1F31F}\\u{1F3A8}\\u{1F512}\\u{1F4CA}\\u{1F9E0}\\u{1F310}\\u{1F389}]\\uFE0F?";
+  const tagRe = new RegExp(`<(h[1-4]|button|a|span|div|text)\\b[^>]*>[^<]{0,90}${emojiClass}[^<]{0,90}<\\/\\1>`, "giu");
+  const matches = [];
+  let m;
+  while ((m = tagRe.exec(clean)) !== null) {
+    matches.push({ index: m.index, length: m[0].length });
+  }
+  if (matches.length >= 3) {
+    return [matches[0]];
+  }
+  return [];
+}
+
+function probeUiTemplateCardGrid(rawText) {
+  const clean = maskUiVisualMarkup(rawText)
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, preserveLinesBlank)
+    .replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, preserveLinesBlank);
+  const hits = [];
+
+  // 1. >= 3 tinted rounded-square icon tiles
+  const tileRe = /<(div|span)\b([^>]*)>/gi;
+  const tileHits = [];
+  let m;
+  while ((m = tileRe.exec(clean)) !== null) {
+    const attrs = m[2] || "";
+    const hasRound = /\brounded-(?:lg|xl|2xl)\b/.test(attrs);
+    const hasSize =
+      /\bsize-(?:8|9|10|11|12|14|16)\b/.test(attrs) ||
+      (/\bw-(?:8|9|10|11|12|14|16)\b/.test(attrs) && /\bh-(?:8|9|10|11|12|14|16)\b/.test(attrs));
+    const hasTint = /\bbg-(?:indigo|purple|violet|blue|pink|fuchsia|emerald|teal|cyan|amber|orange|rose)-(?:50|100|400\/\d+|500\/\d+|900\/\d+|950\/\d+)\b/.test(attrs);
+    if (hasRound && hasSize && hasTint) {
+      tileHits.push({ index: m.index, length: m[0].length });
+    }
+  }
+  if (tileHits.length >= 3) {
+    hits.push(tileHits[0]);
+  }
+
+  // 2. Fake macOS 3-dot traffic-light window chrome
+  const dotRe = /<(?:span|div)\b[^>]*\brounded-full\b[^>]*\bbg-(red|rose|yellow|amber|green|emerald)-\d{2,3}\b[^>]*>(?:\s*<\/(?:span|div)>)?/gi;
+  const dots = [];
+  while ((m = dotRe.exec(clean)) !== null) {
+    dots.push({ index: m.index, length: m[0].length, color: m[1].toLowerCase() });
+  }
+  for (let i = 0; i + 2 < dots.length; i += 1) {
+    const a = dots[i];
+    const b = dots[i + 1];
+    const c = dots[i + 2];
+    if (
+      (a.color === "red" || a.color === "rose") &&
+      (b.color === "yellow" || b.color === "amber") &&
+      (c.color === "green" || c.color === "emerald") &&
+      c.index - a.index <= 280
+    ) {
+      hits.push({ index: a.index, length: Math.min(120, c.index + c.length - a.index) });
+      break;
+    }
+  }
+
+  // 3. Sequential standalone zero-padded eyebrow kickers (`01`, `02`, `03`)
+  // Exempt semantic ordered lists / navigation (`<ol>`, `role="list"`, `<nav>`) via tag nesting stack
+  const VOID_HTML_TAGS = new Set([
+    "area", "base", "br", "col", "embed", "hr", "img", "input",
+    "link", "meta", "param", "source", "track", "wbr",
+  ]);
+  const listAncestryRanges = [];
+  const listTagStack = [];
+  const tokListRe = /<\/?([a-zA-Z0-9-]+)\b([^>]*)\/?>/g;
+  while ((m = tokListRe.exec(clean)) !== null) {
+    const full = m[0];
+    const tag = m[1].toLowerCase();
+    const attrs = m[2] || "";
+    const selfClose = full.endsWith("/>") || VOID_HTML_TAGS.has(tag);
+    if (full.startsWith("</")) {
+      for (let i = listTagStack.length - 1; i >= 0; i -= 1) {
+        if (listTagStack[i].tag === tag) {
+          const popped = listTagStack.splice(i);
+          for (const item of popped) {
+            if (item.isList) listAncestryRanges.push([item.start, m.index + full.length]);
+          }
+          break;
+        }
+      }
+      continue;
+    }
+    const isListContainer =
+      tag === "ol" ||
+      tag === "nav" ||
+      /(?<![A-Za-z0-9_-])role\s*=\s*["']list["']/i.test(attrs);
+    if (!selfClose) {
+      listTagStack.push({ tag, isList: isListContainer, start: m.index });
+    }
+  }
+  for (const item of listTagStack) {
+    if (item.isList) listAncestryRanges.push([item.start, clean.length]);
+  }
+  const inSemanticList = (idx) => listAncestryRanges.some(([s, e]) => idx >= s && idx <= e);
+
+  const numTagRe = /<(span|div|p)\b[^>]*>\s*(0[1-9])\s*<\/\1>/gi;
+  const seqTags = [];
+  while ((m = numTagRe.exec(clean)) !== null) {
+    if (inSemanticList(m.index)) continue;
+    seqTags.push({ index: m.index, length: m[0].length, num: m[2] });
+  }
+  const seqNums = new Set(seqTags.map((t) => t.num));
+  if (seqTags.length >= 3 && seqNums.has("01") && seqNums.has("02") && seqNums.has("03")) {
+    hits.push({ index: seqTags[0].index, length: seqTags[0].length });
+  }
+
+  return hits;
+}
+
+function probeSvgLayoutSlop(rawText) {
+  const clean = maskUiVisualMarkup(rawText).replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, preserveLinesBlank);
+  const hits = [];
+
+  // 1. Non-icon <svg> missing viewBox
+  const svgOpenRe = /<svg\b([^>]*)>/gi;
+  let m;
+  while ((m = svgOpenRe.exec(clean)) !== null) {
+    const attrs = m[1] || "";
+    if (/\bviewBox\s*=/i.test(attrs)) continue;
+    const wm = attrs.match(/\bwidth\s*=\s*["']?(\d+(?:\.\d+)?)/i);
+    const hm = attrs.match(/\bheight\s*=\s*["']?(\d+(?:\.\d+)?)/i);
+    if (wm && hm && Number(wm[1]) >= 120 && Number(hm[1]) >= 80) {
+      hits.push({ index: m.index, length: m[0].length });
+    }
+  }
+
+  // 2. Overlapping <text x="..." y="..."> coordinates within the same <g> transform scope
+  const svgTokRe = /<\/?(?:g|text)\b[^>]*>|[^<]+/gi;
+  const gStack = [];
+  const textsByGroup = new Map();
+  let inText = false;
+  let curTextInfo = null;
+  let curTextBody = "";
+  while ((m = svgTokRe.exec(clean)) !== null) {
+    const tok = m[0];
+    if (/^<g\b/i.test(tok)) {
+      const tr = tok.match(/\btransform\s*=\s*["']([^"']+)["']/i);
+      gStack.push(tr ? tr[1].trim() : "");
+      continue;
+    }
+    if (/^<\/g>/i.test(tok)) {
+      if (gStack.length > 0) gStack.pop();
+      continue;
+    }
+    if (/^<text\b/i.test(tok)) {
+      const xm = tok.match(/\bx\s*=\s*["']?(-?\d+(?:\.\d+)?)/i);
+      const ym = tok.match(/\by\s*=\s*["']?(-?\d+(?:\.\d+)?)/i);
+      if (xm && ym && !/\/>$/.test(tok)) {
+        inText = true;
+        curTextBody = "";
+        curTextInfo = {
+          index: m.index,
+          length: tok.length,
+          x: Number(xm[1]),
+          y: Number(ym[1]),
+          groupKey: gStack.filter(Boolean).join("|") || "root",
+        };
+      }
+      continue;
+    }
+    if (/^<\/text>/i.test(tok)) {
+      if (inText && curTextInfo && curTextBody.trim().length > 0) {
+        const list = textsByGroup.get(curTextInfo.groupKey) || [];
+        list.push(curTextInfo);
+        textsByGroup.set(curTextInfo.groupKey, list);
+      }
+      inText = false;
+      curTextInfo = null;
+      continue;
+    }
+    if (inText) {
+      curTextBody += tok.replace(/<[^>]+>/g, "");
+    }
+  }
+  for (const list of textsByGroup.values()) {
+    let foundOverlap = false;
+    for (let i = 0; i < list.length && !foundOverlap; i += 1) {
+      for (let j = i + 1; j < list.length; j += 1) {
+        if (Math.abs(list[i].x - list[j].x) < 8 && Math.abs(list[i].y - list[j].y) < 8) {
+          hits.push({ index: list[j].index, length: list[j].length });
+          foundOverlap = true;
+          break;
+        }
+      }
+    }
+  }
+
+  // 3. >= 2 orphaned unused id="..." entries inside <defs>
+  const defsRe = /<defs\b[^>]*>([\s\S]*?)<\/defs>/gi;
+  while ((m = defsRe.exec(clean)) !== null) {
+    const defsBody = m[1] || "";
+    const outsideDefs = clean.slice(0, m.index) + clean.slice(m.index + m[0].length);
+    const idMatches = [...defsBody.matchAll(/\bid\s*=\s*["']([^"']+)["']/gi)];
+    let orphanCount = 0;
+    for (const im of idMatches) {
+      const defId = im[1];
+      const escaped = defId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const usedRe = new RegExp(`#${escaped}(?![A-Za-z0-9_-])`);
+      if (!usedRe.test(outsideDefs) && !usedRe.test(defsBody.replace(im[0], ""))) {
+        orphanCount += 1;
+      }
+    }
+    if (orphanCount >= 2) {
+      hits.push({ index: m.index, length: Math.min(80, m[0].length) });
+    }
+  }
+
   return hits;
 }
 
@@ -1340,30 +2400,145 @@ function probeUnanchoredMultiplier(zoneText, rawText) {
 
 // ---------- Core Text Auditor ----------
 
+const META_MENTION_GUARD_RULES = new Set([
+  "unsubstantiated-superlative",
+  "reg-unsubstantiated-superlative",
+  "false-certainty",
+  "overclaiming",
+  "unanchored-multiplier",
+  "unsourced-attribution",
+]);
+
+function isMetaMentionHit(clauseSource, start, end, rule, breakIndices = null) {
+  const fam = String(rule.family || "");
+  const unprefixedId = String(rule.id || "").replace(/^(?:reg|eng|biz|ess|lit|exec|ui)-/, "");
+  if (
+    rule.category !== "lexicon" &&
+    !fam.startsWith("lexicon/") &&
+    !META_MENTION_GUARD_RULES.has(rule.id) &&
+    !META_MENTION_GUARD_RULES.has(unprefixedId)
+  ) {
+    return false;
+  }
+  const s = String(clauseSource || "");
+  let left = s.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+  let right = s.indexOf("\n", end);
+  if (right === -1) right = s.length;
+  if (Array.isArray(breakIndices) && breakIndices.length > 0) {
+    for (let bIdx = breakIndices.length - 1; bIdx >= 0; bIdx -= 1) {
+      if (breakIndices[bIdx] < start) {
+        left = Math.max(left, breakIndices[bIdx] + 1);
+        break;
+      }
+    }
+    for (let bIdx = 0; bIdx < breakIndices.length; bIdx += 1) {
+      if (breakIndices[bIdx] >= end) {
+        right = Math.min(right, breakIndices[bIdx]);
+        break;
+      }
+    }
+  } else {
+    let p = start;
+    while (p > left && !isSentenceBreakAt(s, p - 1)) p -= 1;
+    left = p;
+    p = end;
+    while (p < right && !isSentenceBreakAt(s, p)) p += 1;
+    right = p;
+  }
+  const clause = s.slice(left, right);
+
+  const hasMetaCue =
+    /(?:禁用|禁词|忌用|黑词|黑话|套话|套词|违禁|回避|勿用|避免(?:使用)?|替换为|改为|改成|改写|反例|原句|例句|示例|forbidden|banned|avoid|do\s+not\s+use|replace\s+with|instead\s+of|anti-pattern|clich[eé]|slop|buzzwords?|jargon|filler)/i.test(
+      clause
+    ) || /(?:^|\b)(?:FORBIDDEN|BANNED|DISALLOWED|BLOCKLIST|STOP_WORDS)\s*[:=]/i.test(clause);
+  if (!hasMetaCue) return false;
+
+  const quotePairs = [
+    ['"', '"'],
+    ["“", "”"],
+    ["‘", "’"],
+    ["「", "」"],
+    ["『", "』"],
+    ["`", "`"],
+    ["'", "'"],
+  ];
+  const relStart = start - left;
+  const relEnd = end - left;
+  for (const [openQ, closeQ] of quotePairs) {
+    const qOpen = clause.lastIndexOf(openQ, Math.max(0, relStart));
+    if (qOpen === -1 || relStart - qOpen > 24) continue;
+    const qClose = clause.indexOf(closeQ, relEnd);
+    if (qClose === -1) continue;
+    if (qClose - qOpen <= 48) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function cleanMatchExcerpt(matchedRaw, modality, primaryZoneName) {
+  let out = String(matchedRaw || "");
+  if (primaryZoneName === "prose" && (modality === "html" || modality === "jsx" || modality === "svg")) {
+    const noTags = out.replace(/<[^>]+>/g, " ");
+    const decoded = noTags.replace(HTML_ENTITY_RE, (m, dec, hex) => decodeEntityToken(m, dec, hex) || m);
+    const stripped = decodeXmlEntities(decoded).replace(/\s+/g, " ").trim();
+    if (stripped) out = stripped;
+  } else {
+    out = out.replace(/\s+/g, " ").trim();
+  }
+  if (/^\*\*[^*]+$/.test(out)) out = out.slice(2).trim();
+  if (/^[^*]+\*\*$/.test(out)) out = out.slice(0, -2).trim();
+  return clipCodepoints(out, 140);
+}
+
 export function auditText(text, { filename = "<memory>", modality = null, pack, config = {}, allowSyntheticFixtures = false } = {}) {
   const mod = modality || detectModality(filename) || "markdown";
   const lineStarts = buildLineStarts(text);
-  const zones = buildZones(text, mod);
+  const zones = buildZones(text, mod, {
+    proseFences: config?.proseFences,
+    maskBlockquotes: config?.maskBlockquotes,
+  });
   const { byTargetLine, directives } = parseSuppressions(text);
   const allowList = config?.allow || [];
-  const cpPrefix = /[\uD800-\uDBFF]/.test(text) ? buildCodePointPrefix(text) : null;
+  const cpPrefix = /[\uD800-\uDFFF]/.test(text) ? buildCodePointPrefix(text) : null;
+  const textBreaks = buildSentenceBreakIndices(text);
+  const rawProseMaskBreaks = zones.prose ? buildSentenceBreakIndices(zones.prose) : textBreaks;
+  const allowHtmlRulesInMixedMd = mod === "markdown" && hasEmbeddedUiMarkup(text);
+  const mdUiZone = allowHtmlRulesInMixedMd ? maskMarkdownFences(text, new Set()).replace(/`[^`\n]+`/g, (m) => " ".repeat(m.length)) : null;
   const findings = [];
 
   for (const rule of pack.rules || []) {
-    if (rule.modalities && !rule.modalities.includes(mod)) continue;
+    const directModMatch = !rule.modalities || rule.modalities.includes(mod);
+    const mixedUiRule = !directModMatch && allowHtmlRulesInMixedMd && rule.modalities.includes("html");
+    if (!directModMatch && !mixedUiRule) continue;
 
-    // Synthetic Office/PDF fixture tokens ONLY during `dislop pack-test`
-    if (allowSyntheticFixtures && (text.startsWith("DOCX_") || text.startsWith("PPTX_"))) {
+    // Synthetic Office/Image/PDF fixture tokens ONLY during `dislop pack-test`
+    if (
+      allowSyntheticFixtures &&
+      (text.startsWith("DOCX_") || text.startsWith("PPTX_") || text.startsWith("IMG_") || text.startsWith("PDF_"))
+    ) {
       const synthHits = evaluateSyntheticBinaryFixture(text, rule, pack.thresholds || {});
       for (const h of synthHits) {
-        findings.push(makeFinding({ rule, filename, modality: mod, location: h.location, match: h.match, sentence: text, span: { start: 0, end: text.length } }));
+        findings.push(
+          makeFinding({
+            rule: h.severity ? { ...rule, severity: h.severity } : rule,
+            filename,
+            modality: mod,
+            location: h.location,
+            match: h.match,
+            sentence: text,
+            span: { start: 0, end: text.length },
+          })
+        );
       }
       continue;
     }
 
     let rawHits = [];
     const primaryZoneName = (rule.zones && rule.zones[0]) || "prose";
-    const zoneText = zones[primaryZoneName] ?? zones.prose;
+    const useLogicalProse = !mixedUiRule && primaryZoneName === "prose" && zones.proseLogical && zones.proseMap;
+    const zoneText = mixedUiRule ? mdUiZone : (useLogicalProse ? zones.proseLogical : (zones[primaryZoneName] ?? zones.prose));
+    const rawForProbes = useLogicalProse ? zoneText : text;
 
     if (rule.probe === "regex") {
       for (const pattern of rule.patterns || []) {
@@ -1383,15 +2558,15 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
               len -= lead[0].length;
             }
           }
-          while (len > 1 && text.charCodeAt(idx) === 0xfeff) {
+          while (len > 1 && zoneText.charCodeAt(idx) === 0xfeff) {
             idx += 1;
             len -= 1;
           }
           if (
             rule.id === "unfilled-placeholder" &&
-            text[idx] === "[" &&
-            text[idx + len - 1] === "]" &&
-            /^(?:\(|\[|:)/.test(text.slice(idx + len))
+            zoneText[idx] === "[" &&
+            zoneText[idx + len - 1] === "]" &&
+            /^(?:\(|\[|:)/.test(zoneText.slice(idx + len))
           ) {
             continue;
           }
@@ -1399,35 +2574,43 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
         }
       }
     } else if (rule.probe === "negation-pivot") {
-      rawHits = probeNegationPivot(zoneText, text);
+      rawHits = probeNegationPivot(zoneText, rawForProbes);
     } else if (rule.probe === "staccato-run") {
       rawHits = probeStaccatoRun(zoneText);
     } else if (rule.probe === "zh-four-char-triad") {
       rawHits = probeZhFourCharTriad(zoneText);
     } else if (rule.probe === "unsourced-attribution") {
-      rawHits = probeUnsourcedAttribution(zoneText, text);
+      rawHits = probeUnsourcedAttribution(zoneText, rawForProbes);
     } else if (rule.probe === "bold-lead-list-wall") {
-      rawHits = probeBoldLeadListWall(zoneText, text, pack.thresholds?.boldLeadListRun || 4);
+      rawHits = probeBoldLeadListWall(zoneText, rawForProbes, pack.thresholds?.boldLeadListRun || 4);
     } else if (rule.probe === "em-dash-density") {
       rawHits = probeEmDashDensity(zoneText, pack.thresholds?.maxEmDashesPer300Words || 4);
     } else if (rule.probe === "zh-halfwidth-punctuation") {
       rawHits = probeZhHalfwidthPunctuation(zoneText);
     } else if (rule.probe === "cooccurrence-slop-cluster") {
-      rawHits = probeCooccurrenceSlopCluster(zoneText, text);
+      rawHits = probeCooccurrenceSlopCluster(zoneText, rawForProbes);
     } else if (rule.probe === "semicolon-tricolon") {
-      rawHits = probeSemicolonTricolon(zoneText, text);
+      rawHits = probeSemicolonTricolon(zoneText, rawForProbes);
     } else if (rule.probe === "rhetorical-qa-cadence") {
-      rawHits = probeRhetoricalQaCadence(zoneText, text);
+      rawHits = probeRhetoricalQaCadence(zoneText, rawForProbes);
     } else if (rule.probe === "comma-chain-runon") {
-      rawHits = probeCommaChainRunon(zoneText, text);
+      rawHits = probeCommaChainRunon(zoneText, rawForProbes);
     } else if (rule.probe === "narrative-sandwich-frame") {
-      rawHits = probeNarrativeSandwichFrame(zoneText, text);
+      rawHits = probeNarrativeSandwichFrame(zoneText, rawForProbes);
     } else if (rule.probe === "template-skeleton-echo") {
-      rawHits = probeTemplateSkeletonEcho(zoneText, text);
+      rawHits = probeTemplateSkeletonEcho(zoneText, rawForProbes);
     } else if (rule.probe === "low-burstiness-vapor") {
-      rawHits = probeLowBurstinessVapor(zoneText, text);
+      rawHits = probeLowBurstinessVapor(zoneText, rawForProbes);
     } else if (rule.probe === "unanchored-multiplier") {
-      rawHits = probeUnanchoredMultiplier(zoneText, text);
+      rawHits = probeUnanchoredMultiplier(zoneText, rawForProbes);
+    } else if (rule.probe === "zh-dev-jargon") {
+      rawHits = probeZhDevJargon(zoneText, rawForProbes);
+    } else if (rule.probe === "zh-exclamation") {
+      rawHits = probeZhExclamation(zoneText, rawForProbes);
+    } else if (rule.probe === "zh-mega-sentence") {
+      rawHits = probeZhMegaSentence(zoneText, rawForProbes);
+    } else if (rule.probe === "unsourced-statistic") {
+      rawHits = probeUnsourcedStatistic(zoneText, text, useLogicalProse ? zones.proseMap : null);
     } else if (rule.probe === "ui-dead-control") {
       rawHits = probeUiDeadControl(text);
     } else if (rule.probe === "ui-ai-gradient") {
@@ -1436,9 +2619,24 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
       rawHits = probeUiPillSoup(text, pack.thresholds?.maxPillsPerFile || 6);
     } else if (rule.probe === "ui-box-in-box") {
       rawHits = probeUiBoxInBox(text);
+    } else if (rule.probe === "ui-glow-blob-chrome") {
+      rawHits = probeUiGlowBlobChrome(text);
+    } else if (rule.probe === "ui-emoji-icon-chrome") {
+      rawHits = probeUiEmojiIconChrome(text);
+    } else if (rule.probe === "ui-template-card-grid") {
+      rawHits = probeUiTemplateCardGrid(text);
+    } else if (rule.probe === "svg-layout-slop") {
+      rawHits = probeSvgLayoutSlop(text);
     }
 
     // Sort and deduplicate overlapping spans emitted by multiple patterns of the same rule
+    if (useLogicalProse) {
+      rawHits = rawHits.map((h) => {
+        const sIdx = zones.proseMap.starts[h.index] ?? h.index;
+        const eIdx = zones.proseMap.ends[Math.max(h.index, h.index + h.length - 1)] ?? h.index + h.length;
+        return { ...h, index: sIdx, length: Math.max(1, eIdx - sIdx) };
+      });
+    }
     rawHits.sort((a, b) => a.index - b.index || b.length - a.length);
     const dedupHits = [];
     for (const h of rawHits) {
@@ -1451,7 +2649,11 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
       const start = hit.index;
       const end = hit.index + hit.length;
       const matchedRaw = text.slice(start, end);
-      if (isAllowedMatch(matchedRaw, allowList)) continue;
+      const matchedDisplay = cleanMatchExcerpt(matchedRaw, mod, primaryZoneName);
+      if (isAllowedMatch(matchedRaw, allowList) || isAllowedMatch(matchedDisplay, allowList)) continue;
+      const mentionSrc = primaryZoneName === "prose" ? zones.prose : text;
+      const mentionBreaks = primaryZoneName === "prose" ? rawProseMaskBreaks : textBreaks;
+      if (isMetaMentionHit(mentionSrc, start, end, rule, mentionBreaks)) continue;
 
       const { line, col } = offsetToLineCol(text, lineStarts, start, cpPrefix);
       const lineSuppressions = byTargetLine.get(line) || [];
@@ -1464,7 +2666,7 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
       }
       if (suppressed) continue;
 
-      const sentence = enclosingSentence(text, start, end);
+      const sentence = enclosingSentence(text, start, end, textBreaks);
       const cpStart = cpPrefix ? cpPrefix[start] : start;
       const cpEnd = cpPrefix ? cpPrefix[end] : end;
       findings.push(
@@ -1476,7 +2678,7 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
           line,
           col,
           span: { start: cpStart, end: cpEnd },
-          match: clipCodepoints(matchedRaw.replace(/\s+/g, " ").trim(), 140),
+          match: cleanMatchExcerpt(matchedRaw, mod, primaryZoneName),
           sentence,
         })
       );
@@ -1493,7 +2695,18 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
     }));
 
   findings.sort((a, b) => (a.line || 0) - (b.line || 0) || (a.col || 0) - (b.col || 0));
-  return { findings, unusedSuppressions };
+  const jargonRanges = findings
+    .filter((f) => f.ruleId === "zh-dev-jargon" && f.span)
+    .map((f) => f.span);
+  const filteredFindings = jargonRanges.length > 0
+    ? findings.filter(
+        (f) =>
+          f.ruleId !== "zh-bureaucratic-padding" ||
+          !f.span ||
+          !jargonRanges.some((j) => f.span.start >= j.start - 2 && f.span.end <= j.end + 2)
+      )
+    : findings;
+  return { findings: filteredFindings, unusedSuppressions };
 }
 
 function evaluateSyntheticBinaryFixture(fixture, rule, thresholds) {
@@ -1521,7 +2734,72 @@ function evaluateSyntheticBinaryFixture(fixture, rule, thresholds) {
       return [{ location: `slide ${run}`, match: `${run} consecutive identical slide layouts` }];
     }
   }
+  if (rule.probe === "image-ai-workflow-residue") {
+    if (fixture.startsWith("IMG_WORKFLOW:")) {
+      return [{ location: "metadata", match: fixture.slice("IMG_WORKFLOW:".length), severity: "warning" }];
+    }
+    if (fixture.startsWith("IMG_PROVENANCE:")) {
+      return [{ location: "metadata", match: fixture.slice("IMG_PROVENANCE:".length), severity: "info" }];
+    }
+  }
+  if (rule.probe === "image-ai-palette-slop") {
+    if (fixture.startsWith("IMG_NEON_PALETTE:") || fixture.startsWith("IMG_PLASTIC:")) {
+      return [{ location: "pixels", match: fixture.split(":")[1] || "synthetic-palette" }];
+    }
+  }
+  if (rule.probe === "pdf-visual-layout-slop") {
+    if (
+      fixture.startsWith("PDF_RASTER_DECK:") ||
+      fixture.startsWith("PDF_FLAT_TYPE:") ||
+      fixture.startsWith("PDF_MONOTONY:")
+    ) {
+      return [{ location: "page 1", match: fixture.split(":")[1] || "pdf-layout" }];
+    }
+  }
   return [];
+}
+
+const DELETE_STRATEGY_IDS = new Set([
+  "chatbot-artifact",
+  "markdown-leak",
+  "ui-prompt-echo-badge",
+  "ui-dead-control",
+  "throat-clearing-opener",
+  "closing-platitude",
+]);
+
+const NEED_SOURCE_STRATEGY_IDS = new Set([
+  "unfilled-placeholder",
+  "unsourced-attribution",
+  "unsourced-statistic",
+  "reg-unsubstantiated-superlative",
+  "reg-unqualified-guarantee",
+]);
+
+export function deriveFixStrategy(rule) {
+  if (rule?.fixStrategy) return rule.fixStrategy;
+  const id = String(rule?.id || rule?.ruleId || "").trim();
+  const fam = String(rule?.family || "").trim();
+  if (DELETE_STRATEGY_IDS.has(id) || fam === "hygiene/chat-residue") return "delete";
+  if (
+    NEED_SOURCE_STRATEGY_IDS.has(id) ||
+    fam.startsWith("evidence/") ||
+    fam.startsWith("hygiene/placeholder")
+  ) {
+    return "need-source";
+  }
+  if (
+    id.startsWith("ui-") ||
+    id.startsWith("slide-") ||
+    id.startsWith("pdf-") ||
+    id.startsWith("img-") ||
+    id.startsWith("docx-") ||
+    fam.startsWith("design/") ||
+    fam.startsWith("visual/")
+  ) {
+    return "unwrap-layout";
+  }
+  return "rephrase";
 }
 
 export function makeFinding({ rule, filename, modality, location, line = 1, col = 1, span = null, match, sentence = "" }) {
@@ -1533,6 +2811,7 @@ export function makeFinding({ rule, filename, modality, location, line = 1, col 
     ruleId: rule.id,
     tier: rule.tier || "taste",
     severity: rule.severity || "warning",
+    fixStrategy: deriveFixStrategy(rule),
     family: rule.family || "general",
     file: filename,
     modality,
@@ -1599,7 +2878,7 @@ export function auditOoxmlEntries(entries, { filename, modality, pack, config = 
       if (!paraText) continue;
       paraIndex += 1;
 
-      if (mdLeakRule && (/\*\*[^*\n]{1,80}\*\*/.test(paraText) || /^#{1,6}\s+\S/.test(paraText))) {
+      if (mdLeakRule && (/\*\*[^*\n]{1,80}\*\*/.test(paraText) || /^#{1,6}[ \t]+\S/.test(paraText))) {
         findings.push(makeFinding({ rule: mdLeakRule, filename, modality, location: `para ${paraIndex}`, line: paraIndex, match: paraText.slice(0, 100) }));
       }
 
@@ -1708,7 +2987,7 @@ export function auditOoxmlEntries(entries, { filename, modality, pack, config = 
       }
 
       const fullSlideText = slideParagraphs.join("\n");
-      if (mdLeakRule && (/\*\*[^*\n]{1,80}\*\*/.test(fullSlideText) || /^#{1,6}\s+\S/m.test(fullSlideText))) {
+      if (mdLeakRule && (/\*\*[^*\n]{1,80}\*\*/.test(fullSlideText) || /^#{1,6}[ \t]+\S/m.test(fullSlideText))) {
         findings.push(makeFinding({ rule: mdLeakRule, filename, modality, location: `slide ${slideNum}`, line: slideNum, match: fullSlideText.slice(0, 90) }));
       }
 
@@ -1785,6 +3064,295 @@ export function auditOoxmlEntries(entries, { filename, modality, pack, config = 
   return { findings, skipped };
 }
 
+/**
+ * Audit parsed PNG/JPEG/WebP metadata & pixel heuristics for AI workflow leaks and template palette/plastic slop.
+ */
+export function auditImageDocument(parsedImage, { filename, pack, config = {} } = {}) {
+  const findings = [];
+  const skipped = [];
+  if (!parsedImage || !parsedImage.format) {
+    return { findings, skipped: [{ file: filename, reason: "Unparseable image metadata" }] };
+  }
+  const allowList = config?.allow || [];
+  const rulesById = new Map((pack.rules || []).map((r) => [r.id, r]));
+
+  const wfRule = rulesById.get("image-ai-workflow-residue");
+  if (wfRule) {
+    const metaTexts = parsedImage.metadataTexts || [];
+    const workflowMatches = [];
+    const provenanceMatches = [];
+    for (const item of metaTexts) {
+      const key = String(item.key || "").trim();
+      const val = String(item.value || "");
+      const combined = `${key}: ${val}`;
+      if (isAllowedMatch(combined, allowList)) continue;
+      if (
+        /^(?:parameters|prompt|workflow|generation_data)$/i.test(key) ||
+        /(?:Negative prompt:|Steps:\s*\d+\s*,\s*Sampler:|CFG scale:\s*\d|"class_type"\s*:\s*"(?:KSampler|CheckpointLoaderSimple|CLIPTextEncode)")/i.test(val)
+      ) {
+        workflowMatches.push(clipCodepoints(`${key || "chunk"}: ${val.replace(/\s+/g, " ").trim()}`, 120));
+      } else if (
+        /(?:trainedAlgorithmicMedia|c2pa|Midjourney|DALL-E|Adobe Firefly|Stable Diffusion|ComfyUI|AUTOMATIC1111|Flux\.1|Ideogram|Recraft)/i.test(combined)
+      ) {
+        provenanceMatches.push(clipCodepoints(`${key || "tag"}: ${val.replace(/\s+/g, " ").trim()}`, 120));
+      }
+    }
+    if (workflowMatches.length > 0) {
+      findings.push(
+        makeFinding({
+          rule: { ...wfRule, severity: "warning" },
+          filename,
+          modality: "image",
+          location: "metadata",
+          line: 1,
+          match: workflowMatches[0],
+        })
+      );
+    } else if (parsedImage.hasC2pa || provenanceMatches.length > 0) {
+      findings.push(
+        makeFinding({
+          rule: { ...wfRule, severity: "info" },
+          filename,
+          modality: "image",
+          location: "metadata",
+          line: 1,
+          match: provenanceMatches[0] || "C2PA / AI provenance manifest present",
+        })
+      );
+    }
+  }
+
+  const palRule = rulesById.get("image-ai-palette-slop");
+  const pm = parsedImage.pixelMetrics;
+  if (palRule && pm && parsedImage.width >= 64 && parsedImage.height >= 64) {
+    const isNeonPurple =
+      (pm.neonPurpleRatio >= 0.16 && pm.neutralRatio < 0.75) ||
+      (pm.darkBgRatio >= 0.35 && pm.neonPurpleRatio + pm.neonCyanRatio >= 0.14 && pm.neonPurpleRatio >= 0.06);
+    const isPlastic = pm.highSatRatio >= 0.38 && pm.smoothHighSatRatio >= 0.65;
+    if (isNeonPurple || isPlastic) {
+      const reasons = [];
+      if (isNeonPurple) {
+        reasons.push(`neonPurple=${Math.round(pm.neonPurpleRatio * 100)}%`);
+        if (pm.darkBgRatio >= 0.35) reasons.push(`darkBg=${Math.round(pm.darkBgRatio * 100)}%`);
+      }
+      if (isPlastic) {
+        reasons.push(`highSat=${Math.round(pm.highSatRatio * 100)}%`);
+        reasons.push(`smooth=${Math.round(pm.smoothHighSatRatio * 100)}%`);
+      }
+      findings.push(
+        makeFinding({
+          rule: palRule,
+          filename,
+          modality: "image",
+          location: "pixels",
+          line: 1,
+          match: `${parsedImage.width}x${parsedImage.height} (${reasons.join(", ")})`,
+        })
+      );
+    }
+  }
+
+  return { findings, skipped };
+}
+
+/**
+ * Audit parsed PDF visual layout, landscape slide density, RGB shading slop, and embedded text artifacts.
+ */
+export function auditPdfDocument(parsedPdf, { filename, pack, config = {} } = {}) {
+  const findings = [];
+  const skipped = [];
+  if (!parsedPdf) {
+    return { findings, skipped: [{ file: filename, reason: "Unparseable PDF file" }] };
+  }
+  if (parsedPdf.encrypted) {
+    return { findings, skipped: [{ file: filename, reason: "Encrypted PDF cannot be audited offline" }] };
+  }
+  const pages = parsedPdf.pages || [];
+  if (pages.length === 0) {
+    return { findings, skipped: [{ file: filename, reason: "Missing page objects inside PDF" }] };
+  }
+
+  const rulesById = new Map((pack.rules || []).map((r) => [r.id, r]));
+  const thresholds = pack.thresholds || {};
+  const mdLeakRule = rulesById.get("markdown-leak");
+  const wordWallRule = rulesById.get("slide-word-wall");
+  const gradientRule = rulesById.get("ui-ai-gradient");
+  const pdfLayoutRule = rulesById.get("pdf-visual-layout-slop");
+
+  let rasterOnlyLandscapeCount = 0;
+  let prevSig = null;
+  let monoRun = 0;
+  let monoEmitted = false;
+
+  for (const p of pages) {
+    const pageNum = p.pageNum || 1;
+    const text = p.text || "";
+    const cjkChars = (text.match(/[\u4e00-\u9fff]/gu) || []).length;
+    const latinWords = text.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
+
+    if (mdLeakRule && (/\*\*[^*\n]{1,80}\*\*/.test(text) || /^#{1,6}[ \t]+\S/m.test(text))) {
+      findings.push(
+        makeFinding({
+          rule: mdLeakRule,
+          filename,
+          modality: "pdf",
+          location: `page ${pageNum}`,
+          line: pageNum,
+          match: clipCodepoints(text.replace(/\s+/g, " ").trim(), 100),
+        })
+      );
+    }
+
+    if (p.isLandscape && wordWallRule) {
+      const maxWords = thresholds.maxSlideWords || 120;
+      const maxZh = thresholds.maxSlideCharsZh || 280;
+      if (latinWords > maxWords || cjkChars > maxZh) {
+        findings.push(
+          makeFinding({
+            rule: wordWallRule,
+            filename,
+            modality: "pdf",
+            location: `page ${pageNum}`,
+            line: pageNum,
+            match: `${latinWords} words / ${cjkChars} CJK chars`,
+          })
+        );
+      }
+    }
+
+    if (gradientRule && Array.isArray(p.rgbColors) && p.rgbColors.length > 0) {
+      const purpleKeys = new Set();
+      for (const rgb of p.rgbColors) {
+        const [h, s] = rgbToHsl(rgb);
+        if (h >= 235 && h <= 345 && s >= 45) {
+          purpleKeys.add(`${Math.floor(rgb[0] / 16)},${Math.floor(rgb[1] / 16)},${Math.floor(rgb[2] / 16)}`);
+        }
+      }
+      if (purpleKeys.size >= 2) {
+        findings.push(
+          makeFinding({
+            rule: gradientRule,
+            filename,
+            modality: "pdf",
+            location: `page ${pageNum}`,
+            line: pageNum,
+            match: `${purpleKeys.size} neon purple-pink RGB fills/shadings`,
+          })
+        );
+      }
+    }
+
+    if (pdfLayoutRule) {
+      if (p.isLandscape && (p.textOpCount || 0) === 0 && (p.imageCount || 0) >= 1) {
+        rasterOnlyLandscapeCount += 1;
+      }
+
+      if (p.isLandscape && (latinWords >= 40 || cjkChars >= 90) && Array.isArray(p.fontSizes) && p.fontSizes.length >= 4) {
+        let minF = p.fontSizes[0];
+        let maxF = p.fontSizes[0];
+        for (let fi = 1; fi < p.fontSizes.length; fi += 1) {
+          const fv = p.fontSizes[fi];
+          if (fv < minF) minF = fv;
+          if (fv > maxF) maxF = fv;
+        }
+        if (minF > 0 && (maxF / minF < 1.2 || (p.width >= 500 && minF < 9.5))) {
+          findings.push(
+            makeFinding({
+              rule: pdfLayoutRule,
+              filename,
+              modality: "pdf",
+              location: `page ${pageNum}`,
+              line: pageNum,
+              match: `font hierarchy collapsed (min=${minF}pt, max=${maxF}pt, words=${latinWords})`,
+            })
+          );
+        }
+      }
+
+      if (pages.length >= 5) {
+        const isPlainTextSlide =
+          p.isLandscape &&
+          (p.imageCount || 0) === 0 &&
+          (latinWords > 8 || cjkChars > 16) &&
+          Array.isArray(p.fontSizes) &&
+          p.fontSizes.length > 0;
+        let pMin = Infinity;
+        let pMax = -Infinity;
+        if (isPlainTextSlide) {
+          for (const fv of p.fontSizes) {
+            if (fv < pMin) pMin = fv;
+            if (fv > pMax) pMax = fv;
+          }
+        }
+        const sig = isPlainTextSlide
+          ? `f:${Math.floor(pMin + 0.5)}-${Math.floor(pMax + 0.5)}|w:${latinWords >= 25 || cjkChars >= 50 ? 2 : 1}`
+          : null;
+        if (sig && sig === prevSig) {
+          monoRun += 1;
+        } else {
+          prevSig = sig;
+          monoRun = sig ? 1 : 0;
+        }
+        if (!monoEmitted && monoRun >= (thresholds.maxIdenticalSlideRun || 4)) {
+          monoEmitted = true;
+          findings.push(
+            makeFinding({
+              rule: pdfLayoutRule,
+              filename,
+              modality: "pdf",
+              location: `page ${pageNum}`,
+              line: pageNum,
+              match: `${monoRun} consecutive identical plain-text landscape PDF pages (${sig})`,
+            })
+          );
+        }
+      }
+    }
+
+    if (text.trim()) {
+      const sub = auditText(text, { filename, modality: "markdown", pack, config });
+      for (const f of sub.findings) {
+        if (f.ruleId === "markdown-leak") continue;
+        findings.push({ ...f, modality: "pdf", location: `page ${pageNum}`, line: pageNum });
+      }
+    }
+  }
+
+  if (pdfLayoutRule && pages.length >= 2 && rasterOnlyLandscapeCount >= 2) {
+    findings.push(
+      makeFinding({
+        rule: pdfLayoutRule,
+        filename,
+        modality: "pdf",
+        location: "page 1",
+        line: 1,
+        match: `${rasterOnlyLandscapeCount} raster-only landscape pages with zero selectable text`,
+      })
+    );
+  }
+
+  const coverageWarnings = [];
+  const unreadablePages = [];
+  for (const p of pages) {
+    const emptyText = !(p.text || "").trim();
+    const isRasterSlide = p.isLandscape && (p.textOpCount || 0) === 0 && (p.imageCount || 0) >= 1;
+    if (emptyText && !isRasterSlide && (p.hasFonts || parsedPdf.hasFonts || parsedPdf.hasCompressedStreams || (p.fontSizes?.length || 0) > 0)) {
+      unreadablePages.push(p.pageNum || 1);
+    }
+  }
+  if (unreadablePages.length > 0 && !(rasterOnlyLandscapeCount >= 2 && unreadablePages.length === pages.length)) {
+    coverageWarnings.push({
+      file: filename,
+      code: "unreadable-pdf-text",
+      pages: unreadablePages,
+      message: `PDF contains fonts or streams on page(s) ${unreadablePages.join(", ")} with 0 selectable characters extracted; inspect visually or via pdftotext.`,
+    });
+  }
+
+  findings.sort((a, b) => (a.line || 0) - (b.line || 0) || (a.col || 0) - (b.col || 0));
+  return { findings, skipped, coverageWarnings };
+}
+
 // ---------- Output Formatters (text, json, sarif, github, md) ----------
 
 function escapeGithubProp(val) {
@@ -1803,8 +3371,20 @@ function escapeGithubData(val) {
     .replace(/\n/g, "%0A");
 }
 
+export function ruleDocUrl(item, lang = "en") {
+  const ruleId = String(item?.ruleId || item?.id || "");
+  const source = item?.source || "";
+  const packId = item?.packId || "";
+  const isZh = lang === "zh" || ruleId.startsWith("zh-");
+  const base = isZh ? "https://dislop.com/rules/" : "https://dislop.com/en/rules/";
+  if (!ruleId || source === "pattern-library" || packId === "pocket-model") {
+    return base;
+  }
+  return `${base}${ruleId}/`;
+}
+
 export function formatReport(report, format = "text", lang = "en") {
-  const { findings, checkedCount, skipped = [], unusedSuppressions = [] } = report;
+  const { findings, checkedCount, skipped = [], unusedSuppressions = [], coverageWarnings = [], changedFilter = false } = report;
   if (format === "json") {
     return JSON.stringify(report, null, 2);
   }
@@ -1815,7 +3395,7 @@ export function formatReport(report, format = "text", lang = "en") {
     const lines = findings.map((f) => {
       const level = f.severity === "error" ? "error" : f.severity === "warning" ? "warning" : "notice";
       const msg = (f.message?.[lang] || f.message?.en || "").replace(/\r?\n/g, " ");
-      return `::${level} file=${escapeGithubProp(f.file)},line=${f.line || 1},col=${f.col || 1},title=${escapeGithubProp(f.ruleId)}::${escapeGithubData(`${msg} (${f.match})`)}`;
+      return `::${level} file=${escapeGithubProp(f.file)},line=${f.line || 1},col=${f.col || 1},title=${escapeGithubProp(f.ruleId)}::${escapeGithubData(`${msg} (${f.match}) — ${ruleDocUrl(f, lang)}`)}`;
     });
     return lines.join("\n");
   }
@@ -1834,29 +3414,70 @@ export function formatReport(report, format = "text", lang = "en") {
   // Default human text format
   const out = [];
   const skipNote = skipped.length > 0 ? `, ${skipped.length} skipped` : "";
-  if (findings.length === 0 && unusedSuppressions.length === 0) {
+  if (changedFilter && checkedCount === 0 && skipped.length === 0 && findings.length === 0 && coverageWarnings.length === 0) {
+    out.push(
+      lang === "zh"
+        ? "dislop: --changed 未匹配到可检查的变更文件（已检 0 项，0 处命中）"
+        : "dislop: --changed matched 0 inspectable files (0 checked, 0 findings)"
+    );
+  } else if (findings.length === 0 && unusedSuppressions.length === 0) {
     out.push(
       lang === "zh"
         ? `dislop: 未发现已知模式（已检 ${checkedCount} 项${skipped.length > 0 ? `，跳过 ${skipped.length} 项` : ""}，0 处命中）`
         : `dislop: no known patterns found (${checkedCount} checked${skipNote}, 0 findings)`
     );
   } else {
-    out.push(`dislop: ${findings.length} finding(s) across ${checkedCount} checked file(s)${skipNote}`);
+    const isZh = lang === "zh";
+    const errCount = findings.filter((f) => f.severity === "error").length;
+    const advCount = findings.length - errCount;
+    const zhSkip = skipped.length > 0 ? `，跳过 ${skipped.length} 项` : "";
+    out.push(
+      isZh
+        ? `dislop: 发现 ${findings.length} 处问题（${errCount} 硬伤 · ${advCount} 提醒，已检 ${checkedCount} 个文件${zhSkip}）`
+        : `dislop: ${findings.length} finding(s) (${errCount} error · ${advCount} advisory) across ${checkedCount} checked file(s)${skipNote}`
+    );
+    const stratLabelsZh = { delete: "删掉", "need-source": "补出处", "unwrap-layout": "去套壳", rephrase: "改写" };
+    const seenRuleIds = new Set();
+    const ruleCounts = new Map();
     for (const f of findings) {
-      const msg = f.message?.[lang] || f.message?.en || "";
-      out.push(`  [${f.severity.toUpperCase()}] ${f.file}:${f.location}  ${f.ruleId}`);
-      out.push(`    match: "${f.match}"`);
-      out.push(`    why:   ${msg}`);
-      if (f.deletionTest) {
-        out.push(`    test:  ${f.deletionTest[lang] || f.deletionTest.en}`);
+      ruleCounts.set(f.ruleId, (ruleCounts.get(f.ruleId) || 0) + 1);
+      const strat = f.fixStrategy || deriveFixStrategy({ id: f.ruleId, family: f.family });
+      const tag = isZh ? stratLabelsZh[strat] || "改写" : strat;
+      out.push(`  [${f.severity.toUpperCase()}] ${f.file}:${f.location}  ${f.ruleId} [${tag}]  "${f.match}"`);
+      if (!seenRuleIds.has(f.ruleId)) {
+        seenRuleIds.add(f.ruleId);
+        const msg = f.message?.[lang] || f.message?.en || "";
+        const testTxt = f.deletionTest ? f.deletionTest[lang] || f.deletionTest.en || "" : "";
+        if (msg) {
+          out.push(isZh ? `    原因: ${msg}` : `    why: ${msg}`);
+        }
+        if (testTxt && testTxt !== msg) {
+          out.push(isZh ? `    改法: ${testTxt}` : `    fix: ${testTxt}`);
+        }
       }
     }
     for (const u of unusedSuppressions) {
-      out.push(`  [UNUSED] ${u.file}:${u.line}  stale dislop-ignore (${u.ruleIds.join(", ")})`);
+      out.push(
+        isZh
+          ? `  [UNUSED] ${u.file}:${u.line}  失效忽略注释 dislop-ignore (${u.ruleIds.join(", ")})`
+          : `  [UNUSED] ${u.file}:${u.line}  stale dislop-ignore (${u.ruleIds.join(", ")})`
+      );
+    }
+    if (findings.length >= 4 || (checkedCount >= 2 && findings.length > 0)) {
+      const topStr = Array.from(ruleCounts.entries())
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, 5)
+        .map(([rid, cnt]) => `${rid}×${cnt}`)
+        .join(", ");
+      out.push(isZh ? `  按规则分布: ${topStr}` : `  Top rules: ${topStr}`);
+      out.push(isZh ? "  下一步: 改完可跑 dislop verify --git HEAD <文件>" : "  Next: verify edits with dislop verify --git HEAD <file>");
     }
   }
   for (const s of skipped) {
     out.push(`  [SKIP] ${s.file} — ${s.reason}`);
+  }
+  for (const w of coverageWarnings) {
+    out.push(`  [COVERAGE] ${w.file} — ${w.message}`);
   }
   if (report.profiles && report.profiles.length > 0) {
     for (const item of report.profiles) {
@@ -1880,7 +3501,7 @@ function buildSarif(report, lang = "en") {
         help: {
           text: f.deletionTest?.[lang] || f.deletionTest?.en || f.message?.en || f.ruleId,
         },
-        helpUri: `https://dislop.com/#rule-${f.ruleId}`,
+        helpUri: ruleDocUrl(f, lang),
         defaultConfiguration: {
           level: f.severity === "error" ? "error" : f.severity === "warning" ? "warning" : "note",
         },
@@ -1940,6 +3561,7 @@ export const FAMILY_TO_CATEGORY = {
   "evidence/": "evidence-rigor",
   "deck/": "deck-layout",
   "ui/": "ui-design",
+  "graphic/": "graphic-layout",
   "composite/": "composite-signal",
 };
 
@@ -2006,7 +3628,7 @@ export function buildCatalog(packsById, patternByRuleId = null) {
         message: rule.message || { en: "", zh: "" },
         deletionTest: rule.deletionTest || null,
         exemplar: rule.exemplar || null,
-        anchorUrl: `https://dislop.com/#rule-${rule.id}`,
+        anchorUrl: ruleDocUrl({ ruleId: rule.id }, "en"),
       });
     }
   }
@@ -2103,13 +3725,13 @@ export function queryCatalog(entries, filters = {}) {
 // ---------- Zero-Entropy Fact-Lock Ledger (`dislop.fact-ledger/1`) & Stet Spans ----------
 
 const FACT_QUALIFIER_PATTERNS = [
-  { group: "max_inc", re: /^(?:up\s+to|no\s+more\s+than|at\s+most|within|max(?:imum)?(?:\s+of)?|<=|≤)\s*/i },
+  { group: "min_inc", re: /^(?:no\s+less\s+than|no\s+fewer\s+than|at\s+least|minimum\s+of|>=|≥)\s*/i },
+  { group: "min_inc", re: /^(?:不低于|不少于|不小于|不得低于|不得少于|至少|最少|最低|起码|下限(?:为)?)\s*/ },
+  { group: "max_inc", re: /^(?:no\s+more\s+than|up\s+to|at\s+most|within|max(?:imum)?(?:\s+of)?|<=|≤)\s*/i },
+  { group: "max_inc", re: /^(?:不超过|不高于|不大于|不多于|不得超过|不得高于|最多|至多|最高|以内|上限(?:为)?)\s*/ },
   { group: "max_lt", re: /^(?:under|below|less\s+than|fewer\s+than|<)\s*/i },
-  { group: "max_inc", re: /^(?:最多|不超过|不高于|至多|以内|上限(?:为)?)\s*/ },
   { group: "max_lt", re: /^(?:低于|小于|少于|不到)\s*/ },
-  { group: "min_inc", re: /^(?:at\s+least|no\s+less\s+than|no\s+fewer\s+than|minimum\s+of|>=|≥)\s*/i },
   { group: "min_gt", re: /^(?:more\s+than|greater\s+than|over|above|>)\s*/i },
-  { group: "min_inc", re: /^(?:至少|不少于|不低于|下限(?:为)?)\s*/ },
   { group: "min_gt", re: /^(?:超过|高于|大于)\s*/ },
   { group: "approx", re: /^(?:approx(?:imately)?\.?|roughly|about|around|~|≈)\s*/i },
   { group: "approx", re: /^(?:约|大约|近)\s*/ },
@@ -2160,6 +3782,24 @@ const UNIT_CANON_MAP = {
   元: "cny",
 };
 
+function normalizeFactScanText(raw) {
+  let out = "";
+  const s = String(raw || "");
+  for (let i = 0; i < s.length; i += 1) {
+    const code = s.charCodeAt(i);
+    if (code >= 0xff10 && code <= 0xff19) {
+      out += String.fromCharCode(code - 0xff10 + 48);
+    } else if (code === 0xff05) {
+      out += "%";
+    } else if (code === 0x2212) {
+      out += "-";
+    } else {
+      out += s[i];
+    }
+  }
+  return out;
+}
+
 function canonicalizeNumericToken(token) {
   const clean = token.replace(/,/g, "").trim();
   if (/^[+-]?v\d+(?:\.\d+){1,3}$/i.test(clean)) {
@@ -2183,7 +3823,9 @@ function canonicalizeNumericToken(token) {
   if (!nm) return `${sign}${curr}${rest.toLowerCase()}`;
   const numPart = nm[1];
   const rawUnit = nm[2].trim();
-  const normUnit = rawUnit ? UNIT_CANON_MAP[rawUnit.toLowerCase()] || UNIT_CANON_MAP[rawUnit] || rawUnit.toLowerCase() : "";
+  const normUnit = rawUnit
+    ? UNIT_CANON_MAP[rawUnit.toLowerCase()] || UNIT_CANON_MAP[rawUnit] || ZH_UNIT_CANON[rawUnit] || rawUnit.toLowerCase()
+    : "";
   return `${sign}${curr}${numPart}${normUnit}`;
 }
 
@@ -2197,6 +3839,108 @@ function blankMarkupForFactScan(raw, modality) {
     s = s.replace(/<[^>]+>/g, (m) => " ".repeat(m.length));
   }
   return s;
+}
+
+const ZH_NUM_DIGIT = { 零: 0, 〇: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+const ZH_UNIT_CANON = {
+  个: "个",
+  条: "条",
+  项: "项",
+  次: "次",
+  份: "份",
+  页: "页",
+  行: "行",
+  人: "人",
+  家: "家",
+  位: "人",
+  名: "人",
+  台: "台",
+  套: "套",
+  批: "批",
+  种: "种",
+  轮: "轮",
+  层: "层",
+  步: "步",
+  篇: "篇",
+  节: "节",
+  章: "章",
+};
+
+function parseChineseNumeral(zhStr) {
+  const s = String(zhStr || "").trim();
+  if (!s) return null;
+  if (s.startsWith("万") || s.startsWith("亿")) return null;
+  if (/^[零〇一二两三四五六七八九]+$/.test(s) && s.length === 1) {
+    return ZH_NUM_DIGIT[s];
+  }
+  let total = 0;
+  let section = 0;
+  let num = 0;
+  for (const ch of s) {
+    if (ch in ZH_NUM_DIGIT) {
+      num = ZH_NUM_DIGIT[ch];
+    } else if (ch === "十") {
+      section += (num === 0 ? 1 : num) * 10;
+      num = 0;
+    } else if (ch === "百") {
+      section += (num === 0 ? 1 : num) * 100;
+      num = 0;
+    } else if (ch === "千") {
+      section += (num === 0 ? 1 : num) * 1000;
+      num = 0;
+    } else if (ch === "万") {
+      if (section + num === 0) return null;
+      total += (section + num) * 10000;
+      section = 0;
+      num = 0;
+    } else if (ch === "亿") {
+      if (section + num === 0) return null;
+      total += (section + num) * 100000000;
+      section = 0;
+      num = 0;
+    } else {
+      return null;
+    }
+  }
+  const val = total + section + num;
+  return val >= 0 ? val : null;
+}
+
+function canonicalizeDateToken(rawDate) {
+  const s = String(rawDate || "").trim();
+  let m = s.match(/^((?:19|20)\d{2})[-/.年]\s*(0?[1-9]|1[0-2])[-/.月]\s*(0?[1-9]|[12]\d|3[01])\s*[日号]?$/);
+  if (m) {
+    return `${m[1]}-${String(Number(m[2])).padStart(2, "0")}-${String(Number(m[3])).padStart(2, "0")}`;
+  }
+  m = s.match(/^(0?[1-9]|[12]\d|3[01])[/.](0?[1-9]|[12]\d|3[01])[/.]((?:19|20)\d{2})$/);
+  if (m) {
+    return `${String(Number(m[1])).padStart(2, "0")}/${String(Number(m[2])).padStart(2, "0")}/${m[3]}`;
+  }
+  m = s.match(/^(0?[1-9]|1[0-2])[/.月]\s*(0?[1-9]|[12]\d|3[01])\s*[日号]?$/);
+  if (m) {
+    return `${String(Number(m[1])).padStart(2, "0")}/${String(Number(m[2])).padStart(2, "0")}`;
+  }
+  return s;
+}
+
+function extractLeadingQualifier(cleanScan, numStart, lookbackChars = 24) {
+  const lookbehindStart = Math.max(0, numStart - lookbackChars);
+  const prefixWindow = cleanScan.slice(lookbehindStart, numStart);
+  let qualifier = null;
+  let spanStart = numStart;
+  let bestMatchLen = 0;
+  for (const qp of FACT_QUALIFIER_PATTERNS) {
+    for (let offset = 0; offset < prefixWindow.length; offset += 1) {
+      const sub = prefixWindow.slice(offset);
+      const qm = sub.match(qp.re);
+      if (qm && qm[0].length === sub.length && qm[0].length > bestMatchLen) {
+        bestMatchLen = qm[0].length;
+        qualifier = qp.group;
+        spanStart = lookbehindStart + offset;
+      }
+    }
+  }
+  return { qualifier, spanStart };
 }
 
 export function extractProtectedFacts(text, { modality = "markdown" } = {}) {
@@ -2232,9 +3976,9 @@ export function extractProtectedFacts(text, { modality = "markdown" } = {}) {
   }
 
   // 2. Explicit URLs and real HTML hrefs
-  const urlRe = /\bhttps?:\/\/[^\s)>\]"']+/gi;
+  const urlRe = /https?:\/\/[A-Za-z0-9._~:/?#[\]@!$&'()*+,;=%-]+/gi;
   while ((m = urlRe.exec(withoutFences)) !== null) {
-    const cleaned = m[0].replace(/[.,;!?。，；！？]+$/, "");
+    const cleaned = m[0].replace(/[.,;!?)]+$/, "");
     claim({
       kind: "url",
       raw: cleaned,
@@ -2259,15 +4003,119 @@ export function extractProtectedFacts(text, { modality = "markdown" } = {}) {
     }
   }
 
-  // 3. Numbers, units, versions, and bounding qualifiers in visible prose
-  const proseScan = blankMarkupForFactScan(raw, modality);
-  const chars = proseScan.split("");
-  for (const [s, e] of occupied) {
-    for (let i = s; i < e && i < chars.length; i += 1) chars[i] = " ";
-  }
-  const cleanScan = chars.join("");
+  // 3. Atomic ratios/dates/times and numbers/units/versions in visible prose (1:1 normalized digits/minus)
+  const proseScan = normalizeFactScanText(blankMarkupForFactScan(raw, modality));
+  const maskOccupied = () => {
+    const chars = proseScan.split("");
+    for (const [s, e] of occupied) {
+      for (let i = s; i < e && i < chars.length; i += 1) chars[i] = " ";
+    }
+    return chars.join("");
+  };
 
-  const numRe = /(?<![A-Za-z0-9_])(?:v\d+(?:\.\d+){1,3}(?![A-Za-z0-9_.])|\d+(?:\.\d+){2,3}(?![A-Za-z0-9_.])|Q[1-4](?![A-Za-z0-9_])|P(?:50|90|95|99)(?![A-Za-z0-9_])|(?:(?<![A-Za-z0-9_.-])[+-])?[$€¥£]\s?\d[\d,]*(?:\.\d+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?|(?:(?<![A-Za-z0-9_.-])[+-])?\d[\d,]*(?:\.\d+)?(?:\s?(?:%|(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|倍|秒|分钟|小时|天|个月|年|万|亿|元|美元|次|个|条|份|页|行|人|席))?)/g;
+  const applyTrailingQual = (scanStr, spanEnd, initialQual) => {
+    if (initialQual) return { qualifier: initialQual, spanEnd };
+    const suffixWindow = scanStr.slice(spanEnd, Math.min(scanStr.length, spanEnd + 6));
+    for (const sp of FACT_SUFFIX_QUALIFIERS) {
+      const sm = suffixWindow.match(sp.re);
+      if (sm) {
+        return { qualifier: sp.group, spanEnd: spanEnd + sm[0].length };
+      }
+    }
+    return { qualifier: null, spanEnd };
+  };
+
+  // 3a. Atomic ratios (`3:1`, context-ratio `1/2`), dates (`2026-11-23.`, `05/06/2024`, `11/20`, `11月20日`), and clock times (`10:30`)
+  let cleanScan = maskOccupied();
+  const slashRatioRe = /(?<![A-Za-z0-9_.])(\d+)\/(\d+)(?![A-Za-z0-9_./])/g;
+  while ((m = slashRatioRe.exec(cleanScan)) !== null) {
+    const pre = cleanScan.slice(Math.max(0, m.index - 18), m.index);
+    if (/(?:比例|比值|比率|系数|概率|胜率|占比|ratio|fraction|odds|chance)/i.test(pre)) {
+      const { qualifier: preQual, spanStart } = extractLeadingQualifier(cleanScan, m.index);
+      const { qualifier, spanEnd } = applyTrailingQual(cleanScan, m.index + m[0].length, preQual);
+      claim({
+        kind: qualifier ? "qualified-number" : "number",
+        raw: raw.slice(spanStart, spanEnd).trim(),
+        canonical: m[0].trim(),
+        qualifier,
+        span: { start: spanStart, end: spanEnd },
+      });
+    }
+  }
+
+  cleanScan = maskOccupied();
+  const dateTimeRe =
+    /(?:(?<![A-Za-z0-9_.])(?:19|20)\d{2}[-/.年]\s*(?:0?[1-9]|1[0-2])[-/.月]\s*(?:0?[1-9]|[12]\d|3[01])\s*[日号]?(?!(?:\.[0-9]|[A-Za-z0-9_/-]))|(?<![A-Za-z0-9_.])(?:0?[1-9]|[12]\d|3[01])[/.](?:0?[1-9]|[12]\d|3[01])[/.](?:19|20)\d{2}(?!(?:\.[0-9]|[A-Za-z0-9_/-]))|(?<![A-Za-z0-9_.])(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])(?!(?:\.[0-9]|[A-Za-z0-9_./]))|(?:0?[1-9]|1[0-2])\s*月\s*(?:0?[1-9]|[12]\d|3[01])\s*[日号]|(?<![A-Za-z0-9_:])(?:[01]?\d|2[0-3]):[0-5]\d(?::[0-5]\d)?(?![A-Za-z0-9_:]))/g;
+  while ((m = dateTimeRe.exec(cleanScan)) !== null) {
+    const dtStart = m.index;
+    const dtEnd = m.index + m[0].length;
+    const { qualifier, spanStart } = extractLeadingQualifier(cleanScan, dtStart);
+    const canonical = /:/.test(m[0]) ? m[0].trim() : canonicalizeDateToken(m[0]);
+    claim({
+      kind: "date",
+      raw: raw.slice(spanStart, dtEnd).trim(),
+      canonical,
+      qualifier,
+      span: { start: spanStart, end: dtEnd },
+    });
+  }
+
+  // Non-clock ratios like `3:1` or `16:9`
+  cleanScan = maskOccupied();
+  const colonRatioRe = /(?<![A-Za-z0-9_:])(\d+:\d+)(?![A-Za-z0-9_:])/g;
+  while ((m = colonRatioRe.exec(cleanScan)) !== null) {
+    const { qualifier: preQual, spanStart } = extractLeadingQualifier(cleanScan, m.index);
+    const { qualifier, spanEnd } = applyTrailingQual(cleanScan, m.index + m[0].length, preQual);
+    claim({
+      kind: qualifier ? "qualified-number" : "number",
+      raw: raw.slice(spanStart, spanEnd).trim(),
+      canonical: m[1],
+      qualifier,
+      span: { start: spanStart, end: spanEnd },
+    });
+  }
+
+  // 3b. Constrained Chinese numerals with classifiers / `零`+risk-noun
+  cleanScan = maskOccupied();
+  const zhCountRe =
+    /(?:(?:(共|共计|合计|至少|不超过|不少于|不小于|不高于|不低于|超过|低于|多于|少于|仅|约|大约)\s*)?([一二两三四五六七八九十百千万亿零〇]+)(个月|[个条项次份页行人家位名台套批种轮层步篇章节]))|(?<![0-9])(?:零|0)\s*(误差|漏报|误报|残留|依赖|新增|故障|容忍|阻塞|中断|风险)/g;
+  while ((m = zhCountRe.exec(cleanScan)) !== null) {
+    if (m[2]) {
+      const lead = m[1] || "";
+      const numStr = m[2];
+      const unitStr = m[3];
+      // Require an explicit quantifier when numeral is bare "一" to skip idioms like "一个问题" / "一步到位"
+      if (numStr === "一" && !lead) continue;
+      const val = parseChineseNumeral(numStr);
+      if (val === null) continue;
+      const unitCanon = UNIT_CANON_MAP[unitStr] || ZH_UNIT_CANON[unitStr] || unitStr;
+      const numStart = m.index + (lead ? m[0].indexOf(numStr) : 0);
+      const { qualifier: preQual, spanStart } = extractLeadingQualifier(cleanScan, numStart);
+      const { qualifier, spanEnd } = applyTrailingQual(cleanScan, m.index + m[0].length, preQual);
+      claim({
+        kind: qualifier ? "qualified-number" : "number",
+        raw: raw.slice(spanStart, spanEnd).trim(),
+        canonical: `${val}${unitCanon}`,
+        qualifier,
+        span: { start: spanStart, end: spanEnd },
+      });
+    } else if (m[4]) {
+      const zeroStart = cleanScan.indexOf("0", m.index) === m.index || cleanScan.indexOf("零", m.index) === m.index ? m.index : m.index;
+      const { qualifier: preQual, spanStart } = extractLeadingQualifier(cleanScan, zeroStart);
+      const { qualifier, spanEnd } = applyTrailingQual(cleanScan, m.index + m[0].length, preQual);
+      claim({
+        kind: qualifier ? "qualified-number" : "number",
+        raw: raw.slice(spanStart, spanEnd).trim(),
+        canonical: `0${m[4]}`,
+        qualifier,
+        span: { start: spanStart, end: spanEnd },
+      });
+    }
+  }
+
+  // 3c. Arabic numbers, units, versions, and bounding qualifiers in visible prose
+  cleanScan = maskOccupied();
+  const numRe = /(?<![A-Za-z0-9_])(?:v\d+(?:\.\d+){1,3}(?![A-Za-z0-9_.])|\d+(?:\.\d+){2,3}(?![A-Za-z0-9_.])|Q[1-4](?![A-Za-z0-9_])|P(?:50|90|95|99)(?![A-Za-z0-9_])|(?:(?<![A-Za-z0-9_.-])[+-])?[$€¥£]\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?|(?:(?<![A-Za-z0-9_.-])[+-])?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?(?:%|(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|个月|倍|秒|分钟|小时|天|年|万|亿|元|美元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?)/g;
 
   while ((m = numRe.exec(cleanScan)) !== null) {
     const numStart = m.index;
@@ -2282,36 +4130,8 @@ export function extractProtectedFacts(text, { modality = "markdown" } = {}) {
       continue;
     }
 
-    const lookbehindStart = Math.max(0, numStart - 24);
-    const prefixWindow = cleanScan.slice(lookbehindStart, numStart);
-    let qualifier = null;
-    let spanStart = numStart;
-    let spanEnd = numEnd;
-
-    for (const qp of FACT_QUALIFIER_PATTERNS) {
-      for (let offset = 0; offset < prefixWindow.length; offset += 1) {
-        const sub = prefixWindow.slice(offset);
-        const qm = sub.match(qp.re);
-        if (qm && qm[0].length === sub.length) {
-          qualifier = qp.group;
-          spanStart = lookbehindStart + offset;
-          break;
-        }
-      }
-      if (qualifier) break;
-    }
-
-    if (!qualifier) {
-      const suffixWindow = cleanScan.slice(numEnd, Math.min(cleanScan.length, numEnd + 6));
-      for (const sp of FACT_SUFFIX_QUALIFIERS) {
-        const sm = suffixWindow.match(sp.re);
-        if (sm) {
-          qualifier = sp.group;
-          spanEnd = numEnd + sm[0].length;
-          break;
-        }
-      }
-    }
+    const { qualifier: preQual, spanStart } = extractLeadingQualifier(cleanScan, numStart);
+    const { qualifier, spanEnd } = applyTrailingQual(cleanScan, numEnd, preQual);
 
     const canonical = canonicalizeNumericToken(token);
 
@@ -2335,15 +4155,18 @@ export function verifyRevision(beforeText, afterText, { modality = "markdown", a
   const preserved = [];
   const missing = [];
   const qualifierDropped = [];
+  const unmatchedIndices = [];
 
-  for (const bf of beforeFacts) {
+  // Pass 1: exact (kind-compatible, canonical, qualifier) matches first so bare or mis-ordered tokens cannot steal qualified matches
+  for (let i = 0; i < beforeFacts.length; i += 1) {
+    const bf = beforeFacts[i];
     const isNum = bf.kind === "number" || bf.kind === "qualified-number";
     const matchIdx = pool.findIndex(
       (af) =>
         !af.used &&
         (isNum ? af.kind === "number" || af.kind === "qualified-number" : af.kind === bf.kind) &&
         af.canonical === bf.canonical &&
-        (!bf.qualifier || af.qualifier === bf.qualifier)
+        (af.qualifier || null) === (bf.qualifier || null)
     );
     if (matchIdx !== -1) {
       pool[matchIdx].used = true;
@@ -2354,27 +4177,31 @@ export function verifyRevision(beforeText, afterText, { modality = "markdown", a
         canonical: bf.canonical,
         qualifier: bf.qualifier,
       });
-      continue;
+    } else {
+      unmatchedIndices.push(i);
     }
+  }
 
-    if (bf.qualifier) {
-      const bareIdx = pool.findIndex(
-        (af) =>
-          !af.used &&
-          (af.kind === "number" || af.kind === "qualified-number") &&
-          af.canonical === bf.canonical
-      );
-      if (bareIdx !== -1) {
-        pool[bareIdx].used = true;
-        qualifierDropped.push({
-          before: bf.raw,
-          after: pool[bareIdx].raw,
-          canonical: bf.canonical,
-          expectedQualifier: bf.qualifier,
-          actualQualifier: pool[bareIdx].qualifier,
-        });
-        continue;
-      }
+  // Pass 2: remaining items catch mismatched, dropped, or newly added qualifiers
+  for (const idx of unmatchedIndices) {
+    const bf = beforeFacts[idx];
+    const isNum = bf.kind === "number" || bf.kind === "qualified-number";
+    const bareIdx = pool.findIndex(
+      (af) =>
+        !af.used &&
+        (isNum ? af.kind === "number" || af.kind === "qualified-number" : af.kind === bf.kind) &&
+        af.canonical === bf.canonical
+    );
+    if (bareIdx !== -1 && (bf.qualifier || pool[bareIdx].qualifier)) {
+      pool[bareIdx].used = true;
+      qualifierDropped.push({
+        before: bf.raw,
+        after: pool[bareIdx].raw,
+        canonical: bf.canonical,
+        expectedQualifier: bf.qualifier,
+        actualQualifier: pool[bareIdx].qualifier,
+      });
+      continue;
     }
 
     missing.push({
@@ -2402,6 +4229,246 @@ export function verifyRevision(beforeText, afterText, { modality = "markdown", a
     missing,
     qualifierDropped,
     addedNumbers,
+  };
+}
+
+export function verifyRevisionBundle(
+  beforeText,
+  afterText,
+  {
+    filename = "<memory>",
+    modality = null,
+    pack = null,
+    config = {},
+    keepTerms = [],
+    allowAdded = false,
+    strict = false,
+  } = {}
+) {
+  const bef = String(beforeText || "");
+  const aft = String(afterText || "");
+  const mod = modality || detectModality(filename) || "markdown";
+  const factLedger = verifyRevision(bef, aft, { allowAdded });
+
+  const requested = [];
+  const seenKeep = new Set();
+  for (const t of Array.isArray(keepTerms) ? keepTerms : []) {
+    const clean = String(t || "").trim();
+    if (!clean || seenKeep.has(clean)) continue;
+    seenKeep.add(clean);
+    requested.push(clean);
+  }
+  const aftLower = aft.toLowerCase();
+  const kept = [];
+  const missing = [];
+  for (const term of requested) {
+    const isAscii = /^[A-Za-z0-9 _.-]+$/.test(term);
+    const present = isAscii ? aftLower.includes(term.toLowerCase()) : aft.includes(term);
+    if (present) kept.push(term);
+    else missing.push(term);
+  }
+  const keepTermsCheck = { requested, kept, missing };
+
+  let findingsDelta = null;
+  if (pack) {
+    const beforeRes = auditText(bef, { filename, modality: mod, pack, config });
+    const afterRes = auditText(aft, { filename, modality: mod, pack, config });
+    const beforeCounts = new Map();
+    const afterCounts = new Map();
+    const findingKey = (f) => `${f.ruleId}|${f.match || ""}`;
+    for (const f of beforeRes.findings) {
+      const k = findingKey(f);
+      beforeCounts.set(k, (beforeCounts.get(k) || 0) + 1);
+    }
+    for (const f of afterRes.findings) {
+      const k = findingKey(f);
+      afterCounts.set(k, (afterCounts.get(k) || 0) + 1);
+    }
+    let resolvedCount = 0;
+    for (const [k, bc] of beforeCounts.entries()) {
+      const ac = afterCounts.get(k) || 0;
+      if (bc > ac) resolvedCount += bc - ac;
+    }
+    const seenAfter = new Map();
+    const introduced = [];
+    for (const f of afterRes.findings) {
+      const k = findingKey(f);
+      const nth = (seenAfter.get(k) || 0) + 1;
+      seenAfter.set(k, nth);
+      if (nth > (beforeCounts.get(k) || 0)) {
+        introduced.push({
+          ruleId: f.ruleId,
+          severity: f.severity,
+          fixStrategy: f.fixStrategy,
+          line: f.line,
+          col: f.col,
+          match: f.match,
+        });
+      }
+    }
+    findingsDelta = {
+      beforeCount: beforeRes.findings.length,
+      afterCount: afterRes.findings.length,
+      resolvedCount,
+      introduced,
+      introducedErrors: introduced.filter((x) => x.severity === "error").length,
+    };
+  }
+
+  const beforeChars = codePointLength(bef.trim());
+  const afterChars = codePointLength(aft.trim());
+  const ratio = beforeChars === 0 ? 1 : Number((afterChars / beforeChars).toFixed(4));
+  let lengthStatus = "ok";
+  if (beforeChars >= 120 && ratio < 0.5) {
+    lengthStatus = "over-compressed";
+  } else if (beforeChars >= 60 && beforeChars <= 160 && ratio > 1.8) {
+    lengthStatus = "over-expanded";
+  }
+  const lengthCheck = {
+    beforeChars,
+    afterChars,
+    ratio,
+    status: lengthStatus,
+  };
+
+  // Built-in anti-degradation guardrails: protect author voice, cadence, information density, and modality precision
+  const beforeProf = analyzeTextProfile(bef, { modality: mod, config });
+  const afterProf = analyzeTextProfile(aft, { modality: mod, config });
+  const degWarnings = [];
+
+  const countPersp = (s) =>
+    (s.match(/(?:我|我们|咱们|你|你们)/g) || []).length +
+    (s.match(/\b(?:I|we|my|our|you|your)\b/gi) || []).length;
+  const beforePersp = countPersp(bef);
+  const afterPersp = countPersp(aft);
+  const perspectivePreserved = !(beforePersp >= 2 && afterPersp === 0);
+  if (!perspectivePreserved) {
+    degWarnings.push({
+      code: "voice-perspective-erased",
+      severity: "warning",
+      message: {
+        en: "Original author perspective (first/second person) was erased into impersonal prose.",
+        zh: "原文的第一/第二人称作者视角被完全抹平，改成了冰冷的第三方腔。",
+      },
+    });
+  }
+
+  if (
+    beforeProf.sentenceCount >= 4 &&
+    afterProf.sentenceCount >= 4 &&
+    beforeProf.burstiness.cv >= 0.32 &&
+    afterProf.burstiness.cv < 0.22 &&
+    beforeProf.burstiness.cv - afterProf.burstiness.cv >= 0.12
+  ) {
+    degWarnings.push({
+      code: "cadence-flattened",
+      severity: "warning",
+      message: {
+        en: "Sentence rhythm was flattened into uniform cadence, losing the original phrasing variation.",
+        zh: "原文错落的句长节奏被压平变呆板，丢失了自然的表达起伏。",
+      },
+    });
+  }
+
+  if (
+    beforeProf.concreteness.anchorCount >= 3 &&
+    afterProf.concreteness.anchorCount < beforeProf.concreteness.anchorCount * 0.7
+  ) {
+    degWarnings.push({
+      code: "information-loss",
+      severity: "warning",
+      message: {
+        en: "Concrete facts, metrics, paths, or examples dropped by >30%, reducing information density.",
+        zh: "具体数字、路径、时间或实例锚点流失超过 30%，信息量受损。",
+      },
+    });
+  }
+
+  const modalityBuckets = [
+    ["estimate", /(?:预计|约|大约|估算|大概|\b(?:projected|estimated|approx(?:imately)?|roughly|target)\b)/i],
+    ["condition", /(?:仅在|除非|前提是|当且仅当|\b(?:only when|unless|provided that|if and only if)\b)/i],
+    ["unverified", /(?:暂未|尚未|待确认|待验证|\b(?:pending|unverified|not yet)\b)/i],
+    ["measured", /(?:实测|压测|基准测试|\b(?:measured|benchmarked|observed)\b)/i],
+  ];
+  const modalityDrifts = [];
+  for (const [bName, bRe] of modalityBuckets) {
+    if (bRe.test(bef) && !bRe.test(aft)) {
+      modalityDrifts.push(bName);
+    }
+  }
+  if (modalityDrifts.length > 0) {
+    const joinedDrifts = modalityDrifts.join(", ");
+    degWarnings.push({
+      code: "modality-drifted",
+      severity: "error",
+      message: {
+        en: `Precision/modality qualifiers dropped (${joinedDrifts}); revision may overclaim or lose scope bounds.`,
+        zh: `边界或模态限定词丢失（${joinedDrifts}），改稿可能导致表述失准或过度承诺。`,
+      },
+    });
+  }
+
+  if (findingsDelta && findingsDelta.introduced.length > 0) {
+    degWarnings.push({
+      code: "secondary-slop-introduced",
+      severity: findingsDelta.introducedErrors > 0 ? "error" : "warning",
+      message: {
+        en: "Revision introduced new AI-slop pattern(s) not present in the original.",
+        zh: "改稿新引入了原文原本没有的 AI 套路或残留问题。",
+      },
+    });
+  }
+
+  if (lengthStatus === "over-compressed") {
+    degWarnings.push({
+      code: "over-compressed",
+      severity: "warning",
+      message: {
+        en: "Revision shrank below 50% of original length; verify no substance or nuance was stripped.",
+        zh: "改稿篇幅被压缩至原文 50% 以下，请核对是否误删干货或细节。",
+      },
+    });
+  } else if (lengthStatus === "over-expanded") {
+    degWarnings.push({
+      code: "over-expanded",
+      severity: "warning",
+      message: {
+        en: "Short UI/label copy expanded above 180% of original length; check layout overflow risk.",
+        zh: "短文案被扩写超过原文 180%，注意检查界面换行或卡片溢出。",
+      },
+    });
+  }
+
+  const antiDegradation = {
+    status: degWarnings.length === 0 ? "preserved" : "degraded",
+    warnings: degWarnings,
+    metrics: {
+      beforeCv: beforeProf.burstiness.cv,
+      afterCv: afterProf.burstiness.cv,
+      beforeAnchors: beforeProf.concreteness.anchorCount,
+      afterAnchors: afterProf.concreteness.anchorCount,
+      perspectivePreserved,
+      modalityDrifts,
+      secondarySlopCount: findingsDelta ? findingsDelta.introduced.length : 0,
+    },
+  };
+
+  const hardPass =
+    factLedger.status === "preserved" &&
+    keepTermsCheck.missing.length === 0 &&
+    modalityDrifts.length === 0 &&
+    (findingsDelta ? findingsDelta.introducedErrors === 0 : true);
+  const ok = hardPass && (!strict || degWarnings.length === 0);
+
+  return {
+    schema: "dislop.verify/1",
+    ok,
+    status: ok ? "passed" : "failed",
+    factLedger,
+    keepTerms: keepTermsCheck,
+    lengthCheck,
+    antiDegradation,
+    ...(findingsDelta ? { findingsDelta } : {}),
   };
 }
 

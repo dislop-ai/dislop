@@ -10,7 +10,7 @@ family: hygiene/placeholder
 # Rule: `unfilled-placeholder`
 
 - Pack: [`core`](../packs/core.md) · Tier: `invariant` · Severity: `error`
-- Modalities: `markdown, text, html, jsx, svg, docx, pptx`
+- Modalities: `markdown, text, html, jsx, svg, docx, pptx, pdf`
 - Human anchor: https://dislop.com/#rule-unfilled-placeholder
 
 ## What It Catches

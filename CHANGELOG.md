@@ -4,6 +4,16 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Bilingual static rule catalog pages (`/rules/<id>/` and `/en/rules/<id>/`) and 6 bilingual editorial anti-slop guides (`/guides/` and `/en/guides/`) compiled into `site/` with `llms.txt`, Atom feeds, JSON-LD, and reciprocal `hreflang`.
+- Offline workbench shareable result links (`#share=v1.<base64url>` via `CompressionStream` with `v0.` fallback) and direct rule deep-links (`#try=<ruleId>`), keeping draft contents strictly in the URL fragment with zero server upload.
+- GitHub Issue Form template (`.github/ISSUE_TEMPLATE/slop_sample.yml`) for redacted community slop sample submissions.
+
+### Changed
+- Pointed SARIF `helpUri`, `catalog` `anchorUrl`, and `--format github` annotation messages directly to language-specific rule documentation URLs (`https://dislop.com/en/rules/<id>/` or `https://dislop.com/rules/<id>/`, with index fallbacks for `pattern-library` and `pocket-model` findings) across both Node and Python runtimes.
+
 ## [0.7.1] - 2026-11-22
 
 ### Fixed

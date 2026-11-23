@@ -19,7 +19,18 @@ const I18N = {
     "page.title": `去 AI 味工具清单 · Awesome Anti-Slop（${TOTAL_COUNT} 条）— dislop`,
     "nav.skip": "跳至正文",
     "nav.workbench": "返回首页",
+    "nav.guides": "指南",
     "nav.awesome": "工具清单",
+    "nav.rules": "规则",
+    "triage.h1": "想在本地或 CI 里自动拦截硬伤",
+    "triage.p1": "优先用确定性检查工具（dislop、Vale、textlint），按规则直出精确行号，不花模型额度。",
+    "triage.a1": "看检查器与检测器对比 →",
+    "triage.h2": "想让 Agent 动笔前先避开套话",
+    "triage.p2": "在编码或写作工具里挂载 Humanizer-zh、stop-slop 等纯文档 Skill，写完再跑一遍本地检查。",
+    "triage.a2": "看中文写作去味指南 →",
+    "triage.h3": "要排查网页模板味或 PPT 排版",
+    "triage.p3": "把 frontend-design、Impeccable 和 dislop 网页/PPT 规则配在一起，清掉紫粉渐变、空链接和字墙。",
+    "triage.a3": "看前端与 PPT 排查教程 →",
     "awesome.heading": "去 AI 味工具清单",
     "awesome.sub":
       `一共整理了 ${TOTAL_COUNT} 个中英文工具、检查器、写作规范、网页设计指南和论文，包括 Vale、Impeccable 这类常用项目。可以按类别找，也可以只看能自动检查的工具。链接和 GitHub 状态核验于 ${SNAPSHOT_DATE}。`,
@@ -43,7 +54,18 @@ const I18N = {
     "page.title": `Awesome Anti-Slop (${TOTAL_COUNT} Entries) — dislop`,
     "nav.skip": "Skip to main content",
     "nav.workbench": "Back to dislop",
+    "nav.guides": "Guides",
     "nav.awesome": "Awesome list",
+    "nav.rules": "Rules",
+    "triage.h1": "Need automated CI or pre-send checks?",
+    "triage.p1": "Start with deterministic linters (dislop, Vale, textlint) that flag exact lines with zero LLM calls.",
+    "triage.a1": "Compare linters vs. skills →",
+    "triage.h2": "Fixing prose habits before drafting?",
+    "triage.p2": "Load a Markdown Skill such as Humanizer or stop-slop into your agent, then verify the final draft locally.",
+    "triage.a2": "Read the writing guide →",
+    "triage.h3": "Cleaning AI-built UI or slide decks?",
+    "triage.p3": "Pair frontend-design or Impeccable with dislop UI and PPTX rules to strip gradients, dead links, and word walls.",
+    "triage.a3": "Read the web UI guide →",
     "awesome.heading": "Awesome Anti-Slop",
     "awesome.sub":
       `${TOTAL_COUNT} tools, linters, style guides, UI rules, and papers in English and Chinese, including established projects like Vale and Impeccable. Filter by topic or show only automated tools. Links and GitHub snapshots checked on ${SNAPSHOT_DATE}.`,
@@ -82,20 +104,61 @@ function safeSetStorage(key, value) {
 }
 
 function detectInitialLang() {
+  const staticLang =
+    typeof document !== "undefined" && document.documentElement
+      ? document.documentElement.getAttribute("data-static-lang")
+      : "";
+  if (staticLang === "en") {
+    try {
+      const q = new URLSearchParams(window.location.search).get("lang");
+      if (q && /^zh\b/i.test(String(q).trim())) return "zh";
+    } catch {
+      // Ignore URL parse issues
+    }
+    return "en";
+  }
+  if (typeof window.__DISLOP_RESOLVE_LANG__ === "function") {
+    let intlLocale = "";
+    try {
+      intlLocale = Intl.DateTimeFormat().resolvedOptions().locale || "";
+    } catch {
+      intlLocale = "";
+    }
+    return window.__DISLOP_RESOLVE_LANG__({
+      search: window.location ? window.location.search : "",
+      stored: safeGetStorage("dislop-lang"),
+      languages: typeof navigator !== "undefined" ? navigator.languages : undefined,
+      language: typeof navigator !== "undefined" ? navigator.language || "" : "",
+      intlLocale,
+    });
+  }
   try {
     const q = new URLSearchParams(window.location.search).get("lang");
-    if (q === "en" || q === "zh") {
-      safeSetStorage("dislop-lang", q);
-      return q;
+    if (q) {
+      const norm = String(q).trim().toLowerCase();
+      if (/^zh\b/.test(norm)) return "zh";
+      if (/^en\b/.test(norm)) return "en";
     }
   } catch {
     // Ignore URL parse issues
   }
   const saved = safeGetStorage("dislop-lang");
   if (saved === "en" || saved === "zh") return saved;
-  const navLang = (typeof navigator !== "undefined" && navigator.language ? navigator.language : "").toLowerCase();
-  if (navLang && !navLang.startsWith("zh")) return "en";
-  return "zh";
+  const nav = typeof navigator !== "undefined" ? navigator : {};
+  const list = Array.isArray(nav.languages) && nav.languages.length > 0 ? nav.languages : nav.language ? [nav.language] : [];
+  for (const raw of list) {
+    const tag = String(raw || "").trim().toLowerCase();
+    if (/^zh\b/.test(tag)) return "zh";
+    if (/^en\b/.test(tag)) return "en";
+  }
+  if (list.length > 0) return "en";
+  try {
+    const intlLocale = Intl.DateTimeFormat().resolvedOptions().locale || "";
+    if (/^zh\b/i.test(intlLocale)) return "zh";
+  } catch {
+    // Ignore Intl errors
+  }
+  return "en";
 }
 
 let currentLang = detectInitialLang();
@@ -231,9 +294,16 @@ function applyTheme(theme) {
   }
 }
 
-function applyLanguage(lang) {
+function applyLanguage(lang, isUserSwitch = false) {
+  const isEnStaticPage = document.documentElement.getAttribute("data-static-lang") === "en";
+  if (isUserSwitch) {
+    safeSetStorage("dislop-lang", lang);
+    if (isEnStaticPage && lang === "zh") {
+      window.location.href = "../../awesome/?lang=zh";
+      return;
+    }
+  }
   currentLang = lang;
-  safeSetStorage("dislop-lang", lang);
   document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
   document.title = I18N[lang]["page.title"];
 
@@ -243,6 +313,23 @@ function applyLanguage(lang) {
       el.textContent = I18N[lang][key];
     }
   }
+
+  const rootPrefix = isEnStaticPage ? "../../" : "../";
+  const langPrefix = lang === "en" ? `${rootPrefix}en/` : rootPrefix;
+  const homeNav = document.getElementById("awesome-home-link");
+  const guidesNav = document.getElementById("awesome-guides-link");
+  const rulesNav = document.getElementById("awesome-rules-link");
+  const footHome = document.getElementById("awesome-foot-home");
+  if (homeNav) homeNav.href = langPrefix;
+  if (footHome) footHome.href = langPrefix;
+  if (guidesNav) guidesNav.href = `${langPrefix}guides/`;
+  if (rulesNav) rulesNav.href = `${langPrefix}rules/`;
+  const t1 = document.getElementById("triage-link-1");
+  const t2 = document.getElementById("triage-link-2");
+  const t3 = document.getElementById("triage-link-3");
+  if (t1) t1.href = `${langPrefix}guides/linter-vs-detector-vs-skill/`;
+  if (t2) t2.href = `${langPrefix}guides/remove-ai-slop-writing/`;
+  if (t3) t3.href = `${langPrefix}guides/fix-ai-slop-web-ui/`;
 
   const langBtn = document.getElementById("lang-toggle");
   if (langBtn) {
@@ -271,6 +358,7 @@ function applyLanguage(lang) {
 
   updateSectionSelectLabels();
   renderTable();
+  document.documentElement.removeAttribute("data-lang-hydrating");
 }
 
 function init() {
@@ -283,7 +371,7 @@ function init() {
   });
 
   document.getElementById("lang-toggle")?.addEventListener("click", () => {
-    applyLanguage(currentLang === "zh" ? "en" : "zh");
+    applyLanguage(currentLang === "zh" ? "en" : "zh", true);
   });
 
   document.getElementById("awesome-search")?.addEventListener("input", (e) => {

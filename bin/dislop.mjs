@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { execFileSync } from "node:child_process";
@@ -8,12 +9,22 @@ import {
   ENGINE_VERSION,
   SEVERITY_RANK,
   fnv1aHex,
+  codePointLength,
   detectModality,
   defaultPackForModality,
+  isLongFormHtmlDocument,
+  hasEmbeddedUiMarkup,
+  deriveFixStrategy,
+  computeRulesetHash,
   resolveEffectivePack,
+  buildZones,
   auditText,
   auditOoxmlEntries,
+  auditImageDocument,
+  auditPdfDocument,
   analyzeTextProfile,
+  verifyRevision,
+  verifyRevisionBundle,
   formatReport,
   buildCatalog,
   queryCatalog,
@@ -32,7 +43,7 @@ import {
   removeInstalledModel,
   runLocalDeslop,
 } from "../src/local-model.mjs";
-import { readZipXmlEntries } from "../src/binary-node.mjs";
+import { parseImageBuffer, parsePdfBuffer, readZipXmlEntries } from "../src/binary-node.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
@@ -80,8 +91,46 @@ function loadPatternLibrary(customPatternsDir = PATTERNS_DIR) {
   return byRuleId;
 }
 
+function getUserConfigDir() {
+  if (process.env.DISLOP_CONFIG_HOME) {
+    return path.resolve(process.env.DISLOP_CONFIG_HOME);
+  }
+  const base = process.env.XDG_CONFIG_HOME ? path.resolve(process.env.XDG_CONFIG_HOME) : path.join(os.homedir(), ".config");
+  return path.join(base, "dislop");
+}
+
+function shouldSkipUserConfig(cwd, explicitConfigPath = null) {
+  if (explicitConfigPath || process.env.DISLOP_NO_USER_CONFIG === "1") return true;
+  const isSelfRepo =
+    fs.existsSync(path.join(cwd, "packs", "core", "pack.json")) &&
+    fs.existsSync(path.join(cwd, "src", "core.mjs"));
+  return isSelfRepo && !process.env.DISLOP_CONFIG_HOME;
+}
+
+function mergeConfigLayers(base, layer) {
+  if (!layer || typeof layer !== "object") return base;
+  return {
+    ...base,
+    ...layer,
+    rules: { ...(base.rules || {}), ...(layer.rules || {}) },
+    allow: [...(base.allow || []), ...(layer.allow || [])],
+    ignore: [...(base.ignore || []), ...(layer.ignore || [])],
+    forbid: [...(base.forbid || []), ...(layer.forbid || [])],
+    overrides: [...(base.overrides || []), ...(layer.overrides || [])],
+    proseFences: [...(base.proseFences || []), ...(layer.proseFences || [])],
+    ...(layer.maskBlockquotes !== undefined ? { maskBlockquotes: layer.maskBlockquotes } : {}),
+  };
+}
+
 function loadConfig(cwd = process.cwd(), explicitConfigPath = null) {
   let base = {};
+  if (!shouldSkipUserConfig(cwd, explicitConfigPath)) {
+    const userCfgPath = path.join(getUserConfigDir(), "config.json");
+    if (fs.existsSync(userCfgPath)) {
+      const uCfg = JSON.parse(fs.readFileSync(userCfgPath, "utf8"));
+      base = mergeConfigLayers(base, uCfg);
+    }
+  }
   const candidates = explicitConfigPath
     ? [path.resolve(cwd, explicitConfigPath)]
     : [
@@ -92,7 +141,7 @@ function loadConfig(cwd = process.cwd(), explicitConfigPath = null) {
 
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) {
-      base = JSON.parse(fs.readFileSync(candidate, "utf8"));
+      base = mergeConfigLayers(base, JSON.parse(fs.readFileSync(candidate, "utf8")));
       break;
     }
   }
@@ -100,16 +149,32 @@ function loadConfig(cwd = process.cwd(), explicitConfigPath = null) {
   const localPath = path.join(cwd, ".dislop.local.json");
   if (fs.existsSync(localPath)) {
     const localCfg = JSON.parse(fs.readFileSync(localPath, "utf8"));
-    base = {
-      ...base,
-      ...localCfg,
-      rules: { ...(base.rules || {}), ...(localCfg.rules || {}) },
-      allow: [...(base.allow || []), ...(localCfg.allow || [])],
-      ignore: [...(base.ignore || []), ...(localCfg.ignore || [])],
-      forbid: [...(base.forbid || []), ...(localCfg.forbid || [])],
-    };
+    base = mergeConfigLayers(base, localCfg);
   }
   return base;
+}
+
+function discoverVoiceCard(cwd = process.cwd()) {
+  const candidates = [
+    ["local", path.join(cwd, ".dislop.local", "voice.json")],
+    ["project", path.join(cwd, ".dislop", "voice.json")],
+  ];
+  if (!shouldSkipUserConfig(cwd, null)) {
+    candidates.push(["user", path.join(getUserConfigDir(), "voice.json")]);
+  }
+  for (const [scope, p] of candidates) {
+    if (fs.existsSync(p)) {
+      try {
+        const card = JSON.parse(fs.readFileSync(p, "utf8"));
+        if (card && typeof card === "object" && !Array.isArray(card)) {
+          return { found: true, scope, card };
+        }
+      } catch {
+        // ignore unreadable voice card
+      }
+    }
+  }
+  return { found: false, scope: null, card: null };
 }
 
 function expandBraces(pattern) {
@@ -152,15 +217,47 @@ function matchesAnyGlob(relPosix, globs = []) {
   return globs.flatMap(expandBraces).some((g) => globToRegExp(g).test(clean));
 }
 
-function pickPackForFile(relPosix, modality, explicitPack, config) {
-  if (explicitPack) return explicitPack;
+function resolveConfigForFile(relPosix, config = {}) {
+  let merged = {
+    ...config,
+    rules: { ...(config.rules || {}) },
+    allow: [...(config.allow || [])],
+    forbid: [...(config.forbid || [])],
+    proseFences: [...(config.proseFences || [])],
+  };
   for (const ov of config?.overrides || []) {
     const patterns = Array.isArray(ov.files) ? ov.files : [ov.files];
-    if (ov.pack && matchesAnyGlob(relPosix, patterns)) {
-      return ov.pack;
-    }
+    if (!matchesAnyGlob(relPosix, patterns)) continue;
+    merged = {
+      ...merged,
+      ...(ov.pack ? { pack: ov.pack } : {}),
+      rules: { ...merged.rules, ...(ov.rules || {}) },
+      allow: [...merged.allow, ...(ov.allow || [])],
+      forbid: [...merged.forbid, ...(ov.forbid || [])],
+      proseFences: [...merged.proseFences, ...(ov.proseFences || [])],
+      ...(ov.maskBlockquotes !== undefined ? { maskBlockquotes: ov.maskBlockquotes } : {}),
+    };
   }
-  if (config?.pack) return config.pack;
+  return merged;
+}
+
+function mergePacks(primaryPack, extraPack) {
+  const byId = new Map();
+  for (const r of extraPack.rules || []) byId.set(r.id, r);
+  for (const r of primaryPack.rules || []) byId.set(r.id, r);
+  return {
+    ...extraPack,
+    ...primaryPack,
+    id: `${primaryPack.id}+${extraPack.id}`,
+    thresholds: { ...(extraPack.thresholds || {}), ...(primaryPack.thresholds || {}) },
+    rules: Array.from(byId.values()),
+  };
+}
+
+function pickPackForFile(relPosix, modality, explicitPack, config) {
+  if (explicitPack && explicitPack !== "auto") return explicitPack;
+  const resolvedCfg = resolveConfigForFile(relPosix, config);
+  if (resolvedCfg?.pack && explicitPack !== "auto") return resolvedCfg.pack;
   return defaultPackForModality(modality);
 }
 
@@ -169,7 +266,7 @@ function decodeUtf8Strict(buffer) {
   return decoder.decode(buffer);
 }
 
-function collectFiles(targetPaths, cwd, config) {
+function collectFiles(targetPaths, cwd, config, explicitTargets = true) {
   const realCwd = fs.existsSync(cwd) ? fs.realpathSync(cwd) : cwd;
   const files = [];
   const skipped = [];
@@ -204,7 +301,7 @@ function collectFiles(targetPaths, cwd, config) {
     if (stat.isDirectory()) {
       const entries = fs
         .readdirSync(canonicalPath, { withFileTypes: true })
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
       for (const entry of entries) {
         if (DEFAULT_IGNORE_DIRS.has(entry.name)) continue;
         walk(path.join(canonicalPath, entry.name), false);
@@ -224,36 +321,117 @@ function collectFiles(targetPaths, cwd, config) {
   }
 
   for (const t of targetPaths) {
-    walk(path.resolve(realCwd, t), true);
+    walk(path.resolve(realCwd, t), explicitTargets);
   }
   return { files, skipped };
 }
 
+const PROSE_ML_MODALITIES = new Set(["markdown", "text", "html", "svg"]);
+
+function buildCodepointLineStarts(text) {
+  const starts = [0];
+  let cpIdx = 0;
+  for (const ch of String(text || "")) {
+    cpIdx += 1;
+    if (ch === "\n") starts.push(cpIdx);
+  }
+  return starts;
+}
+
+function cpOffsetToLine(cpStarts, cpOff) {
+  let lo = 0;
+  let hi = cpStarts.length - 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (cpStarts[mid] <= cpOff) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  return Math.max(0, hi) + 1;
+}
+
+function unquoteGitPath(rawPath) {
+  const s = String(rawPath || "");
+  if (s.length < 2 || !s.startsWith('"') || !s.endsWith('"')) return s;
+  const inner = s.slice(1, -1);
+  const bytes = [];
+  const pushStr = (str) => {
+    for (const b of Buffer.from(str, "utf8")) bytes.push(b);
+  };
+  const escMap = { a: "\x07", b: "\x08", f: "\x0c", n: "\n", r: "\r", t: "\t", v: "\x0b", "\\": "\\", '"': '"' };
+  for (let i = 0; i < inner.length; i += 1) {
+    const ch = inner[i];
+    if (ch !== "\\") {
+      pushStr(ch);
+      continue;
+    }
+    if (i + 1 >= inner.length) {
+      bytes.push(0x5c);
+      break;
+    }
+    const next = inner[i + 1];
+    if (/[0-7]{3}/.test(inner.slice(i + 1, i + 4))) {
+      bytes.push(parseInt(inner.slice(i + 1, i + 4), 8));
+      i += 3;
+    } else if (next in escMap) {
+      pushStr(escMap[next]);
+      i += 1;
+    } else {
+      pushStr(next);
+      i += 1;
+    }
+  }
+  return Buffer.from(bytes).toString("utf8");
+}
+
 function getChangedLineMap(cwd, gitRef, staged = false) {
   const args = staged
-    ? ["diff", "--cached", "-U0", "--no-color"]
-    : ["diff", "-U0", "--no-color", gitRef || "HEAD"];
+    ? [
+        "-c", "core.quotepath=off",
+        "-c", "diff.interHunkContext=0",
+        "diff", "--cached",
+        "--no-ext-diff", "--no-textconv", "--src-prefix=a/", "--dst-prefix=b/", "--relative",
+        "-U0", "--no-color", "--",
+      ]
+    : [
+        "-c", "core.quotepath=off",
+        "-c", "diff.interHunkContext=0",
+        "diff",
+        "--no-ext-diff", "--no-textconv", "--src-prefix=a/", "--dst-prefix=b/", "--relative",
+        "-U0", "--no-color", gitRef || "HEAD", "--",
+      ];
   const diffOut = execFileSync("git", args, { cwd, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
   const changed = new Map(); // relPath -> Set<line> | "ALL"
   let currentFile = null;
+  let inHunk = false;
 
   for (const line of diffOut.split(/\r?\n/)) {
     if (line.startsWith("diff --git ")) {
-      const dm = line.match(/^diff --git a\/.+ b\/(.+)$/);
-      currentFile = dm ? dm[1].trim() : null;
-    } else if (line.startsWith("+++ b/")) {
-      currentFile = line.slice(6).trim();
-      if (!changed.has(currentFile)) changed.set(currentFile, new Set());
-    } else if (line.startsWith("Binary files ") && currentFile) {
-      changed.set(currentFile, "ALL");
+      inHunk = false;
+      currentFile = null;
+    } else if (!inHunk && (line.startsWith("+++ b/") || line.startsWith('+++ "b/'))) {
+      const target = unquoteGitPath(line.slice(4));
+      if (target.startsWith("b/")) {
+        currentFile = target.slice(2);
+        if (!changed.has(currentFile)) changed.set(currentFile, new Set());
+      }
+    } else if (!inHunk && line.startsWith("Binary files ")) {
+      const bm = line.match(/^Binary files .* and (b\/.+|"b\/.+") differ$/);
+      if (bm) {
+        const binTarget = unquoteGitPath(bm[1]);
+        if (binTarget.startsWith("b/")) {
+          changed.set(binTarget.slice(2), "ALL");
+        }
+      }
     } else if (line.startsWith("@@ ") && currentFile) {
+      inHunk = true;
       const m = line.match(/\+(\d+)(?:,(\d+))?/);
       if (m) {
         const start = Number(m[1]);
         const count = m[2] !== undefined ? Number(m[2]) : 1;
+        if (count === 0) continue;
         const set = changed.get(currentFile);
         if (set instanceof Set) {
-          for (let k = 0; k < Math.max(1, count); k += 1) {
+          for (let k = 0; k < count; k += 1) {
             set.add(start + k);
           }
         }
@@ -263,7 +441,21 @@ function getChangedLineMap(cwd, gitRef, staged = false) {
   return changed;
 }
 
-function buildPocketMlFindings(text, filename, existingFindings, threshold = null) {
+function filterDriversWithProfile(drivers, profile) {
+  if (!Array.isArray(drivers) || !profile) return drivers || [];
+  return drivers.filter((d) => {
+    const feat = String(d.feature || "");
+    if (profile.concreteness?.status === "grounded" && feat.includes("concreteness")) {
+      return false;
+    }
+    if (profile.burstiness?.status === "varied" && feat.includes("sent_cv")) {
+      return false;
+    }
+    return true;
+  });
+}
+
+function buildPocketMlFindings(text, filename, existingFindings, threshold = null, { profile = null, modality = null } = {}) {
   const doc = analyzeDocumentWithPocketModels(text, { threshold });
   const extras = [];
   for (const p of doc.paragraphs) {
@@ -273,8 +465,9 @@ function buildPocketMlFindings(text, filename, existingFindings, threshold = nul
     );
     if (overlapsExisting) continue;
     const pct = Math.round(p.slopProbability * 100);
-    const drvEn = p.topDrivers.map((d) => d.reason.en).join("; ") || "uniform abstract phrasing";
-    const drvZh = p.topDrivers.map((d) => d.reason.zh).join("、") || "句式与用词高度均质";
+    const activeDrivers = filterDriversWithProfile(p.topDrivers, profile);
+    const drvEn = activeDrivers.map((d) => d.reason.en).join("; ") || "uniform abstract phrasing";
+    const drvZh = activeDrivers.map((d) => d.reason.zh).join("、") || "句式与用词高度均质";
     const loc = String(p.startLine);
     const cleanExcerpt = String(p.excerpt || "");
     const fp = `pocket-stealth-vapor:${fnv1aHex(`pocket-stealth-vapor|${cleanExcerpt.toLowerCase()}|${loc}`)}`;
@@ -284,9 +477,10 @@ function buildPocketMlFindings(text, filename, existingFindings, threshold = nul
       packId: "pocket-model",
       severity: "warning",
       tier: "taste",
+      fixStrategy: "rephrase",
       family: "rhythm/pocket-stealth-vapor",
       category: "statistical-vapor",
-      modality: detectModality(filename) || "markdown",
+      modality: modality || detectModality(filename) || "markdown",
       file: filename,
       location: loc,
       line: p.startLine,
@@ -319,10 +513,10 @@ function summarizePocketForProfile(text) {
 }
 
 function mergePatternBankFindings(existingFindings, patFindings) {
-  const seen = new Set(existingFindings.map((f) => `${f.ruleId}:${f.line}`));
+  const seen = new Set(existingFindings.map((f) => `${f.ruleId}:${f.line}:${f.col || 1}`));
   const out = [...existingFindings];
   for (const pf of patFindings || []) {
-    const key = `${pf.ruleId}:${pf.line}`;
+    const key = `${pf.ruleId}:${pf.line}:${pf.col || 1}`;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(pf);
@@ -330,39 +524,235 @@ function mergePatternBankFindings(existingFindings, patFindings) {
   return out;
 }
 
-function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, config, { includeMl = false, includePatterns = false, banks = null } = {}) {
+function collectTextCoverageWarnings(text, modality, rel, profile) {
+  const warnings = [];
+  if (
+    modality === "html" &&
+    /<script\b[^>]*\btype\s*=\s*(?:"application\/json"|'application\/json'|application\/json(?=[\s>]))/i.test(text)
+  ) {
+    const zones = buildZones(text, "html");
+    if (codePointLength(zones.prose.replace(/\s+/g, "")) < 120) {
+      warnings.push({
+        file: rel,
+        code: "spa-json-shell",
+        message: "HTML appears to be an SPA shell with <script type=\"application/json\"> data and <120 visible prose chars; inspect JSON payload or rendered DOM.",
+      });
+      return warnings;
+    }
+  }
+  const textCpLen = codePointLength(text);
+  if ((modality === "markdown" || modality === "text" || modality === "html") && textCpLen >= 2000 && profile && profile.proseCoverage < 0.15) {
+    if (modality === "html") {
+      warnings.push({
+        file: rel,
+        code: "low-prose-coverage",
+        message: `Extracted prose covers only ${Math.round(profile.proseCoverage * 100)}% of file (${textCpLen} chars); check fenced blocks/markup if unexpected.`,
+      });
+      return warnings;
+    }
+    const nonEmptyLines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+    const tableOrLinkLines = nonEmptyLines.filter((l) => /^\s*(?:\||[-*+]\s+\[)/.test(l)).length;
+    if (nonEmptyLines.length > 0 && tableOrLinkLines / nonEmptyLines.length < 0.5) {
+      warnings.push({
+        file: rel,
+        code: "low-prose-coverage",
+        message: `Extracted prose covers only ${Math.round(profile.proseCoverage * 100)}% of file (${textCpLen} chars); check fenced blocks/markup if unexpected.`,
+      });
+    }
+  }
+  return warnings;
+}
+
+function selectPackWithConfidenceFloor(routeRes) {
+  const rec = routeRes?.recommendedPack || "business-brief";
+  const conf = Number(routeRes?.confidence || 0);
+  if (rec === "business-brief") return { packId: "business-brief", packSource: "auto-pocket-router" };
+  if (rec === "deck-and-ui" && conf >= 0.6) return { packId: "deck-and-ui", packSource: "auto-pocket-router" };
+  if (rec !== "deck-and-ui" && conf >= 0.65) return { packId: rec, packSource: "auto-pocket-router" };
+  return { packId: "business-brief", packSource: "auto-default-fallback" };
+}
+
+function resolveTextPackAndSource(text, rel, modality, explicitPack, fileConfig, packs) {
+  let pack;
+  let effectivePack;
+  let packSource;
+  if (explicitPack && explicitPack !== "auto") {
+    pack = resolveEffectivePack(explicitPack, packs, fileConfig);
+    effectivePack = explicitPack;
+    packSource = "cli-flag";
+  } else if (explicitPack === "auto" && (modality === "markdown" || modality === "text")) {
+    const sel = selectPackWithConfidenceFloor(predictPackWithPocketRouter(text));
+    const routed = sel.packId;
+    if (modality === "markdown" && hasEmbeddedUiMarkup(text)) {
+      let prosePackId = routed;
+      if (prosePackId === "deck-and-ui") {
+        const stripped = text.replace(/<[^>]+>/g, " ");
+        const strippedCjk = (stripped.match(/[\u4e00-\u9fff]/gu) || []).length;
+        const strippedWords = stripped.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
+        if (strippedCjk >= 20 || strippedWords >= 12) {
+          const rerouted = selectPackWithConfidenceFloor(predictPackWithPocketRouter(stripped)).packId;
+          prosePackId = rerouted === "deck-and-ui" ? "business-brief" : rerouted;
+        }
+      }
+      if (prosePackId !== "deck-and-ui") {
+        const prosePack = resolveEffectivePack(prosePackId, packs, fileConfig);
+        const uiPack = resolveEffectivePack("deck-and-ui", packs, fileConfig);
+        pack = mergePacks(prosePack, uiPack);
+        effectivePack = `${prosePackId}+deck-and-ui`;
+        packSource = "auto-mixed-ui";
+      } else {
+        pack = resolveEffectivePack(routed, packs, fileConfig);
+        effectivePack = routed;
+        packSource = sel.packSource;
+      }
+    } else {
+      pack = resolveEffectivePack(routed, packs, fileConfig);
+      effectivePack = routed;
+      packSource = sel.packSource;
+    }
+  } else if (explicitPack === "auto" && modality === "html" && isLongFormHtmlDocument(text)) {
+    const biz = resolveEffectivePack("business-brief", packs, fileConfig);
+    const ui = resolveEffectivePack("deck-and-ui", packs, fileConfig);
+    pack = mergePacks(biz, ui);
+    effectivePack = "business-brief+deck-and-ui";
+    packSource = "auto-html-longform";
+  } else {
+    const packId = pickPackForFile(rel, modality, explicitPack, fileConfig);
+    pack = resolveEffectivePack(packId, packs, fileConfig);
+    effectivePack = packId;
+    packSource = explicitPack === "auto" ? "auto-modality" : fileConfig.pack ? "config" : "default-modality";
+  }
+  return { pack, effectivePack, packSource };
+}
+
+function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, config, { includeMl = false, includePatterns = false, includeProfile = false, banks = null } = {}) {
   const stat = fs.statSync(absPath);
   if (stat.size > 25 * 1024 * 1024) {
     return {
       checked: false,
       findings: [],
       unusedSuppressions: [],
+      coverageWarnings: [],
       skipped: [{ file: rel, reason: "File exceeds 25 MB single-file inspection cap" }],
     };
   }
 
+  const fileConfig = resolveConfigForFile(rel, config);
   const buf = fs.readFileSync(absPath);
 
   if (modality === "docx" || modality === "pptx") {
-    const resolvedExplicit = explicitPack === "auto" ? null : explicitPack;
-    const packId = pickPackForFile(rel, modality, resolvedExplicit, config);
-    const pack = resolveEffectivePack(packId, packs, config);
+    const packId = pickPackForFile(rel, modality, explicitPack, fileConfig);
+    const pack = resolveEffectivePack(packId, packs, fileConfig);
+    const packSource = explicitPack && explicitPack !== "auto" ? "cli-flag" : explicitPack === "auto" ? "auto-modality" : fileConfig.pack ? "config" : "default-modality";
     try {
       const entries = readZipXmlEntries(buf);
-      const res = auditOoxmlEntries(entries, { filename: rel, modality, pack, config });
+      const res = auditOoxmlEntries(entries, { filename: rel, modality, pack, config: fileConfig });
       const missingCorePart = res.skipped.some((s) => s.file === rel);
       let findings = res.findings;
       if (includePatterns && !missingCorePart) {
-        const patRes = auditPatterns("", { filename: rel, modality, banks: banks || loadPatternBanks(), ooxml: entries });
+        const patRes = auditPatterns("", { filename: rel, modality, banks: banks || loadPatternBanks(), ooxml: entries, config: fileConfig });
         findings = mergePatternBankFindings(findings, patRes.findings);
       }
-      return { checked: !missingCorePart, findings, unusedSuppressions: [], skipped: res.skipped };
+      return {
+        checked: !missingCorePart,
+        findings,
+        unusedSuppressions: [],
+        coverageWarnings: [],
+        skipped: res.skipped,
+        effectivePack: packId,
+        packSource,
+        rulesetHash: computeRulesetHash(pack),
+      };
     } catch (err) {
       return {
         checked: false,
         findings: [],
         unusedSuppressions: [],
+        coverageWarnings: [],
         skipped: [{ file: rel, reason: `Uninspectable ${modality.toUpperCase()} archive: ${err.message}` }],
+      };
+    }
+  }
+
+  if (modality === "image") {
+    const packId = pickPackForFile(rel, modality, explicitPack, fileConfig);
+    const pack = resolveEffectivePack(packId, packs, fileConfig);
+    const packSource = explicitPack && explicitPack !== "auto" ? "cli-flag" : explicitPack === "auto" ? "auto-modality" : fileConfig.pack ? "config" : "default-modality";
+    try {
+      const parsed = parseImageBuffer(buf);
+      const res = auditImageDocument(parsed, { filename: rel, pack, config: fileConfig });
+      return {
+        checked: true,
+        findings: res.findings,
+        unusedSuppressions: [],
+        coverageWarnings: [],
+        skipped: res.skipped,
+        effectivePack: packId,
+        packSource,
+        rulesetHash: computeRulesetHash(pack),
+      };
+    } catch (err) {
+      return {
+        checked: false,
+        findings: [],
+        unusedSuppressions: [],
+        coverageWarnings: [],
+        skipped: [{ file: rel, reason: `Uninspectable image: ${err.message}` }],
+      };
+    }
+  }
+
+  if (modality === "pdf") {
+    try {
+      const parsed = parsePdfBuffer(buf);
+      let pack;
+      let effectivePack;
+      let packSource;
+      if (explicitPack && explicitPack !== "auto") {
+        pack = resolveEffectivePack(explicitPack, packs, fileConfig);
+        effectivePack = explicitPack;
+        packSource = "cli-flag";
+      } else if (explicitPack === "auto") {
+        const pages = parsed?.pages || [];
+        const landscapeCount = pages.filter((p) => p.isLandscape).length;
+        const portraitCount = pages.length - landscapeCount;
+        if (pages.length > 0 && portraitCount >= landscapeCount) {
+          pack = mergePacks(
+            resolveEffectivePack("business-brief", packs, fileConfig),
+            resolveEffectivePack("deck-and-ui", packs, fileConfig)
+          );
+          effectivePack = "business-brief+deck-and-ui";
+          packSource = "auto-pdf-portrait";
+        } else {
+          pack = resolveEffectivePack("deck-and-ui", packs, fileConfig);
+          effectivePack = "deck-and-ui";
+          packSource = "auto-pdf-landscape";
+        }
+      } else {
+        const packId = pickPackForFile(rel, modality, explicitPack, fileConfig);
+        pack = resolveEffectivePack(packId, packs, fileConfig);
+        effectivePack = packId;
+        packSource = fileConfig.pack ? "config" : "default-modality";
+      }
+      const res = auditPdfDocument(parsed, { filename: rel, pack, config: fileConfig });
+      const uninspectable = res.skipped.some((s) => s.file === rel);
+      return {
+        checked: !uninspectable,
+        findings: res.findings,
+        unusedSuppressions: [],
+        coverageWarnings: res.coverageWarnings || [],
+        skipped: res.skipped,
+        effectivePack,
+        packSource,
+        rulesetHash: computeRulesetHash(pack),
+      };
+    } catch (err) {
+      return {
+        checked: false,
+        findings: [],
+        unusedSuppressions: [],
+        coverageWarnings: [],
+        skipped: [{ file: rel, reason: `Uninspectable PDF: ${err.message}` }],
       };
     }
   }
@@ -375,30 +765,54 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
       checked: false,
       findings: [],
       unusedSuppressions: [],
+      coverageWarnings: [],
       skipped: [{ file: rel, reason: "Non-UTF-8 text encoding; convert to UTF-8 to inspect" }],
     };
   }
 
-  const effectiveExplicit =
-    explicitPack === "auto" && (modality === "markdown" || modality === "text")
-      ? predictPackWithPocketRouter(text).recommendedPack
-      : explicitPack === "auto"
-        ? null
-        : explicitPack;
-  const packId = pickPackForFile(rel, modality, effectiveExplicit, config);
-  const pack = resolveEffectivePack(packId, packs, config);
+  const { pack, effectivePack, packSource } = resolveTextPackAndSource(text, rel, modality, explicitPack, fileConfig, packs);
 
-  const res = auditText(text, { filename: rel, modality, pack, config });
+  const res = auditText(text, { filename: rel, modality, pack, config: fileConfig });
   let findings = res.findings;
   if (includePatterns) {
-    const patRes = auditPatterns(text, { filename: rel, modality, banks: banks || loadPatternBanks() });
+    const patRes = auditPatterns(text, { filename: rel, modality, banks: banks || loadPatternBanks(), config: fileConfig });
     findings = mergePatternBankFindings(findings, patRes.findings);
   }
-  if (includeMl && (modality === "markdown" || modality === "text")) {
-    const mlRes = buildPocketMlFindings(text, rel, findings);
-    findings = [...findings, ...mlRes.findings];
+
+  let profileObj = null;
+  let mlInput = null;
+  if (PROSE_ML_MODALITIES.has(modality) && (includeMl || includeProfile || text.length >= 2000 || modality === "html")) {
+    profileObj = analyzeTextProfile(text, { modality, config: fileConfig });
+    if (includeMl) {
+      mlInput = modality === "html" || modality === "svg" ? buildZones(text, modality, fileConfig).prose : text;
+      const mlRes = buildPocketMlFindings(mlInput, rel, findings, null, { profile: profileObj, modality });
+      findings = [...findings, ...mlRes.findings];
+    }
   }
-  return { checked: true, findings, unusedSuppressions: res.unusedSuppressions, skipped: [] };
+
+  const coverageWarnings = collectTextCoverageWarnings(text, modality, rel, profileObj);
+  let profileItem = null;
+  if (includeProfile && PROSE_ML_MODALITIES.has(modality)) {
+    const pocketSrc = mlInput ?? (modality === "html" || modality === "svg" ? buildZones(text, modality, fileConfig).prose : text);
+    profileItem = {
+      file: rel,
+      profile: profileObj || analyzeTextProfile(text, { modality, config: fileConfig }),
+      pocketModel: summarizePocketForProfile(pocketSrc),
+    };
+  }
+
+  return {
+    checked: true,
+    findings,
+    unusedSuppressions: res.unusedSuppressions,
+    coverageWarnings,
+    skipped: [],
+    effectivePack,
+    packSource,
+    rulesetHash: computeRulesetHash(pack),
+    profileItem,
+    _cpLineStarts: buildCodepointLineStarts(text),
+  };
 }
 
 // ---------- Subcommands ----------
@@ -418,6 +832,11 @@ function parseFlags(args) {
     "profile",
     "ml",
     "patterns",
+    "deep",
+    "compact",
+    "allow-added",
+    "strict",
+    "offline",
     "force",
     "dry-run",
     "yes",
@@ -443,6 +862,9 @@ function parseFlags(args) {
       }
     } else if (arg.startsWith("-o=")) {
       flags.output = arg.slice(3);
+    } else if (arg === "--") {
+      positional.push(...args.slice(i + 1));
+      break;
     } else if (arg.startsWith("--")) {
       const eq = arg.indexOf("=");
       if (eq !== -1) {
@@ -459,13 +881,13 @@ function parseFlags(args) {
             process.exit(2);
           }
         } else {
-          flags[key] = val;
+          flags[key] = key === "changed" && val === "" ? "HEAD" : val;
         }
       } else {
         const key = arg.slice(2);
         if (boolKeys.has(key)) {
           flags[key] = true;
-        } else if (key === "changed" && (i + 1 >= args.length || args[i + 1].startsWith("-"))) {
+        } else if ((key === "changed" || key === "git") && (i + 1 >= args.length || args[i + 1].startsWith("-"))) {
           flags[key] = "HEAD";
         } else if (i + 1 < args.length) {
           flags[key] = args[i + 1];
@@ -492,6 +914,43 @@ function assertTextOrJsonFormat(format) {
   }
 }
 
+function applyCompactReport(report) {
+  const ruleMeta = {};
+  const compactFindings = [];
+  for (const f of report.findings || []) {
+    const rid = f.ruleId;
+    const strategy = f.fixStrategy || deriveFixStrategy({ id: rid, family: f.family });
+    if (!ruleMeta[rid]) {
+      ruleMeta[rid] = {
+        tier: f.tier || "taste",
+        family: f.family || "general",
+        fixStrategy: strategy,
+        message: f.message,
+        ...(f.deletionTest ? { deletionTest: f.deletionTest } : {}),
+      };
+    }
+    compactFindings.push({
+      fingerprint: f.fingerprint,
+      ruleId: rid,
+      severity: f.severity,
+      fixStrategy: strategy,
+      file: f.file,
+      modality: f.modality,
+      location: f.location,
+      line: f.line,
+      col: f.col,
+      ...(f.span ? { span: f.span } : {}),
+      match: f.match,
+    });
+  }
+  return {
+    ...report,
+    compact: true,
+    ruleMeta,
+    findings: compactFindings,
+  };
+}
+
 function runCheck(args, packs) {
   const { flags, positional } = parseFlags(args);
   const cwd = process.cwd();
@@ -501,8 +960,9 @@ function runCheck(args, packs) {
   const lang = flags.lang || "en";
   const reportUnused = Boolean(flags["report-unused"]);
   const includeProfile = Boolean(flags.profile);
-  const includeMl = Boolean(flags.ml);
-  const includePatterns = Boolean(flags.patterns);
+  const includeMl = Boolean(flags.ml || flags.deep);
+  const includePatterns = Boolean(flags.patterns || flags.deep);
+  const compactJson = Boolean(flags.compact && format === "json");
   const banks = includePatterns ? loadPatternBanks() : null;
 
   const validFormats = new Set(["text", "json", "sarif", "github", "md"]);
@@ -520,48 +980,60 @@ function runCheck(args, packs) {
     const stdinText = fs.readFileSync(0, "utf8");
     const filename = flags["stdin-filename"] || "stdin.md";
     const modality = detectModality(filename) || "markdown";
-    const effectiveExplicit =
-      flags.pack === "auto" && (modality === "markdown" || modality === "text")
-        ? predictPackWithPocketRouter(stdinText).recommendedPack
-        : flags.pack === "auto"
-          ? null
-          : flags.pack || null;
-    const packId = pickPackForFile(filename, modality, effectiveExplicit, config);
-    let pack;
+    const fileConfig = resolveConfigForFile(filename, config);
+    let resolved;
     try {
-      pack = resolveEffectivePack(packId, packs, config);
+      resolved = resolveTextPackAndSource(stdinText, filename, modality, flags.pack || null, fileConfig, packs);
     } catch (err) {
       console.error(`dislop: ${err.message}`);
       process.exit(2);
     }
-    const res = auditText(stdinText, { filename, modality, pack, config });
+    const { pack, effectivePack, packSource } = resolved;
+    const res = auditText(stdinText, { filename, modality, pack, config: fileConfig });
     let findings = res.findings;
     if (includePatterns) {
-      const patRes = auditPatterns(stdinText, { filename, modality, banks });
+      const patRes = auditPatterns(stdinText, { filename, modality, banks, config: fileConfig });
       findings = mergePatternBankFindings(findings, patRes.findings);
     }
-    if (includeMl && (modality === "markdown" || modality === "text")) {
-      findings = [...findings, ...buildPocketMlFindings(stdinText, filename, findings).findings];
+    let profileObj = null;
+    let mlInput = null;
+    if (PROSE_ML_MODALITIES.has(modality) && (includeMl || includeProfile || stdinText.length >= 2000 || modality === "html")) {
+      profileObj = analyzeTextProfile(stdinText, { modality, config: fileConfig });
+      if (includeMl) {
+        mlInput = modality === "html" || modality === "svg" ? buildZones(stdinText, modality, fileConfig).prose : stdinText;
+        findings = [...findings, ...buildPocketMlFindings(mlInput, filename, findings, null, { profile: profileObj, modality }).findings];
+      }
     }
+    const coverageWarnings = collectTextCoverageWarnings(stdinText, modality, filename, profileObj);
+    const pocketSrc = includeProfile && PROSE_ML_MODALITIES.has(modality)
+      ? mlInput ?? (modality === "html" || modality === "svg" ? buildZones(stdinText, modality, fileConfig).prose : stdinText)
+      : null;
     const report = {
       version: ENGINE_VERSION,
+      rulesetHash: computeRulesetHash(pack),
+      effectivePack,
+      packSource,
+      changedFilter: false,
+      files: [{ file: filename, modality, effectivePack, packSource }],
       checkedCount: 1,
       skipped: [],
+      coverageWarnings,
       findings,
       unusedSuppressions: reportUnused ? res.unusedSuppressions : [],
-      ...(includeProfile && (modality === "markdown" || modality === "text")
+      ...(includeProfile && PROSE_ML_MODALITIES.has(modality)
         ? {
             profiles: [
               {
                 file: filename,
-                profile: analyzeTextProfile(stdinText, { modality }),
-                pocketModel: summarizePocketForProfile(stdinText),
+                profile: profileObj || analyzeTextProfile(stdinText, { modality, config: fileConfig }),
+                pocketModel: summarizePocketForProfile(pocketSrc),
               },
             ],
           }
         : {}),
     };
-    console.log(formatReport(report, format, lang));
+    const outReport = compactJson ? applyCompactReport(report) : report;
+    console.log(formatReport(outReport, format, lang));
     const triggered =
       findings.some((f) => SEVERITY_RANK[f.severity] >= SEVERITY_RANK[failOn]) ||
       (reportUnused && res.unusedSuppressions.length > 0);
@@ -582,7 +1054,7 @@ function runCheck(args, packs) {
   const targets = positional.length > 0 ? positional : changedMap ? Array.from(changedMap.keys()).filter((p) => fs.existsSync(path.join(cwd, p))) : ["."];
   let collected;
   try {
-    collected = collectFiles(targets, cwd, config);
+    collected = collectFiles(targets, cwd, config, positional.length > 0);
   } catch (err) {
     console.error(`dislop: ${err.message}`);
     process.exit(2);
@@ -590,8 +1062,13 @@ function runCheck(args, packs) {
 
   const allFindings = [];
   const allSkipped = [...collected.skipped];
+  const allCoverageWarnings = [];
   const allUnused = [];
   const allProfiles = [];
+  const fileMeta = [];
+  const seenHashes = new Set();
+  const seenPacks = new Set();
+  const seenSources = new Set();
   let checkedCount = 0;
   let explicitUninspectable = collected.skipped.length > 0;
 
@@ -599,22 +1076,24 @@ function runCheck(args, packs) {
     if (changedMap && !changedMap.has(item.rel)) continue;
     let res;
     try {
-      res = inspectSingleFile(item, packs, flags.pack || null, config, { includeMl, includePatterns, banks });
+      res = inspectSingleFile(item, packs, flags.pack || null, config, { includeMl, includePatterns, includeProfile, banks });
     } catch (err) {
       console.error(`dislop: ${err.message}`);
       process.exit(2);
     }
     if (res.checked) {
       checkedCount += 1;
-      if (includeProfile && (item.modality === "markdown" || item.modality === "text")) {
-        try {
-          const rawTxt = decodeUtf8Strict(fs.readFileSync(item.absPath));
-          allProfiles.push({
-            file: item.rel,
-            profile: analyzeTextProfile(rawTxt, { modality: item.modality }),
-            pocketModel: summarizePocketForProfile(rawTxt),
-          });
-        } catch {}
+      if (res.effectivePack) seenPacks.add(res.effectivePack);
+      if (res.packSource) seenSources.add(res.packSource);
+      if (res.rulesetHash) seenHashes.add(res.rulesetHash);
+      fileMeta.push({
+        file: item.rel,
+        modality: item.modality,
+        effectivePack: res.effectivePack || null,
+        packSource: res.packSource || null,
+      });
+      if (res.profileItem) {
+        allProfiles.push(res.profileItem);
       }
     } else if (item.explicit) {
       explicitUninspectable = true;
@@ -623,11 +1102,25 @@ function runCheck(args, packs) {
     if (changedMap && changedMap.has(item.rel)) {
       const allowedLines = changedMap.get(item.rel);
       if (allowedLines instanceof Set) {
-        fileFindings = fileFindings.filter((f) => allowedLines.has(f.line));
+        fileFindings = fileFindings.filter((f) => {
+          const startLine = Number.isInteger(f.line) ? f.line : 1;
+          let endLine = Number.isInteger(f.endLine) && f.endLine >= startLine ? f.endLine : startLine;
+          if (!Number.isInteger(f.endLine) && f.span && Number.isInteger(f.span.end) && res._cpLineStarts) {
+            const endOff = Math.max(f.span.start || 0, f.span.end - 1);
+            endLine = Math.max(startLine, cpOffsetToLine(res._cpLineStarts, endOff));
+          }
+          for (let ln = startLine; ln <= endLine; ln += 1) {
+            if (allowedLines.has(ln)) return true;
+          }
+          return false;
+        });
       }
     }
     allFindings.push(...fileFindings);
     allSkipped.push(...res.skipped);
+    if (res.coverageWarnings && res.coverageWarnings.length > 0) {
+      allCoverageWarnings.push(...res.coverageWarnings);
+    }
     if (reportUnused) {
       allUnused.push(...res.unusedSuppressions);
     }
@@ -635,14 +1128,21 @@ function runCheck(args, packs) {
 
   const report = {
     version: ENGINE_VERSION,
+    rulesetHash: seenHashes.size === 1 ? Array.from(seenHashes)[0] : seenHashes.size > 1 ? fnv1aHex(Array.from(seenHashes).sort().join("|")) : null,
+    effectivePack: seenPacks.size === 1 ? Array.from(seenPacks)[0] : seenPacks.size > 1 ? "mixed" : flags.pack || null,
+    packSource: seenSources.size === 1 ? Array.from(seenSources)[0] : seenSources.size > 1 ? "mixed" : null,
+    changedFilter: Boolean(flags.changed || flags.staged),
+    files: fileMeta,
     checkedCount,
     skipped: allSkipped,
+    coverageWarnings: allCoverageWarnings,
     findings: allFindings,
     unusedSuppressions: allUnused,
     ...(allProfiles.length > 0 ? { profiles: allProfiles } : {}),
   };
 
-  const rendered = formatReport(report, format, lang);
+  const outReport = compactJson ? applyCompactReport(report) : report;
+  const rendered = formatReport(outReport, format, lang);
   if (rendered) console.log(rendered);
 
   if (explicitUninspectable || (checkedCount === 0 && allSkipped.length > 0)) {
@@ -793,7 +1293,7 @@ function runPacks(args, packs) {
   }
 }
 
-const VALID_MODALITIES = new Set(["markdown", "text", "html", "css", "jsx", "svg", "docx", "pptx"]);
+const VALID_MODALITIES = new Set(["markdown", "text", "html", "css", "jsx", "svg", "docx", "pptx", "pdf", "image"]);
 const VALID_SEVERITIES = new Set(["error", "warning", "info"]);
 const VALID_TIERS = new Set(["invariant", "taste"]);
 
@@ -1009,6 +1509,7 @@ function runMcpServer(packs, patternByRuleId) {
       ruleId: f.ruleId,
       tier: f.tier ?? "taste",
       severity: f.severity,
+      fixStrategy: f.fixStrategy || deriveFixStrategy({ id: f.ruleId, family: f.family }),
       family: f.family ?? (f.dimension ? `${f.dimension}/${f.ruleId}` : null),
       file: f.file,
       modality: f.modality,
@@ -1025,15 +1526,16 @@ function runMcpServer(packs, patternByRuleId) {
     {
       name: "dislop_check",
       description:
-        "Check a draft (`text` or workspace-relative `path`) for AI-generation artifacts, clichés, and template slop across Markdown, HTML/CSS/JSX/SVG, Word (.docx), and PowerPoint (.pptx). Edit only the flagged spans, then run `dislop_check` again.",
+        "Check a draft (`text` or workspace-relative `path`) for AI-generation artifacts, clichés, and template slop across Markdown, HTML/CSS/JSX/SVG, PNG/JPEG/WebP, Word (.docx), PowerPoint (.pptx), and PDF. Edit only the flagged spans using `fixStrategy`, then run `dislop_verify`.",
       inputSchema: {
         type: "object",
         properties: {
           text: { type: "string", description: "Draft text to inspect in memory" },
-          path: { type: "string", description: "Workspace-relative file path (.md, .html, .css, .jsx, .svg, .docx, .pptx)" },
+          path: { type: "string", description: "Workspace-relative file path (.md, .html, .css, .jsx, .svg, .png, .jpg, .jpeg, .webp, .docx, .pptx, .pdf)" },
           pack: { type: "string", description: "Style pack ID (auto, business-brief, engineering-spec, regulated-comms, literary-essay, deck-and-ui, executive-deck)" },
           filename: { type: "string", description: "Virtual filename hint when inspecting `text`" },
           profile: { type: "boolean", description: "Include 5-axis rhythm & concreteness telemetry on text/markdown (default true)" },
+          deep: { type: "boolean", description: "Enable thorough inspection (Pocket ML + extended 6-dimension pattern bank)" },
           ml: { type: "boolean", description: "Enable bundled 15 KB Pocket ML stealth-vapor paragraph detection (default false)" },
           patterns: { type: "boolean", description: "Include extended 6-dimension pattern-bank probes (default false)" },
           verbosity: { type: "string", enum: ["compact", "full"], description: "Default compact (omits per-hit exemplars to save context tokens; pass full to inline exemplars)" },
@@ -1042,31 +1544,32 @@ function runMcpServer(packs, patternByRuleId) {
       },
     },
     {
-      name: "dislop_explain",
+      name: "dislop_verify",
       description:
-        "Retrieve the rationale, check question, and before/trap/after examples for a specific `ruleId`.",
+        "Verify a revised draft against its original text (or Git baseline for workspace `path`): checks numbers/qualifiers, required `keep` terms, newly introduced AI slop, length bounds, and anti-degradation guardrails (author perspective, cadence, info density, modality).",
       inputSchema: {
         type: "object",
         properties: {
-          ruleId: { type: "string", description: "Rule ID returned by dislop_check or dislop_catalog" },
-          lang: { type: "string", enum: ["en", "zh"], description: "en or zh" },
+          before: { type: "string", description: "Original text before revision (required unless `path` is provided)" },
+          after: { type: "string", description: "Revised text after revision (required unless `path` is provided)" },
+          path: { type: "string", description: "Workspace-relative file path to compare working tree against `gitRef`" },
+          gitRef: { type: "string", description: "Git ref baseline when `path` is given (default HEAD)" },
+          filename: { type: "string", description: "Optional virtual filename hint when passing `before`/`after`" },
+          pack: { type: "string", description: "Optional pack ID or 'auto' to also verify findingsDelta" },
+          keep: { type: "array", items: { type: "string" }, description: "Protected terms/concepts that must stay intact in the revision" },
+          allowAdded: { type: "boolean", description: "Allow new numbers not present in original (default false)" },
+          strict: { type: "boolean", description: "Fail `ok` on any anti-degradation warning in addition to hard fact/error checks" },
         },
-        required: ["ruleId"],
       },
     },
     {
-      name: "dislop_packs",
-      description: "List installed rule packs, supported formats, and rule counts.",
-      inputSchema: { type: "object", properties: {} },
-    },
-    {
-      name: "dislop_catalog",
-      description:
-        "Search and browse dislop's 53-pattern AI-slop catalog by keyword, dimension, category, family, modality, severity, tier, or pack.",
+      name: "dislop_rules",
+      description: "Unified rule lookup: pass `ruleId` to explain a rule, filters (`query`/`pack`/`dimension`) to search, or empty object to list all packs.",
       inputSchema: {
         type: "object",
         properties: {
-          query: { type: "string", description: "Optional bilingual keyword query (matches id, tags, message, deletionTest, exemplar)" },
+          ruleId: { type: "string", description: "Optional rule ID to explain with before/trap/after examples" },
+          query: { type: "string", description: "Optional keyword search query" },
           pack: { type: "string" },
           category: { type: "string" },
           dimension: { type: "string" },
@@ -1075,15 +1578,15 @@ function runMcpServer(packs, patternByRuleId) {
           severity: { type: "string", enum: ["error", "warning", "info"] },
           tier: { type: "string", enum: ["invariant", "taste"] },
           lang: { type: "string", enum: ["en", "zh"] },
-          includeExemplars: { type: "boolean", description: "Default true; set false for compact index listing" },
+          includeExemplars: { type: "boolean" },
           limit: { type: "integer", minimum: 1, maximum: 100 },
         },
       },
     },
     {
-      name: "dislop_voice_extract_offline",
+      name: "dislop_voice_extract",
       description:
-        "Extract a deterministic offline `dislop.voice/1` statistical writing profile from 1-15 clean author samples (0 network calls, 0 uploads).",
+        "Extract a deterministic offline `dislop.voice/1` personal style card from 1-15 clean author samples (0 network calls, 0 uploads).",
       inputSchema: {
         type: "object",
         properties: {
@@ -1132,8 +1635,26 @@ function runMcpServer(packs, patternByRuleId) {
     } catch {
       return;
     }
-    const { id, method, params = {} } = req;
+    if (!req || typeof req !== "object" || Array.isArray(req)) {
+      send({
+        jsonrpc: "2.0",
+        id: null,
+        error: { code: -32600, message: "Invalid Request: expected JSON-RPC object" },
+      });
+      return;
+    }
+    const { id, method } = req;
     if (id === undefined || id === null) return;
+    const rawParams = req.params;
+    if (rawParams !== undefined && (!rawParams || typeof rawParams !== "object" || Array.isArray(rawParams))) {
+      send({
+        jsonrpc: "2.0",
+        id,
+        error: { code: -32600, message: "Invalid Request: params must be an object" },
+      });
+      return;
+    }
+    const params = rawParams || {};
 
     if (method === "initialize") {
       const clientVersion = params.protocolVersion || "2024-11-05";
@@ -1161,8 +1682,156 @@ function runMcpServer(packs, patternByRuleId) {
 
     if (method === "tools/call") {
       const name = params.name;
-      const args = params.arguments || {};
+      const rawArgs = params.arguments;
+      if (rawArgs !== undefined && (!rawArgs || typeof rawArgs !== "object" || Array.isArray(rawArgs))) {
+        send({
+          jsonrpc: "2.0",
+          id,
+          error: { code: -32602, message: "Invalid params: arguments must be an object" },
+        });
+        return;
+      }
+      const args = rawArgs || {};
       try {
+        const resolveWorkspaceFileMcp = (relOrAbsPath) => {
+          const realCwd = fs.realpathSync(cwd);
+          const resolved = path.resolve(cwd, relOrAbsPath);
+          if (!fs.existsSync(resolved)) {
+            const lexReal = path.relative(realCwd, path.resolve(realCwd, relOrAbsPath));
+            const lexCwd = path.relative(path.resolve(cwd), resolved);
+            const escapesBoth =
+              (lexReal === ".." || lexReal.startsWith(`..${path.sep}`) || path.isAbsolute(lexReal)) &&
+              (lexCwd === ".." || lexCwd.startsWith(`..${path.sep}`) || path.isAbsolute(lexCwd));
+            return {
+              error: escapesBoth
+                ? "Path must stay within the current workspace directory."
+                : `File not found: ${relOrAbsPath}`,
+            };
+          }
+          if (!fs.statSync(resolved).isFile()) {
+            return { error: `File not found: ${relOrAbsPath}` };
+          }
+          const realTarget = fs.realpathSync(resolved);
+          const rel = path.relative(realCwd, realTarget);
+          if (rel === ".." || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) {
+            return { error: "Path must stay within the current workspace directory." };
+          }
+          return { realTarget, posixRel: rel.split(path.sep).join("/") };
+        };
+
+        const resolveExplainById = (ruleId, langArg) => {
+          for (const p of Object.values(packs)) {
+            const rule = (p.rules || []).find((r) => r.id === ruleId);
+            if (rule) return formatRuleForExplain(rule, p.id, langArg);
+          }
+          const pat = patternByRuleId && patternByRuleId[ruleId];
+          if (pat) {
+            const guards = Array.isArray(pat.falsePositiveGuards) ? pat.falsePositiveGuards.join(" ") : "";
+            const synthRule = {
+              id: ruleId,
+              tier: "taste",
+              severity: pat.severityDefault || "info",
+              category: pat.category || "general",
+              family: pat.dimension ? `${pat.dimension}/${ruleId}` : "pattern-bank",
+              modalities: pat.modalities || ["markdown", "text"],
+              tags: pat.tags || [],
+              message: pat.mechanism || pat.name || { en: "", zh: "" },
+              ...(guards ? { deletionTest: { en: guards, zh: guards } } : {}),
+              ...(pat.exemplar ? { exemplar: pat.exemplar } : {}),
+            };
+            return formatRuleForExplain(synthRule, pat.packId || "pattern-bank", langArg);
+          }
+          if (ruleId === "pocket-stealth-vapor") {
+            return formatRuleForExplain(POCKET_STEALTH_VAPOR_RULE, "pocket-model", langArg);
+          }
+          return null;
+        };
+
+        if (name === "dislop_rules") {
+          if (args.ruleId) {
+            const explained = resolveExplainById(args.ruleId, args.lang);
+            if (explained) toolResult(id, explained);
+            else toolResult(id, { error: `Unknown ruleId '${args.ruleId}'` }, true);
+            return;
+          }
+          const hasFilter = Boolean(
+            args.query || args.pack || args.category || args.dimension || args.family || args.modality || args.severity || args.tier
+          );
+          if (hasFilter) {
+            const result = queryCatalog(catalogEntries, {
+              query: args.query || "",
+              pack: args.pack || null,
+              category: args.category || null,
+              dimension: args.dimension || null,
+              family: args.family || null,
+              modality: args.modality || null,
+              severity: args.severity || null,
+              tier: args.tier || null,
+              includeExemplars: args.includeExemplars !== false,
+              limit: Number.isInteger(args.limit) && args.limit > 0 ? args.limit : null,
+            });
+            toolResult(id, result);
+            return;
+          }
+          const list = Object.values(packs).map((p) => ({
+            id: p.id,
+            tier: p.tier,
+            name: p.name,
+            modalities: p.modalities,
+            ruleCount: (p.rules || []).length,
+            summary: p.summary,
+          }));
+          toolResult(id, { packs: list });
+          return;
+        }
+
+        if (name === "dislop_verify") {
+          const liveConfig = loadConfig(cwd);
+          const hasBefore = typeof args.before === "string";
+          const hasAfter = typeof args.after === "string";
+          const hasPath = typeof args.path === "string" && args.path.trim().length > 0;
+          let beforeText;
+          let afterText;
+          let fn = args.filename || "draft.md";
+          if (hasPath) {
+            const ws = resolveWorkspaceFileMcp(args.path);
+            if (ws.error) {
+              toolResult(id, { error: ws.error }, true);
+              return;
+            }
+            fn = ws.posixRel;
+            afterText = decodeUtf8Strict(fs.readFileSync(ws.realTarget));
+            beforeText = readGitBaselineForFile(ws.realTarget, typeof args.gitRef === "string" && args.gitRef.trim() ? args.gitRef.trim() : "HEAD");
+          } else if (hasBefore && hasAfter) {
+            beforeText = args.before;
+            afterText = args.after;
+          } else {
+            toolResult(id, { error: "Provide both `before` and `after` strings, or a workspace `path`." }, true);
+            return;
+          }
+          const mod = detectModality(fn) || "markdown";
+          const fileCfg = resolveConfigForFile(fn, liveConfig);
+          const packRes = resolveTextPackAndSource(afterText, fn, mod, args.pack || "auto", fileCfg, packs);
+          const keepTerms = Array.isArray(args.keep)
+            ? args.keep
+            : typeof args.keep === "string"
+              ? args.keep.split(",").map((x) => x.trim()).filter(Boolean)
+              : [];
+          const out = verifyRevisionBundle(beforeText, afterText, {
+            filename: fn,
+            modality: mod,
+            pack: packRes.pack,
+            config: fileCfg,
+            keepTerms,
+            allowAdded: Boolean(args.allowAdded),
+            strict: Boolean(args.strict),
+          });
+          out.effectivePack = packRes.effectivePack;
+          out.packSource = packRes.packSource;
+          toolResult(id, out);
+          return;
+        }
+
         if (name === "dislop_packs") {
           const list = Object.values(packs).map((p) => ({
             id: p.id,
@@ -1245,60 +1914,72 @@ function runMcpServer(packs, patternByRuleId) {
 
           const liveConfig = loadConfig(cwd);
           const verbosity = args.verbosity === "full" ? "full" : "compact";
-          const includeMl = Boolean(args.ml);
-          const includePatterns = Boolean(args.patterns);
+          const includeMl = Boolean(args.ml || args.deep);
+          const includePatterns = Boolean(args.patterns || args.deep);
           const wantProfile = args.profile !== false;
           const banks = includePatterns ? loadPatternBanks() : null;
 
           if (hasText) {
             const fn = args.filename || "draft.md";
             const mod = detectModality(fn) || "markdown";
-            const effPack =
-              args.pack === "auto" && (mod === "markdown" || mod === "text")
-                ? predictPackWithPocketRouter(args.text).recommendedPack
-                : args.pack === "auto"
-                  ? null
-                  : args.pack || null;
-            const packId = pickPackForFile(fn, mod, effPack, liveConfig);
-            const pack = resolveEffectivePack(packId, packs, liveConfig);
-            const res = auditText(args.text, { filename: fn, modality: mod, pack, config: liveConfig });
+            const fileCfg = resolveConfigForFile(fn, liveConfig);
+            const { pack, effectivePack, packSource } = resolveTextPackAndSource(args.text, fn, mod, args.pack || null, fileCfg, packs);
+            const res = auditText(args.text, { filename: fn, modality: mod, pack, config: fileCfg });
             let findings = res.findings;
             if (includePatterns) {
-              findings = mergePatternBankFindings(findings, auditPatterns(args.text, { filename: fn, modality: mod, banks }).findings);
+              findings = mergePatternBankFindings(findings, auditPatterns(args.text, { filename: fn, modality: mod, banks, config: fileCfg }).findings);
             }
-            if (includeMl && (mod === "markdown" || mod === "text")) {
-              findings = [...findings, ...buildPocketMlFindings(args.text, fn, findings).findings];
+            const needsCoverageProfile = codePointLength(args.text) >= 2000 || mod === "html";
+            const profile = PROSE_ML_MODALITIES.has(mod) && (wantProfile || includeMl || needsCoverageProfile)
+              ? analyzeTextProfile(args.text, { modality: mod, config: fileCfg })
+              : null;
+            if (includeMl && PROSE_ML_MODALITIES.has(mod)) {
+              const mlSrc = mod === "html" || mod === "svg" ? buildZones(args.text, mod, fileCfg).prose : args.text;
+              findings = [...findings, ...buildPocketMlFindings(mlSrc, fn, findings, null, { profile, modality: mod }).findings];
             }
-            const profile = wantProfile && (mod === "markdown" || mod === "text") ? analyzeTextProfile(args.text, { modality: mod }) : null;
             const formatted = formatFindingsForMcp(findings, verbosity, args.lang);
             toolResult(id, {
-              pack: packId,
+              pack: effectivePack,
+              packSource,
+              rulesetHash: computeRulesetHash(pack),
               modality: mod,
               checked: true,
               skipped: [],
+              coverageWarnings: collectTextCoverageWarnings(args.text, mod, fn, profile),
               count: formatted.length,
               findings: formatted,
               ...(verbosity === "compact" && formatted.length > 0
                 ? { explainHint: "Call dislop_explain(ruleId) for before/trap/after examples." }
                 : {}),
-              ...(profile ? { profile } : {}),
+              ...(wantProfile && profile ? { profile } : {}),
             });
             return;
           }
 
-          // Check lexical workspace containment BEFORE touching filesystem, then realpath containment against symlinks
           const realCwd = fs.realpathSync(cwd);
-          const resolvedLex = path.resolve(realCwd, args.path);
-          const lexRel = path.relative(realCwd, resolvedLex);
-          if (lexRel === ".." || lexRel.startsWith(`..${path.sep}`) || path.isAbsolute(lexRel)) {
-            toolResult(id, { error: "Path must stay within the current workspace directory." }, true);
+          const resolved = path.resolve(cwd, args.path);
+          if (!fs.existsSync(resolved)) {
+            const lexReal = path.relative(realCwd, path.resolve(realCwd, args.path));
+            const lexCwd = path.relative(path.resolve(cwd), resolved);
+            const escapesBoth =
+              (lexReal === ".." || lexReal.startsWith(`..${path.sep}`) || path.isAbsolute(lexReal)) &&
+              (lexCwd === ".." || lexCwd.startsWith(`..${path.sep}`) || path.isAbsolute(lexCwd));
+            toolResult(
+              id,
+              {
+                error: escapesBoth
+                  ? "Path must stay within the current workspace directory."
+                  : `File not found: ${args.path}`,
+              },
+              true
+            );
             return;
           }
-          if (!fs.existsSync(resolvedLex) || !fs.statSync(resolvedLex).isFile()) {
+          if (!fs.statSync(resolved).isFile()) {
             toolResult(id, { error: `File not found: ${args.path}` }, true);
             return;
           }
-          const realTarget = fs.realpathSync(resolvedLex);
+          const realTarget = fs.realpathSync(resolved);
           const rel = path.relative(realCwd, realTarget);
           if (rel === ".." || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) {
             toolResult(id, { error: "Path must stay within the current workspace directory." }, true);
@@ -1310,35 +1991,23 @@ function runMcpServer(packs, patternByRuleId) {
             return;
           }
           const posixRel = rel.split(path.sep).join("/");
-          let rawTxtForPack = null;
-          if ((mod === "markdown" || mod === "text") && (args.pack === "auto" || wantProfile)) {
-            try {
-              rawTxtForPack = decodeUtf8Strict(fs.readFileSync(realTarget));
-            } catch {}
-          }
-          const effPackArg =
-            args.pack === "auto" && rawTxtForPack !== null && (mod === "markdown" || mod === "text")
-              ? predictPackWithPocketRouter(rawTxtForPack).recommendedPack
-              : args.pack === "auto"
-                ? null
-                : args.pack || null;
           const res = inspectSingleFile(
             { absPath: realTarget, rel: posixRel, modality: mod },
             packs,
-            effPackArg,
+            args.pack || null,
             liveConfig,
-            { includeMl, includePatterns, banks }
+            { includeMl, includePatterns, includeProfile: wantProfile, banks }
           );
-          let profile = null;
-          if (res.checked && wantProfile && rawTxtForPack !== null && (mod === "markdown" || mod === "text")) {
-            profile = analyzeTextProfile(rawTxtForPack, { modality: mod });
-          }
+          const profile = res.profileItem ? res.profileItem.profile : null;
           const formatted = formatFindingsForMcp(res.findings, verbosity, args.lang);
           toolResult(id, {
-            pack: pickPackForFile(posixRel, mod, effPackArg, liveConfig),
+            pack: res.effectivePack || pickPackForFile(posixRel, mod, args.pack || null, liveConfig),
+            packSource: res.packSource || null,
+            rulesetHash: res.rulesetHash || null,
             modality: mod,
             checked: res.checked,
             skipped: res.skipped,
+            coverageWarnings: res.coverageWarnings || [],
             count: formatted.length,
             findings: formatted,
             ...(verbosity === "compact" && formatted.length > 0
@@ -1349,7 +2018,7 @@ function runMcpServer(packs, patternByRuleId) {
           return;
         }
 
-        if (name === "dislop_voice_extract_offline") {
+        if (name === "dislop_voice_extract_offline" || name === "dislop_voice_extract") {
           if (!Array.isArray(args.samples) || args.samples.length === 0) {
             toolResult(id, { error: "Non-empty `samples` string array is required." }, true);
             return;
@@ -1496,6 +2165,10 @@ function runPatterns(args) {
       process.exit(2);
     }
     modality = detected;
+    if (modality === "pdf" || modality === "image") {
+      console.error(`dislop: unsupported modality '${modality}' for patterns (use 'dislop check' for PDF and image files)`);
+      process.exit(2);
+    }
     const buf = fs.readFileSync(abs);
     try {
       if (modality === "pptx" || modality === "docx") {
@@ -1897,27 +2570,554 @@ async function runModel(args, packs) {
   }
 }
 
+function readGitBaselineForFile(absFile, gitRef = "HEAD") {
+  const fileDir = path.dirname(absFile);
+  const topLevel = execFileSync("git", ["-c", "core.quotepath=off", "rev-parse", "--show-toplevel"], {
+    cwd: fileDir,
+    encoding: "utf8",
+  }).trim();
+  const realFile = fs.realpathSync(absFile);
+  const realTop = fs.realpathSync(topLevel);
+  const relPosix = path.relative(realTop, realFile).split(path.sep).join("/");
+  return execFileSync("git", ["-c", "core.quotepath=off", "show", `${gitRef}:${relPosix}`], {
+    cwd: realTop,
+    encoding: "utf8",
+    maxBuffer: 32 * 1024 * 1024,
+  });
+}
+
+function runVerify(args, packs) {
+  const { flags, positional } = parseFlags(args);
+  const cwd = process.cwd();
+  const format = flags.json ? "json" : flags.format || "text";
+  assertTextOrJsonFormat(format);
+  const lang = flags.lang || "en";
+  const allowAdded = Boolean(flags["allow-added"]);
+  const strict = Boolean(flags.strict);
+  const keepRaw = typeof flags.keep === "string" ? flags.keep : "";
+  const keepTerms = keepRaw ? keepRaw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+  const config = loadConfig(cwd, flags.config || null);
+
+  let beforeText;
+  let afterText;
+  let label;
+  if (flags.git !== undefined) {
+    let gitRef = "HEAD";
+    let targetPath;
+    if (flags.git === true) {
+      targetPath = positional[0];
+    } else if (positional.length === 0) {
+      targetPath = String(flags.git);
+    } else {
+      gitRef = String(flags.git);
+      targetPath = positional[0];
+    }
+    if (!targetPath) {
+      console.error("Usage: dislop verify --git [ref] <file> [--keep a,b] [--pack <id|auto>] [--strict] [--json]");
+      process.exit(2);
+    }
+    const absTarget = path.resolve(cwd, targetPath);
+    if (!fs.existsSync(absTarget) || !fs.statSync(absTarget).isFile()) {
+      console.error(`dislop: file not found: ${targetPath}`);
+      process.exit(2);
+    }
+    label = targetPath;
+    afterText = decodeUtf8Strict(fs.readFileSync(absTarget));
+    try {
+      beforeText = readGitBaselineForFile(absTarget, gitRef);
+    } catch (err) {
+      console.error(`dislop verify: failed to read '${gitRef}' baseline for '${targetPath}': ${err.message}`);
+      process.exit(2);
+    }
+  } else {
+    if (positional.length < 2) {
+      console.error("Usage: dislop verify <before-file> <after-file> [--keep a,b] [--pack <id|auto>] [--strict] [--json]");
+      process.exit(2);
+    }
+    const beforeAbs = path.resolve(cwd, positional[0]);
+    const afterAbs = path.resolve(cwd, positional[1]);
+    for (const [p, rawArg] of [[beforeAbs, positional[0]], [afterAbs, positional[1]]]) {
+      if (!fs.existsSync(p) || !fs.statSync(p).isFile()) {
+        console.error(`dislop: file not found: ${rawArg}`);
+        process.exit(2);
+      }
+    }
+    label = positional[1];
+    beforeText = decodeUtf8Strict(fs.readFileSync(beforeAbs));
+    afterText = decodeUtf8Strict(fs.readFileSync(afterAbs));
+  }
+
+  const mod = detectModality(label) || "markdown";
+  const fileCfg = resolveConfigForFile(label, config);
+  let resolvedPack;
+  try {
+    resolvedPack = resolveTextPackAndSource(afterText, label, mod, flags.pack || "auto", fileCfg, packs);
+  } catch (err) {
+    console.error(`dislop: ${err.message}`);
+    process.exit(2);
+  }
+  const result = verifyRevisionBundle(beforeText, afterText, {
+    filename: label,
+    modality: mod,
+    pack: resolvedPack.pack,
+    config: fileCfg,
+    keepTerms,
+    allowAdded,
+    strict,
+  });
+  result.effectivePack = resolvedPack.effectivePack;
+  result.packSource = resolvedPack.packSource;
+
+  if (format === "json") {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    const fl = result.factLedger;
+    const lc = result.lengthCheck;
+    const ad = result.antiDegradation;
+    if (lang === "zh") {
+      console.log(`dislop verify (${label}): ${result.ok ? "通过 (PASSED)" : "未通过 (FAILED)"}`);
+      console.log(`  事实账本  : ${fl.status}（保留 ${fl.retainedCount}/${fl.totalProtected}，丢失 ${fl.missing.length}，限定词降级 ${fl.qualifierDropped.length}）`);
+      if (result.keepTerms.requested.length > 0) {
+        console.log(`  关键词保留: 保留 ${result.keepTerms.kept.length}/${result.keepTerms.requested.length}${result.keepTerms.missing.length ? `（缺失：${result.keepTerms.missing.join(", ")}）` : ""}`);
+      }
+      if (result.findingsDelta) {
+        console.log(`  AI味变化  : ${result.findingsDelta.beforeCount} -> ${result.findingsDelta.afterCount}（消解 ${result.findingsDelta.resolvedCount}，新引入 ${result.findingsDelta.introduced.length}）`);
+      }
+      console.log(`  篇幅比例  : ${lc.beforeChars} -> ${lc.afterChars} 字（${lc.ratio}x · ${lc.status}）`);
+      console.log(`  反退化校验: ${ad.status}`);
+      for (const w of ad.warnings) {
+        console.log(`    - [${w.severity.toUpperCase()}] ${w.code}: ${w.message.zh}`);
+      }
+    } else {
+      console.log(`dislop verify (${label}): ${result.status.toUpperCase()}`);
+      console.log(`  Fact ledger   : ${fl.status} (${fl.retainedCount}/${fl.totalProtected} retained, ${fl.missing.length} missing, ${fl.qualifierDropped.length} qualifier dropped)`);
+      if (result.keepTerms.requested.length > 0) {
+        console.log(`  Keep terms    : ${result.keepTerms.kept.length}/${result.keepTerms.requested.length} kept${result.keepTerms.missing.length ? ` (missing: ${result.keepTerms.missing.join(", ")})` : ""}`);
+      }
+      if (result.findingsDelta) {
+        console.log(`  Findings delta: ${result.findingsDelta.beforeCount} -> ${result.findingsDelta.afterCount} (${result.findingsDelta.resolvedCount} resolved, ${result.findingsDelta.introduced.length} introduced)`);
+      }
+      console.log(`  Length ratio  : ${lc.beforeChars} -> ${lc.afterChars} chars (${lc.ratio}x · ${lc.status})`);
+      console.log(`  Anti-degrade  : ${ad.status}`);
+      for (const w of ad.warnings) {
+        console.log(`    - [${w.severity.toUpperCase()}] ${w.code}: ${w.message.en}`);
+      }
+    }
+  }
+  process.exitCode = result.ok ? 0 : 1;
+}
+
+const REVIEW_RESLOP_ZH_RE = /(?:全闭环|闭环|严禁|杜绝|赋能|抓手|家人们|绝绝子|其实吧|咱就是说|不是[^。\n]{1,30}而是)/g;
+const REVIEW_RESLOP_EN_RE = /\b(?:not\s+just\b[^.\n]{1,35}\bbut\b|game[- ]changing|seamless|delve\s+into|tapestry|let\s+that\s+sink\s+in)\b/gi;
+const VALID_TIC_LAYERS = new Set(["lexical", "syntactic", "rhythm", "cognitive-framing", "rhetorical-stance", "visual", "artifact"]);
+
+function loadAiTicRubric(customPatternsDir = PATTERNS_DIR) {
+  const p = path.join(customPatternsDir, "ai-tic-rubric.json");
+  try {
+    if (fs.existsSync(p)) {
+      return JSON.parse(fs.readFileSync(p, "utf8"));
+    }
+  } catch {}
+  return { layers: [], antiDegradationPrinciples: { en: [], zh: [] } };
+}
+
+function mapFindingToTicLayer(finding) {
+  const rid = String(finding?.ruleId || "");
+  const dim = String(finding?.dimension || "");
+  const fam = String(finding?.family || "");
+  if (rid.startsWith("core/") || fam.startsWith("hygiene/") || fam.startsWith("office/") || dim === "artifacts") return "artifact";
+  if (rid.startsWith("ui-") || rid.startsWith("pptx-") || fam.startsWith("deck/") || fam.startsWith("ui/") || dim === "visual-and-deck") return "visual";
+  if (
+    dim === "rhythm" ||
+    fam.startsWith("rhythm/") ||
+    fam.startsWith("punctuation/") ||
+    ["low-burstiness-vapor", "comma-chain-runon", "opener-anaphora-monotony", "inline-bold-saturation", "paragraph-length-uniformity", "semicolon-tricolon", "em-dash-cluster", "en-dash-overuse", "bold-lead-list-wall"].includes(rid)
+  ) {
+    return "rhythm";
+  }
+  if (
+    dim === "syntactic" ||
+    fam.startsWith("frame/") ||
+    ["negation-pivot", "staccato-slogan-run", "zh-four-char-triad", "concession-symmetry-frame", "rhetorical-qa-cadence", "pull-quote-closer", "template-skeleton-echo"].includes(rid)
+  ) {
+    return "syntactic";
+  }
+  if (
+    ["macro-trend-opener", "moralizing-ending", "narrative-sandwich", "unsourced-attribution", "unsubstantiated-superlative", "composite-multi-signal"].includes(rid) ||
+    fam.startsWith("evidence/")
+  ) {
+    return "cognitive-framing";
+  }
+  if (["throat-clearing-opener", "sycophancy-residue", "hedge-cluster", "discourse-marker-cluster"].includes(rid) || dim === "discourse") {
+    return "rhetorical-stance";
+  }
+  return "lexical";
+}
+
+function buildCrossCheckSummary({ ruleFindings, patternFindings, profile, mlFindings, mergedFindings, modality }) {
+  const signalsPresent = [];
+  if (ruleFindings.length > 0) signalsPresent.push("rules");
+  if (patternFindings.length > 0) signalsPresent.push("patterns");
+  if (profile && ((profile.telemetryRisk?.score || 0) >= 15 || profile.structure?.lowBurstinessVapor)) {
+    signalsPresent.push("profile");
+  }
+  if (mlFindings.length > 0) signalsPresent.push("pocket-ml");
+
+  const layerCounts = {};
+  for (const f of mergedFindings) {
+    const layer = mapFindingToTicLayer(f);
+    layerCounts[layer] = (layerCounts[layer] || 0) + 1;
+  }
+
+  const proseMods = new Set(["markdown", "text", "html", "svg"]);
+  const hasSubtleProse = Boolean(proseMods.has(modality) && profile && (profile.sentenceCount || 0) >= 3);
+  const suspectedSubtleLayers = hasSubtleProse && (signalsPresent.length > 0 || ruleFindings.length === 0)
+    ? ["cognitive-framing", "rhetorical-stance"]
+    : [];
+  const llmRecommended = Boolean(
+    hasSubtleProse && ((profile.telemetryRisk?.score || 0) >= 15 || mlFindings.length > 0 || ruleFindings.length === 0)
+  );
+
+  return {
+    signalsPresent,
+    multiSignalConfirmed: signalsPresent.length >= 2,
+    layerCounts,
+    suspectedSubtleLayers,
+    llmRecommended,
+  };
+}
+
+function findingsToReviewIssues(findings, lang = "en") {
+  return findings.map((f) => {
+    const strategy = f.fixStrategy || deriveFixStrategy({ id: f.ruleId, family: f.family });
+    const action = strategy === "delete" ? "edit" : strategy === "need-source" ? "ask" : "rewrite";
+    const why = (f.message?.[lang] || f.message?.en || f.ruleId || "").trim();
+    const guidance = (f.deletionTest?.[lang] || f.deletionTest?.en || why).trim();
+    return {
+      source: f.source || "rule",
+      ruleId: f.ruleId,
+      ticLayer: mapFindingToTicLayer(f),
+      severity: f.severity,
+      fixStrategy: strategy,
+      action,
+      line: f.line || 1,
+      col: f.col || 1,
+      quote: f.match || "",
+      why,
+      ...(action === "edit"
+        ? { replacement: "" }
+        : action === "ask"
+          ? { question: guidance }
+          : { instruction: guidance }),
+    };
+  });
+}
+
+function groundByokLlmIssues(rawIssues, sourceText, lineStarts) {
+  if (!Array.isArray(rawIssues)) return [];
+  const src = String(sourceText || "");
+  const out = [];
+  for (const iss of rawIssues) {
+    if (!iss || typeof iss !== "object") continue;
+    const q = String(iss.quote || "").trim();
+    if (!q) continue;
+    const idx = src.indexOf(q);
+    if (idx === -1) continue;
+    let action = ["edit", "replace", "delete", "rewrite", "ask"].includes(iss.action) ? iss.action : "rewrite";
+    if (action === "replace" || action === "delete") action = "edit";
+    const rep = action === "edit" ? String(iss.replacement ?? "") : "";
+    if (action === "edit" || iss.replacement) {
+      let introducedSlop = false;
+      const qLower = q.toLowerCase();
+      for (const m of String(iss.replacement || "").matchAll(REVIEW_RESLOP_ZH_RE)) {
+        if (!q.includes(m[0])) {
+          introducedSlop = true;
+          break;
+        }
+      }
+      if (!introducedSlop) {
+        for (const m of String(iss.replacement || "").matchAll(REVIEW_RESLOP_EN_RE)) {
+          if (!qLower.includes(m[0].toLowerCase())) {
+            introducedSlop = true;
+            break;
+          }
+        }
+      }
+      if (introducedSlop) continue;
+    }
+    let finalInstruction = String(iss.instruction || iss.why || "").trim();
+    if (action === "edit") {
+      const vr = verifyRevision(q, rep);
+      if (vr.status !== "preserved") {
+        action = "rewrite";
+        if (!finalInstruction) finalInstruction = String(iss.why || "Keep all numbers and qualifiers intact while removing filler.");
+      }
+    }
+    const lc = lineStarts ? (() => {
+      let lo = 0; let hi = lineStarts.length - 1;
+      while (lo <= hi) { const mid = (lo + hi) >> 1; if (lineStarts[mid] <= idx) lo = mid + 1; else hi = mid - 1; }
+      const li = Math.max(0, hi);
+      return { line: li + 1, col: idx - lineStarts[li] + 1 };
+    })() : { line: 1, col: 1 };
+    out.push({
+      source: "byok-llm",
+      ruleId: null,
+      ...(VALID_TIC_LAYERS.has(iss.ticLayer) ? { ticLayer: iss.ticLayer } : {}),
+      severity: ["error", "warning", "info"].includes(iss.severity) ? iss.severity : "warning",
+      fixStrategy: action === "edit" ? (rep === "" ? "delete" : "rephrase") : action === "ask" ? "need-source" : "rephrase",
+      action,
+      line: lc.line,
+      col: lc.col,
+      quote: q,
+      why: String(iss.why || "").trim(),
+      ...(action === "edit"
+        ? { replacement: rep }
+        : action === "ask"
+          ? { question: String(iss.question || finalInstruction).trim() }
+          : { instruction: finalInstruction }),
+    });
+    if (out.length >= 16) break;
+  }
+  return out;
+}
+
+function buildRubricPromptDigest(rubric, lang = "en") {
+  const isZh = lang === "zh";
+  const layers = Array.isArray(rubric?.layers) ? rubric.layers : [];
+  if (layers.length === 0) return "";
+  return layers
+    .map((layer) => {
+      const name = layer.name?.[isZh ? "zh" : "en"] || layer.id;
+      const prompt = layer.llmCheckPrompt?.[isZh ? "zh" : "en"] || "";
+      const guards = (layer.falsePositiveGuards?.[isZh ? "zh" : "en"] || []).slice(0, 1).join("; ");
+      return `- [${layer.id}] ${name}: ${prompt}${guards ? ` (Guard: ${guards})` : ""}`;
+    })
+    .join("\n");
+}
+
+async function runReview(args, packs) {
+  const { flags, positional } = parseFlags(args);
+  const cwd = process.cwd();
+  const format = flags.json ? "json" : flags.format || "text";
+  assertTextOrJsonFormat(format);
+  const lang = flags.lang || "en";
+  const config = loadConfig(cwd, flags.config || null);
+  const voiceInfo = discoverVoiceCard(cwd);
+  const rubric = loadAiTicRubric();
+  const target = positional[0] || "-";
+
+  let text;
+  let label;
+  if (target === "-") {
+    text = fs.readFileSync(0, "utf8");
+    label = flags["stdin-filename"] || "stdin.md";
+  } else {
+    const abs = path.resolve(cwd, target);
+    if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
+      console.error(`dislop: file not found: ${target}`);
+      process.exit(2);
+    }
+    label = target;
+    text = decodeUtf8Strict(fs.readFileSync(abs));
+  }
+
+  const mod = detectModality(label) || "markdown";
+  const fileCfg = resolveConfigForFile(label, config);
+  const packRes = resolveTextPackAndSource(text, label, mod, flags.pack || "auto", fileCfg, packs);
+  const auditRes = auditText(text, { filename: label, modality: mod, pack: packRes.pack, config: fileCfg });
+  const ruleFindings = auditRes.findings;
+  const patRes = auditPatterns(text, { filename: label, modality: mod, banks: loadPatternBanks(), config: fileCfg });
+  const patternFindings = patRes.findings;
+  let findings = mergePatternBankFindings(ruleFindings, patternFindings);
+  const profile = PROSE_ML_MODALITIES.has(mod) ? analyzeTextProfile(text, { modality: mod, config: fileCfg }) : null;
+  let mlFindings = [];
+  if (PROSE_ML_MODALITIES.has(mod)) {
+    const mlSrc = mod === "html" || mod === "svg" ? buildZones(text, mod, fileCfg).prose : text;
+    mlFindings = buildPocketMlFindings(mlSrc, label, findings, null, { profile, modality: mod }).findings;
+    findings = [...findings, ...mlFindings];
+  }
+  const crossCheck = buildCrossCheckSummary({
+    ruleFindings,
+    patternFindings,
+    profile,
+    mlFindings,
+    mergedFindings: findings,
+    modality: mod,
+  });
+
+  const detIssues = findingsToReviewIssues(findings, lang);
+  let issues = [...detIssues];
+  let mode = "offline-deterministic";
+  let summary =
+    issues.length === 0
+      ? lang === "zh" ? "未发现确定性 AI 味或硬伤问题。" : "No deterministic AI-slop issues detected."
+      : lang === "zh" ? `发现 ${issues.length} 处多信号审校建议（覆盖 ${crossCheck.signalsPresent.join("+") || "rules"}，改后可用 dislop verify 校验）。` : `Found ${issues.length} multi-signal review item(s) across ${crossCheck.signalsPresent.join("+") || "rules"}.`;
+
+  const endpoint = flags.offline
+    ? ""
+    : String(flags.endpoint || process.env.DISLOP_REVIEW_ENDPOINT || process.env.OPENAI_BASE_URL || "").trim();
+  const keyEnvName = flags["api-key-env"]
+    ? String(flags["api-key-env"])
+    : process.env.DISLOP_REVIEW_API_KEY
+      ? "DISLOP_REVIEW_API_KEY"
+      : process.env.OPENAI_API_KEY
+        ? "OPENAI_API_KEY"
+        : "";
+  const apiKey = keyEnvName ? String(process.env[keyEnvName] || "") : "";
+
+  if (!flags.offline && endpoint && apiKey) {
+    let u;
+    try {
+      u = new URL(endpoint);
+    } catch {
+      console.error(`dislop review: invalid endpoint URL '${endpoint}'`);
+      process.exit(2);
+    }
+    if (u.protocol !== "http:" && u.protocol !== "https:") {
+      console.error(`dislop review: endpoint must use http or https scheme`);
+      process.exit(2);
+    }
+    if (process.env.DISLOP_TEST_MODE === "1" && !["127.0.0.1", "localhost", "::1", "[::1]"].includes(u.hostname)) {
+      console.error("dislop review: live BYOK requests are blocked when DISLOP_TEST_MODE=1");
+      process.exit(2);
+    }
+    const chatUrl = endpoint.endsWith("/chat/completions") ? endpoint : `${endpoint.replace(/\/+$/, "")}/chat/completions`;
+    const modelId = String(flags.model || process.env.DISLOP_REVIEW_MODEL || "gpt-4o-mini");
+    const sysPrompt =
+      lang === "zh"
+        ? "你是 dislop 审校助手，请结合五层 AI 口癖准则交叉核对确定性预检与统计信号。只输出 JSON：{\"summary\":\"...\",\"issues\":[{\"quote\":\"原文原样片段\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"原因\",\"replacement\":\"仅edit填\",\"instruction\":\"仅rewrite填\",\"question\":\"仅ask填\"}]}。硬规则：1) 保留作者原有视角、自然句长起伏、个性化表达与带事实锚点的行业术语，禁止改写成死板说教、廉价“装人味”口水词（家人们/其实吧/绝绝子）或删减干货；2) quote 必须一字不差从原文复制；3) 禁止引入全闭环/闭环/赋能/抓手/不是A而是B等新套词；4) 绝不改丢数字或范围限定词（预计/仅在/除非/待确认）。"
+        : "You are dislop's multi-layer AI-tic reviewer. Cross-check deterministic findings and telemetry against the 5-layer rubric. Output strict JSON only: {\"summary\":\"...\",\"issues\":[{\"quote\":\"exact verbatim substring\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"reason\",\"replacement\":\"for edit\",\"instruction\":\"for rewrite\",\"question\":\"for ask\"}]}. Rules: 1) preserve author voice, perspective, rhythm contrast, vivid phrasing, grounded domain terms, and modality qualifiers; never suggest cheesy fake-human slang; 2) quote MUST match verbatim; 3) never introduce filler slogans; 4) keep every number and unit intact.";
+    const rubricDigest = buildRubricPromptDigest(rubric, lang);
+    const userPrompt = [
+      `Modality: ${mod} | Pack: ${packRes.effectivePack}`,
+      ...(rubricDigest ? [`5-Layer AI-Tic Rubric:\n${rubricDigest}`] : []),
+      `Local Cross-Check Signals: ${JSON.stringify(crossCheck)}`,
+      ...(voiceInfo.found && voiceInfo.card?.profile ? [`Author style card (${voiceInfo.scope}): ${JSON.stringify(voiceInfo.card.profile)}`] : []),
+      `Deterministic findings: ${JSON.stringify(detIssues.slice(0, 12).map((x) => ({ ruleId: x.ruleId, ticLayer: x.ticLayer, quote: x.quote, fixStrategy: x.fixStrategy })))}`,
+      `Draft:\n${text}`,
+    ].join("\n\n");
+    try {
+      const resp = await fetch(chatUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: modelId,
+          temperature: 0.2,
+          messages: [
+            { role: "system", content: sysPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+        signal: AbortSignal.timeout(30000),
+      });
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
+      const data = await resp.json();
+      const rawContent = String(data?.choices?.[0]?.message?.content || "").trim();
+      const jsonBody = rawContent.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+      const parsed = JSON.parse(jsonBody);
+      const lineStarts = [0];
+      for (let i = 0; i < text.length; i += 1) {
+        if (text[i] === "\n") lineStarts.push(i + 1);
+      }
+      const detQuotes = new Set(detIssues.map((d) => d.quote).filter(Boolean));
+      const llmGrounded = groundByokLlmIssues(parsed?.issues, text, lineStarts).filter((i) => !detQuotes.has(i.quote));
+      issues = [...detIssues, ...llmGrounded];
+      mode = "byok-llm";
+      if (typeof parsed?.summary === "string" && parsed.summary.trim()) {
+        summary = parsed.summary.trim();
+      }
+    } catch (err) {
+      console.error(`dislop review: endpoint call failed (${err.message})`);
+      process.exit(2);
+    }
+  }
+
+  const out = {
+    schema: "dislop.review/1",
+    mode,
+    file: label,
+    modality: mod,
+    effectivePack: packRes.effectivePack,
+    packSource: packRes.packSource,
+    crossCheck,
+    rubricLayers: (rubric.layers || []).map((l) => l.id),
+    voiceCard: { found: voiceInfo.found, scope: voiceInfo.scope },
+    ...(profile ? { profile } : {}),
+    summary,
+    issues,
+  };
+
+  if (format === "json") {
+    console.log(JSON.stringify(out, null, 2));
+    return;
+  }
+  const isZh = lang === "zh";
+  const stratLabelsZh = { delete: "删掉", "need-source": "补出处", "unwrap-layout": "去套壳", rephrase: "改写" };
+  const actLabelsZh = { edit: "修改", rewrite: "改写", ask: "核实" };
+  const modeLabelZh = mode === "byok-llm" ? "本地+BYOK联合审校" : "四路离线核对";
+  const vcNote = voiceInfo.found ? (isZh ? ` · 个人文风:${voiceInfo.scope}` : ` · voice:${voiceInfo.scope}`) : "";
+  const layerStr = Object.entries(crossCheck.layerCounts)
+    .map(([k, v]) => `${k}×${v}`)
+    .join(", ") || (isZh ? "无明确命中" : "none");
+  const sigStr = crossCheck.signalsPresent.join("+") || "rules";
+  console.log(`dislop review (${label} · ${isZh ? modeLabelZh : mode} · ${packRes.effectivePack}${vcNote})`);
+  console.log(isZh ? `  摘要    : ${summary}` : `  summary : ${summary}`);
+  console.log(isZh ? `  信号分布: ${sigStr} | 层级: ${layerStr}` : `  signals : ${sigStr} | layers: ${layerStr}`);
+  for (const iss of issues) {
+    const tag = isZh ? stratLabelsZh[iss.fixStrategy] || iss.fixStrategy : iss.fixStrategy;
+    const act = isZh ? actLabelsZh[iss.action] || iss.action : iss.action;
+    const layerTag = iss.ticLayer ? ` · ${iss.ticLayer}` : "";
+    console.log(`  [${String(iss.severity).toUpperCase()}] ${iss.line}:${iss.col} ${act} (${tag}${layerTag}) "${iss.quote}"`);
+    console.log(isZh ? `    原因: ${iss.why}` : `    why: ${iss.why}`);
+    if (iss.action === "edit") {
+      console.log(isZh ? `    替换: ${JSON.stringify(iss.replacement)}` : `    rep: ${JSON.stringify(iss.replacement)}`);
+    } else if (iss.action === "ask") {
+      console.log(isZh ? `    追问: ${iss.question}` : `    ask: ${iss.question}`);
+    } else if (iss.instruction && iss.instruction !== iss.why) {
+      console.log(isZh ? `    改法: ${iss.instruction}` : `    how: ${iss.instruction}`);
+    }
+  }
+  if (mode === "offline-deterministic" && crossCheck.llmRecommended) {
+    console.log(
+      isZh
+        ? "  深查提示: 思维“端水”(cognitive-framing)与说教角度(rhetorical-stance)可配 --endpoint 或云端 dislop_review 联合复核。"
+        : "  tip: Pass --endpoint (or use Cloud dislop_review) for LLM semantic cross-check on cognitive-framing and rhetorical-stance."
+    );
+  }
+}
+
 function printHelp() {
-  console.log(`dislop v${ENGINE_VERSION} — Linter for AI Slop in docs, web UI, and slides
+  console.log(`dislop v${ENGINE_VERSION} — Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI, and slides
 
 Usage:
-  dislop check [paths... | -] [--pack <id|auto>] [--ml] [--patterns] [--fail-on error|warning|info|never]
-               [--format text|json|sarif|github|md] [--profile] [--changed [ref] | --staged]
-               [--stdin-filename <name>] [--report-unused] [--lang en|zh]
-  dislop voice [paths... | -] [--output|-o <voice.json>] [--lang auto|en|zh] [--json]
+  Core Workflow:
+    dislop check [paths... | -] [--pack <id|auto>] [--deep] [--compact] [--fail-on error|warning|info|never]
+                 [--format text|json|sarif|github|md] [--profile] [--changed [ref] | --staged]
+                 [--stdin-filename <name>] [--report-unused] [--lang en|zh]
+    dislop review [file | -] [--pack <id|auto>] [--offline | --endpoint <url>] [--lang en|zh] [--json]
+    dislop verify <before> <after> | --git [ref] <file> [--keep a,b] [--pack <id|auto>] [--strict] [--json]
+    dislop voice [paths... | -] [--output|-o <voice.json>] [--lang auto|en|zh] [--json]
+    dislop init
+
+Rule & MCP Tools:
+  dislop explain <rule-id> [--lang en|zh] [--json]
+  dislop packs [--json]
+  dislop catalog [query] [--pack <id>] [--dimension <dim>] [--format text|json|md] [--lang en|zh]
+  dislop --mcp
+
+Optional / Diagnostics:
+  dislop check ... [--ml] [--patterns]
+  dislop patterns [file | -] [--stdin-filename <name>] [--angle <a,b>] [--lang en|zh] [--json]
   dislop model [status|score|install|import|remove|deslop] [target] [--tier <t>] [--lang en|zh] [--json]
   dislop setup [--tier auto|none|fast|balanced|quality] [--dry-run] [--force] [--lang en|zh]
   dislop deslop [file | -] --local [--endpoint <url>] [--model <id>] [--output|-o <file>] [--json]
-  dislop explain <rule-id> [--lang en|zh] [--json]
-  dislop catalog [query] [--pack <id>] [--category <cat>] [--dimension <dim>]
-                 [--family <prefix>] [--modality <mod>] [--severity <sev>] [--tier invariant|taste]
-                 [--format text|json|md] [--lang en|zh]
-  dislop patterns [file | -] [--stdin-filename <name>] [--angle <a,b>] [--lang en|zh] [--json]
-  dislop packs [--json]
   dislop resources [--json]
-  dislop pack-test
-  dislop init
-  dislop --mcp`);
+  dislop pack-test`);
 }
 
 async function main() {
@@ -1941,6 +3141,8 @@ async function main() {
   const cmd = argv[0];
   const rest = argv.slice(1);
   if (cmd === "check") return runCheck(rest, packs);
+  if (cmd === "verify") return runVerify(rest, packs);
+  if (cmd === "review") return await runReview(rest, packs);
   if (cmd === "voice") return runVoice(rest);
   if (cmd === "model" || cmd === "doctor") return await runModel(rest, packs);
   if (cmd === "setup") return await runModel(["setup", ...rest], packs);

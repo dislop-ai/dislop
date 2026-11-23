@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "dislop"
 version = "0.7.1"
-description = "Linter for AI Slop in docs, web UI, Word, and PowerPoint — zero-dependency CLI and MCP."
+description = "Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI, Word, and PowerPoint — zero-dependency CLI and MCP."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
@@ -45,6 +45,7 @@ include = [
   "models/**",
   "packs/**",
   "patterns/taxonomy.json",
+  "patterns/ai-tic-rubric.json",
   "patterns/dimensions/**",
   "patterns/banks/**",
   "skills/**",

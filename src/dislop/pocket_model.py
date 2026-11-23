@@ -211,7 +211,8 @@ def _strip_fenced_blocks_linear(raw: str) -> str:
 
 
 def clean_prose_surface(raw: str) -> dict[str, Any]:
-    s = str(raw or "").replace("\ufeff", " ")
+    s = re.sub(r"^\ufeff?---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)", " ", str(raw or ""))
+    s = s.replace("\ufeff", " ")
     s = DISLOP_QUOTE_BLOCK_RE.sub(" ", s)
     s = HTML_COMMENT_RE.sub(" ", s)
     s = _strip_fenced_blocks_linear(s)
@@ -313,6 +314,13 @@ def _score_lm_span(text: str, bundle: dict[str, Any]) -> float:
     return total / math.sqrt(len(unique_ngs) + 8.0)
 
 
+def _l2r_sum(vals: Any) -> float:
+    acc = 0.0
+    for v in vals:
+        acc += v
+    return acc
+
+
 def _score_lm_features(text: str, bundle: dict[str, Any]) -> tuple[float, float, float]:
     whole = _score_lm_span(text, bundle)
     surf = clean_prose_surface(text)["surface"]
@@ -320,9 +328,9 @@ def _score_lm_features(text: str, bundle: dict[str, Any]) -> tuple[float, float,
     if not sents:
         return whole, whole, 0.0
     s_scores = [_score_lm_span(s, bundle) for s in sents]
-    mean_s = sum(s_scores) / len(s_scores)
+    mean_s = _l2r_sum(s_scores) / len(s_scores)
     max_s = max(s_scores)
-    std_s = math.sqrt(sum((x - mean_s) ** 2 for x in s_scores) / len(s_scores)) if len(s_scores) >= 2 else 0.0
+    std_s = math.sqrt(_l2r_sum((x - mean_s) ** 2 for x in s_scores) / len(s_scores)) if len(s_scores) >= 2 else 0.0
     return whole, max_s, std_s
 
 
@@ -343,11 +351,11 @@ def extract_pocket_features(text: str, bundle: dict[str, Any]) -> tuple[list[flo
     sent_lens = [x for x in sent_lens if x > 0]
     n_sents = len(sent_lens)
     if n_sents >= 2:
-        mean_s = sum(sent_lens) / n_sents
-        std_s = math.sqrt(sum((x - mean_s) ** 2 for x in sent_lens) / n_sents)
+        mean_s = _l2r_sum(sent_lens) / n_sents
+        std_s = math.sqrt(_l2r_sum((x - mean_s) ** 2 for x in sent_lens) / n_sents)
         sent_cv = std_s / mean_s if mean_s > 0 else 0.0
         adj_diff = (
-            sum(abs(sent_lens[i] - sent_lens[i - 1]) for i in range(1, n_sents))
+            _l2r_sum(abs(sent_lens[i] - sent_lens[i - 1]) for i in range(1, n_sents))
             / ((n_sents - 1) * max(1.0, mean_s))
         )
     elif n_sents == 1:
@@ -359,8 +367,8 @@ def extract_pocket_features(text: str, bundle: dict[str, Any]) -> tuple[list[flo
     clause_lens = [len(CJK_RE.findall(c)) * 0.6 + len(EN_ALNUM_RE.findall(c)) for c in clauses]
     clause_lens = [x for x in clause_lens if x > 0]
     if len(clause_lens) >= 3:
-        mc = sum(clause_lens) / len(clause_lens)
-        sc = math.sqrt(sum((x - mc) ** 2 for x in clause_lens) / len(clause_lens))
+        mc = _l2r_sum(clause_lens) / len(clause_lens)
+        sc = math.sqrt(_l2r_sum((x - mc) ** 2 for x in clause_lens) / len(clause_lens))
         clause_cv = sc / mc if mc > 0 else 0.0
     else:
         clause_cv = 0.42
@@ -369,7 +377,7 @@ def extract_pocket_features(text: str, bundle: dict[str, Any]) -> tuple[list[flo
     n_tok = len(lex_toks)
     if n_tok > 25:
         windows = [len(set(lex_toks[i : i + 25])) / 25.0 for i in range(0, n_tok - 24, 5)]
-        mattr = sum(windows) / len(windows)
+        mattr = _l2r_sum(windows) / len(windows)
     else:
         mattr = len(set(lex_toks)) / max(1, n_tok)
 
@@ -559,14 +567,31 @@ def predict_pack_with_pocket_router(text: str, custom_bundle: dict[str, Any] | N
 
 
 def _mask_newline_preserving(raw: str) -> str:
-    s = DISLOP_QUOTE_BLOCK_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), str(raw or ""))
+    s = re.sub(
+        r"^\ufeff?---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)",
+        lambda m: re.sub(r"[^\n]", " ", m.group(0)),
+        str(raw or ""),
+    )
+    s = s.replace("\ufeff", " ")
+    s = DISLOP_QUOTE_BLOCK_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), s)
     s = HTML_COMMENT_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), s)
     return s
 
 
-def _split_paragraph_blocks(raw: str) -> list[dict[str, Any]]:
+def _is_ui_short_line_stack(lines: list[str]) -> bool:
+    if not lines or len(lines) < 3:
+        return False
+    non_empty = [ln.strip() for ln in lines if ln.strip()]
+    if len(non_empty) < 3:
+        return False
+    short_count = sum(1 for ln in non_empty if len(ln) <= 16)
+    return short_count * 2 >= len(non_empty)
+
+
+def _split_paragraph_blocks_with_stats(raw: str) -> dict[str, Any]:
     text = _mask_newline_preserving(raw)
     blocks: list[dict[str, Any]] = []
+    suppressed_ui_count = 0
     line_no = 1
     idx = 0
     lines = text.split("\n")
@@ -576,7 +601,7 @@ def _split_paragraph_blocks(raw: str) -> list[dict[str, Any]]:
     fence_marker: str | None = None
 
     def flush(end_offset: int, end_line: int) -> None:
-        nonlocal cur_lines
+        nonlocal cur_lines, suppressed_ui_count
         if not cur_lines:
             return
         content = "\n".join(cur_lines)
@@ -590,13 +615,16 @@ def _split_paragraph_blocks(raw: str) -> list[dict[str, Any]]:
             and not trimmed.startswith(">")
             and not re.match(r"^(?:[-*+]|[0-9]+\.)\s", trimmed)
         ):
-            blocks.append({
-                "text": content,
-                "startOffset": cur_start_offset,
-                "endOffset": end_offset,
-                "startLine": cur_start_line,
-                "endLine": end_line,
-            })
+            if _is_ui_short_line_stack(cur_lines):
+                suppressed_ui_count += 1
+            else:
+                blocks.append({
+                    "text": content,
+                    "startOffset": cur_start_offset,
+                    "endOffset": end_offset,
+                    "startLine": cur_start_line,
+                    "endLine": end_line,
+                })
         cur_lines = []
 
     for ln in lines:
@@ -624,7 +652,11 @@ def _split_paragraph_blocks(raw: str) -> list[dict[str, Any]]:
         line_no += 1
 
     flush(len(text), len(lines))
-    return blocks
+    return {"blocks": blocks, "suppressedUiCount": suppressed_ui_count}
+
+
+def _split_paragraph_blocks(raw: str) -> list[dict[str, Any]]:
+    return _split_paragraph_blocks_with_stats(raw)["blocks"]
 
 
 def analyze_document_with_pocket_models(
@@ -644,7 +676,9 @@ def analyze_document_with_pocket_models(
     )
     whole = score_pocket_span(text, bundle)
     pack_routing = predict_pack_with_pocket_router(text, bundle)
-    blocks = _split_paragraph_blocks(text)
+    split_res = _split_paragraph_blocks_with_stats(text)
+    blocks = split_res["blocks"]
+    suppressed_ui_count = split_res["suppressedUiCount"]
 
     paragraphs: list[dict[str, Any]] = []
     for b in blocks:
@@ -666,8 +700,10 @@ def analyze_document_with_pocket_models(
     max_para_prob = (
         max(p["slopProbability"] for p in paragraphs) if paragraphs else whole["slopProbability"]
     )
-    doc_prob = _round4(max(whole["slopProbability"], max_para_prob))
     flagged_count = sum(1 for p in paragraphs if p["flagged"])
+    doc_prob = _round4(max(whole["slopProbability"], max_para_prob))
+    if (paragraphs or suppressed_ui_count > 0) and flagged_count == 0 and doc_prob >= effective_threshold:
+        doc_prob = _round4(max(0.0, effective_threshold - 0.005))
 
     return {
         "schema": bundle["schema"],

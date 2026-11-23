@@ -7,7 +7,7 @@ version: 0.7.1
 
 ## 1. Official Cloud HTTP MCP (Sign-In Required, Free 30 Credits/Month)
 
-Claim a free Bearer token (`dslp_...`) at `https://dislop.com/#cloud-token-box` (paid-tier zero-training model endpoints, no draft logging; see [`/privacy.md`](../privacy.md)).
+Claim a free Bearer token (`dslp_...`) at `https://dislop.com/#cloud-token-box` (paid-tier Google Gemini API; Google does not train on it, and we do not store drafts; see [`/privacy.md`](../privacy.md)).
 
 ### Claude Code
 ```bash
@@ -51,6 +51,6 @@ http_headers = { Authorization = "Bearer dslp_YOUR_FREE_TOKEN" }
 
 ## 2. Cloud HTTP API & JS Core Export
 
-- Same-origin HTTP endpoints: `GET /api/health`, `POST /api/v1/check`, `POST /api/v1/review`, `POST /api/v1/deslop`, `POST /api/v1/voice/extract`, `POST /api/v1/auth/register`, `GET /api/v1/account/me`, and `POST /api/v1/waitlist`.
+- Same-origin HTTP endpoints: `GET /api/health`, `GET /api/v1/auth/session`, `POST /api/v1/auth/otp/request`, `POST /api/v1/auth/otp/verify`, `GET /api/v1/account/me`, `GET|POST /api/v1/account/keys`, `POST /api/v1/check`, `POST /api/v1/review`, `POST /api/v1/deslop`, `POST /api/v1/office/review`, `POST /api/v1/office/deslop`, `POST /api/v1/voice/extract`, and `POST /api/v1/waitlist`.
 - `package.json` exports the zero-I/O pure ES module `src/core.mjs` (`auditText`, `auditOoxmlEntries`, `resolveEffectivePack`).
 - Note: existing local `--mcp` stdio code remains in the open-source CLI during real-world evaluation, while official manifests target `https://dislop.com/mcp`.

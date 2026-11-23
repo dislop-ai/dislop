@@ -5,7 +5,7 @@ version: 0.7.1
 
 # Cross-Modality Anti-Pattern Map
 
-`dislop` ships 53 structured anti-slop patterns across 6 dimensions in `v0.7.1` (42 built-in pack rules across 7 packs + 11 extended pattern-bank probes), plus an offline 14.6 KB Pocket ML scorer (`--ml`) for uniform-cadence vapor prose.
+`dislop` ships 65 structured anti-slop patterns across 6 dimensions in `v0.7.1` (53 built-in pack rules across 7 packs + 12 extended pattern-bank probes), plus an offline 14.6 KB Pocket ML scorer (`--ml`) for uniform-cadence vapor prose.
 
 | Category | What It Covers | Shipped `v0.7.1` Offline Coverage |
 |---|---|---|

@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../assets/banner-dark.svg">
-    <img src="../assets/banner-light.svg" alt="Awesome Anti-Slop — 去 AI 味工具清单" width="100%">
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/banner-zh-dark.svg">
+    <img src="../assets/banner-zh-light.svg" alt="Awesome Anti-Slop — 去 AI 味才是真正的生产力！" width="100%">
   </picture>
 </p>
 
@@ -15,9 +15,9 @@
 
 # Awesome Anti-Slop（去 AI 味工具清单）
 
-一共整理了 87 个中英文工具、检查器、写作规范、网页设计指南、代码 PR 治理规则和论文，包括 Vale、Impeccable 这类常用项目。
+去 AI 味才是真正的生产力！一共整理了 90 个中英文工具、检查器、写作规范、网页设计指南、代码 PR 治理规则和论文，包括 Vale、Impeccable 这类常用项目。
 
-所有链接、GitHub 星标和最近更新时间都在 `2026-11-21` 核过一遍。其中 19 个可以在本地跑自动检查，不依赖大模型。AI 文本检测器和规避工具单独放在最下面的[检测与规避研究](#检测与规避研究仅供对照)，只作对照参考。
+所有链接、GitHub 星标和最近更新时间都在 `2026-11-21` 核过一遍。其中 20 个可以在本地跑自动检查，不依赖大模型。AI 文本检测器和规避工具单独放在最下面的[检测与规避研究](#检测与规避研究仅供对照)，只作对照参考。
 
 想离线搜索筛选，可以打开 [dislop.com/awesome](https://dislop.com/awesome/)。想给 Agent 读，直接用 [index.json](https://dislop.com/awesome/index.json) 或 [index.md](https://dislop.com/awesome/index.md)。补充新条目请看[提交新条目](#提交新条目)。
 
@@ -27,7 +27,7 @@
 - [英文与多语种写作](#英文与多语种写作)（14）
 - [中文写作与去翻译腔](#中文写作与去翻译腔)（9）
 - [确定性检查工具](#确定性检查工具)（9）
-- [前端界面、设计与图表](#前端界面设计与图表)（12）
+- [前端界面、设计与图表](#前端界面设计与图表)（15）
 - [代码与 PR 治理](#代码与-pr-治理)（8）
 - [目录与注册中心](#目录与注册中心)（13）
 - [检测与规避研究（仅供对照）](#检测与规避研究仅供对照)（9）
@@ -107,7 +107,7 @@
 
 ## 前端界面、设计与图表
 
-共 12 条
+共 15 条
 
 | 资源 | 类别 / 语种 | 检查方式 | 星标 · 最近更新 | 用途 |
 |---|---|---|---|---|
@@ -123,6 +123,9 @@
 | [superdesigndev/superdesign-skill](https://github.com/superdesigndev/superdesign-skill) | `ui-design` / `en` | 规范/提示 | 1,038★ · 2026-08-21 | 面向编程 Agent 的反通用 AI 界面设计技能。 |
 | [Yu-369/VibeCurb](https://github.com/Yu-369/VibeCurb) | `ui-design` / `en` | 规范/提示 | 1,010★ · 2026-08-05 | 向 AI 界面工作流注入审美品味约束的工具集。 |
 | [funboy322/avoid-ai-design](https://github.com/funboy322/avoid-ai-design) | `ui-design` / `en` | 规范/提示 | 166★ · 2026-11-18 | 审查并重写紫粉渐变等常见默认前端样式的轻量项目。 |
+| [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | `ui-design` / `en` | 规范/提示 | 152,711★ · 2026-11-22 | 按行业场景与界面风格提供完整设计令牌、字体搭配与排版规范的多平台 UI/UX 技能库。 |
+| [vercel-labs/agent-skills (web-design-guidelines)](https://github.com/vercel-labs/agent-skills) | `ui-design` / `en` | 规范/提示 | 34,714★ · 2026-11-20 | Vercel 官方 Agent Skills 集合，含覆盖交互可用性、表单行为与可访问性的 Web 界面审查规范。 |
+| [cesaroeduardo/antiwebslop](https://github.com/cesaroeduardo/antiwebslop) | `ui-design` / `en` | 自动检查 | 44★ · 2026-11-17 | 面向网页设计的去 AI 味技能与脚本合集，配套前后对比画廊与验证评分卡。 |
 
 ## 代码与 PR 治理
 

@@ -2,7 +2,7 @@
 
 [简体中文](./releasing.zh-CN.md)
 
-`dislop` keeps shipping fast and reliable with one zero-dependency script (`scripts/release.mjs`), one GitHub Actions workflow (`.github/workflows/release.yml`), and Agent-driven triage instead of rigid release bureaucracy.
+`dislop` releases through one zero-dependency script (`scripts/release.mjs`), one GitHub Actions workflow (`.github/workflows/release.yml`), and Agent-driven checks.
 
 ---
 

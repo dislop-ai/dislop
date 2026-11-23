@@ -14,20 +14,22 @@ from .engine import (
     analyze_text_profile,
     audit_text,
     build_catalog,
+    build_zones,
+    compute_ruleset_hash,
+    derive_fix_strategy,
     detect_modality,
     extract_voice_profile_offline,
-    fnv1a_hex,
-    inspect_file,
     load_all_packs,
     load_config,
     load_pattern_library,
     pick_pack_for_file,
     query_catalog,
-    resolve_effective_pack,
+    resolve_config_for_file,
+    verify_revision_bundle,
 )
 from .local_model import build_model_status_report
 from .pattern_engine import audit_patterns, load_pattern_banks
-from .pocket_model import analyze_document_with_pocket_models, predict_pack_with_pocket_router
+from .pocket_model import analyze_document_with_pocket_models
 
 
 def _merge_pattern_bank_findings(
@@ -70,6 +72,7 @@ def _build_pocket_ml_findings_mcp(
             "packId": "pocket-model",
             "severity": "warning",
             "tier": "taste",
+            "fixStrategy": "rephrase",
             "family": "rhythm/pocket-stealth-vapor",
             "category": "statistical-vapor",
             "modality": mod,
@@ -161,6 +164,7 @@ def _format_findings_for_mcp(findings: list[dict[str, Any]], verbosity: str, lan
             "ruleId": f.get("ruleId"),
             "tier": f.get("tier") if f.get("tier") is not None else "taste",
             "severity": f.get("severity"),
+            "fixStrategy": f.get("fixStrategy") or derive_fix_strategy({"id": f.get("ruleId"), "family": f.get("family")}),
             "family": f.get("family") if f.get("family") is not None else (f"{f['dimension']}/{f['ruleId']}" if f.get("dimension") else None),
             "file": f.get("file"),
             "modality": f.get("modality"),
@@ -180,16 +184,17 @@ TOOLS = [
         "name": "dislop_check",
         "description": (
             "Check a draft (`text` or workspace-relative `path`) for AI-generation artifacts, clichés, and template slop "
-            "across Markdown, HTML/CSS/JSX/SVG, Word (.docx), and PowerPoint (.pptx). Edit only the flagged spans, then run `dislop_check` again."
+            "across Markdown, HTML/CSS/JSX/SVG, PNG/JPEG/WebP, Word (.docx), PowerPoint (.pptx), and PDF. Edit only the flagged spans using `fixStrategy`, then run `dislop_verify`."
         ),
         "inputSchema": {
             "type": "object",
             "properties": {
                 "text": {"type": "string", "description": "Draft text to inspect in memory"},
-                "path": {"type": "string", "description": "Workspace-relative file path (.md, .html, .css, .jsx, .svg, .docx, .pptx)"},
+                "path": {"type": "string", "description": "Workspace-relative file path (.md, .html, .css, .jsx, .svg, .png, .jpg, .jpeg, .webp, .docx, .pptx, .pdf)"},
                 "pack": {"type": "string", "description": "Style pack ID (auto, business-brief, engineering-spec, regulated-comms, literary-essay, deck-and-ui, executive-deck)"},
                 "filename": {"type": "string", "description": "Virtual filename hint when inspecting `text`"},
                 "profile": {"type": "boolean", "description": "Include 5-axis rhythm & concreteness telemetry on text/markdown (default true)"},
+                "deep": {"type": "boolean", "description": "Enable thorough inspection (Pocket ML + extended 6-dimension pattern bank)"},
                 "ml": {"type": "boolean", "description": "Enable bundled 15 KB Pocket ML stealth-vapor paragraph detection (default false)"},
                 "patterns": {"type": "boolean", "description": "Include extended 6-dimension pattern-bank probes (default false)"},
                 "verbosity": {"type": "string", "enum": ["compact", "full"], "description": "Default compact (omits per-hit exemplars to save context tokens; pass full to inline exemplars)"},
@@ -198,29 +203,34 @@ TOOLS = [
         },
     },
     {
-        "name": "dislop_explain",
-        "description": "Retrieve the rationale, check question, and before/trap/after examples for a specific `ruleId`.",
+        "name": "dislop_verify",
+        "description": (
+            "Verify a revised draft against its original text (or Git baseline for workspace `path`): checks numbers/qualifiers, "
+            "required `keep` terms, newly introduced AI slop, length bounds, and anti-degradation guardrails (author perspective, cadence, info density, modality)."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "ruleId": {"type": "string", "description": "Rule ID returned by dislop_check or dislop_catalog"},
-                "lang": {"type": "string", "enum": ["en", "zh"], "description": "en or zh"},
+                "before": {"type": "string", "description": "Original text before revision (required unless `path` is provided)"},
+                "after": {"type": "string", "description": "Revised text after revision (required unless `path` is provided)"},
+                "path": {"type": "string", "description": "Workspace-relative file path to compare working tree against `gitRef`"},
+                "gitRef": {"type": "string", "description": "Git ref baseline when `path` is given (default HEAD)"},
+                "filename": {"type": "string", "description": "Optional virtual filename hint when passing `before`/`after`"},
+                "pack": {"type": "string", "description": "Optional pack ID or 'auto' to also verify findingsDelta"},
+                "keep": {"type": "array", "items": {"type": "string"}, "description": "Protected terms/concepts that must stay intact in the revision"},
+                "allowAdded": {"type": "boolean", "description": "Allow new numbers not present in original (default false)"},
+                "strict": {"type": "boolean", "description": "Fail `ok` on any anti-degradation warning in addition to hard fact/error checks"},
             },
-            "required": ["ruleId"],
         },
     },
     {
-        "name": "dislop_packs",
-        "description": "List installed rule packs, supported formats, and rule counts.",
-        "inputSchema": {"type": "object", "properties": {}},
-    },
-    {
-        "name": "dislop_catalog",
-        "description": "Search and browse dislop's 53-pattern AI-slop catalog by keyword, dimension, category, family, modality, severity, tier, or pack.",
+        "name": "dislop_rules",
+        "description": "Unified rule lookup: pass `ruleId` to explain a rule, filters (`query`/`pack`/`dimension`) to search, or empty object to list all packs.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "query": {"type": "string", "description": "Optional bilingual keyword query (matches id, tags, message, deletionTest, exemplar)"},
+                "ruleId": {"type": "string", "description": "Optional rule ID to explain with before/trap/after examples"},
+                "query": {"type": "string", "description": "Optional keyword search query"},
                 "pack": {"type": "string"},
                 "category": {"type": "string"},
                 "dimension": {"type": "string"},
@@ -229,14 +239,14 @@ TOOLS = [
                 "severity": {"type": "string", "enum": ["error", "warning", "info"]},
                 "tier": {"type": "string", "enum": ["invariant", "taste"]},
                 "lang": {"type": "string", "enum": ["en", "zh"]},
-                "includeExemplars": {"type": "boolean", "description": "Default true; set false for compact index listing"},
+                "includeExemplars": {"type": "boolean"},
                 "limit": {"type": "integer", "minimum": 1, "maximum": 100},
             },
         },
     },
     {
-        "name": "dislop_voice_extract_offline",
-        "description": "Extract a deterministic offline `dislop.voice/1` statistical writing profile from 1-15 clean author samples (0 network calls, 0 uploads).",
+        "name": "dislop_voice_extract",
+        "description": "Extract a deterministic offline `dislop.voice/1` personal style card from 1-15 clean author samples (0 network calls, 0 uploads).",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -290,11 +300,26 @@ def run_mcp_stdio() -> None:
         except json.JSONDecodeError:
             continue
 
+        if not isinstance(req, dict):
+            _send({
+                "jsonrpc": "2.0",
+                "id": None,
+                "error": {"code": -32600, "message": "Invalid Request: expected JSON-RPC object"},
+            })
+            continue
         req_id = req.get("id")
         if req_id is None:
             continue
         method = req.get("method")
-        params = req.get("params") or {}
+        raw_params = req.get("params")
+        if raw_params is not None and not isinstance(raw_params, dict):
+            _send({
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {"code": -32600, "message": "Invalid Request: params must be an object"},
+            })
+            continue
+        params = raw_params or {}
 
         if method == "initialize":
             client_ver = params.get("protocolVersion", "2024-11-05")
@@ -321,8 +346,147 @@ def run_mcp_stdio() -> None:
 
         if method == "tools/call":
             name = params.get("name")
-            args = params.get("arguments") or {}
+            raw_args = params.get("arguments")
+            if raw_args is not None and not isinstance(raw_args, dict):
+                _send({
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32602, "message": "Invalid params: arguments must be an object"},
+                })
+                continue
+            args = raw_args or {}
             try:
+                def _resolve_explain_by_id(rid: str, lang_arg: Any) -> dict[str, Any] | None:
+                    for p in packs.values():
+                        for r in p.get("rules", []):
+                            if r["id"] == rid:
+                                return _format_rule_for_explain(r, p["id"], lang_arg)
+                    if rid in pattern_by_rule_id:
+                        pat = pattern_by_rule_id[rid]
+                        guards_list = pat.get("falsePositiveGuards") or []
+                        guards = " ".join(guards_list) if isinstance(guards_list, list) else ""
+                        dim = pat.get("dimension")
+                        synth_rule: dict[str, Any] = {
+                            "id": rid,
+                            "tier": "taste",
+                            "severity": pat.get("severityDefault") or "info",
+                            "category": pat.get("category") or "general",
+                            "family": f"{dim}/{rid}" if dim else "pattern-bank",
+                            "modalities": list(pat.get("modalities") or ["markdown", "text"]),
+                            "tags": list(pat.get("tags") or []),
+                            "message": pat.get("mechanism") or pat.get("name") or {"en": "", "zh": ""},
+                        }
+                        if guards:
+                            synth_rule["deletionTest"] = {"en": guards, "zh": guards}
+                        if pat.get("exemplar"):
+                            synth_rule["exemplar"] = pat["exemplar"]
+                        return _format_rule_for_explain(synth_rule, pat.get("packId") or "pattern-bank", lang_arg)
+                    if rid == "pocket-stealth-vapor":
+                        from .cli import _POCKET_STEALTH_VAPOR_RULE
+                        return _format_rule_for_explain(_POCKET_STEALTH_VAPOR_RULE, "pocket-model", lang_arg)
+                    return None
+
+                if name == "dislop_rules":
+                    if args.get("ruleId"):
+                        found = _resolve_explain_by_id(str(args["ruleId"]), args.get("lang"))
+                        if found:
+                            _tool_result(req_id, found)
+                        else:
+                            _tool_result(req_id, {"error": f"Unknown ruleId '{args['ruleId']}'"}, True)
+                        continue
+                    has_filter = any(
+                        bool(args.get(k))
+                        for k in ("query", "pack", "category", "dimension", "family", "modality", "severity", "tier")
+                    )
+                    if has_filter:
+                        result = query_catalog(
+                            catalog_entries,
+                            {
+                                "query": args.get("query") or "",
+                                "pack": args.get("pack"),
+                                "category": args.get("category"),
+                                "dimension": args.get("dimension"),
+                                "family": args.get("family"),
+                                "modality": args.get("modality"),
+                                "severity": args.get("severity"),
+                                "tier": args.get("tier"),
+                                "includeExemplars": args.get("includeExemplars", True) is not False,
+                                "limit": args.get("limit") if isinstance(args.get("limit"), int) and args.get("limit") > 0 else None,
+                            },
+                        )
+                        _tool_result(req_id, result)
+                        continue
+                    items = [
+                        {
+                            "id": p["id"],
+                            "tier": p.get("tier"),
+                            "name": p["name"],
+                            "modalities": p["modalities"],
+                            "ruleCount": len(p.get("rules", [])),
+                            "summary": p["summary"],
+                        }
+                        for p in packs.values()
+                    ]
+                    _tool_result(req_id, {"packs": items})
+                    continue
+
+                if name == "dislop_verify":
+                    from .cli import _read_git_baseline_for_file, _read_utf8_exact, _resolve_text_pack_and_source
+
+                    live_config = load_config(cwd)
+                    has_before = isinstance(args.get("before"), str)
+                    has_after = isinstance(args.get("after"), str)
+                    has_path = isinstance(args.get("path"), str) and bool(args["path"].strip())
+                    if has_path:
+                        real_cwd = cwd.resolve()
+                        resolved = (cwd / str(args["path"])).resolve()
+                        try:
+                            rel = resolved.relative_to(real_cwd).as_posix()
+                        except ValueError:
+                            _tool_result(req_id, {"error": "Path must stay within the current workspace directory."}, True)
+                            continue
+                        if not resolved.is_file():
+                            _tool_result(req_id, {"error": f"File not found: {args['path']}"}, True)
+                            continue
+                        fn = rel
+                        after_text = _read_utf8_exact(resolved)
+                        g_ref = str(args.get("gitRef") or "HEAD").strip() or "HEAD"
+                        before_text = _read_git_baseline_for_file(resolved, g_ref)
+                    elif has_before and has_after:
+                        fn = str(args.get("filename") or "draft.md")
+                        before_text = args["before"]
+                        after_text = args["after"]
+                    else:
+                        _tool_result(req_id, {"error": "Provide both `before` and `after` strings, or a workspace `path`."}, True)
+                        continue
+                    mod = detect_modality(fn) or "markdown"
+                    file_cfg = resolve_config_for_file(fn, live_config)
+                    pack_obj, eff_pack, pack_source = _resolve_text_pack_and_source(
+                        after_text, fn, mod, args.get("pack") or "auto", file_cfg, packs
+                    )
+                    raw_keep = args.get("keep")
+                    if isinstance(raw_keep, list):
+                        keep_terms = [str(x).strip() for x in raw_keep if str(x).strip()]
+                    elif isinstance(raw_keep, str):
+                        keep_terms = [x.strip() for x in raw_keep.split(",") if x.strip()]
+                    else:
+                        keep_terms = []
+                    out = verify_revision_bundle(
+                        before_text,
+                        after_text,
+                        filename=fn,
+                        modality=mod,
+                        pack=pack_obj,
+                        config=file_cfg,
+                        keep_terms=keep_terms,
+                        allow_added=bool(args.get("allowAdded")),
+                        strict=bool(args.get("strict")),
+                    )
+                    out["effectivePack"] = eff_pack
+                    out["packSource"] = pack_source
+                    _tool_result(req_id, out)
+                    continue
+
                 if name == "dislop_packs":
                     items = [
                         {
@@ -409,49 +573,71 @@ def run_mcp_stdio() -> None:
                         )
                         continue
 
+                    from .cli import (
+                        PROSE_ML_MODALITIES,
+                        _build_pocket_ml_findings,
+                        _collect_text_coverage_warnings,
+                        _inspect_single_file_full,
+                        _merge_pattern_bank_findings,
+                        _resolve_text_pack_and_source,
+                    )
+
                     live_config = load_config(cwd)
                     verbosity = "full" if args.get("verbosity") == "full" else "compact"
-                    include_ml = bool(args.get("ml"))
-                    include_patterns = bool(args.get("patterns"))
+                    include_ml = bool(args.get("ml") or args.get("deep"))
+                    include_patterns = bool(args.get("patterns") or args.get("deep"))
                     want_profile = args.get("profile") is not False
                     banks = load_pattern_banks() if include_patterns else None
 
                     if has_text:
                         fn = args.get("filename") or "draft.md"
                         mod = detect_modality(fn) or "markdown"
-                        eff_pack = (
-                            predict_pack_with_pocket_router(args["text"])["recommendedPack"]
-                            if args.get("pack") == "auto" and mod in {"markdown", "text"}
-                            else (None if args.get("pack") == "auto" else args.get("pack"))
+                        file_cfg = resolve_config_for_file(fn, live_config)
+                        pack, eff_pack, pack_source = _resolve_text_pack_and_source(
+                            args["text"], fn, mod, args.get("pack"), file_cfg, packs
                         )
-                        pack_id = pick_pack_for_file(fn, mod, eff_pack, live_config)
-                        pack = resolve_effective_pack(pack_id, packs, live_config)
-                        res = audit_text(args["text"], filename=fn, modality=mod, pack=pack, config=live_config)
+                        res = audit_text(args["text"], filename=fn, modality=mod, pack=pack, config=file_cfg)
                         findings = list(res["findings"])
                         if include_patterns:
-                            pat_res = audit_patterns(args["text"], filename=fn, modality=mod, banks=banks)
+                            pat_res = audit_patterns(args["text"], filename=fn, modality=mod, banks=banks, config=file_cfg)
                             findings = _merge_pattern_bank_findings(findings, pat_res["findings"])
-                        if include_ml and mod in {"markdown", "text"}:
-                            findings.extend(_build_pocket_ml_findings_mcp(args["text"], fn, findings))
+                        needs_coverage_profile = len(args["text"]) >= 2000 or mod == "html"
+                        profile = (
+                            analyze_text_profile(args["text"], modality=mod, config=file_cfg)
+                            if (mod in PROSE_ML_MODALITIES and (want_profile or include_ml or needs_coverage_profile))
+                            else None
+                        )
+                        if include_ml and mod in PROSE_ML_MODALITIES:
+                            ml_src = (
+                                build_zones(args["text"], mod, {"proseFences": file_cfg.get("proseFences"), "maskBlockquotes": file_cfg.get("maskBlockquotes")})["prose"]
+                                if mod in {"html", "svg"}
+                                else args["text"]
+                            )
+                            _, ml_extras = _build_pocket_ml_findings(ml_src, fn, findings, profile=profile, modality=mod)
+                            findings.extend(ml_extras)
                         formatted = _format_findings_for_mcp(findings, verbosity, args.get("lang"))
                         payload: dict[str, Any] = {
-                            "pack": pack_id,
+                            "pack": eff_pack,
+                            "packSource": pack_source,
+                            "rulesetHash": compute_ruleset_hash(pack),
                             "modality": mod,
                             "checked": True,
                             "skipped": [],
+                            "coverageWarnings": _collect_text_coverage_warnings(args["text"], mod, fn, profile),
                             "count": len(formatted),
                             "findings": formatted,
                         }
                         if verbosity == "compact" and formatted:
                             payload["explainHint"] = "Call dislop_explain(ruleId) for before/trap/after examples."
-                        if want_profile and mod in {"markdown", "text"}:
-                            payload["profile"] = analyze_text_profile(args["text"], modality=mod)
+                        if want_profile and profile is not None:
+                            payload["profile"] = profile
                         _tool_result(req_id, payload)
                         continue
 
-                    resolved = (cwd / args["path"]).resolve()
+                    real_cwd = cwd.resolve()
+                    resolved = (cwd / str(args["path"])).resolve()
                     try:
-                        rel = resolved.relative_to(cwd).as_posix()
+                        rel = resolved.relative_to(real_cwd).as_posix()
                     except ValueError:
                         _tool_result(req_id, {"error": "Path must stay within the current workspace directory."}, True)
                         continue
@@ -462,56 +648,39 @@ def run_mcp_stdio() -> None:
                     if not mod:
                         _tool_result(req_id, {"error": f"Unsupported file extension for '{args['path']}'"}, True)
                         continue
-                    raw_txt_for_pack: str | None = None
-                    if (mod in {"markdown", "text"} and (args.get("pack") == "auto" or want_profile or include_ml)) or (
-                        include_patterns and mod not in {"docx", "pptx"}
-                    ):
-                        try:
-                            raw_txt_for_pack = resolved.read_bytes().decode("utf-8")
-                        except Exception:
-                            raw_txt_for_pack = None
-                    eff_pack_arg = (
-                        predict_pack_with_pocket_router(raw_txt_for_pack)["recommendedPack"]
-                        if args.get("pack") == "auto" and raw_txt_for_pack is not None and mod in {"markdown", "text"}
-                        else (None if args.get("pack") == "auto" else args.get("pack"))
+                    res = _inspect_single_file_full(
+                        resolved,
+                        rel,
+                        mod,
+                        packs,
+                        args.get("pack"),
+                        live_config,
+                        include_ml=include_ml,
+                        include_patterns=include_patterns,
+                        include_profile=want_profile,
+                        banks=banks,
                     )
-                    res = inspect_file(resolved, rel, packs, eff_pack_arg, live_config)
-                    f_list = list(res["findings"])
-                    if res["checked"]:
-                        if include_patterns:
-                            if mod in {"docx", "pptx"}:
-                                try:
-                                    ooxml_entries: dict[str, str] = {}
-                                    with zipfile.ZipFile(resolved, "r") as zf:
-                                        for info in zf.infolist():
-                                            if info.filename.endswith((".xml", ".rels")):
-                                                ooxml_entries[info.filename] = zf.read(info.filename).decode("utf-8", errors="replace")
-                                    pat_res = audit_patterns("", filename=rel, modality=mod, banks=banks, ooxml=ooxml_entries)
-                                    f_list = _merge_pattern_bank_findings(f_list, pat_res["findings"])
-                                except Exception:
-                                    pass
-                            elif raw_txt_for_pack is not None:
-                                pat_res = audit_patterns(raw_txt_for_pack, filename=rel, modality=mod, banks=banks)
-                                f_list = _merge_pattern_bank_findings(f_list, pat_res["findings"])
-                        if include_ml and raw_txt_for_pack is not None and mod in {"markdown", "text"}:
-                            f_list.extend(_build_pocket_ml_findings_mcp(raw_txt_for_pack, rel, f_list))
-                    formatted = _format_findings_for_mcp(f_list, verbosity, args.get("lang"))
+                    profile = res["profileItem"]["profile"] if res.get("profileItem") else None
+                    formatted = _format_findings_for_mcp(res["findings"], verbosity, args.get("lang"))
                     payload = {
-                        "pack": pick_pack_for_file(rel, mod, eff_pack_arg, live_config),
+                        "pack": res.get("effectivePack") or pick_pack_for_file(rel, mod, args.get("pack"), live_config),
+                        "packSource": res.get("packSource"),
+                        "rulesetHash": res.get("rulesetHash"),
                         "modality": mod,
                         "checked": res["checked"],
                         "skipped": res["skipped"],
+                        "coverageWarnings": res.get("coverageWarnings") or [],
                         "count": len(formatted),
                         "findings": formatted,
                     }
                     if verbosity == "compact" and formatted:
                         payload["explainHint"] = "Call dislop_explain(ruleId) for before/trap/after examples."
-                    if res["checked"] and want_profile and raw_txt_for_pack is not None and mod in {"markdown", "text"}:
-                        payload["profile"] = analyze_text_profile(raw_txt_for_pack, modality=mod)
+                    if profile is not None:
+                        payload["profile"] = profile
                     _tool_result(req_id, payload)
                     continue
 
-                if name == "dislop_voice_extract_offline":
+                if name in {"dislop_voice_extract_offline", "dislop_voice_extract"}:
                     samples = args.get("samples")
                     if not isinstance(samples, list) or not samples:
                         _tool_result(req_id, {"error": "Non-empty `samples` string array is required."}, True)

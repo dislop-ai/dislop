@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>dislop Guides (EN)</title>
+  <link href="https://dislop.com/en/feed.xml" rel="self"/>
+  <link href="https://dislop.com/en/guides/"/>
+  <updated>2026-11-23T00:00:00Z</updated>
+  <id>https://dislop.com/en/feed.xml</id>
+  <entry>
+    <title>Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions</title>
+    <link href="https://dislop.com/en/guides/agent-cli-mcp-tutorial/"/>
+    <id>https://dislop.com/en/guides/agent-cli-mcp-tutorial/</id>
+    <updated>2026-11-23T00:00:00Z</updated>
+    <summary>The cleanest anti-slop setup splits prevention from verification: load the pure-Markdown Skill before drafting so agents avoid stock templates, then run the offline `dislop check` CLI locally or on `--changed` PR lines. For office agents without local shells, connect `https://dislop.com/mcp`.</summary>
+  </entry>
+  <entry>
+    <title>Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)</title>
+    <link href="https://dislop.com/en/guides/deslop-pptx-docx/"/>
+    <id>https://dislop.com/en/guides/deslop-pptx-docx/</id>
+    <updated>2026-11-23T00:00:00Z</updated>
+    <summary>AI-generated Office deliverables break in five predictable ways: pasted `**bold**` Markdown asterisks, 120+ word slide walls, &gt;6 bullets per slide, shrunk `normAutofit` fonts below 80%, and vague titles like &apos;Overview&apos; or &apos;Analysis of Q3 Retention&apos;. Inspect the OOXML and PDF text layers deterministically before sending.</summary>
+  </entry>
+  <entry>
+    <title>Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons</title>
+    <link href="https://dislop.com/en/guides/fix-ai-slop-web-ui/"/>
+    <id>https://dislop.com/en/guides/fix-ai-slop-web-ui/</id>
+    <updated>2026-11-23T00:00:00Z</updated>
+    <summary>AI-generated web UIs look interchangeable when they fall back on purple-pink gradients, pill-badge walls, 3-level nested cards, fake macOS window dots, and dead href=&apos;#&apos; buttons. Replace template chrome with 1px structural grids, clear type hierarchy, and deterministic HTML/CSS linting.</summary>
+  </entry>
+  <entry>
+    <title>AI Slop Linter vs. AI Detectors vs. Prompt Skills: How to Choose in 2026</title>
+    <link href="https://dislop.com/en/guides/linter-vs-detector-vs-skill/"/>
+    <id>https://dislop.com/en/guides/linter-vs-detector-vs-skill/</id>
+    <updated>2026-11-23T00:00:00Z</updated>
+    <summary>Probabilistic AI detectors only output a guess percentage without telling you what to fix; Markdown skills improve first drafts but slip under long contexts; deterministic linters (Vale, dislop) give repeatable, line-level pass/fail gates across CI, web UI, and slides. Use skills upfront and linters at the gate.</summary>
+  </entry>
+  <entry>
+    <title>How to Remove AI Slop From Writing Without Triggering Second-Order Clichés</title>
+    <link href="https://dislop.com/en/guides/remove-ai-slop-writing/"/>
+    <id>https://dislop.com/en/guides/remove-ai-slop-writing/</id>
+    <updated>2026-11-23T00:00:00Z</updated>
+    <summary>Banning stock words alone forces LLMs to swap buzzwords for second-order templates like &apos;Not X, but Y&apos; slogans, three-word staccato chains, and moralizing endings. Replace clichés by running the Deletion Test on flagged spans and re-checking after edits.</summary>
+  </entry>
+  <entry>
+    <title>What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks</title>
+    <link href="https://dislop.com/en/guides/what-is-ai-slop/"/>
+    <id>https://dislop.com/en/guides/what-is-ai-slop/</id>
+    <updated>2026-11-23T00:00:00Z</updated>
+    <summary>AI slop is unreviewed, low-signal machine output driven by statistical averaging. Beyond banned words like &apos;delve&apos; and &apos;tapestry&apos;, it shows up as &apos;Not X, but Y&apos; contrast slogans, purple-pink SaaS web templates, dense PowerPoint word walls, and stray chatbot greetings.</summary>
+  </entry>
+</feed>

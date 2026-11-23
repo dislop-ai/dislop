@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-static-lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>去 AI 味实用指南与教程 — dislop</title>
+  <meta name="description" content="覆盖中文写作、前端页面、Word/PPT 排版与 Claude Code / Codex / Cursor 接入的去 AI 味实用教程。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/guides/">
+  <meta property="og:title" content="去 AI 味实用指南与教程 — dislop">
+  <meta property="og:description" content="覆盖中文写作、前端页面、Word/PPT 排版与 Claude Code / Codex / Cursor 接入的去 AI 味实用教程。">
+  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="去 AI 味实用指南与教程 — dislop">
+  <meta name="twitter:description" content="覆盖中文写作、前端页面、Word/PPT 排版与 Claude Code / Codex / Cursor 接入的去 AI 味实用教程。">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <link rel="canonical" href="https://dislop.com/guides/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/">
+  <link rel="alternate" type="application/atom+xml" href="../feed.xml" title="dislop 实用指南（中文）">
+  <link rel="alternate" type="text/plain" href="../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+  <link rel="stylesheet" href="../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": "https://dislop.com/guides/",
+      "url": "https://dislop.com/guides/",
+      "name": "去 AI 味实用指南与教程 — dislop",
+      "inLanguage": "zh-CN"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "实用指南",
+          "item": "https://dislop.com/guides/"
+        }
+      ]
+    },
+    {
+      "@type": "ItemList",
+      "numberOfItems": 6,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程",
+          "url": "https://dislop.com/guides/agent-cli-mcp-tutorial/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程",
+          "url": "https://dislop.com/guides/deslop-pptx-docx/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮",
+          "url": "https://dislop.com/guides/fix-ai-slop-web-ui/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比",
+          "url": "https://dislop.com/guides/linter-vs-detector-vs-skill/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话",
+          "url": "https://dislop.com/guides/remove-ai-slop-writing/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱",
+          "url": "https://dislop.com/guides/what-is-ai-slop/"
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳至正文</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../">
+        <img src="../assets/logo.svg" width="28" height="28" alt="dislop 图标">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a href="../#workbench">在线试</a>
+        <a href="../guides/" aria-current="page">指南</a>
+        <a href="../awesome/">工具清单</a>
+        <a href="../rules/">规则</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../en/guides/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="Switch to English">EN</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="面包屑导航">
+        <a href="../">dislop</a> / <span aria-current="page">实用指南</span>
+      </nav>
+      <h1 class="lead-heading" style="max-width:26ch;">去 AI 味实用指南与教程</h1>
+      <p class="section-desc">
+        覆盖文稿写作、前端界面、PPT 与 Word 排版、Agent 接入和工具选型的 6 篇实操教程。每篇都带正反句对照、可直接运行的命令和一手出处。
+      </p>
+      <div class="guide-grid">
+          <article class="guide-card">
+            <div class="guide-card-cat">工程接入 · 6 分钟</div>
+            <h2><a href="./agent-cli-mcp-tutorial/">把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程</a></h2>
+            <p>按场景选择纯文档 Skill、零依赖本地 CLI、GitHub Actions 增量门禁，或免安装官网远程 MCP。</p>
+            <div class="guide-card-foot"><a href="./agent-cli-mcp-tutorial/">阅读指南 →</a><span>更新于 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">办公文档与演示 · 6 分钟</div>
+            <h2><a href="./deslop-pptx-docx/">AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程</a></h2>
+            <p>直接扫描 DOCX、PPTX 和横版 PDF 的结构问题：清理未渲染星号、单页字墙、过量要点、自动缩字和空泛汇报标题。</p>
+            <div class="guide-card-foot"><a href="./deslop-pptx-docx/">阅读指南 →</a><span>更新于 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">前端与视觉 · 6 分钟</div>
+            <h2><a href="./fix-ai-slop-web-ui/">Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮</a></h2>
+            <p>拆解 Claude Code、Cursor 等生成前端页面时最常犯的 7 个模板毛病，给出 CSS/HTML 改法与自动化检查命令。</p>
+            <div class="guide-card-foot"><a href="./fix-ai-slop-web-ui/">阅读指南 →</a><span>更新于 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">选型与基准 · 6 分钟</div>
+            <h2><a href="./linter-vs-detector-vs-skill/">去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比</a></h2>
+            <p>对比概率型 AI 文本检测器（Fast-DetectGPT、Pangram、朱雀）、纯提示词 Skill（Humanizer-zh、stop-slop）与确定性检查器（Vale、dislop）的能力边界。</p>
+            <div class="guide-card-foot"><a href="./linter-vs-detector-vs-skill/">阅读指南 →</a><span>更新于 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">写作与改稿 · 7 分钟</div>
+            <h2><a href="./remove-ai-slop-writing/">中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话</a></h2>
+            <p>为什么只禁“抓手”“赋能”会把文章改成“不是 A，而是 B”反转腔，以及如何用四步删除测试写出干净的中文工作文档与长文。</p>
+            <div class="guide-card-foot"><a href="./remove-ai-slop-writing/">阅读指南 →</a><span>更新于 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">基础识别 · 6 分钟</div>
+            <h2><a href="./what-is-ai-slop/">什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱</a></h2>
+            <p>拆解中文写作、前端网页和 Word/PPT 里常见的四层 AI 味信号，附上行业研究数据与可落地的判断方法。</p>
+            <div class="guide-card-foot"><a href="./what-is-ai-slop/">阅读指南 →</a><span>更新于 2026-11-23</span></div>
+          </article>
+      </div>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>这个页面自己也跑过 dislop check site/，0 处问题。给 Agent 读的话，从 <a href="../llms.txt">/llms.txt</a> 开始。</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../guides/">实用指南</a>
+        <a href="../awesome/">工具清单</a>
+        <a href="../rules/">全部规则</a>
+        <a href="../privacy.md">隐私说明</a>
+        <a href="../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">关闭</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../static-ui.js"></script>
+
+</body>
+</html>

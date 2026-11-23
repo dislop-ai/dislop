@@ -2,7 +2,7 @@
 
 [简体中文](./brand-and-voice-guide.zh-CN.md) · [Product Brief](../PRODUCT.md)
 
-One rule covers every public word in `dislop`—the website, READMEs, CLI help, and release notes: **write like the person who built the tool talking to a colleague. Plain, relaxed, direct.** Public positioning, target users, selling points, and one-sentence pitch follow [PRODUCT.md](../PRODUCT.md).
+One rule covers every public word in `dislop`—the website, READMEs, CLI help, and release notes: **write like the person who built the tool talking to a colleague. Plain, relaxed, direct.** Public slogans (`Cutting AI slop is real productivity.` / `去 AI 味才是真正的生产力！`), positioning, target users, selling points, and one-sentence pitch follow [PRODUCT.md](../PRODUCT.md).
 
 Do not sound corporate, do not try to impress or please the reader, and do not dress the tool up in a literary persona.
 
@@ -32,22 +32,22 @@ No metaphors, no quotable mic-drop at the end, and no three-way parallel bundle.
 
 ---
 
-## 2. How We Write: Karpathy's 80% Plain Technical Prose + Relaxed Maker Voice
+## 2. How We Write: Plain Technical Prose + Relaxed Maker Voice
 
-Andrej Karpathy's writing advice and READMEs (`nanoGPT`, `micrograd`) pair **80% ASD-STE100** (Simplified Technical English) clarity with a casual, unpretentious tone. Combined with structural cuts from `stop-slop`, we follow six rules:
+We aim for the plain clarity of **ASD-STE100** (Simplified Technical English) in most sentences while keeping a casual, unpretentious tone. Combined with structural cuts from `stop-slop`, we follow six rules:
 
 1. **One thought per sentence, with uneven lengths.** If a sentence binds two or three claims with semicolons or symmetrical clauses, split it.
 2. **Use the same plain word for the same thing.** Do not rotate synonyms to sound lively. Stick to plain labels across the whole product: `hard bug`, `warning`, `passed`, `rejected`, `Awesome list`.
 3. **Cut every pull-quote closer and roleplay metaphor.** If a line sounds like a poster slogan or a costumed persona (`Pass for press`, `the pen stays in your hand`, `the sheet is set by machine`), delete it or rewrite it flat.
 4. **Start with something concrete.** Open with an actual draft, file, number, or command instead of throat-clearing background.
 5. **State limits plainly.** Unreadable archives and unshipped work (like code AST linting) are marked as skipped or not built yet.
-6. **Keep English and Chinese completely separate.** `dislop.com` and `/awesome/` default to Simplified Chinese with one-click switching to English. Chinese pages show only Chinese examples and notes; English pages show only English examples and notes. Keep internal architecture tier codes, academic jargon, and research shorthand inside `docs/research/`, never in public copy.
+6. **Keep English and Chinese independent and unmixed.** `dislop.com` and `/awesome/` auto-detect the visitor's browser language (`zh` or `en`) instead of hardcoding one default, with a one-click manual toggle. Chinese and English materials are authored separately for their own audiences—separate copy, examples, banners, and social posts (channels like X can run one independent Chinese post and one independent English post), never word-for-word translations and never mixed inside one page or post. Keep internal architecture tier codes, academic jargon, and research shorthand inside `docs/research/`, never in public copy.
 
 ### Copy Table
 
 | Surface | Avoid (AI-flavored / performative) | Use (plain English) |
 |---|---|---|
-| **Headline** | `Your draft, minus the slop.` | `Catch the AI slop before you send it` |
+| **Headline / Slogan** | `Your draft, minus the slop.` | `Cutting AI slop is real productivity.` |
 | **Intro copy** | `dislop strikes what can't ship... the pen stays in your hand.` | `dislop marks what looks off locally so you or your agent can fix it, with optional Cloud MCP rewrites.` |
 | **Clean check** | `Pass for press. 0 findings; protected spans stayed as written.` | `0 issues. Chat wrapper and stock phrasing removed.` |
 | **2nd-order slop** | `Sent back: displacement detected` | `Still flagged (1 issue). Old buzzwords are gone, replaced by a 'Not X, but Y' AI slogan.` |
@@ -86,6 +86,6 @@ Before merging changes to the website, README, CLI help, or release notes:
 4. Is the tool wearing a roleplay costume (`Pass for press`, `the pen stays in your hand`)? Say it plainly.
 5. Does the same concept (`hard bug` / `warning` / `passed`) use the same plain name everywhere on the page?
 6. Are English and Chinese strictly separated (no Chinese in EN examples, no English in ZH examples)?
-7. Does `dislop check <file> --fail-on info` pass with 0 findings, and zero `!`, emojis, or `finding(s)`?
+7. Does `dislop check <file> --fail-on info` pass with 0 findings, and keep body prose free of `!`, emojis, and `finding(s)` (the official Chinese slogan `去 AI 味才是真正的生产力！` keeps its original `！`)?
 
 The draft machine-readable voice config lives at [docs/brand/voice.json](./brand/voice.json) (`dislop.voice/1`).

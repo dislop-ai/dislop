@@ -10,7 +10,7 @@ family: deck/density
 # Rule: `slide-word-wall`
 
 - Pack: [`deck-and-ui`](../packs/deck-and-ui.md) · Tier: `taste` · Severity: `warning`
-- Modalities: `pptx`
+- Modalities: `pptx, pdf`
 - Human anchor: https://dislop.com/#rule-slide-word-wall
 
 ## What It Catches

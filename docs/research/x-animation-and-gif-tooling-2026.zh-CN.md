@@ -87,16 +87,16 @@ X 上设计工程师（如 `@MengTo`、`@ibelick`、`@emilkowalski_` 等）分�
 
 ---
 
-## 4. `dislop` 的最终技术选型
+## 4. `dislop` 的最终技术选型与 `v2` 落地情况
 
-结合项目零外部 npm 运行时依赖的定位，现阶段采用这套**零污染仓库依赖、全本地可复现**的 GIF 生产路线：
+结合项目零外部 npm 运行时依赖的定位与 [编码对照实验实测](./gif-encoding-experiments-2026.zh-CN.md)，当前已落地一套**零污染仓库依赖、全本地可复现、声明式校验**的动画管线：
 
-1. **视觉与源码层**：沿用与官网完全一致的零框架 HTML + CSS + 原生 SVG（直接导入 [设计规范](./../design-system.zh-CN.md) 色值与字体栈），不把 React/GSAP/Remotion 塞进公开包依赖。
-2. **确定性出帧层**：`scripts/media/render_gifs.py` 使用本机已有的 Playwright Chromium 驱动两类内容：
-   - 场景动画（`proof-cycle`、`cli-check`、`ui-slop`）：按 `window.__renderAt(t)` 逐帧截图；
-   - 真机工作台实录（`workbench-live`）：拉起本地临时 HTTP 服务打开真实 `site/index.html`，模拟鼠标点击“看换了种 AI 味的”“看改好的”并逐帧捕获真实 DOM 状态。
-3. **调色板与体积压制层**：
-   - 平面排版场景用 FFmpeg `palettegen=max_colors=96:stats_mode=diff` 配 `paletteuse=dither=none:diff_mode=rectangle`，保证冷纸白底 `#F6F7F5` / `#FFFFFF` **零抖动麻点**且字体边缘锐利；
-   - 真机长录屏用 `max_colors=128` 配轻度 `bayer_scale=3`；
-   - 统一过一遍 `gifsicle -O3 --lossy=25` 做帧差裁剪，并导出 `-poster.png` 供减动效用户回退。
-4. **双人/双模型对照机制**：重要宣传物料允许让不同模型分别写一版独立 HTML 动效源码，在相同帧率与像素尺寸下并排渲染 6 帧 Contact Sheet 拼图，按清晰度、可读性与体积择优或融合定稿。
+1. **声明式分镜清单与视觉源码层**：所有 6 个中英场景规格（分辨率、帧率、体积预算与双语文案）统一收口到 `scripts/media/demos.manifest.json`（参考 `openmotion` 纯文本清单思路），视觉沿用零框架 HTML + CSS + 原生 SVG。已吸收社区高赞动效手法，包括 `rough-notation` 式朱红删除线 SVG 描边、`number-flow` 式垂直滚动等宽计数器、`shiki-magic-move` 词块三态对比与真机光标贝塞尔轨迹。
+2. **确定性出帧与真实引擎接地**：`scripts/media/render_gifs.py` 使用 Playwright Chromium 驱动两类内容：
+   - 场景动画（`proof-cycle`、`cli-check`、`ui-slop`、`deck-office`、`agent-workflow`）：在渲染期直接运行 `node bin/dislop.mjs check` 提取当前版本的真实规则命中与退出码，按 `window.__renderAt(t)` 逐帧截图；
+   - 真机工作台实录（`workbench-live`）：拉起本地临时 HTTP 服务打开真实 `site/index.html`（`1140×640`，完整露出 5 轴体检条），叠加矢量光标模拟点击切换并逐帧捕获真实 DOM。
+3. **无损 WebP + 无抖动 GIF 渐进式分发**：
+   - `flat-paper` 与 `dark-terminal` 场景使用 `img2webp -loop 0 -lossless -m 4` 输出无损动态 WebP（实测 `35–198 KB`、`100.0%` 纸面纯净度），并配 FFmpeg `palettegen=96:diff` + `dither=none` + `gifsicle -O3 --lossy=20` 作为 GitHub README 与旧端 GIF 回退；
+   - 真机长录屏用 `max_colors=128` 配轻度 `bayer_scale=3` 与有损 `q84` WebP；
+   - 网页端一律用 `<picture>` 按 **减动效静态海报 → 动态 WebP → GIF** 顺序加载，并配前端定格、重播与原生 `<dialog>` 放大看图控件；支持 `--social-dir` 按需导出 X 平台 `1080×600` H.264 MP4。
+4. **自动化 G0–G5 门禁（`npm run media:verify`）**：`scripts/media/verify_demos.py`（借鉴 `motionmaxxing` 思路）自动核验头信息、尺寸一致性、真实 CLI 命中、白纸底 `>= 99.0%` 纯净度、尾帧 `>= 1.5s` 静止可读性与中英文隔离，配合 6 帧 Contact Sheet 人工抽检定稿。

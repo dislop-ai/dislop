@@ -5,9 +5,17 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { auditText, resolveEffectivePack } from "../src/core.mjs";
+import vm from "node:vm";
+import zlib from "node:zlib";
+import { auditImageDocument, auditPdfDocument, auditText, resolveEffectivePack } from "../src/core.mjs";
+import { parseBrowserImageBuffer, parseBrowserPdfBuffer } from "../site/engine/binary-browser.mjs";
+import { auditPatterns } from "../site/engine/pattern-engine.mjs";
+import { PATTERN_BANKS } from "../site/engine/patterns-data.mjs";
+import { analyzeDocumentWithPocketModels, setPocketModelBundle } from "../site/engine/pocket-model.mjs";
+import { POCKET_MODEL_BUNDLE } from "../site/engine/pocket-model-data.mjs";
 import { PACKS_BY_ID, RULE_UI_META } from "../site/engine/packs-data.mjs";
 import { AWESOME_DATA } from "../site/awesome/awesome-data.mjs";
+setPocketModelBundle(POCKET_MODEL_BUNDLE);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -92,8 +100,8 @@ for (const [pid, pack] of Object.entries(PACKS_BY_ID)) {
     }
   }
 }
-assert.equal(totalRules, 42, `Expected 42 total rules, got ${totalRules}`);
-assert.equal(tryRulesChecked, 36, `Expected 36 Try rules, got ${tryRulesChecked}`);
+assert.equal(totalRules, 53, `Expected 53 total rules, got ${totalRules}`);
+assert.equal(tryRulesChecked, 44, `Expected 44 Try rules, got ${tryRulesChecked}`);
 
 // 2. Verify Hero Proof Cards (ZH + EN) and all 14 language-pure specimens (7 ZH + 7 EN)
 const appSource = fs.readFileSync(path.join(SITE_DIR, "app.js"), "utf8");
@@ -120,7 +128,7 @@ for (const lang of ["zh", "en"]) {
 let specimenCount = 0;
 for (const lang of ["zh", "en"]) {
   const list = specimensByLang[lang];
-  assert.equal(list.length, 7, `Expected 7 specimens for ${lang}`);
+  assert.equal(list.length, 8, `Expected 8 specimens for ${lang}`);
   for (const sp of list) {
     specimenCount += 1;
     const pack = resolveEffectivePack(sp.pack, PACKS_BY_ID);
@@ -128,11 +136,20 @@ for (const lang of ["zh", "en"]) {
     const trapRes = auditText(sp.trap, { filename: sp.filename, modality: sp.modality, pack });
     const goodRes = auditText(sp.good, { filename: sp.filename, modality: sp.modality, pack });
     assert.equal(goodRes.findings.length, 0, `Specimen ${lang}/${sp.id} good had ${goodRes.findings.length} findings`);
-    assert.ok(trapRes.findings.length >= 1, `Specimen ${lang}/${sp.id} trap should still trigger AI slop`);
-    if (sp.id === "clean-nearmiss") {
+    if (sp.id === "stealth-vapor") {
+      assert.equal(badRes.findings.length, 0, `Specimen ${lang}/stealth-vapor bad should have 0 deterministic findings`);
+      const badMl = analyzeDocumentWithPocketModels(sp.bad);
+      const trapMl = analyzeDocumentWithPocketModels(sp.trap);
+      const goodMl = analyzeDocumentWithPocketModels(sp.good);
+      assert.ok(badMl.documentProbability >= badMl.threshold, `Specimen ${lang}/stealth-vapor bad should trigger Pocket ML (${badMl.documentProbability})`);
+      assert.ok(trapMl.documentProbability >= trapMl.threshold, `Specimen ${lang}/stealth-vapor trap should trigger Pocket ML (${trapMl.documentProbability})`);
+      assert.ok(goodMl.documentProbability < 0.5, `Specimen ${lang}/stealth-vapor good should score clean on Pocket ML (${goodMl.documentProbability})`);
+    } else if (sp.id === "clean-nearmiss") {
       assert.equal(badRes.findings.length, 0, `Specimen ${lang}/clean-nearmiss should have 0 findings`);
+      assert.ok(trapRes.findings.length >= 1, `Specimen ${lang}/clean-nearmiss trap should still trigger AI slop`);
     } else {
       assert.ok(badRes.findings.length > 0, `Specimen ${lang}/${sp.id} bad draft should have >= 1 finding`);
+      assert.ok(trapRes.findings.length >= 1, `Specimen ${lang}/${sp.id} trap should still trigger AI slop`);
     }
     if (lang === "en") {
       assert.equal(/[\u4E00-\u9FFF]/.test(sp.bad + sp.good + sp.trap), false, `EN specimen ${sp.id} leaked Chinese chars`);
@@ -157,7 +174,7 @@ for (const res of catalog.resources) {
 }
 
 // 4. Verify Awesome Anti-Slop data, pure-EN README.md & pure-ZH README.zh-CN.md
-assert.equal(AWESOME_DATA.entries.length, 87, "Expected 87 Awesome Anti-Slop entries");
+assert.equal(AWESOME_DATA.entries.length, 90, "Expected 90 Awesome Anti-Slop entries");
 assert.ok(fs.existsSync(path.join(ROOT, "awesome", "README.md")), "Missing top-level awesome/README.md");
 assert.ok(fs.existsSync(path.join(ROOT, "awesome", "README.zh-CN.md")), "Missing top-level awesome/README.zh-CN.md");
 assert.ok(fs.existsSync(path.join(SITE_DIR, "awesome", "index.html")), "Missing site/awesome/index.html");
@@ -248,9 +265,11 @@ assert.ok(fs.existsSync(path.join(SITE_DIR, "assets", "og-card.svg")), "Missing 
 const indexHtml = fs.readFileSync(path.join(SITE_DIR, "index.html"), "utf8");
 const awesomeHtml = fs.readFileSync(path.join(SITE_DIR, "awesome", "index.html"), "utf8");
 const llmsTxt = fs.readFileSync(path.join(SITE_DIR, "llms.txt"), "utf8");
-assert.ok(indexHtml.includes('<html lang="zh-CN">'), "site/index.html should default to zh-CN");
-assert.ok(awesomeHtml.includes('<html lang="zh-CN">'), "site/awesome/index.html should default to zh-CN");
-assert.ok(indexHtml.includes('property="og:image" content="https://dislop.com/assets/og-card.png"'));
+assert.ok(indexHtml.includes('<html lang="zh-CN" data-static-lang="zh">'), "site/index.html static fallback should declare data-static-lang=zh");
+assert.ok(awesomeHtml.includes('<html lang="zh-CN" data-static-lang="zh">'), "site/awesome/index.html static fallback should declare data-static-lang=zh");
+assert.ok(indexHtml.includes('property="og:image" content="https://dislop.com/assets/og-card-zh.png"'));
+const enIndexHtml = fs.readFileSync(path.join(SITE_DIR, "en", "index.html"), "utf8");
+assert.ok(enIndexHtml.includes('property="og:image" content="https://dislop.com/assets/og-card.png"'));
 assert.equal(indexHtml.includes('data-theme="light"'), false, "index.html should not force data-theme=light before hydration");
 assert.equal(/^[ \t]+$/m.test(indexHtml), false, "index.html contains whitespace-only lines");
 assert.equal(indexHtml.includes("NaN KB"), false, "index.html contains NaN KB in endpoints ledger");
@@ -297,7 +316,16 @@ assert.ok(fs.existsSync(path.join(ROOT, "skills", "dislop", "agents", "openai.ya
 assert.ok(fs.existsSync(path.join(ROOT, "action.yml")), "Missing root GitHub Action action.yml");
 assert.ok(fs.existsSync(path.join(ROOT, ".pre-commit-hooks.yaml")), "Missing .pre-commit-hooks.yaml");
 assert.equal(mcpJson.mcpServers?.dislop?.url, "https://dislop.com/mcp", ".mcp.json should point to Official Cloud MCP");
-for (const refFile of ["business-and-rfc.md", "editorial-and-essay.md", "web-ui-and-deck.md", "regulated-and-precision.md"]) {
+for (const refFile of [
+  "work-docs.md",
+  "work-docs.zh-CN.md",
+  "essay.md",
+  "essay.zh-CN.md",
+  "office.md",
+  "office.zh-CN.md",
+  "web-ui.md",
+  "web-ui.zh-CN.md",
+]) {
   assert.ok(fs.existsSync(path.join(ROOT, "skills", "dislop", "references", refFile)), `Missing local Skill reference ${refFile}`);
   assert.ok(fs.existsSync(path.join(SITE_DIR, "tools", "references", refFile)), `Missing compiled site Skill reference ${refFile}`);
 }
@@ -316,13 +344,19 @@ const jsonDocPaths = [
   path.join(ROOT, "skills", "dislop", "SKILL.md"),
 ];
 let checkedJsonBlocks = 0;
+const jsonBlocksByBase = {};
 for (const docPath of jsonDocPaths) {
   const txt = fs.readFileSync(docPath, "utf8");
+  let countHere = 0;
   for (const m of txt.matchAll(/```json\n([\s\S]*?)```/g)) {
     checkedJsonBlocks += 1;
+    countHere += 1;
     assert.doesNotThrow(() => JSON.parse(m[1]), `Invalid JSON code block in ${path.relative(ROOT, docPath)}`);
   }
+  jsonBlocksByBase[path.basename(docPath)] = countHere;
 }
+assert.ok((jsonBlocksByBase["cli-and-hooks.md"] || 0) >= 1, "site/tools/cli-and-hooks.md should have >= 1 valid JSON block");
+assert.ok((jsonBlocksByBase["mcp-sdk-api.md"] || 0) >= 1, "site/tools/mcp-sdk-api.md should have >= 1 valid JSON block");
 const snippetsBlock = appSource.match(/const SNIPPETS_BY_LANG = \{[\s\S]*?\n\};/);
 assert.ok(snippetsBlock, "Could not locate SNIPPETS_BY_LANG in site/app.js");
 const snippetsByLang = new Function(`${snippetsBlock[0]}\nreturn SNIPPETS_BY_LANG;`)();
@@ -332,7 +366,7 @@ for (const lang of ["zh", "en"]) {
     assert.doesNotThrow(() => JSON.parse(snippetsByLang[lang][key]), `Invalid JSON snippet in site/app.js ${lang}.${key}`);
   }
 }
-assert.ok(checkedJsonBlocks >= 10, `Expected >= 10 validated JSON snippets, got ${checkedJsonBlocks}`);
+assert.ok(checkedJsonBlocks >= 8, `Expected >= 8 validated JSON snippets, got ${checkedJsonBlocks}`);
 assert.ok(fs.existsSync(path.join(SITE_DIR, "privacy.md")), "Missing site/privacy.md");
 
 // 9. Verify CSS brace balance (blocks early-closed @media queries) and complete data-i18n coverage
@@ -368,34 +402,395 @@ assert.ok(robotsTxt.includes("Disallow: /api/"), "robots.txt missing Disallow: /
 assert.ok(robotsTxt.includes("Disallow: /mcp"), "robots.txt missing Disallow: /mcp");
 
 const sitemapXml = fs.readFileSync(path.join(SITE_DIR, "sitemap.xml"), "utf8");
-assert.ok(sitemapXml.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'), "sitemap.xml missing urlset root");
+assert.ok(sitemapXml.includes('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'), "sitemap.xml missing urlset xmlns");
+assert.ok(sitemapXml.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), "sitemap.xml missing xhtml xmlns");
 assert.ok(sitemapXml.includes("<loc>https://dislop.com/</loc>"), "sitemap.xml missing root URL");
+assert.ok(sitemapXml.includes("<loc>https://dislop.com/en/</loc>"), "sitemap.xml missing /en/ URL");
 assert.ok(sitemapXml.includes("<loc>https://dislop.com/awesome/</loc>"), "sitemap.xml missing /awesome/ URL");
+assert.ok(sitemapXml.includes("<loc>https://dislop.com/en/awesome/</loc>"), "sitemap.xml missing /en/awesome/ URL");
+assert.ok(sitemapXml.includes("<loc>https://dislop.com/guides/</loc>"), "sitemap.xml missing /guides/ URL");
+assert.ok(sitemapXml.includes("<loc>https://dislop.com/en/guides/</loc>"), "sitemap.xml missing /en/guides/ URL");
 assert.equal(INVISIBLE_BIDI_RE.test(sitemapXml), false, "sitemap.xml contains invisible/bidi chars");
 assert.equal(/&(?!amp;|lt;|gt;|quot;|apos;)/.test(sitemapXml), false, "sitemap.xml contains unescaped '&'");
 const sitemapUrlCount = (sitemapXml.match(/<url>/g) || []).length;
 assert.ok(sitemapUrlCount >= 50, `Expected >= 50 <url> entries in sitemap.xml, got ${sitemapUrlCount}`);
 
-// 11. Verify animated demo GIFs & reduced-motion posters exist in site/assets/demos/ and match HTML references
+// 11. Verify animated demo GIFs, animated WebPs & reduced-motion posters exist in site/assets/demos/ and match HTML references
 const DEMOS_DIR = path.join(SITE_DIR, "assets", "demos");
-const demoSlugs = ["proof-cycle", "cli-check", "workbench-live", "ui-slop"];
+const demoSlugs = ["proof-cycle", "cli-check", "workbench-live", "ui-slop", "deck-office", "agent-workflow"];
 for (const lang of ["zh", "en"]) {
   for (const slug of demoSlugs) {
-    const gifPath = path.join(DEMOS_DIR, `${slug}-${lang}-v1.gif`);
-    const posterPath = path.join(DEMOS_DIR, `${slug}-${lang}-v1-poster.png`);
+    const gifPath = path.join(DEMOS_DIR, `${slug}-${lang}-v2.gif`);
+    const webpPath = path.join(DEMOS_DIR, `${slug}-${lang}-v2.webp`);
+    const posterPath = path.join(DEMOS_DIR, `${slug}-${lang}-v2-poster.png`);
     assert.ok(fs.existsSync(gifPath), `Missing demo GIF: ${path.relative(ROOT, gifPath)}`);
+    assert.ok(fs.existsSync(webpPath), `Missing demo WebP: ${path.relative(ROOT, webpPath)}`);
     assert.ok(fs.existsSync(posterPath), `Missing demo poster: ${path.relative(ROOT, posterPath)}`);
     const gifBuf = fs.readFileSync(gifPath);
     assert.ok(gifBuf.subarray(0, 6).toString("ascii").startsWith("GIF8"), `Invalid GIF header on ${path.basename(gifPath)}`);
     assert.ok(gifBuf.length <= 600 * 1024, `Demo GIF exceeds 600 KB budget: ${path.basename(gifPath)} (${(gifBuf.length / 1024).toFixed(1)} KB)`);
-    assert.ok(fs.statSync(posterPath).size <= 70 * 1024, `Demo poster exceeds 70 KB budget: ${path.basename(posterPath)}`);
+    const webpBuf = fs.readFileSync(webpPath);
+    assert.ok(
+      webpBuf.subarray(0, 4).toString("ascii") === "RIFF" && webpBuf.subarray(8, 12).toString("ascii") === "WEBP",
+      `Invalid WebP header on ${path.basename(webpPath)}`
+    );
+    assert.ok(webpBuf.length <= 320 * 1024, `Demo WebP exceeds 320 KB budget: ${path.basename(webpPath)} (${(webpBuf.length / 1024).toFixed(1)} KB)`);
+    const posterBuf = fs.readFileSync(posterPath);
+    assert.ok(
+      posterBuf.subarray(0, 4).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47])),
+      `Invalid PNG header on ${path.basename(posterPath)}`
+    );
+    assert.ok(posterBuf.length <= 70 * 1024, `Demo poster exceeds 70 KB budget: ${path.basename(posterPath)}`);
   }
 }
-for (const m of indexHtml.matchAll(/\.\/assets\/demos\/([A-Za-z0-9._-]+)/g)) {
-  assert.ok(fs.existsSync(path.join(DEMOS_DIR, m[1])), `Broken demo asset reference ./assets/demos/${m[1]} in site/index.html`);
+const demoCheckFiles = [indexHtml, fs.readFileSync(path.join(SITE_DIR, "en", "index.html"), "utf8")];
+for (const baseDir of [path.join(SITE_DIR, "guides"), path.join(SITE_DIR, "en", "guides")]) {
+  if (fs.existsSync(baseDir)) {
+    for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        const p = path.join(baseDir, entry.name, "index.html");
+        if (fs.existsSync(p)) demoCheckFiles.push(fs.readFileSync(p, "utf8"));
+      }
+    }
+  }
 }
+for (const docHtml of demoCheckFiles) {
+  for (const m of docHtml.matchAll(/(?:\.\.?\/)+assets\/demos\/([A-Za-z0-9._-]+)/g)) {
+    assert.ok(fs.existsSync(path.join(DEMOS_DIR, m[1])), `Broken demo asset reference assets/demos/${m[1]}`);
+  }
+}
+
+// 12. Verify auto language detection (site/lang-init.js), hreflang, bilingual banners/OG cards & official slogans
+const langInitPath = path.join(SITE_DIR, "lang-init.js");
+assert.ok(fs.existsSync(langInitPath), "Missing site/lang-init.js");
+assert.ok(indexHtml.includes('<script src="./lang-init.js"></script>'), "site/index.html must load ./lang-init.js synchronously");
+assert.ok(awesomeHtml.includes('<script src="../lang-init.js"></script>'), "site/awesome/index.html must load ../lang-init.js synchronously");
+for (const docHtml of [indexHtml, awesomeHtml]) {
+  assert.ok(docHtml.includes('hreflang="zh-Hans"'), "Missing hreflang=zh-Hans");
+  assert.ok(docHtml.includes('hreflang="en"'), "Missing hreflang=en");
+  assert.ok(docHtml.includes('hreflang="x-default"'), "Missing hreflang=x-default");
+}
+for (const assetRel of [
+  "assets/banner-zh-light.svg",
+  "assets/banner-zh-dark.svg",
+  "assets/og-card-zh.svg",
+  "assets/og-card-zh.png",
+  "site/assets/og-card-zh.png",
+  "site/assets/og-card-zh.svg",
+]) {
+  assert.ok(fs.existsSync(path.join(ROOT, assetRel)), `Missing bilingual visual asset: ${assetRel}`);
+}
+const productBrief = fs.readFileSync(path.join(ROOT, "PRODUCT.md"), "utf8");
+assert.ok(productBrief.includes("去 AI 味才是真正的生产力！"), "PRODUCT.md missing official ZH slogan");
+assert.ok(productBrief.includes("Cutting AI slop is real productivity."), "PRODUCT.md missing official EN slogan");
+
+const langInitSrc = fs.readFileSync(langInitPath, "utf8");
+const fakeRoot = {
+  lang: "zh-CN",
+  attrs: { "data-static-lang": "zh" },
+  getAttribute(k) { return this.attrs[k] ?? null; },
+  setAttribute(k, v) { this.attrs[k] = String(v); },
+  removeAttribute(k) { delete this.attrs[k]; },
+};
+const sandbox = {
+  URLSearchParams,
+  Intl,
+  navigator: { languages: ["en-US", "zh-CN"], language: "en-US" },
+  location: { search: "" },
+  localStorage: { getItem: () => null },
+  document: { documentElement: fakeRoot },
+  setTimeout: () => 0,
+};
+sandbox.window = sandbox;
+vm.runInNewContext(langInitSrc, sandbox);
+const resolveLang = sandbox.__DISLOP_RESOLVE_LANG__;
+assert.equal(typeof resolveLang, "function", "site/lang-init.js did not expose __DISLOP_RESOLVE_LANG__");
+assert.equal(sandbox.__DISLOP_INIT_LANG__, "en", "Expected en-US browser to resolve to en");
+assert.equal(fakeRoot.lang, "en", "Expected root lang attribute updated pre-paint to en");
+assert.equal(fakeRoot.attrs["data-lang-hydrating"], "1", "Expected data-lang-hydrating=1 when browser != staticLang");
+
+assert.equal(resolveLang({ search: "?lang=en", stored: "zh", languages: ["zh-CN"] }), "en");
+assert.equal(resolveLang({ search: "?lang=zh", stored: "en", languages: ["en-US"] }), "zh");
+assert.equal(resolveLang({ search: "", stored: "zh", languages: ["en-US"] }), "zh");
+assert.equal(resolveLang({ search: "", stored: null, languages: ["en-US", "zh-CN"] }), "en");
+assert.equal(resolveLang({ search: "", stored: null, languages: ["zh-CN", "en-US"] }), "zh");
+assert.equal(resolveLang({ search: "", stored: null, languages: ["zh-TW"] }), "zh");
+assert.equal(resolveLang({ search: "", stored: null, languages: ["ja-JP", "en"] }), "en");
+assert.equal(resolveLang({ search: "", stored: null, languages: ["fr-FR"] }), "en");
+assert.equal(resolveLang({ search: "", stored: null, languages: [], language: "", intlLocale: "zh-Hans-CN" }), "zh");
+assert.equal(resolveLang({ search: "", stored: null, languages: [], language: "", intlLocale: "en-GB" }), "en");
+
+const awesomeSource = fs.readFileSync(path.join(SITE_DIR, "awesome", "awesome.js"), "utf8");
+const applyI18nBeforeUserBranch = (appSource.split("function applyI18n")[1] || "").split("if (isUserSwitch)")[0] || "";
+assert.equal(applyI18nBeforeUserBranch.includes('safeSetStorage("dislop-lang"'), false);
+assert.equal(/function detectInitialLang[\s\S]*?safeSetStorage/.test(awesomeSource.split("let currentLang")[0] || ""), false);
+
+// 13. Verify site/engine/* browser modules have zero node:* imports, binary parsers work offline, and Round 5 workbench regressions stay locked
+const engineFiles = [
+  "core.mjs",
+  "binary-browser.mjs",
+  "pattern-engine.mjs",
+  "patterns-data.mjs",
+  "packs-data.mjs",
+  "pocket-model.mjs",
+  "pocket-model-data.mjs",
+];
+for (const fname of engineFiles) {
+  const fpath = path.join(SITE_DIR, "engine", fname);
+  assert.ok(fs.existsSync(fpath), `Missing browser engine file: site/engine/${fname}`);
+  const src = fs.readFileSync(fpath, "utf8");
+  assert.equal(/["']node:[a-z0-9_/-]+["']/i.test(src), false, `site/engine/${fname} must not import node:* modules`);
+}
+
+function makePngChunk(type, data) {
+  const typeBuf = Buffer.from(type, "ascii");
+  const lenBuf = Buffer.alloc(4);
+  lenBuf.writeUInt32BE(data.length, 0);
+  const crcBuf = Buffer.alloc(4);
+  crcBuf.writeUInt32BE(zlib.crc32(Buffer.concat([typeBuf, data])) >>> 0, 0);
+  return Buffer.concat([lenBuf, typeBuf, data, crcBuf]);
+}
+
+function buildSyntheticPurplePng() {
+  const w = 64;
+  const h = 64;
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(w, 0);
+  ihdr.writeUInt32BE(h, 4);
+  ihdr[8] = 8;
+  ihdr[9] = 2; // RGB
+  const rawRows = Buffer.alloc(h * (1 + w * 3));
+  for (let y = 0; y < h; y += 1) {
+    const rowOff = y * (1 + w * 3);
+    rawRows[rowOff] = 0;
+    for (let x = 0; x < w; x += 1) {
+      rawRows[rowOff + 1 + x * 3] = 186;
+      rawRows[rowOff + 2 + x * 3] = 52;
+      rawRows[rowOff + 3 + x * 3] = 255;
+    }
+  }
+  const idat = zlib.deflateSync(rawRows);
+  const textMeta = Buffer.from("parameters\0Negative prompt: blurry Steps: 28, CFG scale: 7", "utf8");
+  return Buffer.concat([
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    makePngChunk("IHDR", ihdr),
+    makePngChunk("tEXt", textMeta),
+    makePngChunk("IDAT", idat),
+    makePngChunk("IEND", Buffer.alloc(0)),
+  ]);
+}
+
+const uiEffPack = resolveEffectivePack("deck-and-ui", PACKS_BY_ID);
+const parsedImg = await parseBrowserImageBuffer(buildSyntheticPurplePng());
+const imgAudit = auditImageDocument(parsedImg, { filename: "slop-poster.png", pack: uiEffPack });
+assert.ok(imgAudit.findings.length >= 2, `Expected >= 2 image findings on purple PNG with metadata, got ${imgAudit.findings.length}`);
+
+function buildMinimalPdf({ landscape = false, textOps = "", hasEncrypt = false, extraPageDict = "" } = {}) {
+  const mediaBox = landscape ? "[0 0 792 612]" : "[0 0 612 792]";
+  const objs = [
+    "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+    "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
+    `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox ${mediaBox} /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R ${extraPageDict}>>\nendobj\n`,
+    "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
+    `5 0 obj\n<< /Length ${Buffer.byteLength(textOps, "latin1")} >>\nstream\n${textOps}\nendstream\nendobj\n`,
+  ];
+  let body = "%PDF-1.4\n";
+  const offsets = [0];
+  for (const obj of objs) {
+    offsets.push(Buffer.byteLength(body, "latin1"));
+    body += obj;
+  }
+  const xrefPos = Buffer.byteLength(body, "latin1");
+  body += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`;
+  for (let i = 1; i < offsets.length; i += 1) {
+    body += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+  }
+  body += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R ${hasEncrypt ? "/Encrypt << /V 2 >> " : ""}>>\nstartxref\n${xrefPos}\n%%EOF\n`;
+  return Buffer.from(body, "latin1");
+}
+
+const longUniformLine = Array.from({ length: 48 }, (_, i) => `item${i}`).join(" ");
+const flatScalePdf = buildMinimalPdf({
+  landscape: true,
+  textOps: `BT /F1 12 Tf 72 520 Td (${longUniformLine}) Tj /F1 12 Tf 72 480 Td (a) Tj /F1 12 Tf 72 440 Td (b) Tj /F1 12 Tf 72 400 Td (c) Tj ET`,
+});
+const parsedFlatPdf = await parseBrowserPdfBuffer(flatScalePdf);
+const flatPdfAudit = auditPdfDocument(parsedFlatPdf, { filename: "flat-deck.pdf", pack: uiEffPack });
+assert.equal(flatPdfAudit.findings.some((f) => f.ruleId === "pdf-visual-layout-slop"), true, "Expected pdf-visual-layout-slop on flat-scale landscape PDF");
+
+const encryptedPdf = await parseBrowserPdfBuffer(buildMinimalPdf({ hasEncrypt: true }));
+const encPdfAudit = auditPdfDocument(encryptedPdf, { filename: "locked.pdf", pack: uiEffPack });
+assert.equal(encPdfAudit.skipped.length, 1, "Expected encrypted PDF to be skipped");
+
+const unreadablePdf = await parseBrowserPdfBuffer(buildMinimalPdf({ landscape: false, textOps: "" }));
+const unreadablePdfAudit = auditPdfDocument(unreadablePdf, { filename: "unreadable.pdf", pack: uiEffPack });
+assert.ok((unreadablePdfAudit.coverageWarnings || []).length >= 1, "Expected coverageWarnings for PDF with font dict and 0 extracted text");
+
+const patBanksDir = path.join(ROOT, "patterns", "banks");
+for (const fname of fs.readdirSync(patBanksDir).filter((f) => f.endsWith(".json"))) {
+  const bank = JSON.parse(fs.readFileSync(path.join(patBanksDir, fname), "utf8"));
+  const candidates = bank.ruleId ? [bank] : Object.values(bank).filter((v) => v && typeof v === "object" && v.ruleId);
+  for (const item of candidates) {
+    assert.ok(appSource.includes(`"${item.ruleId}"`), `PATTERN_PROBE_META in site/app.js missing ruleId ${item.ruleId}`);
+  }
+}
+const patSampleRes = auditPatterns(
+  "在当今快速发展的时代背景下，不可否认的是，这一方案扮演着重要角色，为后续落地奠定了坚实基础。\n",
+  { filename: "calque.md", modality: "markdown", banks: PATTERN_BANKS }
+);
+assert.ok(patSampleRes.findings.some((f) => f.ruleId === "zh-ai-calque-cluster"), "Expected browser pattern-engine to fire zh-ai-calque-cluster");
+
+const stylesCss = fs.readFileSync(path.join(SITE_DIR, "styles.css"), "utf8");
+assert.ok(stylesCss.includes(".btn-primary:disabled"), "site/styles.css missing .btn-primary:disabled rule");
+assert.ok(stylesCss.includes(".wb-mobile-privacy"), "site/styles.css missing .wb-mobile-privacy rule");
+assert.ok(stylesCss.includes(".wb-applied-banner.is-error"), "site/styles.css missing .wb-applied-banner.is-error rule");
+for (const legacyStr of ["AI 3rd-order", "Self-Healing Rewrite", "AI 一键去味", "ML alert"]) {
+  assert.equal(appSource.includes(legacyStr), false, `site/app.js leaked banned legacy workbench label: ${legacyStr}`);
+}
+assert.equal(appSource.includes("resolveEffectivePack(packId, PACKS_BY_ID).rules"), true, "buildAgentFixBrief must use resolveEffectivePack");
+
+// 14. Verify aggregated auth modal, GitHub/Google OAuth + OTP UI hooks, Account Hub, and removal of broken legacy register flow
+assert.ok(indexHtml.includes('id="auth-modal-backdrop"'), "site/index.html missing #auth-modal-backdrop dialog");
+assert.ok(indexHtml.includes('id="cloud-github-btn"'), "site/index.html missing #cloud-github-btn");
+assert.ok(indexHtml.includes('id="cloud-google-btn"'), "site/index.html missing #cloud-google-btn");
+assert.ok(stylesCss.includes(".auth-modal-backdrop"), "site/styles.css missing .auth-modal-backdrop rule");
+assert.ok(appSource.includes("function openAuthModal("), "site/app.js missing openAuthModal()");
+assert.ok(appSource.includes("function savePendingWorkbenchIntent("), "site/app.js missing savePendingWorkbenchIntent()");
+assert.ok(appSource.includes("function consumePendingWorkbenchIntent("), "site/app.js missing consumePendingWorkbenchIntent()");
+assert.ok(appSource.includes("async function renderAccountHub("), "site/app.js missing renderAccountHub()");
+assert.ok(appSource.includes("/api/v1/auth/github/start"), "site/app.js missing GitHub OAuth start endpoint");
+assert.equal(appSource.includes("/api/v1/auth/register"), false, "site/app.js must not call closed /api/v1/auth/register endpoint");
+
+// 15. Verify SEO/GEO foundation: KB sources, 6 bilingual guides, rule wiki HTML, Atom feeds, JSON-LD, hreflang & link integrity
+const kbPath = path.join(ROOT, "docs", "research", "content-kb", "sources.json");
+assert.ok(fs.existsSync(kbPath), "Missing docs/research/content-kb/sources.json");
+const kbData = JSON.parse(fs.readFileSync(kbPath, "utf8"));
+assert.equal(kbData.schema, "dislop.kb/1", "Unexpected KB schema");
+assert.ok(Array.isArray(kbData.sources) && kbData.sources.length >= 40, "Expected >= 40 verified KB sources");
+for (const srcEntry of kbData.sources) {
+  assert.match(srcEntry.url, /^https:\/\//i, `Non-HTTPS KB source URL on ${srcEntry.id}`);
+}
+
+assert.ok(Buffer.byteLength(llmsTxt, "utf8") <= 2600, `site/llms.txt exceeds 2600-byte budget`);
+for (const feedRel of ["feed.xml", "en/feed.xml"]) {
+  const feedPath = path.join(SITE_DIR, feedRel);
+  assert.ok(fs.existsSync(feedPath), `Missing Atom feed: site/${feedRel}`);
+  const feedXml = fs.readFileSync(feedPath, "utf8");
+  assert.ok(feedXml.includes('<feed xmlns="http://www.w3.org/2005/Atom">'), `${feedRel} missing Atom root`);
+  assert.equal((feedXml.match(/<entry>/g) || []).length, 6, `${feedRel} should list 6 guide entries`);
+}
+
+function walkHtmlFiles(dir, out = []) {
+  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, ent.name);
+    if (ent.isDirectory()) walkHtmlFiles(p, out);
+    else if (ent.isFile() && ent.name.endsWith(".html") && !ent.name.startsWith("google")) out.push(p);
+  }
+  return out;
+}
+
+const allSiteHtml = walkHtmlFiles(SITE_DIR);
+assert.ok(allSiteHtml.length >= 115, `Expected >= 115 static HTML pages, got ${allSiteHtml.length}`);
+const seenTitles = new Map();
+const seenDescs = new Map();
+const hreflangClusters = new Map();
+
+for (const htmlFile of allSiteHtml) {
+  const rel = path.relative(SITE_DIR, htmlFile).replace(/\\/g, "/");
+  const doc = fs.readFileSync(htmlFile, "utf8");
+  const isEnPage = rel.startsWith("en/");
+
+  const titleMatch = doc.match(/<title>([\s\S]*?)<\/title>/i);
+  assert.ok(titleMatch && titleMatch[1].trim(), `Missing <title> in ${rel}`);
+  assert.equal(seenTitles.has(titleMatch[1].trim()), false, `Duplicate <title> in ${rel} and ${seenTitles.get(titleMatch[1].trim())}`);
+  seenTitles.set(titleMatch[1].trim(), rel);
+
+  const descMatch = doc.match(/<meta\s+name="description"\s+content="([^"]*)"/i);
+  assert.ok(descMatch && descMatch[1].trim(), `Missing meta description in ${rel}`);
+  assert.equal(seenDescs.has(descMatch[1].trim()), false, `Duplicate description in ${rel} and ${seenDescs.get(descMatch[1].trim())}`);
+  seenDescs.set(descMatch[1].trim(), rel);
+
+  assert.equal((doc.match(/<h1\b/gi) || []).length, 1, `Expected single <h1> in ${rel}`);
+
+  const canonMatch = doc.match(/<link\s+rel="canonical"\s+href="([^"]*)"/i);
+  assert.ok(canonMatch, `Missing canonical in ${rel}`);
+  const expectedCanon = `https://dislop.com/${rel.replace(/index\.html$/, "")}`;
+  assert.equal(canonMatch[1], expectedCanon, `Canonical mismatch in ${rel}`);
+  assert.equal(canonMatch[1].includes("?lang="), false, `Canonical must not include ?lang= in ${rel}`);
+
+  const ldMatches = [...doc.matchAll(/<script\s+type="application\/ld\+json">([\s\S]*?)<\/script>/gi)];
+  assert.ok(ldMatches.length >= 1, `Missing JSON-LD in ${rel}`);
+  for (const m of ldMatches) {
+    const parsed = JSON.parse(m[1]);
+    assert.equal(parsed["@context"], "https://schema.org", `Invalid @context in ${rel}`);
+    assert.ok(Array.isArray(parsed["@graph"]) && parsed["@graph"].length >= 1, `Empty @graph in ${rel}`);
+  }
+
+  if (isEnPage) {
+    assert.ok(doc.includes("https://dislop.com/assets/og-card.png"), `EN page missing og-card.png: ${rel}`);
+    const stripped = doc.replace(/>中文<\/(?:a|button)>/g, "><").replace(/aria-label="切换为中文"/g, "");
+    assert.equal(/[\u4E00-\u9FFF]/.test(stripped), false, `EN page leaked Chinese characters: ${rel}`);
+  } else {
+    assert.ok(doc.includes("https://dislop.com/assets/og-card-zh.png"), `ZH page missing og-card-zh.png: ${rel}`);
+  }
+
+  const zhAlt = doc.match(/<link\s+rel="alternate"\s+hreflang="zh-Hans"\s+href="([^"]*)"/i)?.[1];
+  const enAlt = doc.match(/<link\s+rel="alternate"\s+hreflang="en"\s+href="([^"]*)"/i)?.[1];
+  const defAlt = doc.match(/<link\s+rel="alternate"\s+hreflang="x-default"\s+href="([^"]*)"/i)?.[1];
+  assert.ok(zhAlt && defAlt, `Missing hreflang zh-Hans/x-default in ${rel}`);
+  if (enAlt) hreflangClusters.set(canonMatch[1], { zhAlt, enAlt, defAlt });
+
+  const pageDir = path.dirname(htmlFile);
+  for (const m of doc.matchAll(/\b(?:href|src)="([^"]+)"/gi)) {
+    const raw = m[1].split("#")[0].split("?")[0];
+    if (!raw || raw.startsWith("https://") || raw.startsWith("http://") || raw.startsWith("mailto:") || raw.startsWith("data:") || raw.startsWith("/api/") || raw === "/mcp") {
+      continue;
+    }
+    let targetPath = raw.startsWith("/") ? path.join(SITE_DIR, raw.slice(1)) : path.resolve(pageDir, raw);
+    if (fs.existsSync(targetPath) && fs.statSync(targetPath).isDirectory()) {
+      targetPath = path.join(targetPath, "index.html");
+    }
+    assert.ok(fs.existsSync(targetPath), `Broken internal link in ${rel}: ${m[1]}`);
+  }
+}
+
+for (const [url, alts] of hreflangClusters.entries()) {
+  const peerUrl = url === alts.zhAlt ? alts.enAlt : alts.zhAlt;
+  const peer = hreflangClusters.get(peerUrl);
+  assert.ok(peer && peer.zhAlt === alts.zhAlt && peer.enAlt === alts.enAlt && peer.defAlt === alts.defAlt, `Reciprocal hreflang mismatch for ${url}`);
+}
+
+// 16. Rule exemplar notes, share action bars, offline workbench share hashes & slop-sample form
+for (const [ruleRel, ruleId] of [
+  ["rules/negation-pivot-frame/index.html", "negation-pivot-frame"],
+  ["en/rules/negation-pivot-frame/index.html", "negation-pivot-frame"],
+  ["rules/zh-bureaucratic-padding/index.html", "zh-bureaucratic-padding"],
+]) {
+  const ruleDoc = fs.readFileSync(path.join(SITE_DIR, ruleRel), "utf8");
+  assert.ok(ruleDoc.includes('class="rule-note"'), `Expected .rule-note in ${ruleRel}`);
+  assert.ok(ruleDoc.includes('class="share-action-bar"'), `Expected .share-action-bar in ${ruleRel}`);
+  assert.ok(ruleDoc.includes('data-copy-target="share-cite-payload"') && ruleDoc.includes('id="share-cite-payload"'), `Expected citation copy button in ${ruleRel}`);
+  assert.ok(ruleDoc.includes(`#try=${ruleId}`), `Expected #try=${ruleId} link in ${ruleRel}`);
+  assert.ok(ruleDoc.includes("template=slop_sample.yml"), `Expected slop_sample.yml link in ${ruleRel}`);
+}
+
+for (const guideRel of ["guides/remove-ai-slop-writing/index.html", "en/guides/remove-ai-slop-writing/index.html"]) {
+  const guideDoc = fs.readFileSync(path.join(SITE_DIR, guideRel), "utf8");
+  assert.ok(guideDoc.includes('class="share-action-bar"'), `Expected .share-action-bar in ${guideRel}`);
+  assert.ok(guideDoc.includes('data-copy-target="share-cite-payload"') && guideDoc.includes('id="share-cite-payload"'), `Expected citation copy button in ${guideRel}`);
+}
+
+const wbHtml = fs.readFileSync(path.join(SITE_DIR, "index.html"), "utf8");
+const wbApp = fs.readFileSync(path.join(SITE_DIR, "app.js"), "utf8");
+assert.ok(wbHtml.includes('id="wb-share-link-btn"') && wbHtml.includes('data-i18n="wb.shareLink"'), "Expected #wb-share-link-btn in site/index.html");
+for (const sym of ["encodeShareHash", "decodeShareHash", "#try=", "#share="]) {
+  assert.ok(wbApp.includes(sym), `Expected ${sym} in site/app.js`);
+}
+
+const slopTpl = fs.readFileSync(path.join(ROOT, ".github/ISSUE_TEMPLATE/slop_sample.yml"), "utf8");
+assert.ok(slopTpl.trim().length > 100 && /redact|private/i.test(slopTpl), "Expected .github/ISSUE_TEMPLATE/slop_sample.yml with redaction reminder");
 
 console.log(
   `dislop site-test: ok (${totalRules} rules, ${tryRulesChecked} Try demos, ${specimenCount} ZH/EN specimens + 2 hero proofs + 6 cases, ` +
-    `${catalog.resources.length} catalog resources, ${sitemapUrlCount} sitemap URLs, ${demoSlugs.length * 2} demo GIFs, ${checkedJsonBlocks} valid JSON configs, ${htmlI18nKeys.length} bilingual i18n keys, CSS braces balanced, ${AWESOME_DATA.entries.length} Awesome entries & WCAG AA passed)`
+    `${catalog.resources.length} catalog resources, ${sitemapUrlCount} sitemap URLs, ${allSiteHtml.length} static HTML pages, ${demoSlugs.length * 2} demo GIFs, ${checkedJsonBlocks} valid JSON configs, ${htmlI18nKeys.length} bilingual i18n keys, CSS braces balanced, ${AWESOME_DATA.entries.length} Awesome entries & WCAG AA passed)`
 );

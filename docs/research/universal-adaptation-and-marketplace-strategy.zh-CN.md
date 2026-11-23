@@ -23,6 +23,7 @@
 1. **“全适配”靠标准协议收敛，不靠每个软件写一套逻辑**。2026 年主流宿主已经高度收敛到 6 种标准载体：`SKILL.md`（`agentskills.io`）、`CLI`（npm / PyPI）、`MCP`（本地 `stdio` + 远程 `streamable-http`）、`Agent Plugins 1.0` 清单（`agent-plugins.org`）、兼容 Open VSX 的轻量 `VSIX` 扩展，以及 Git 仓库级配置模板。维护好这 6 份同源薄壳，就能覆盖市面上 95% 以上的工具。
 2. **严格区分“兼容运行”与“自带搜索流量的商店”**。很多终端工具没有中心化商店，只要支持 CLI、Skill 或 MCP 就能直接用，写进文档和官网安装矩阵即可；真正的包装精力（图标、动图、关键词、首屏提示词、双通道提审）必须集中砸向**带客户端内搜索、排行榜或一键安装卡片**的 9 个核心流量入口。
 3. **集成效果取决于“触发时机分层”，而不是把所有规则塞进同一个口子**。只挂一个被动 MCP Server，模型在长任务里经常忘记调用；反过来，如果把所有文风 `warning` 规则都挂进每次写文件的阻塞 Hook，又会把编码 Agent 卡进反复改写的死循环。有效做法是：**动笔前靠精简 Skill 预防、编辑中靠内存级波浪线或紧凑 MCP 诊断、交稿/提交前只拿 `packs/core` 的客观硬伤（`error`）做自动拦截**。
+   - 行业对照印证（详见 [grammarly-evolution-and-agent-lessons.zh-CN.md](./grammarly-evolution-and-agent-lessons.zh-CN.md)）：Grammarly / Superhuman Go 凭借「原位消除 AI 绕道 + 98% 请求跑在 `< 100ms` 定制小模型」跑通了高频调用，随后却因插件 AI 膨胀、高频推销弹窗和生硬改写提醒引发老用户卸载；同时，Superhuman Docs 与 Go 分别开放 MCP Server 和第三方 SDK 也说明协议互操作才是主流。这反过来验证了 `dislop` 坚持「协议薄壳 + 毫秒级本地核 + 非阻断标线 + 连续 2 次熔断」的长期价值。
 4. **Orca、Herdr 这类多 Agent 编排器的核心痛点在“Git Worktree 隔离”与“收口验收”**。当开发者同时开 5 到 10 个 Agent 并行干活时，没人会逐个终端窗口手动点检查。谁能帮他们在每个隔离 worktree 里自动继承本地词表（`.dislop.local.json`），并在 Agent 报完工或提 PR 前用 `< 100ms` 拦住未填占位符、开头寒暄和空链接，谁就能成为这类多 Agent 工作流的默认质检门禁。
 
 ---

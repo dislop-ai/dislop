@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-static-lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比 — dislop</title>
+  <meta name="description" content="对比概率型 AI 文本检测器（Fast-DetectGPT、Pangram、朱雀）、纯提示词 Skill（Humanizer-zh、stop-slop）与确定性检查器（Vale、dislop）的能力边界。">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/guides/linter-vs-detector-vs-skill/">
+  <meta property="og:title" content="去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比 — dislop">
+  <meta property="og:description" content="对比概率型 AI 文本检测器（Fast-DetectGPT、Pangram、朱雀）、纯提示词 Skill（Humanizer-zh、stop-slop）与确定性检查器（Vale、dislop）的能力边界。">
+  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比 — dislop">
+  <meta name="twitter:description" content="对比概率型 AI 文本检测器（Fast-DetectGPT、Pangram、朱雀）、纯提示词 Skill（Humanizer-zh、stop-slop）与确定性检查器（Vale、dislop）的能力边界。">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <link rel="canonical" href="https://dislop.com/guides/linter-vs-detector-vs-skill/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/linter-vs-detector-vs-skill/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/linter-vs-detector-vs-skill/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/linter-vs-detector-vs-skill/">
+  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop 实用指南（中文）">
+  <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/guides/linter-vs-detector-vs-skill/",
+      "url": "https://dislop.com/guides/linter-vs-detector-vs-skill/",
+      "headline": "去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比",
+      "description": "对比概率型 AI 文本检测器（Fast-DetectGPT、Pangram、朱雀）、纯提示词 Skill（Humanizer-zh、stop-slop）与确定性检查器（Vale、dislop）的能力边界。",
+      "inLanguage": "zh-CN",
+      "datePublished": "2026-11-23",
+      "dateModified": "2026-11-23",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "image": "https://dislop.com/assets/og-card-zh.png",
+      "citation": [
+        "https://github.com/baoguangsheng/fast-detect-gpt",
+        "https://github.com/ahans30/Binoculars",
+        "https://pangram.com/",
+        "https://matrix.tencent.com/ai-detect/",
+        "https://github.com/vale-cli/vale",
+        "https://github.com/op7418/Humanizer-zh",
+        "https://github.com/hardikpandya/stop-slop",
+        "https://github.com/anthropics/skills/tree/main/skills/frontend-design",
+        "https://github.com/pbakaus/impeccable",
+        "https://arxiv.org/abs/2510.22954"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "实用指南",
+          "item": "https://dislop.com/guides/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "去 AI 味工具对比",
+          "item": "https://dislop.com/guides/linter-vs-detector-vs-skill/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "为什么不能直接用 AI 文本检测器当去 AI 味工具？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Fast-DetectGPT、Binoculars 或腾讯朱雀算的是词元概率分布，最后给一个整体概率分。不仅存在把书面正式中文误判成 AI 的风险，而且不告诉你具体哪句是空话、哪页 PPT 字太挤，也没法修网页里的 href=\\\"#\\\"。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Vale 和 dislop 都是确定性检查器，该用哪一个？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "如果团队已经有成熟的英文技术文档风格库并重度依赖自定义 YAML 词典，Vale 非常合适；如果需要开箱即用同时排查中英文二阶 AI 句式、Tailwind 网页模板味、SVG、Word/PPT 和 PDF，dislop 覆盖面更全，且两者可以在 CI 里并行运行。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "有了 Humanizer-zh 或 stop-slop 这种 Skill，为什么还要配本地检查？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Skill 本质上是喂给大模型的文字提示，遇到长上下文或切回英文/表格时模型仍可能漏网。用 Skill 管住“写前习惯”，再用确定性检查器管住“交付底线”，才能真正把问题拦在发出之前。"
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳至正文</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../">
+        <img src="../../assets/logo.svg" width="28" height="28" alt="dislop 图标">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a href="../../#workbench">在线试</a>
+        <a href="../../guides/" aria-current="page">指南</a>
+        <a href="../../awesome/">工具清单</a>
+        <a href="../../rules/">规则</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../en/guides/linter-vs-detector-vs-skill/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="Switch to English">EN</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="面包屑导航">
+        <a href="../../">dislop</a> / <a href="../">实用指南</a> / <span aria-current="page">去 AI 味工具对比</span>
+      </nav>
+
+      <article>
+        <header>
+          <h1 class="lead-heading" style="max-width:30ch;">去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比</h1>
+          <div class="article-meta">
+            <span>选型与基准</span>
+            <span>更新于 2026-11-23</span>
+            <span>6 分钟阅读</span>
+            <a href="./index.md">Markdown</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">先说结论</div>
+            <p>概率型 AI 检测器只能告诉你“疑似度 82%”，却不指明哪句有问题；纯写作 Skill 能提前压住套话，但模型写嗨了还是会漏；确定性检查器（如 Vale、dislop）负责在发稿前按行标出硬伤和句式模板，三者分工不同、不能互相替代。</p>
+          </div>
+        </header>
+
+        <div class="article-shell">
+          <div class="article-prose">
+<p>在社区里搜“去 AI 味工具”，经常会同时搜出三类完全不同的东西：写着“检测 AI 率”的网页检测器、贴给 Claude/Codex 的 Markdown Skill，以及跑在命令行里的静态检查器。</p>
+
+<p>把三类工具混为一谈，往往买错或配错流水线。我们整理了 <a href="/awesome/">90 条核验工具清单</a> 的真实分类，先把这三类工具的输入、输出和短板摆在桌面上。</p>
+
+<h2 id="1-三类工具能力对照表">1. 三类工具能力对照表</h2>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>工具类型</th><th>代表项目</th><th>它输出什么</th><th>擅长解决的问题</th><th>明显短板</th></tr></thead><tbody>
+<tr><td><strong>概率型 AI 检测器</strong></td><td>Fast-DetectGPT、Binoculars、Pangram、腾讯朱雀</td><td>整篇文本的“AI 概率分”（如 0–100%）</td><td>学术或内容平台做统计抽样参考</td><td>不给出具体行号和改法，易受模型版本漂移影响，不看网页与 PPT</td></tr>
+<tr><td><strong>写作 / 设计 Skill</strong></td><td><code>Humanizer-zh</code>、<code>stop-slop</code>、<code>frontend-design</code>、<code>Impeccable</code></td><td>注入大模型上下文的写作/审美规范</td><td>在模型动笔阶段压低套话和模板味</td><td>依赖模型自觉遵守，长对话后易遗忘，无法做 0/1 门禁</td></tr>
+<tr><td><strong>确定性静态检查器</strong></td><td><code>Vale</code>、<code>textlint</code>、<code>dislop</code></td><td>精确文件、行号、规则 ID 与退出码</td><td>本地/CI 100% 可复现拦截硬伤、套句与页面/PPT 缺陷</td><td>不替代人工核对业务事实准确性</td></tr>
+</tbody></table></div>
+
+<h2 id="2-常见疑问ai-检测器高分等于有-ai-味吗">2. 常见疑问：AI 检测器高分，等于“有 AI 味”吗？</h2>
+
+<p>不一定。很多人类写的标准行业规范、招投标说明和正式新闻稿，因为用词整齐、信息密度克制，在概率型检测器里也会拿到不低的分数；反过来，拿同义词乱洗稿虽然有时能骗过统计检测器，读者一眼还是觉得像机器写的（比如删掉了禁用词，却满屏“不是……而是……”反转句）。</p>
+
+<p>因此，<code>dislop</code> 在工具清单里把概率型检测器和规避工具单独隔离在“检测与规避研究（仅供对照）”里，定位非常明确：<strong>我们只帮你把残留、空话和模板排版清理干净，不去做针对检测系统的对抗伪装。</strong></p>
+
+<h2 id="3-不同人的最小实用组合">3. 不同人的最小实用组合</h2>
+
+<ol>
+<li><strong>个人文字创作者 / 编辑</strong>：写前参考 <code>Humanizer-zh</code> 或 <code>stop-slop</code> 建好写作骨架，定稿前贴进官网工作台本地检查，0 命中再发。</li>
+<li><strong>前端与全栈开发者</strong>：在 Claude Code / Cursor 里加载 <code>frontend-design</code> 或 <code>Impeccable</code> 负责出稿审美，再把 <code>npx --yes dislop check . --fail-on error</code> 放进 Git 预提交或 PR 门禁。</li>
+<li><strong>技术文档与多语种团队</strong>：英文技术文档已有 <code>Vale</code> 规范的可以继续保留，同时叠加 <code>dislop</code> 补齐中文公文腔、二阶句式以及 <code>.docx</code>/<code>.pptx</code>/<code>.pdf</code> 办公文件检查。</li>
+</ol>
+
+<p>想看完整 90 个工具的星标、更新日期和协议对比，可以直接打开 <a href="/awesome/">去 AI 味工具清单（Awesome Anti-Slop）</a> 在线筛选。</p>
+<h2 id="faq">常见问题</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>为什么不能直接用 AI 文本检测器当去 AI 味工具？</h3>
+            <p>Fast-DetectGPT、Binoculars 或腾讯朱雀算的是词元概率分布，最后给一个整体概率分。不仅存在把书面正式中文误判成 AI 的风险，而且不告诉你具体哪句是空话、哪页 PPT 字太挤，也没法修网页里的 href=\&quot;#\&quot;。</p>
+          </div>
+          <div class="faq-item">
+            <h3>Vale 和 dislop 都是确定性检查器，该用哪一个？</h3>
+            <p>如果团队已经有成熟的英文技术文档风格库并重度依赖自定义 YAML 词典，Vale 非常合适；如果需要开箱即用同时排查中英文二阶 AI 句式、Tailwind 网页模板味、SVG、Word/PPT 和 PDF，dislop 覆盖面更全，且两者可以在 CI 里并行运行。</p>
+          </div>
+          <div class="faq-item">
+            <h3>有了 Humanizer-zh 或 stop-slop 这种 Skill，为什么还要配本地检查？</h3>
+            <p>Skill 本质上是喂给大模型的文字提示，遇到长上下文或切回英文/表格时模型仍可能漏网。用 Skill 管住“写前习惯”，再用确定性检查器管住“交付底线”，才能真正把问题拦在发出之前。</p>
+          </div>
+        </div>
+<h2 id="related-rules">对应的自动检查规则</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../rules/low-burstiness-vapor/"><code>low-burstiness-vapor</code> · 句长齐平且缺具体事实</a>
+<a class="related-link-chip" href="../../rules/cooccurrence-slop-cluster/"><code>cooccurrence-slop-cluster</code> · 低事实段落堆叠空泛动词</a>
+<a class="related-link-chip" href="../../rules/negation-pivot-frame/"><code>negation-pivot-frame</code> · “不是 A，而是 B”套句</a>
+<a class="related-link-chip" href="../../rules/chatbot-artifact/"><code>chatbot-artifact</code> · 留在正文里的 AI 寒暄</a>
+<a class="related-link-chip" href="../../rules/ui-dead-control/"><code>ui-dead-control</code> · 点不动的假按钮或空链接</a>
+</div>
+<h2 id="next-guides">延伸阅读</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../what-is-ai-slop/">什么是 AI 味</a>
+<a class="related-link-chip" href="../remove-ai-slop-writing/">写作怎么去 AI 味</a>
+<a class="related-link-chip" href="../agent-cli-mcp-tutorial/">Agent 与 CI 接入教程</a>
+</div>
+<h2 id="sources">参考与一手出处</h2>
+        <ul>
+          <li><a href="https://github.com/baoguangsheng/fast-detect-gpt" target="_blank" rel="noopener">Fast-DetectGPT: Efficient Zero-Shot Detection of Machine-Generated Text</a> — Probabilistic conditional-probability curvature detector for flagging likely machine-generated text; useful as a statistical reference, not a rewrite guide.</li>
+          <li><a href="https://github.com/ahans30/Binoculars" target="_blank" rel="noopener">Binoculars: Zero-Shot Detection of LLM-Generated Text</a> — Compares perplexity and cross-perplexity between two observer models to classify machine-generated passages.</li>
+          <li><a href="https://pangram.com/" target="_blank" rel="noopener">Pangram AI Detection</a> — Commercial AI-text classifier cited in Substack's creator-reaction discussions; probabilistic scores do not tell writers which phrase or slide defect to edit.</li>
+          <li><a href="https://matrix.tencent.com/ai-detect/" target="_blank" rel="noopener">腾讯朱雀 AI 文本检测器（对照参考）</a> — 提供中文 AI 文本概率打分，只给出百分比结果，不定位具体公文腔、半角标点或排版硬伤。</li>
+          <li><a href="https://github.com/vale-cli/vale" target="_blank" rel="noopener">vale-cli/vale: Syntax-aware linter for prose</a> — 6,413 stars (2026-11-21 snapshot); deterministic prose linter for Markdown, HTML, and AsciiDoc built around configurable YAML style rules.</li>
+          <li><a href="https://github.com/op7418/Humanizer-zh" target="_blank" rel="noopener">op7418/Humanizer-zh: 中文去 AI 味写作技能</a> — 23,450 星标（2026-11-21 快照）；针对中文写作里的套话、公文腔与翻译腔整理对照清单，适合作为写作前提示参考。</li>
+          <li><a href="https://github.com/hardikpandya/stop-slop" target="_blank" rel="noopener">hardikpandya/stop-slop</a> — 19,097 stars (2026-11-21 snapshot); separates banned phrases, structural patterns, and before/after examples with a five-axis rubric.</li>
+          <li><a href="https://github.com/anthropics/skills/tree/main/skills/frontend-design" target="_blank" rel="noopener">anthropics/skills — frontend-design</a> — 198,134 repo stars (2026-11-21 snapshot); warns coding agents against generic SaaS palettes, purple gradients, and default AI card grids.</li>
+          <li><a href="https://github.com/pbakaus/impeccable" target="_blank" rel="noopener">pbakaus/impeccable: Design rules &amp; /audit workflow for AI-built UI</a> — 114,155 stars (2026-11-21 snapshot); packages frontend anti-slop design rules, 7 domain references, and commands like /audit and /polish.</li>
+          <li><a href="https://arxiv.org/abs/2510.22954" target="_blank" rel="noopener">Artificial Hivemind: The Open-Ended Homogeneity of Language Models (and Beyond) (NeurIPS 2025)</a> — Using the Infinity-Chat dataset, demonstrated both intra-model repetition and inter-model homogeneity across different LLM families.</li>
+        </ul>
+<div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../?lang=zh#workbench">去工作台试查 →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">复制引用（PR / 群聊）</button><code id="share-cite-payload" hidden>[去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比](https://dislop.com/guides/linter-vs-detector-vs-skill/) — 对比概率型 AI 文本检测器（Fast-DetectGPT、Pangram、朱雀）、纯提示词 Skill（Humanizer-zh、stop-slop）与确定性检查器（Vale、dislop）的能力边界。</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">投稿翻车样本</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub 收藏 ★</a>
+        </div>
+          </div>
+        <aside class="toc-rail" aria-label="本文目录">
+          <h2 class="toc-rail-title">本文目录</h2>
+          <ol>
+            <li><a href="#1-三类工具能力对照表">1. 三类工具能力对照表</a></li>
+            <li><a href="#2-常见疑问ai-检测器高分等于有-ai-味吗">2. 常见疑问：AI 检测器高分，等于“有 AI 味”吗？</a></li>
+            <li><a href="#3-不同人的最小实用组合">3. 不同人的最小实用组合</a></li>
+          </ol>
+        </aside>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>这个页面自己也跑过 dislop check site/，0 处问题。给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../guides/">实用指南</a>
+        <a href="../../awesome/">工具清单</a>
+        <a href="../../rules/">全部规则</a>
+        <a href="../../privacy.md">隐私说明</a>
+        <a href="../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">关闭</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../static-ui.js"></script>
+
+</body>
+</html>

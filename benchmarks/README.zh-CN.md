@@ -1,6 +1,6 @@
 # dislop 去 AI 味效果测试基准（`dislop-bench v2`）
 
-[English](./README.md) · [离线基线报告](./REPORT.md) · [多角度模式库报告](./PATTERN-BENCHMARK.md) · [真实模型在线对比](./MODEL-COMPARISON.md)
+[English](./README.md) · [离线基线报告](./REPORT.md) · [多角度模式库报告](./PATTERN-BENCHMARK.md) · [Agent Skill 评测报告](./SKILL-BENCHMARK.md) · [真实模型在线对比](./MODEL-COMPARISON.md)
 
 这套基准用来回答两个硬问题，不靠主观感觉：
 
@@ -27,6 +27,9 @@ node scripts/pattern_lab.mjs assert
 
 # 在 stealth-vapor-v1 与留出集上离线复测内置 14.6 KB Pocket ML 模型
 PYTHONPATH=src python3 scripts/train_pocket_models.py --eval-only
+
+# 运行 Agent Skill 离线断言与参考卡防泄漏检查
+npm run bench:skill
 
 # 跑 5 种离线技术范式对照实验（传统黑名单 / 纯统计 / 传统 NLP 机器学习 / 多维规则 / 混合画像）
 PYTHONPATH=src python3 scripts/run_text_paradigm_experiments.py
@@ -71,6 +74,12 @@ node scripts/run_benchmark.mjs --export-blind-sheet baseline_no_skill with_dislo
 - `datasets/stealth-vapor-v1.json`：24 份同题配对 2–4 句隐蔽温吞水与真人朴实段落，用于评测内置 Pocket ML 模型。
 - `datasets/revision-v1.json`：12 组端到端文案与设计去 AI 味对照任务。
 - `datasets/revision-hard-v2.json`：6 组多段干净词表文本去 AI 味难例任务（3 中文 + 3 英文）。
+- `datasets/skill-routing-v1.json`：32 条中英文 Skill 触发与参考卡路由评测用例。
+- `datasets/skill-drafting-v1.json`：12 组带核验数字、边界词与方向对的零基起草任务。
+- `datasets/skill-revision-ext-v1.json`：12 组扩展审校与干净原稿防误伤保真任务（含 `.docx`、温吞水、复盘与合规陷阱）。
+- `datasets/skill-holdout-v1.json`：10 组近迁移留出测试任务，覆盖含修订标记 `.docx`、多页 `.pptx`、CLI 帮助文案、跨语种指令与随笔字数下限。
 - `REPORT.md`：由 `scripts/run_benchmark.mjs` 自动生成的核心实测成绩单。
 - `PATTERN-BENCHMARK.md`：由 `scripts/pattern_lab.mjs` 自动生成的 154 样本多角度反模式成绩单。
+- `SKILL-BENCHMARK.md`：Agent Skill 四组对照评测报告（路由、起草、审校、保真、留出集与跨模型盲评）。
 - `results/latest.json`：完整机器可读评分结果。
+- `results/skill-benchmark-latest.json` 与 `results/skill-round-history.json`：脱敏后的 Skill 第 1–5 轮评测汇总。

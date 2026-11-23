@@ -167,6 +167,32 @@
         "good": "The platform syncs edits across 12 regional clusters in under 150 ms using a single Postgres primary.",
         "source": "original"
       }
+    },
+    {
+      "id": "pat-zh-dev-jargon",
+      "ruleId": "zh-dev-jargon",
+      "packId": "business-brief",
+      "category": "language-lexicon",
+      "detectionAngle": "lexicon-cluster",
+      "status": "active",
+      "severityDefault": "warning",
+      "languages": ["zh"],
+      "modalities": ["markdown", "text", "html", "docx", "pptx"],
+      "evidenceLevel": "empirical-corpus",
+      "name": { "en": "Chinese Engineering/Product Jargon Density", "zh": "中文研发与产品自嗨黑话簇" },
+      "mechanism": {
+        "en": "Dense stacking of 3+ Chinese AI/engineering buzzwords (`全闭环`, `收口`, `强兜底`, `硬熔断`, `拉齐`, `零误差`, `体系化`) inside a single paragraph hides actual retry/exit behavior.",
+        "zh": "单段堆砌 3 处及以上中文研发/产品自嗨黑话（全闭环、收口、强兜底、硬熔断、拉齐、零误差、……化），用强硬姿态词替代具体的重试次数、状态码与限流阈值。"
+      },
+      "tags": ["dev-jargon", "zh", "闭环", "兜底", "收口", "熔断", "黑话"],
+      "falsePositiveGuards": ["Requires >= 3 distinct buzzwords in the same paragraph or table cell so single standard architecture terms do not fire."],
+      "modelTendencies": ["qwen-family", "deepseek-family", "general-llm"],
+      "exemplar": {
+        "bad": "本次发布建立全闭环校验机制，通过硬熔断完成总收口并形成强兜底，确保链路零误差交付。",
+        "trap": "这不只是发布脚本，而是零缺陷交付的工程铁律。",
+        "good": "发布脚本在合入前运行单测与类型检查；任一失败直接退出非零状态码，并保留前一次构建产物用于回滚。",
+        "source": "original"
+      }
     }
   ]
 }

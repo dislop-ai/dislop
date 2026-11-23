@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.dislop-ai/dislop",
   "title": "dislop",
-  "description": "Linter for AI Slop in docs, web UI, and slides — Official Cloud MCP.",
+  "description": "Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI & slides (Cloud MCP).",
   "version": "0.7.1",
   "websiteUrl": "https://dislop.com",
   "repository": {

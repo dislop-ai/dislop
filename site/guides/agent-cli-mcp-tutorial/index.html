@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-static-lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程 — dislop</title>
+  <meta name="description" content="按场景选择纯文档 Skill、零依赖本地 CLI、GitHub Actions 增量门禁，或免安装官网远程 MCP。">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/guides/agent-cli-mcp-tutorial/">
+  <meta property="og:title" content="把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程 — dislop">
+  <meta property="og:description" content="按场景选择纯文档 Skill、零依赖本地 CLI、GitHub Actions 增量门禁，或免安装官网远程 MCP。">
+  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程 — dislop">
+  <meta name="twitter:description" content="按场景选择纯文档 Skill、零依赖本地 CLI、GitHub Actions 增量门禁，或免安装官网远程 MCP。">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <link rel="canonical" href="https://dislop.com/guides/agent-cli-mcp-tutorial/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/agent-cli-mcp-tutorial/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/agent-cli-mcp-tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/agent-cli-mcp-tutorial/">
+  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop 实用指南（中文）">
+  <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/guides/agent-cli-mcp-tutorial/",
+      "url": "https://dislop.com/guides/agent-cli-mcp-tutorial/",
+      "headline": "把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程",
+      "description": "按场景选择纯文档 Skill、零依赖本地 CLI、GitHub Actions 增量门禁，或免安装官网远程 MCP。",
+      "inLanguage": "zh-CN",
+      "datePublished": "2026-11-23",
+      "dateModified": "2026-11-23",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "image": "https://dislop.com/assets/og-card-zh.png",
+      "citation": [
+        "https://agentskills.io/specification",
+        "https://llmstxt.org/",
+        "https://github.com/vale-cli/vale",
+        "https://github.com/ghostty-org/ghostty/blob/main/AI_POLICY.md",
+        "https://www.coderabbit.ai/reports-guides",
+        "https://developers.google.com/tech-writing"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "实用指南",
+          "item": "https://dislop.com/guides/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Agent 与 CI 接入教程",
+          "item": "https://dislop.com/guides/agent-cli-mcp-tutorial/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "纯文档 Skill 和本地 CLI 有什么区别，需要两个都装吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Skill 是纯 Markdown 参考卡，不含可执行代码，负责在 Agent 动笔前定好规矩；CLI 是本地确定性检查工具，负责在写完后按行号验真。编码用户建议两个配合用：写前读 Skill，提交前跑 dislop check。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "在 CI 里跑全仓库检查会不会把老文档全报一遍？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "不会。用 dislop check --changed origin/main --fail-on error 可以只检查本次 PR 改过的行，既能拦住新混进来的寒暄、空链接和未填占位符，又不打扰存量历史文档。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "如果我在离线内网环境或处理涉密代码，能接远程 MCP 吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "不要接。涉密或内网材料请一律只使用开源纯文档 Skill 和纯本地 CLI（零联网、零上传）；远程 MCP 仅用于非涉密稿件的多模型深度审校与办公文档改写。"
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳至正文</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../">
+        <img src="../../assets/logo.svg" width="28" height="28" alt="dislop 图标">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a href="../../#workbench">在线试</a>
+        <a href="../../guides/" aria-current="page">指南</a>
+        <a href="../../awesome/">工具清单</a>
+        <a href="../../rules/">规则</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../en/guides/agent-cli-mcp-tutorial/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="Switch to English">EN</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="面包屑导航">
+        <a href="../../">dislop</a> / <a href="../">实用指南</a> / <span aria-current="page">Agent 与 CI 接入教程</span>
+      </nav>
+
+      <article>
+        <header>
+          <h1 class="lead-heading" style="max-width:30ch;">把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程</h1>
+          <div class="article-meta">
+            <span>工程接入</span>
+            <span>更新于 2026-11-23</span>
+            <span>6 分钟阅读</span>
+            <a href="./index.md">Markdown</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">先说结论</div>
+            <p>防 AI 味最好分两步：写前挂上纯文档 Skill 让 Agent 少写套话，写完跑离线 <code>dislop check</code> 在本地或 Git PR 里做确定性拦截；如果是 Claude Cowork、WorkBuddy 等不方便装本机环境的办公 Agent，直接连 <code>https://dislop.com/mcp</code>。</p>
+          </div>
+        </header>
+
+        <div class="article-shell">
+          <div class="article-prose">
+<p>开源维护者对“AI 水文 PR”的忍耐已经到达临界点。2026 年初，<code>Ghostty</code> 通过 <code>AI_POLICY.md</code> 强制要求 AI 辅助提交必须先获 Issue 批准并完全理解代码；<code>tldraw</code> 一度自动关闭外部 PR；CodeRabbit 实测 AI 生成 PR 平均多出约 1.7 倍问题。</p>
+
+<p>把去 AI 味检查直接放进日常工具链，分三层接法，1 分钟就能跑起来。</p>
+
+<h2 id="1-一分钟选对接入方式">1. 一分钟选对接入方式</h2>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>使用场景</th><th>推荐形态</th><th>运行位置</th><th>典型命令 / 配置</th></tr></thead><tbody>
+<tr><td><strong>动笔前约束 Agent 写作/设计</strong></td><td>纯文档 Skill</td><td>本地客户端</td><td><code>npx --yes skills add dislop-ai/dislop --skill dislop</code></td></tr>
+<tr><td><strong>写完后本地查硬伤与套话</strong></td><td>开源 CLI（Node / Python）</td><td>纯本机离线</td><td><code>npx --yes dislop check .</code> 或 <code>uvx dislop check .</code></td></tr>
+<tr><td><strong>Git 提交与 PR 自动拦截</strong></td><td><code>--changed</code> + GitHub Actions</td><td>本地 / CI</td><td><code>npx --yes dislop check --changed origin/main --fail-on error</code></td></tr>
+<tr><td><strong>办公 Agent 免环境深度审校</strong></td><td>官方远程 MCP</td><td><code>https://dislop.com/mcp</code></td><td>登录工作台领每月 30 免费额度后直连</td></tr>
+</tbody></table></div>
+
+<h2 id="2-接进编码-agent-与编辑器">2. 接进编码 Agent 与编辑器</h2>
+
+<h3 id="安装纯文档-agent-skillclaude-code-codex-cursor-antigravity">安装纯文档 Agent Skill（Claude Code / Codex / Cursor / Antigravity）</h3>
+
+<p>依据跨端通用的 <code>Agent Skills</code> 规范，一条命令把 4 份按文体拆分的参考卡（工作文档、随笔、办公 PPT、前端网页）装进主流工具：</p>
+
+<pre><code class="language-bash">npx --yes skills add dislop-ai/dislop --skill dislop</code></pre>
+
+<p>如果是网页对话窗不方便装本地包，可以直接发一句：</p>
+
+<pre><code class="language-text">先读 https://dislop.com/llms.txt，按里面整理的文案和设计去 AI 味规矩与检查方法，帮我把接下来这份稿子发之前过一遍。</code></pre>
+
+<h3 id="接进远程-mcpcursor-claude-code-codex">接进远程 MCP（Cursor / Claude Code / Codex）</h3>
+
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;dislop&quot;: {
+      &quot;type&quot;: &quot;http&quot;,
+      &quot;url&quot;: &quot;https://dislop.com/mcp&quot;,
+      &quot;headers&quot;: {
+        &quot;Authorization&quot;: &quot;Bearer dslp_YOUR_FREE_TOKEN&quot;
+      }
+    }
+  }
+}</code></pre>
+
+<figure class="guide-demo" data-demo-card="agent-workflow" data-demo-prefix="../../" data-demo-lang="zh" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../../assets/demos/agent-workflow-zh-v2-poster.png" data-demo-poster="agent-workflow">
+              <source type="image/webp" srcset="../../assets/demos/agent-workflow-zh-v2.webp" data-demo-webp="agent-workflow">
+              <img src="../../assets/demos/agent-workflow-zh-v2.gif" alt="Agent 闭环工作流：加载 SKILL.md、增量门禁退出码 1、修复后 dislop verify 通过" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="agent-workflow">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">6. 编码 Agent + CI 闭环：写前读 Skill，提交前过门禁</strong>
+              <span class="demo-cap-badge">Agent 闭环 · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Agent 先读取纯文档 SKILL.md，再用 --changed origin/main 拦下 PR 寒暄与复读 diff，修完复检确认数字零丢失。</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="agent-workflow" aria-pressed="false">定格</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="agent-workflow">放大看</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<h2 id="3-在-git-钩子与-github-actions-里做增量门禁">3. 在 Git 钩子与 GitHub Actions 里做增量门禁</h2>
+
+<p>在团队仓库里，推荐先把硬伤（<code>packs/core</code>，<code>severity: error</code>）设为阻塞项，把风格提醒留给作者自决，避免误伤老文件：</p>
+
+<pre><code class="language-yaml">name: dislop-gate
+on: [pull_request]
+jobs:
+  check-slop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dislop-ai/dislop@v0.7.1
+        with:
+          args: check --changed origin/${{ github.base_ref }} --fail-on error --format github</code></pre>
+
+<p>对于研发文档和复盘，还可以专门加上 <code>--pack engineering-spec</code>，拦住复读 diff 动作的 <code>eng-pr-diff-parrot</code>、把根因归咎于“人工疏忽/沟通不足”的 <code>eng-shallow-root-cause</code>，以及没有负责人与截止日期的 <code>eng-vague-action-item</code>：</p>
+
+<pre><code class="language-bash">npx --yes dislop check docs/ postmortems/ --pack engineering-spec --fail-on warning</code></pre>
+
+<figure class="guide-demo" data-demo-card="cli-check" data-demo-prefix="../../" data-demo-lang="zh" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../../assets/demos/cli-check-zh-v2-poster.png" data-demo-poster="cli-check">
+              <source type="image/webp" srcset="../../assets/demos/cli-check-zh-v2.webp" data-demo-webp="cli-check">
+              <img src="../../assets/demos/cli-check-zh-v2.gif" alt="dislop CLI 本地离线检查：原稿退出码 1 与清理后退出码 0" width="920" height="460" loading="lazy" decoding="async" data-demo-gif="cli-check">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">2. 命令行门禁：Node 与 Python 结果一致</strong>
+              <span class="demo-cap-badge">CLI 离线 · 6.4s</span>
+            </div>
+            <span class="demo-cap-desc">本地跑 dislop check --profile，硬伤直接返回退出码 1 卡住 CI，顺带输出句长起伏与具体度体检。</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="cli-check" aria-pressed="false">定格</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="cli-check">放大看</button>
+            </div>
+          </figcaption>
+        </figure>
+<h2 id="faq">常见问题</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>纯文档 Skill 和本地 CLI 有什么区别，需要两个都装吗？</h3>
+            <p>Skill 是纯 Markdown 参考卡，不含可执行代码，负责在 Agent 动笔前定好规矩；CLI 是本地确定性检查工具，负责在写完后按行号验真。编码用户建议两个配合用：写前读 Skill，提交前跑 dislop check。</p>
+          </div>
+          <div class="faq-item">
+            <h3>在 CI 里跑全仓库检查会不会把老文档全报一遍？</h3>
+            <p>不会。用 dislop check --changed origin/main --fail-on error 可以只检查本次 PR 改过的行，既能拦住新混进来的寒暄、空链接和未填占位符，又不打扰存量历史文档。</p>
+          </div>
+          <div class="faq-item">
+            <h3>如果我在离线内网环境或处理涉密代码，能接远程 MCP 吗？</h3>
+            <p>不要接。涉密或内网材料请一律只使用开源纯文档 Skill 和纯本地 CLI（零联网、零上传）；远程 MCP 仅用于非涉密稿件的多模型深度审校与办公文档改写。</p>
+          </div>
+        </div>
+<h2 id="related-rules">对应的自动检查规则</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../rules/chatbot-artifact/"><code>chatbot-artifact</code> · 留在正文里的 AI 寒暄</a>
+<a class="related-link-chip" href="../../rules/unfilled-placeholder/"><code>unfilled-placeholder</code> · 忘了填的占位符</a>
+<a class="related-link-chip" href="../../rules/eng-pr-diff-parrot/"><code>eng-pr-diff-parrot</code> · 空泛的 AI 提交摘要壳</a>
+<a class="related-link-chip" href="../../rules/eng-shallow-root-cause/"><code>eng-shallow-root-cause</code> · 复盘止步于“人为失误”</a>
+<a class="related-link-chip" href="../../rules/eng-vague-action-item/"><code>eng-vague-action-item</code> · 无指标无负责人的改进项</a>
+</div>
+<h2 id="next-guides">延伸阅读</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../fix-ai-slop-web-ui/">前端页面去 AI 味</a>
+<a class="related-link-chip" href="../deslop-pptx-docx/">PPT 与 Word 去模板味</a>
+<a class="related-link-chip" href="../linter-vs-detector-vs-skill/">去 AI 味工具对比</a>
+</div>
+<h2 id="sources">参考与一手出处</h2>
+        <ul>
+          <li><a href="https://agentskills.io/specification" target="_blank" rel="noopener">Agent Skills Specification</a> — Cross-agent directory and SKILL.md manifest specification decoupling portable instruction skills from individual client hosts.</li>
+          <li><a href="https://llmstxt.org/" target="_blank" rel="noopener">The /llms.txt Proposal (llmstxt.org)</a> — Defines a curated Markdown index at /llms.txt so coding agents and retrieval scrapers can locate task docs without parsing full HTML chrome.</li>
+          <li><a href="https://github.com/vale-cli/vale" target="_blank" rel="noopener">vale-cli/vale: Syntax-aware linter for prose</a> — 6,413 stars (2026-11-21 snapshot); deterministic prose linter for Markdown, HTML, and AsciiDoc built around configurable YAML style rules.</li>
+          <li><a href="https://github.com/ghostty-org/ghostty/blob/main/AI_POLICY.md" target="_blank" rel="noopener">Ghostty AI_POLICY.md</a> — 64,293 repo stars (2026-11-21 snapshot); restricts AI-assisted PRs to pre-approved issues, requires tool disclosure, and mandates full contributor comprehension.</li>
+          <li><a href="https://www.coderabbit.ai/reports-guides" target="_blank" rel="noopener">CodeRabbit: State of AI vs Human Code Generation Report</a> — Measured AI-generated PRs averaging ~1.7x more issues (10.83 vs 6.45), 75% more logic errors, and &gt;3x readability/formatting issues compared with human PRs.</li>
+          <li><a href="https://developers.google.com/tech-writing" target="_blank" rel="noopener">Google Technical Writing Courses</a> — Engineering writing guidance prioritizing short sentences, clear actors, explicit scope boundaries, and lists/tables over wall-of-text paragraphs.</li>
+        </ul>
+<div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../?lang=zh#workbench">去工作台试查 →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">复制引用（PR / 群聊）</button><code id="share-cite-payload" hidden>[把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程](https://dislop.com/guides/agent-cli-mcp-tutorial/) — 按场景选择纯文档 Skill、零依赖本地 CLI、GitHub Actions 增量门禁，或免安装官网远程 MCP。</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">投稿翻车样本</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub 收藏 ★</a>
+        </div>
+          </div>
+        <aside class="toc-rail" aria-label="本文目录">
+          <h2 class="toc-rail-title">本文目录</h2>
+          <ol>
+            <li><a href="#1-一分钟选对接入方式">1. 一分钟选对接入方式</a></li>
+            <li><a href="#2-接进编码-agent-与编辑器">2. 接进编码 Agent 与编辑器</a></li>
+            <li><a href="#3-在-git-钩子与-github-actions-里做增量门禁">3. 在 Git 钩子与 GitHub Actions 里做增量门禁</a></li>
+          </ol>
+        </aside>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>这个页面自己也跑过 dislop check site/，0 处问题。给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../guides/">实用指南</a>
+        <a href="../../awesome/">工具清单</a>
+        <a href="../../rules/">全部规则</a>
+        <a href="../../privacy.md">隐私说明</a>
+        <a href="../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">关闭</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../static-ui.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,252 @@
+{
+  "schema": "dislop.ai-tic-rubric/1",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "title": {
+    "en": "Multi-Layer AI-Tic Feature Library & Cross-Check Rubric",
+    "zh": "五层 AI 口癖特征库与多信号交叉核对准则"
+  },
+  "synthesizedFrom": [
+    { "id": "wp-signs-of-ai-writing", "focus": "Inflated significance, -ing commentary tails, copula inflation, negative parallelisms, rule of three" },
+    { "id": "blader/humanizer", "focus": "24 concrete AI writing tells, author voice loading, soul/personality preservation" },
+    { "id": "op7418/Humanizer-zh", "focus": "Chinese translationese, abstract noun stacking, stiff structural signposting" },
+    { "id": "hardikpandya/stop-slop", "focus": "Banned structural transitions, formulaic openers/closers, anti-drama restraint" },
+    { "id": "petergyang/no-ai-slop", "focus": "20+ punchy writing filters against robotic symmetry and corporate fluff" },
+    { "id": "Adkid-Zephyr/anti-defensive-writing-Skill", "focus": "Removing pre-emptive hedging and defensive boundary disclaimers" },
+    { "id": "larashero3-dotcom/lieflat-less-ai-tone", "focus": "Empirical cross-model frequency baselines for Chinese AI cliché phrases" },
+    { "id": "MrGeDiao/shuorenhua", "focus": "Register separation and blocking cheesy forced-casual fake-human fillers" },
+    { "id": "jiji262/humanizer-chinese", "focus": "36 Chinese AI habits paired with anti-overcorrection guards" },
+    { "id": "eqbench-slop-score", "focus": "Multi-axis weighting (excess lexicon + contrast frames + frequent trigrams)" },
+    { "id": "seyedehsanhadi/sloptrim", "focus": "Zero-dependency deterministic probes + burstiness/entropy scoring" },
+    { "id": "FeedHive/ai-slop-detector", "focus": "Categorized pattern matching paired with structural density checks" }
+  ],
+  "layers": [
+    {
+      "id": "lexical",
+      "order": 1,
+      "name": {
+        "en": "Lexical Buzzwords, Calques & Forced Synonym Cycling",
+        "zh": "词汇层：AI 集中黑话、翻译腔与强行同义词轮换"
+      },
+      "detectionPrimary": "hybrid",
+      "borrowedFrom": [
+        "wp-signs-of-ai-writing",
+        "blader/humanizer",
+        "op7418/Humanizer-zh",
+        "larashero3-dotcom/lieflat-less-ai-tone",
+        "eqbench-slop-score"
+      ],
+      "signals": {
+        "en": [
+          "Over-represented AI vocabulary clusters: delve, tapestry, pivotal, holistic, seamless, underscore, testament to, realm of, ever-evolving, navigate complexities",
+          "Empty abstract buzzwords replacing concrete nouns/verbs (empower, leverage, robust ecosystem, transformative paradigm)",
+          "Forced synonym cycling ('the engine -> the platform -> the architecture -> the backbone' for one concrete component)"
+        ],
+        "zh": [
+          "空洞 AI 集中黑话集群：赋能、抓手、闭环/全闭环、生态矩阵、深度协同、降本增效、维度、心智、颗粒度、组合拳",
+          "高密度中文翻译腔与公文抽象名词堆叠：在……的背景下、不可否认的是、毫不夸张地说、扮演着……角色、提供有力支撑、进行优化/开展推进",
+          "强行同义词轮换（同一具体系统在同一段内先后被改写为“该系统/该平台/该架构/该底座”）"
+        ]
+      },
+      "falsePositiveGuards": {
+        "en": [
+          "Never flag grounded technical or domain identifiers when tied to concrete files, configs, protocols, or numeric bounds",
+          "Allow single isolated words; flag only paragraph-level clusters or unsupported marketing adjectives"
+        ],
+        "zh": [
+          "严格区分 AI 空洞黑话与真实工程/业务行业黑话（如 Redis 兜底、WAL 落盘、PR 收口、告警打通均属扎实表达，不得误报）",
+          "单词孤立出现且上下文有事实锚点时不误报，仅在段落共现成簇或无事实支撑时标记"
+        ]
+      },
+      "llmCheckPrompt": {
+        "en": "Check for AI buzzword clusters, nominalization bloat, and forced synonym cycling while leaving grounded domain terminology untouched.",
+        "zh": "识别空洞 AI 黑话簇、虚化动宾搭配与同义词强行轮换；严禁误伤带真实技术/业务锚点的行业术语。"
+      }
+    },
+    {
+      "id": "syntactic",
+      "order": 2,
+      "name": {
+        "en": "Syntactic Frames, Inflated Copulas & Participle Tails",
+        "zh": "句法层：模板句壳、虚假施事与分词附庸尾句"
+      },
+      "detectionPrimary": "hybrid",
+      "borrowedFrom": [
+        "wp-signs-of-ai-writing",
+        "hardikpandya/stop-slop",
+        "VincentOld/stop-slop-zh",
+        "petergyang/no-ai-slop"
+      ],
+      "signals": {
+        "en": [
+          "Formulaic contrast pivots ('Not just X, but Y', 'It isn't about A; it's about B')",
+          "Dangling -ing commentary tails tacked onto factual clauses (', highlighting its pivotal role', ', underscoring the importance', ', ensuring seamless integration')",
+          "Inflated copulas & false-agency verbs ('serves as a testament to', 'stands as a beacon', 'boasts an array of', 'the data tells us')",
+          "Three-part balanced semicolon pitches, staccato slogan runs, and staged self-Q&A ('Why does this matter? Because...')"
+        ],
+        "zh": [
+          "反转金句套壳（“不是 A，而是 B”“与其说……不如说……”高密度套用）",
+          "角色隐喻与伪载体句式（“扮演着重要角色”“作为……的重要载体/基石/桥梁”）",
+          "抽象跨度伪排比（“从……到……再到……”连接无实体落点的概念）、四字成语排比串与自问自答过渡（“这意味着什么？意味着……”）"
+        ]
+      },
+      "falsePositiveGuards": {
+        "en": [
+          "Distinguish literal architectural roles ('proxy serves as TLS terminator') from puffed-up claims ('serves as a pivotal paradigm')",
+          "Allow genuine parallel debugging steps or crisp specifications"
+        ],
+        "zh": [
+          "区分真实机制对比与空洞反转金句（如真实规格说明“A 不走 TCP，而是走 Unix socket”不应误报）",
+          "代码或表格中的并列技术参数列表不按排比口癖处罚"
+        ]
+      },
+      "llmCheckPrompt": {
+        "en": "Spot formulaic syntactic shells (negation pivots, dangling -ing significance tails, inflated copulas, 3-part symmetry) that persist even after synonyms are swapped.",
+        "zh": "检查换词后仍在的句法骨架（“不是A而是B”反转、角色隐喻载体句、伪跨度排比与自问自答套壳），区分真实机制对比与空洞修辞。"
+      }
+    },
+    {
+      "id": "rhythm",
+      "order": 3,
+      "name": {
+        "en": "Rhythm, Burstiness & Formatting Confetti",
+        "zh": "节奏层：句长节拍器、长逗号链与助手排版噪点"
+      },
+      "detectionPrimary": "deterministic",
+      "borrowedFrom": [
+        "seyedehsanhadi/sloptrim",
+        "FeedHive/ai-slop-detector",
+        "hardikpandya/stop-slop",
+        "blader/humanizer"
+      ],
+      "signals": {
+        "en": [
+          "Metronome sentence-length uniformity (low CV across 5+ sentences) and equal paragraph word budgets",
+          "Flat 5+ comma run-on chains and mechanical repetitive sentence openers",
+          "Inline **bold** lead-in bullet walls, confetti bolding inside prose, and excessive em-dashes"
+        ],
+        "zh": [
+          "连续 5 句以上长度高度均一的节拍器节奏，或连续段落字数几乎均等切割",
+          "单句连续 5 个以上逗号平铺、机械同构句首开头",
+          "无节制加粗标签列表墙（`**关键词**：说明` 连续刷屏）、段内加粗噪点与过密破折号"
+        ]
+      },
+      "falsePositiveGuards": {
+        "en": [
+          "Concise checklists, changelogs, API reference tables, and code blocks naturally share uniform line lengths and must not be penalized",
+          "Allow short, punchy cadence when deliberate in dialogue, release notes, or rules"
+        ],
+        "zh": [
+          "规则清单、接口参数表、变更日志天然具有短句和规则排布，不得硬性要求改写打乱结构",
+          "中文技术列表与规范条目允许稳定格式，不与散文节奏混为一谈"
+        ]
+      },
+      "llmCheckPrompt": {
+        "en": "Verify whether statistical flatness reflects true assistant smoothing rather than an intentional reference list or changelog.",
+        "zh": "结合文体判断平直节奏是否真是 AI 平滑铺陈；若原文是严谨操作规程或参数清单，勿为制造起伏而破坏清晰度。"
+      }
+    },
+    {
+      "id": "cognitive-framing",
+      "order": 4,
+      "name": {
+        "en": "Cognitive Framing: False Neutrality, Elevation & Fake Specificity",
+        "zh": "思维与表达层：虚假端水、强行宏大升华与无依据精确"
+      },
+      "detectionPrimary": "llm-primary",
+      "borrowedFrom": [
+        "wp-signs-of-ai-writing",
+        "Adkid-Zephyr/anti-defensive-writing-Skill",
+        "op7418/Humanizer-zh",
+        "MrGeDiao/shuorenhua",
+        "AIScientists-Dev/academic-humanizer"
+      ],
+      "signals": {
+        "en": [
+          "False-neutral 'both-sides' hedging ('on the one hand ... on the other hand ... ultimately depends on your needs') refusing to make a concrete engineering/editorial call",
+          "Forced macro elevation & significance inflation ('marks a pivotal turning point', 'lays a solid foundation for future innovation')",
+          "Pre-emptive defensive disclaimers ('it is worth noting that no single approach solves everything')",
+          "Fake specificity / ghost attribution ('industry experts widely agree', 'studies show dramatic improvements')"
+        ],
+        "zh": [
+          "虚假客观“端水”思维（“有利有弊，仁者见仁智者见智”“既要效率又要稳定，具体取决于业务场景”——回避直接下判断）",
+          "强行拔高意义与宏大叙事（“标志着……迈入新阶段”“为后续演进奠定了坚实基础”“彰显了深远价值”）",
+          "防御性免责铺垫（“需要客观说明的是，任何方案都非完美，但只要……”）",
+          "无来源伪具体背书（“业内专家普遍认为”“多项实测指标显示显著提升”）"
+        ]
+      },
+      "falsePositiveGuards": {
+        "en": [
+          "Preserve legitimate trade-off analysis backed by concrete conditions, numbers, or threshold boundaries ('Use SQLite under 50k writes/day; move to Postgres beyond that')",
+          "Never strip real uncertainty qualifiers ('estimated', 'unless', 'pending verification')"
+        ],
+        "zh": [
+          "区分“虚假端水”与“有边界条件的真权衡”（如明确写出“日写入低于 5 万用 SQLite，超过再切 Postgres”是精准判断，必须保留）",
+          "严禁把合理的风险限定词（“预计/仅在/除非/待实测确认”）当成防御性废话删掉"
+        ]
+      },
+      "llmCheckPrompt": {
+        "en": "Inspect the reasoning frame: flag false-neutral hedging that dodges a clear judgment, ungrounded macro significance inflation, defensive padding, and fake-specificity attributions. Keep bounded trade-offs and real caveats intact.",
+        "zh": "重点审查思维与立意角度：抓出回避明确判断的“端水套话”、无支撑的宏大升华、冗余免责铺垫与伪权威归因；保留带真实边界条件与实测范围的严谨权衡。"
+      }
+    },
+    {
+      "id": "rhetorical-stance",
+      "order": 5,
+      "name": {
+        "en": "Rhetorical Stance: Lecturing, Over-Explaining & Fake-Human Overcorrection",
+        "zh": "表达角度层：居高临下说教、冗余复述与廉价“装人味”"
+      },
+      "detectionPrimary": "llm-primary",
+      "borrowedFrom": [
+        "MrGeDiao/shuorenhua",
+        "jiji262/humanizer-chinese",
+        "blader/humanizer",
+        "hardikpandya/stop-slop"
+      ],
+      "signals": {
+        "en": [
+          "Didactic lecturing & faux profundity ('Let that sink in.', 'The real truth nobody talks about:', 'At its core, quality isn't a tool—it's a mindset')",
+          "Over-explaining & spoon-feeding (announcing what a clear datum obviously means right after stating it, plus redundant 'Key Takeaways' on short notes)",
+          "Sycophancy & chatbot residue leaks ('Great question!', 'I'd be happy to help')",
+          "Fake-human overcorrection: inserting forced slang, exclamation confetti, or fake typos just to sound casual"
+        ],
+        "zh": [
+          "说教口吻与伪金句收尾（“本质上来说……”“说白了就是……”“真正的……从来不是……而是……”）",
+          "保姆式重复解释与强行总结（刚给出清楚的表格或数字，紧接着再用三句话“换言之，这充分说明了……”；短文硬塞“核心总结 / 下一步展望”）",
+          "助手客套残留与媚俗“装人味”过度纠偏（生硬插入“哈哈/家人们/绝绝子/其实吧/讲真”，破坏专业语体与原声风格）"
+        ]
+      },
+      "falsePositiveGuards": {
+        "en": [
+          "Respect the author's real voice, sharp opinions, humor, and personal register when consistent with their voice card or literary/editorial genre",
+          "Never rewrite vivid human metaphors or crisp stance into bland bureaucratic prose"
+        ],
+        "zh": [
+          "尊重并保留作者本来就有的锋芒观点、个人幽默、口语节奏或文风卡习惯，不得一刀切磨平成白开水",
+          "严禁通过塞入“说白了/其实吧”或磨平个性来伪造“人味”"
+        ]
+      },
+      "llmCheckPrompt": {
+        "en": "Check writer-reader stance: flag didactic lecturing, spoon-feeding summaries after concrete facts, chatbot leaks, and cheesy fake-human slang. Protect genuine author personality, crisp humor, and direct judgment.",
+        "zh": "审查叙事姿态与视角：抓出居高临下的说教金句、事实后的保姆式复述、残留客套与廉价“装人味”口水词；同时保护作者原本鲜明的态度、个人视角与真实语气。"
+      }
+    }
+  ],
+  "antiDegradationPrinciples": {
+    "en": [
+      "Preserve original author perspective, voice tension, and rhetorical personality; never flatten lively prose into sterile report boilerplate.",
+      "Preserve burstiness and natural short-long sentence rhythm contrast.",
+      "Preserve grounded industry/technical terms and concrete information density; delete padding, never delete substance.",
+      "Preserve modality bounds and uncertainty qualifiers (e.g., 'estimated', 'about', 'only if', 'pending benchmark').",
+      "Reject secondary AI slop and fake-human overcorrection slogans during edits."
+    ],
+    "zh": [
+      "保留原作者的人称视角、鲜明态度与表达魅力，绝不把有个性的文章改笨、改呆或磨平为千篇一律的干瘪公文。",
+      "保留长短句自然起伏，防止为了消解排比或长句而把全文切成均一短句。",
+      "保留带事实锚点的行业/技术专名与真实信息密度；只删水词废话，不删实质机制与判断依据。",
+      "严格保留数值、专名与范围/不确定限定词（预计、约、仅在、除非、待确认），绝不夸大成绝对承诺或幻觉编造数字。",
+      "禁止在改写或审校建议中引入新的 AI 套词（全闭环、赋能、抓手、“不是A而是B”）或廉价装人味填充词。"
+    ]
+  }
+}

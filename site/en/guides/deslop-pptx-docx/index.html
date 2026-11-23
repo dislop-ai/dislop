@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" data-static-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF) — dislop</title>
+  <meta name="description" content="How to catch raw Markdown asterisks, 140-word slide walls, shrunk autofit text, and process-only headlines in Word, PowerPoint, and PDF decks.">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/en/guides/deslop-pptx-docx/">
+  <meta property="og:title" content="Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF) — dislop">
+  <meta property="og:description" content="How to catch raw Markdown asterisks, 140-word slide walls, shrunk autofit text, and process-only headlines in Word, PowerPoint, and PDF decks.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF) — dislop">
+  <meta name="twitter:description" content="How to catch raw Markdown asterisks, 140-word slide walls, shrunk autofit text, and process-only headlines in Word, PowerPoint, and PDF decks.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
+  <link rel="canonical" href="https://dislop.com/en/guides/deslop-pptx-docx/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/deslop-pptx-docx/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/deslop-pptx-docx/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/deslop-pptx-docx/">
+  <link rel="alternate" type="application/atom+xml" href="../../../en/feed.xml" title="dislop Guides (EN)">
+  <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../../assets/logo.svg">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/en/guides/deslop-pptx-docx/",
+      "url": "https://dislop.com/en/guides/deslop-pptx-docx/",
+      "headline": "Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)",
+      "description": "How to catch raw Markdown asterisks, 140-word slide walls, shrunk autofit text, and process-only headlines in Word, PowerPoint, and PDF decks.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-23",
+      "dateModified": "2026-11-23",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "image": "https://dislop.com/assets/og-card.png",
+      "citation": [
+        "https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing",
+        "https://www.asd-ste100.org/",
+        "https://digital.gov/guides/plain-language/",
+        "https://www.stiftung-buchkunst.de"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/en/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Guides",
+          "item": "https://dislop.com/en/guides/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Clean Up PPTX & DOCX",
+          "item": "https://dislop.com/en/guides/deslop-pptx-docx/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does inspecting a .docx or .pptx in the browser workbench upload the file?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Local checks unzip OOXML entries inside your current browser tab with zero network requests. Files are only sent to the cloud service when you sign in and click a Cloud Review or Cloud Rewrite button."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why flag slides just for having 4 identical bullet layouts in a row?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "LLM slide generators repeat the same 'Title + 4 bullets' template across consecutive slides instead of switching to comparison tables, timelines, or charts—causing immediate reader fatigue."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can dislop check landscape PDF decks exported from Keynote or Google Slides?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. It checks whether pages were flattened into unselectable raster images, whether body typography drops below 9.5pt, and whether 4+ consecutive landscape slides share a flat text-only scale."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../../en/">
+        <img src="../../../assets/logo.svg" width="28" height="28" alt="dislop icon">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../../?lang=en#workbench">Workbench</a>
+        <a href="../../../en/guides/" aria-current="page">Guides</a>
+        <a href="../../../en/awesome/">Directory</a>
+        <a href="../../../en/rules/">Rules</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../../guides/deslop-pptx-docx/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../../en/">dislop</a> / <a href="../">Guides</a> / <span aria-current="page">Clean Up PPTX &amp; DOCX</span>
+      </nav>
+
+      <article>
+        <header>
+          <h1 class="lead-heading" style="max-width:30ch;">Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)</h1>
+          <div class="article-meta">
+            <span>Docs &amp; Decks</span>
+            <span>Updated 2026-11-23</span>
+            <span>6 min read</span>
+            <a href="./index.md">Markdown</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">DIRECT ANSWER</div>
+            <p>AI-generated Office deliverables break in five predictable ways: pasted <code>**bold**</code> Markdown asterisks, 120+ word slide walls, &gt;6 bullets per slide, shrunk <code>normAutofit</code> fonts below 80%, and vague titles like 'Overview' or 'Analysis of Q3 Retention'. Inspect the OOXML and PDF text layers deterministically before sending.</p>
+          </div>
+        </header>
+
+        <div class="article-shell">
+          <div class="article-prose">
+<p>An LLM can draft a 15-slide deck or a 10-page Word memo in thirty seconds, yet sending it raw almost always leaves telltale damage: unrendered <code>**bold**</code> asterisks copied from chat, a slide jammed with 160 words shrunk down by PowerPoint autofit, and five consecutive slides titled <em>&quot;Overview&quot;</em> or <em>&quot;Analysis of Q3 Retention.&quot;</em></p>
+
+<p>Inspecting the underlying <code>.docx</code>, <code>.pptx</code>, and <code>.pdf</code> structures programmatically catches these defects in one pass.</p>
+
+<h2 id="1-seven-structural-defects-in-ai-office-files">1. Seven structural defects in AI Office files</h2>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Rule ID</th><th>What shows up in the deck or doc</th><th>Why it hurts readers</th><th>Clean fix</th></tr></thead><tbody>
+<tr><td><code>markdown-leak</code></td><td>Raw <code>**key metric**</code> or <code>## Heading</code> in Word or PPTX</td><td>Hard delivery bug showing raw chat copy-paste</td><td>Strip syntax and apply native bold/heading styles</td></tr>
+<tr><td><code>slide-word-wall</code></td><td>More than 120 Latin words on a single PowerPoint slide</td><td>Turns a visual slide into an unreadable wall of text</td><td>Split the claim or trim to one takeaway plus data</td></tr>
+<tr><td><code>slide-bullet-overload</code></td><td>7 or more bullets packed onto one slide</td><td>Hides priority; reads like a raw brainstorm dump</td><td>Consolidate to <code>3–5</code> sharp points</td></tr>
+<tr><td><code>slide-autofit-shrink</code></td><td><code>normAutofit</code> font scale pushed below <code>80%</code></td><td>Text shrinks until back-row readers cannot scan it</td><td>Cut filler words until body text sits cleanly at scale</td></tr>
+<tr><td><code>slide-weak-topic-title</code></td><td>Slide headlines such as <code>&quot;Overview&quot;</code> or <code>&quot;Background&quot;</code></td><td>Tells the audience the topic, not the takeaway</td><td>Replace with a single-sentence conclusion</td></tr>
+<tr><td><code>slide-process-not-finding-title</code></td><td><code>&quot;Analysis of Q3 Customer Retention&quot;</code></td><td>Names the activity instead of the finding</td><td>Put the metric in the headline (<code>&quot;Q3 Net Retention Rose from 88% to 94%&quot;</code>)</td></tr>
+<tr><td><code>pptx-layout-monotony</code></td><td>4+ consecutive slides sharing one identical bullet skeleton</td><td>Creates visual fatigue across executive reviews</td><td>Convert comparisons or trends into tables or charts</td></tr>
+</tbody></table></div>
+
+<p>Compare how an executive deck headline moves from a process label to a hype trap to a concrete finding:</p>
+
+<!-- dislop-quote-start -->
+<pre><code class="language-text">bad:  ## Analysis of Q3 Customer Retention (88% to 94%)
+trap: ## Unlocking the Next-Gen Retention Flywheel
+good: ## Q3 Net Retention Rose from 88% to 94%</code></pre>
+<!-- dislop-quote-end -->
+
+<p>Notice how <code>trap</code> dropped the actual numbers (<code>88% to 94%</code>) in favor of an empty metaphor (<code>Retention Flywheel</code>).</p>
+
+<figure class="guide-demo" data-demo-card="deck-office" data-demo-prefix="../../../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../../../assets/demos/deck-office-en-v2-poster.png" data-demo-poster="deck-office">
+              <source type="image/webp" srcset="../../../assets/demos/deck-office-en-v2.webp" data-demo-webp="deck-office">
+              <img src="../../../assets/demos/deck-office-en-v2.gif" alt="dislop auditing quarterly-review.pptx for raw markdown leaks, word walls, 68% autofit shrink, and process titles" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="deck-office">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">5. PPTX &amp; DOCX audit: catch walls &amp; shrunk text</strong>
+              <span class="demo-cap-badge">PPTX audit · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Unpacks .pptx slides locally to flag raw **markdown** leaks, word walls, 68% autofit shrink, and process titles.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="deck-office" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="deck-office">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<h2 id="2-check-office-and-pdf-files-offline">2. Check Office and PDF files offline</h2>
+
+<p>Keep confidential quarterly decks and internal memos on your machine using the zero-upload CLI:</p>
+
+<pre><code class="language-bash"># Node CLI (zero dependencies)
+npx --yes dislop check proposal.docx board-deck.pptx summary.pdf
+
+# Python CLI (with executive-deck headline rules)
+uvx dislop check board-deck.pptx --pack executive-deck</code></pre>
+
+<p>If an archive is corrupted, password-locked, or exported as an unreadable scan with zero selectable text, <code>dislop</code> prints <code>[SKIP]</code> or a coverage warning (exiting <code>2</code> on single-file runs) instead of pretending the file passed with <code>0</code> issues.</p>
+
+<h2 id="3-layout-preserving-cloud-cleanup-optional">3. Layout-preserving cloud cleanup (optional)</h2>
+
+<p>When you want multi-model prose cleanup that keeps <code>.docx</code> Track Changes or <code>.pptx</code> master layouts intact:</p>
+
+<ol>
+<li>Run local <code>dislop check</code> first and fill any missing bracketed numbers manually.</li>
+<li>Sign in on the workbench or connect Official Cloud MCP (<code>https://dislop.com/mcp</code>) for non-confidential drafts.</li>
+<li>Re-run local <code>dislop check</code> on the exported file to verify numbers and clean structure held up.</li>
+</ol>
+<h2 id="faq">Frequently asked questions</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>Does inspecting a .docx or .pptx in the browser workbench upload the file?</h3>
+            <p>No. Local checks unzip OOXML entries inside your current browser tab with zero network requests. Files are only sent to the cloud service when you sign in and click a Cloud Review or Cloud Rewrite button.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Why flag slides just for having 4 identical bullet layouts in a row?</h3>
+            <p>LLM slide generators repeat the same 'Title + 4 bullets' template across consecutive slides instead of switching to comparison tables, timelines, or charts—causing immediate reader fatigue.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Can dislop check landscape PDF decks exported from Keynote or Google Slides?</h3>
+            <p>Yes. It checks whether pages were flattened into unselectable raster images, whether body typography drops below 9.5pt, and whether 4+ consecutive landscape slides share a flat text-only scale.</p>
+          </div>
+        </div>
+<h2 id="related-rules">Matching deterministic rules</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../../en/rules/markdown-leak/"><code>markdown-leak</code> · Raw Markdown in Office doc</a>
+<a class="related-link-chip" href="../../../en/rules/slide-word-wall/"><code>slide-word-wall</code> · Slide word wall</a>
+<a class="related-link-chip" href="../../../en/rules/slide-bullet-overload/"><code>slide-bullet-overload</code> · Too many bullets on one slide</a>
+<a class="related-link-chip" href="../../../en/rules/slide-autofit-shrink/"><code>slide-autofit-shrink</code> · Slide text auto-shrunk too small</a>
+<a class="related-link-chip" href="../../../en/rules/slide-weak-topic-title/"><code>slide-weak-topic-title</code> · Generic slide title</a>
+<a class="related-link-chip" href="../../../en/rules/slide-process-not-finding-title/"><code>slide-process-not-finding-title</code> · Process-label slide title instead of takeaway</a>
+<a class="related-link-chip" href="../../../en/rules/pptx-layout-monotony/"><code>pptx-layout-monotony</code> · 4+ consecutive identical bullet slides</a>
+<a class="related-link-chip" href="../../../en/rules/pdf-visual-layout-slop/"><code>pdf-visual-layout-slop</code> · PDF raster slides or flat typography</a>
+</div>
+<h2 id="next-guides">Next guides</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../what-is-ai-slop/">What Is AI Slop?</a>
+<a class="related-link-chip" href="../remove-ai-slop-writing/">Remove AI Slop From Writing</a>
+<a class="related-link-chip" href="../agent-cli-mcp-tutorial/">Agent, CLI &amp; CI Setup</a>
+</div>
+<h2 id="sources">Verified references</h2>
+        <ul>
+          <li><a href="https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing" target="_blank" rel="noopener">Wikipedia: Signs of AI writing (WP:AISIGNS)</a> — WikiProject AI Cleanup's living taxonomy of AI prose defects: inflated significance, stock vocabulary, rule-of-three lists, negative parallelisms, chatbot wrappers, and formatting artifacts.</li>
+          <li><a href="https://www.asd-ste100.org/" target="_blank" rel="noopener">ASD-STE100 Simplified Technical English Specification</a> — Aerospace and technical documentation specification enforcing short active sentences, one instruction per sentence, and consistent naming for the same concept.</li>
+          <li><a href="https://digital.gov/guides/plain-language/" target="_blank" rel="noopener">Digital.gov Plain Language Guide (formerly PlainLanguage.gov)</a> — Federal plain-writing rules: front-load key conclusions, use active voice, replace hidden verbs and filler openings with concrete actors and actions.</li>
+          <li><a href="https://www.stiftung-buchkunst.de" target="_blank" rel="noopener">Stiftung Buchkunst — Best Book Design from all over the World</a> — Book proportion, margin choreography, and reading pacing benchmarks directly transferable to PDF reports and presentation decks.</li>
+        </ul>
+<div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../../?lang=en#workbench">Try in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)](https://dislop.com/en/guides/deslop-pptx-docx/) — How to catch raw Markdown asterisks, 140-word slide walls, shrunk autofit text, and process-only headlines in Word, PowerPoint, and PDF decks.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
+        </div>
+          </div>
+        <aside class="toc-rail" aria-label="On this page">
+          <h2 class="toc-rail-title">On this page</h2>
+          <ol>
+            <li><a href="#1-seven-structural-defects-in-ai-office-files">1. Seven structural defects in AI Office files</a></li>
+            <li><a href="#2-check-office-and-pdf-files-offline">2. Check Office and PDF files offline</a></li>
+            <li><a href="#3-layout-preserving-cloud-cleanup-optional">3. Layout-preserving cloud cleanup (optional)</a></li>
+          </ol>
+        </aside>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>This site passes dislop check site/ with 0 issues. For agents, start at <a href="../../../llms.txt">/llms.txt</a>.</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../../en/guides/">Guides</a>
+        <a href="../../../en/awesome/">Awesome list</a>
+        <a href="../../../en/rules/">All rules</a>
+        <a href="../../../privacy.md">Privacy</a>
+        <a href="../../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">Close</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../../static-ui.js"></script>
+
+</body>
+</html>

@@ -110,7 +110,8 @@
         "抓手(?!机)",
         "组合拳",
         "打通最后一公里",
-        "(?:打造|构建|形成)[^，。！？；\\n]{0,12}闭环",
+        "(?:打造|构建|形成|实现)[^，。！？；\\n]{0,12}闭环",
+        "(?:全|强|硬|大|小)闭环",
         "底层逻辑",
         "顶层设计",
         "颗粒度",
@@ -140,7 +141,8 @@
       "fixtures": {
         "hit": [
           "我们要以数据治理为抓手，持续赋能门店运营。",
-          "值得注意的是，导出最多需要 12 分钟。"
+          "值得注意的是，导出最多需要 12 分钟。",
+          "新版本实现从需求评审到发布上线的全闭环。"
         ],
         "clean": [
           "测试员单手抓手机拍摄夜间条码样本。",
@@ -178,6 +180,8 @@
       "fixtures": {
         "hit": [
           "这不是工具，而是底气。",
+          "这既不是效率工具，也不是排版插件，而是新标准。",
+          "这不仅让代码更干净，更让协作效率翻倍。",
           "It's not just a linter — it's a new standard for modern teams.",
           "This isn't a dashboard. It's peace of mind."
         ],
@@ -254,11 +258,14 @@
       "fixtures": {
         "hit": [
           "系统实现了精准高效、安全可靠、灵活易用的目标。",
+          "系统实现了精准高效·安全可靠·灵活易用的目标。",
           "方案坚持统筹兼顾、协同推进、提质增效。"
         ],
         "clean": [
           "首批试点覆盖北京大学、清华大学、复旦大学三所高校图书馆。",
-          "接口支持按项目、按日期、按状态过滤。"
+          "接口支持按项目、按日期、按状态过滤。",
+          "页面包含订单编号、创建日期、结算状态、支付时间四个字段。",
+          "表格列出收入明细、成本汇总、税费状态、利润总额等四类指标。"
         ]
       }
     },
@@ -405,6 +412,7 @@
         ],
         "clean": [
           "上海机房默认走专线同步；北京机房因合同下月到期，暂时走公网加密隧道。",
+          "先检查环境变量；再重跑单元测试；最后提交合并请求。",
           "Prior benchmarks report similar variance (Smith, 2020; Lee, 2021; Wu, 2022).",
           "The licensee shall maintain audit logs; must notify regulators within 72 hours; and shall retain receipts for five years."
         ]
@@ -591,6 +599,155 @@
         ],
         "clean": [
           "Anonymous visitors get 5 free calls per day up to 4,000 characters. Free accounts include 30 monthly credits up to 12,000 characters. If the upstream LLM times out or returns 5xx, the server refunds the credit automatically."
+        ]
+      }
+    },
+    {
+      "id": "zh-dev-jargon",
+      "tier": "taste",
+      "severity": "warning",
+      "family": "lexicon/dev-jargon",
+      "probe": "zh-dev-jargon",
+      "zones": ["prose"],
+      "modalities": ["markdown", "text", "html", "docx", "pptx"],
+      "message": {
+        "en": "Paragraph concentrates hollow AI-generated corporate/engineering buzzwords ('全闭环', '深度赋能', '范式跃迁', '零误差', '…化') rather than grounded technical mechanisms.",
+        "zh": "单段集中出现 AI 爱写的空洞自嗨黑话（如“全闭环/深度赋能/范式跃迁/零失误/体系化”），而非具体工程或业务机制；偶发行业实词会自动豁免。"
+      },
+      "deletionTest": {
+        "en": "Replace each abstract buzzword with the concrete retry count, queue limit, or exit code.",
+        "zh": "把空洞黑话拆成真实机制：写出具体报错码、重试上限、超时秒数或人工处理步骤。"
+      },
+      "exemplar": {
+        "bad": "本次发布建立全闭环校验机制，通过铁律约束完成总收口并形成强兜底，实现零失误交付。",
+        "trap": "这不只是发布脚本，而是零缺陷交付的工程铁律。",
+        "good": "发布脚本在合入前运行单测与类型检查；任一失败直接退出非零状态码，并保留前一次构建产物用于回滚。",
+        "note": {
+          "en": "Distinguishes AI-concentrated filler buzzwords from grounded industry terms (such as WAL flush or fallback cache).",
+          "zh": "区分 AI 集中黑话与有事实锚点的正常行业术语（如 WAL 落盘、Redis 兜底），不误伤实干表达。"
+        },
+        "source": "original"
+      },
+      "fixtures": {
+        "hit": [
+          "这次网关改造打通全闭环校验，通过强兜底完成总收口并实现零失误上线。",
+          "方案打造体系化中台底座，拉齐各业务线口径并建立常态化硬门禁。"
+        ],
+        "clean": [
+          "网关在收到连续 5 次 502 响应后熔断 30 秒，并切换到备用节点处理请求。",
+          "主库异常时由 Redis 兜底，写入 wal.log 落盘，周五前合入 3 个 PR 收口并打通告警回调。",
+          "发布前脚本检查配置文件是否存在未提交密钥。"
+        ]
+      }
+    },
+    {
+      "id": "zh-exclamation",
+      "tier": "taste",
+      "severity": "warning",
+      "family": "punctuation/exclamation",
+      "probe": "zh-exclamation",
+      "zones": ["prose"],
+      "modalities": ["markdown", "text", "html", "docx", "pptx"],
+      "message": {
+        "en": "Chinese prose paragraph overuses exclamation marks or combines exclamation punctuation with hype modifiers.",
+        "zh": "中文正文段出现鸡血营销感叹号（2 处及以上或搭配“太棒了/重磅/彻底告别/震撼”等煽动词），破坏冷静客观的叙述语气。"
+      },
+      "deletionTest": {
+        "en": "Change trailing exclamation marks to periods and remove emotional hype adverbs.",
+        "zh": "把句末感叹号改回句号，删去“重磅/太棒了/彻底告别”等鼓动字眼。"
+      },
+      "exemplar": {
+        "bad": "太棒了！新版工具帮你彻底告别繁琐的人工排查！",
+        "trap": "别再手查了！立刻开启自动化新体验！",
+        "good": "新版工具会在提交前自动扫描未填占位符和超长列表，减少人工复核遗漏。",
+        "note": {
+          "en": "Short standalone taglines (<20 CJK chars), quoted dialogue, and parenthetical asides remain exempt.",
+          "zh": "不超过 20 字的独立短标语、引号对话和括号附注不触发误报。"
+        },
+        "source": "original"
+      },
+      "fixtures": {
+        "hit": [
+          "太棒了！这次版本升级直接解决掉我们拖了半年的历史技术债！",
+          "今天我们正式发布离线校验内核！全量规则零依赖运行！团队交付速度直接翻番！"
+        ],
+        "clean": [
+          "去 AI 味才是真正的生产力！",
+          "示例：当用户看到“请核对参数！”弹窗时，可点击取消按钮返回修改。",
+          "系统上线首日处理了 1.4 万次扫描请求，其中拦截 312 处裸露内部路径。"
+        ]
+      }
+    },
+    {
+      "id": "zh-mega-sentence",
+      "tier": "taste",
+      "severity": "warning",
+      "family": "rhythm/mega-sentence",
+      "probe": "zh-mega-sentence",
+      "zones": ["prose"],
+      "modalities": ["markdown", "text", "html", "docx"],
+      "message": {
+        "en": "Single Chinese prose sentence exceeds 180 CJK characters (or 120+ CJK with 180+ total chars) without breaking.",
+        "zh": "中文单句一逗到底超过 180 个汉字（或 >= 120 汉字且总长超 180 字），阅读负担重，呈大模型长从句生成特征。"
+      },
+      "deletionTest": {
+        "en": "Split at the natural clause shift using periods so each sentence carries one main subject and action.",
+        "zh": "按事件或条件转换处切成句号短句，每句只交代一个主动作或边界条件。"
+      },
+      "exemplar": {
+        "bad": "我们在周一完成双集群流量切分后观察到 orders-worker-service-cluster-01 核心交易接口延迟上升三毫秒但考虑到异步日志落盘能够避免主线程在高峰期被磁盘刷写操作阻塞并且可在节点异常重启后完整保留上下文追踪链路以便值班同学快速排查请求参数与调用栈因此决定保留当前配置并在周四晚低峰期继续观察四十八小时以确认内存缓冲池没有缓慢泄漏或堆积风险。",
+        "trap": "切双集群。延迟微升。观察两天。",
+        "good": "周一完成双集群切分后延迟升了 3ms，但异步落盘可防阻塞并保链路。团队周四再复查 48 小时内存占用。",
+        "note": {
+          "en": "Protects decimals and versions during break scan.",
+          "zh": "切句时跳过小数与版本号。"
+        },
+        "source": "original"
+      },
+      "fixtures": {
+        "hit": [
+          "我们在周一完成新旧双集群流量切分之后虽然观察到核心交易接口的平均延迟略微上升了三毫秒但是考虑到全量开启异步日志落盘能够避免高并发时主线程被磁盘刷写操作阻塞并且可以在节点异常重启时保留完整的上下文追踪链路以便值班工程师在十分钟内定位到具体的异常请求来源和参数状态因此决定保留当前异步配置并在周四晚间低峰期继续观察四十八小时以验证内存缓冲池是否存在缓慢泄漏或者堆积风险从而为下个月的大促扩容做好技术准备。"
+        ],
+        "clean": [
+          "周一完成双集群流量切分后，核心交易接口平均延迟上升 3ms。我们决定保留异步日志落盘配置，并在周四低峰期观察 48 小时内存占用，确认无堆积后定扩容上限。"
+        ]
+      }
+    },
+    {
+      "id": "unsourced-statistic",
+      "tier": "taste",
+      "severity": "warning",
+      "family": "evidence/unsourced-stat",
+      "probe": "unsourced-statistic",
+      "zones": ["prose"],
+      "modalities": ["markdown", "text", "html", "docx", "pptx"],
+      "message": {
+        "en": "Marketing-style percentage claim ('up to X%', 'reduces by X%', '提升 X%', '高达 X%') lacks a baseline, sample size, metric name, or citation.",
+        "zh": "宣传式百分比数字宣称（如“提升 40%”“高达 80%”“up to 50%”）附近缺少测试基线、样本数、指标口径或引用来源。"
+      },
+      "deletionTest": {
+        "en": "Add the before -> after baseline, sample size (n=...), or link to the benchmark; otherwise cut the unverified percentage.",
+        "zh": "补出改动前后的基准对比、样本量或测评出处；拿不出出处就删掉具体百分比。"
+      },
+      "exemplar": {
+        "bad": "Switching to the updated triage workflow boosts team efficiency by up to 45%.",
+        "trap": "Teams work smarter. Triage moves faster. Quality soars.",
+        "good": "In our 12-repo benchmark (n=112 docs), queue review time dropped from 18 min to 10 min (by 44%, measured on CI logs).",
+        "note": {
+          "en": "Exempts claims backed by from/to baselines, sample counts, metric terms, or citation links nearby.",
+          "zh": "同句或紧邻范围出现基线对比、样本数或出处链接时自动豁免。"
+        },
+        "source": "original"
+      },
+      "fixtures": {
+        "hit": [
+          "Deploying this assistant increases enterprise productivity by up to 60%.",
+          "引入该工作流后团队交付效率提升 45%，整体成本节省了 30%。"
+        ],
+        "clean": [
+          "Based on benchmark evaluation across n=112 samples, F1 improved from 72.1% to 100.0%.",
+          "基于 120 份实测日志样本，错误率从 4.2% 降至 1.1%，平均耗时压缩至 95ms。",
+          "据《2026 研发效能年报》，构建缓存命中率提高 38%。"
         ]
       }
     }

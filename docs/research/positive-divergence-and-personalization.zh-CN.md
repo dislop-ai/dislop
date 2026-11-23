@@ -253,7 +253,7 @@ AI 味的表层症状是高频套词、否定转折口号和蓝紫粉渐变卡�
 正向参考体系比纯负向规则更容易触及知识产权与数据隐私敏感区，必须在协议层与工程层预先写死五条红线：
 
 1. 严守「抽象文法 vs. 具体表达」法律分界：依据美国版权局一贯立场与国际通行的思想-表达二分法（idea-expression dichotomy），抽象排版网格、色阶比例与修辞结构不受版权垄断，但第三方网站的具体文案、受版权保护的插画/图标、付费字体文件以及具备来源识别性的商业外观（Trade Dress）受版权或反不正当竞争法保护。因此，所有 `dislop.taste/1` 卡片只能编码抽象比例、令牌约束与设计原则，并保留一手出处链接归因，严禁复制第三方站点完整 DOM/CSS 源码、截图或商业字体。
-2. 禁止「在世个人/商业品牌冒名仿写」预设：公开仓库不内置任何「一键模仿某位在世作家或某竞品官网」的预设包；所有官方内置正反范本均须采用原创构造、公有领域文本或明确兼容开源许可证（如 MIT / Apache-2.0 / CC-BY）材料，并在 JSON 中强制声明 `source` 与 `license`。
+2. 禁止「实名人物与商业品牌冒名仿写/拟态」预设：公开仓库不内置任何「一键模仿某位在世或已故作家、学者、记者或商业品牌」的预设包；所有官方内置正反范本均须采用原创构造、公有领域文本或明确兼容开源许可证（如 MIT / Apache-2.0 / CC-BY）材料，并在 JSON 中强制声明 `source` 与 `license`。2026 年 3 月，Grammarly / Superhuman 因未经授权抓取名家作品推出模拟作家与学者审稿的 `Expert Review`，遭调查记者 Julia Angwin 在纽约南区联邦法院提起集体诉讼（*Angwin v. Superhuman Platform, Inc.*）并被迫公开致歉下架（详见 [grammarly-evolution-and-agent-lessons.zh-CN.md](./grammarly-evolution-and-agent-lessons.zh-CN.md)），这是最直接的前车之鉴。
 3. 尊重一手参考源条款与访问礼仪：正向参考索引（如 [verified-positive-sources.json](./positive-divergence/verified-positive-sources.json)）仅记录公开首页 URL、客观分类标签与简短结构观察，不做自动化整站抓取或图片镜像，严格遵守站点 `robots.txt` 与限流策略。
 4. 个人声纹语料物理留在本地：`dislop voice extract` 处理的用户历史文章、会议纪要与内部文档默认只输出统计画像与经用户审核的脱敏短片段，落盘路径默认指向被 `.gitignore` 忽略的 `.dislop.local/voice.json`，零网络外发；提交前由 `dislop core` 检查拦截误入公开仓库的私有路径与敏感词。
 5. 诚实表达与监管透明并行：延续本仓库在 [anti-slop-landscape-2026.zh-CN.md](./anti-slop-landscape-2026.zh-CN.md#12-监管与平台透明度坐标20252026) 确立的伦理底线，正向差异化与声纹校准服务于提升信息密度、可读性与审美辨识度，绝不提供「伪造错别字绕过检测」或规避中国《人工智能生成合成内容标识办法》（GB 45438-2025）及欧盟 EU AI Act 第 50 条透明度标识义务的功能。

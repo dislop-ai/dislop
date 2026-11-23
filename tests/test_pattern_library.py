@@ -44,7 +44,7 @@ class PatternLibraryTests(unittest.TestCase):
             text=True,
         )
         self.assertEqual(proc.returncode, 0, proc.stderr or proc.stdout)
-        self.assertIn("53 patterns", proc.stdout)
+        self.assertIn("65 patterns", proc.stdout)
 
     def test_catalog_cli_and_mcp_parity(self) -> None:
         rn = run_node(["catalog", "--query", "不是", "--json"])
@@ -98,6 +98,11 @@ class PatternLibraryTests(unittest.TestCase):
                 "glass.html",
                 '<div class="backdrop-blur-md">A</div><div class="backdrop-blur-lg">B</div><div class="backdrop-blur-sm">C</div>',
                 "ui-glassmorphism-overuse",
+            ),
+            (
+                "gen2.html",
+                '<section class="bg-[#faf8f5] rounded-2xl shadow-xl"><span class="uppercase tracking-widest">Intro</span><h2>Build <em>faster</em></h2><a style="color:#c45a3b">Go</a></section>',
+                "ui-gen2-tasteful-slop",
             ),
             (
                 "clean-facts.md",

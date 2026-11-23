@@ -1,7 +1,7 @@
 {
   "name": "dislop",
   "version": "0.7.1",
-  "description": "Linter for AI Slop — helps you (and your agent) catch and fix AI-sounding text and layouts in docs, web UI, and slides. Skill, Plugin, CLI & MCP.",
+  "description": "Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI, and slides — Skill, Plugin, CLI & MCP.",
   "license": "Apache-2.0",
   "homepage": "https://dislop.com",
   "repository": {
@@ -33,14 +33,21 @@
     "test:models": "PYTHONPATH=src python3 scripts/train_pocket_models.py --eval-only",
     "bench": "node scripts/run_benchmark.mjs",
     "bench:assert": "node scripts/run_benchmark.mjs --assert",
+    "bench:skill": "node scripts/run_skill_benchmark.mjs --assert",
     "bench:patterns": "node scripts/pattern_lab.mjs ablation",
+    "bench:visual": "node scripts/run_visual_benchmark.mjs",
+    "bench:visual:vlm": "node scripts/run_visual_vlm_bench.mjs",
     "build:site": "node scripts/build_site.mjs",
     "sync:manifests": "node scripts/sync_manifests.mjs",
     "check:manifests": "node scripts/sync_manifests.mjs --check",
     "release:check": "node scripts/release.mjs --check",
     "release:status": "node scripts/release.mjs --status",
     "release": "node scripts/release.mjs",
-    "dogfood": "node bin/dislop.mjs check . --fail-on warning && node bin/dislop.mjs check site/ --fail-on info"
+    "dogfood": "node bin/dislop.mjs check . --fail-on warning && node bin/dislop.mjs check site/ --fail-on info && node scripts/media/audit_visual_assets.mjs --assert",
+    "media:render": "python3 scripts/media/render_gifs.py",
+    "media:verify": "python3 scripts/media/verify_demos.py",
+    "media:bench": "python3 scripts/media/bench_encoders.py",
+    "media:audit": "node scripts/media/audit_visual_assets.mjs --assert"
   },
   "files": [
     ".agents/plugins/marketplace.json",
@@ -63,6 +70,7 @@
     "models/",
     "packs/",
     "patterns/taxonomy.json",
+    "patterns/ai-tic-rubric.json",
     "patterns/dimensions/",
     "patterns/banks/",
     "skills/",

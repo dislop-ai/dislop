@@ -257,3 +257,67 @@ good: 本段暂未提供具体指标、改动文件或责任人，请先删去�
 ```
 
 Atomic card: [low-burstiness-vapor.md](../rules/low-burstiness-vapor.md)
+
+## `zh-dev-jargon`
+- Tier: `taste` · Severity: `warning` · Family: `lexicon/dev-jargon`
+- Modalities: `markdown, text, html, docx, pptx`
+- EN: Paragraph concentrates hollow AI-generated corporate/engineering buzzwords ('全闭环', '深度赋能', '范式跃迁', '零误差', '…化') rather than grounded technical mechanisms.
+- ZH: 单段集中出现 AI 爱写的空洞自嗨黑话（如`全闭环/深度赋能/范式跃迁/零失误/体系化`），而非具体工程或业务机制；偶发行业实词会自动豁免。
+- Deletion Test (EN): Replace each abstract buzzword with the concrete retry count, queue limit, or exit code.
+- Deletion Test (ZH): 把空洞黑话拆成真实机制：写出具体报错码、重试上限、超时秒数或人工处理步骤。
+
+```text
+bad:  本次发布建立全闭环校验机制，通过铁律约束完成总收口并形成强兜底，实现零失误交付。
+trap: 这不只是发布脚本，而是零缺陷交付的工程铁律。
+good: 发布脚本在合入前运行单测与类型检查；任一失败直接退出非零状态码，并保留前一次构建产物用于回滚。
+```
+
+Atomic card: [zh-dev-jargon.md](../rules/zh-dev-jargon.md)
+
+## `zh-exclamation`
+- Tier: `taste` · Severity: `warning` · Family: `punctuation/exclamation`
+- Modalities: `markdown, text, html, docx, pptx`
+- EN: Chinese prose paragraph overuses exclamation marks or combines exclamation punctuation with hype modifiers.
+- ZH: 中文正文段出现鸡血营销感叹号（2 处及以上或搭配`太棒了/重磅/彻底告别/震撼`等煽动词），破坏冷静客观的叙述语气。
+- Deletion Test (EN): Change trailing exclamation marks to periods and remove emotional hype adverbs.
+- Deletion Test (ZH): 把句末感叹号改回句号，删去`重磅/太棒了/彻底告别`等鼓动字眼。
+
+```text
+bad:  太棒了！新版工具帮你彻底告别繁琐的人工排查！
+trap: 别再手查了！立刻开启自动化新体验！
+good: 新版工具会在提交前自动扫描未填占位符和超长列表，减少人工复核遗漏。
+```
+
+Atomic card: [zh-exclamation.md](../rules/zh-exclamation.md)
+
+## `zh-mega-sentence`
+- Tier: `taste` · Severity: `warning` · Family: `rhythm/mega-sentence`
+- Modalities: `markdown, text, html, docx`
+- EN: Single Chinese prose sentence exceeds 180 CJK characters (or 120+ CJK with 180+ total chars) without breaking.
+- ZH: 中文单句一逗到底超过 180 个汉字（或 >= 120 汉字且总长超 180 字），阅读负担重，呈大模型长从句生成特征。
+- Deletion Test (EN): Split at the natural clause shift using periods so each sentence carries one main subject and action.
+- Deletion Test (ZH): 按事件或条件转换处切成句号短句，每句只交代一个主动作或边界条件。
+
+```text
+bad:  我们在周一完成双集群流量切分后观察到 orders-worker-service-cluster-01 核心交易接口延迟上升三毫秒但考虑到异步日志落盘能够避免主线程在高峰期被磁盘刷写操作阻塞并且可在节点异常重启后完整保留上下文追踪链路以便值班同学快速排查请求参数与调用栈因此决定保留当前配置并在周四晚低峰期继续观察四十八小时以确认内存缓冲池没有缓慢泄漏或堆积风险。
+trap: 切双集群。延迟微升。观察两天。
+good: 周一完成双集群切分后延迟升了 3ms，但异步落盘可防阻塞并保链路。团队周四再复查 48 小时内存占用。
+```
+
+Atomic card: [zh-mega-sentence.md](../rules/zh-mega-sentence.md)
+
+## `unsourced-statistic`
+- Tier: `taste` · Severity: `warning` · Family: `evidence/unsourced-stat`
+- Modalities: `markdown, text, html, docx, pptx`
+- EN: Marketing-style percentage claim ('up to X%', 'reduces by X%', '提升 X%', '高达 X%') lacks a baseline, sample size, metric name, or citation.
+- ZH: 宣传式百分比数字宣称（如`提升 40%``高达 80%``up to 50%`）附近缺少测试基线、样本数、指标口径或引用来源。
+- Deletion Test (EN): Add the before -> after baseline, sample size (n=...), or link to the benchmark; otherwise cut the unverified percentage.
+- Deletion Test (ZH): 补出改动前后的基准对比、样本量或测评出处；拿不出出处就删掉具体百分比。
+
+```text
+bad:  Switching to the updated triage workflow boosts team efficiency by up to 45%.
+trap: Teams work smarter. Triage moves faster. Quality soars.
+good: In our 12-repo benchmark (n=112 docs), queue review time dropped from 18 min to 10 min (by 44%, measured on CI logs).
+```
+
+Atomic card: [unsourced-statistic.md](../rules/unsourced-statistic.md)

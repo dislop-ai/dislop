@@ -11,7 +11,7 @@
 1. **第一代模板（2023–2025）**：深蓝黑底配蓝紫粉霓虹渐变、满屏 `rounded-full` 胶囊标签与渐变裁切大标题。
 2. **第二代模板（2025–2026）**：当提示词禁止紫色渐变后，模型普遍退回暖米白底（`#F7F5F0`）、Tailwind 暖黑（`#1C1917`）配朱砂橙红——形成新的同质化“暖色人文模板”。
 
-`dislop` 同时避开这两类默认解，回到校对这一行当本身的器物逻辑：
+`dislop` 同时避开这两类默认解，参考校对工作本身用的东西：
 
 - **印刷清样（西方 Galley Proof 与国家标准 GB/T 14706《校对符号及其用法》）**：中性棉浆纸白底、高对比碳黑墨迹、待审文稿用衬线体排版，批注置于右侧页边栏并与原文行号对应。
 - **工程结构标尺**：使用连续的 `1px` 细实线划分版面分栏，单元格采用 `0–4px` 直角/微圆角，不叠毛玻璃和弥散阴影；首屏直接提供可编辑、可复检的校样工作台，不放空洞宣传画。
@@ -22,7 +22,7 @@
 - **字标**：全小写无衬线粗体 `dislop`（`letter-spacing: -0.025em`），不挂版本号胶囊、星芒图标或多层套框。
 - **仓库双主题横幅（`assets/banner-light.svg`、`assets/banner-dark.svg`）**：在 `README` 中通过 `<picture>` 标签自适应 GitHub 浅色与深色模式，双主题图标均保留同一枚朱红笔迹（`#F04438`），右侧标本严格遵循红蓝两套语义：朱红实线仅标出 `core` AI 残留硬伤（`chatbot-artifact`），群青虚线标出套话与模板味提醒。
 - **社交预览卡（`assets/og-card.svg`、`assets/og-card.png`，`1200×630`）**：印刷校样风 Open Graph 预览图，构建期同步至 `site/assets/`，适配 X、GitHub、Slack、Discord 与微信链接转发。
-- **对外演示动效 GIF（`assets/demos/*-{zh,en}-v1.gif`）**：面向 README、官网、接入手册与社媒的分语种演示图，完整制作与托管规范见 [gif-production-guide.zh-CN.md](./gif-production-guide.zh-CN.md)。
+- **对外演示动效（`assets/demos/*-{zh,en}-v2.{gif,webp}` 与 `-poster.png`）**：面向 README、官网、`/guides/` 与编辑器市场的分语种渐进式演示图（无损动态 WebP 优先、无抖动 GIF 回退、减动效静态海报），制作规范、编码实测与自动化门禁见 [gif-production-guide.zh-CN.md](./gif-production-guide.zh-CN.md)（[English](./gif-production-guide.md)）。
 
 ## 3. 色彩令牌与深色模式单调亮度阶梯
 

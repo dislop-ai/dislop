@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="../assets/banner-dark.svg">
-    <img src="../assets/banner-light.svg" alt="Awesome Anti-Slop — curated by dislop" width="100%">
+    <img src="../assets/banner-light.svg" alt="Awesome Anti-Slop — Cutting AI slop is real productivity." width="100%">
   </picture>
 </p>
 
@@ -15,11 +15,11 @@
 
 # Awesome Anti-Slop
 
-87 tools, linters, style guides, UI rules, PR policies, and papers in English and Chinese, including established projects like Vale and Impeccable.
+Cutting AI slop is real productivity. 90 tools, linters, style guides, UI rules, PR policies, and papers in English and Chinese, including established projects like Vale and Impeccable.
 
-Every link, star count, and last-push date below was checked via GitHub API and HTTP status on `2026-11-21`. 19 entries run automated checks without an LLM, and the tables note which. AI-text detectors and bypass tools sit apart in [Contrast Watch](#contrast-watch) at the bottom for reference only.
+Every link, star count, and last-push date below was checked via GitHub API and HTTP status on `2026-11-21`. 20 entries run automated checks without an LLM, and the tables note which. AI-text detectors and bypass tools sit apart in [Contrast Watch](#contrast-watch) at the bottom for reference only.
 
-To filter the list offline, open [dislop.com/awesome](https://dislop.com/awesome/). To give it to an agent, point it at [index.json](https://dislop.com/awesome/index.json) or [index.md](https://dislop.com/awesome/index.md). To add an entry, see [Suggest a resource](#suggest-a-resource).
+To filter the list in your browser, open [dislop.com/awesome](https://dislop.com/awesome/). To give it to an agent, point it at [index.json](https://dislop.com/awesome/index.json) or [index.md](https://dislop.com/awesome/index.md). To add an entry, see [Suggest a resource](#suggest-a-resource).
 
 ## Contents
 
@@ -27,7 +27,7 @@ To filter the list offline, open [dislop.com/awesome](https://dislop.com/awesome
 - [English and Multilingual Writing](#english-and-multilingual-writing) (14)
 - [Chinese Writing and Localization](#chinese-writing-and-localization) (9)
 - [Deterministic Linters](#deterministic-linters) (9)
-- [UI, Design, and Diagrams](#ui-design-and-diagrams) (12)
+- [UI, Design, and Diagrams](#ui-design-and-diagrams) (15)
 - [Code and PR Governance](#code-and-pr-governance) (8)
 - [Awesome Lists and Registries](#awesome-lists-and-registries) (13)
 - [Contrast Watch](#contrast-watch) (9)
@@ -107,7 +107,7 @@ To filter the list offline, open [dislop.com/awesome](https://dislop.com/awesome
 
 ## UI, Design, and Diagrams
 
-12 entries
+15 entries
 
 | Resource | Topic / Locale | Automated check | Stars & last push | What it is |
 |---|---|---|---|---|
@@ -123,6 +123,9 @@ To filter the list offline, open [dislop.com/awesome](https://dislop.com/awesome
 | [superdesigndev/superdesign-skill](https://github.com/superdesigndev/superdesign-skill) | `ui-design` / `en` | no | 1,038★ · 2026-08-21 | Anti-generic UI design skill for coding agents. |
 | [Yu-369/VibeCurb](https://github.com/Yu-369/VibeCurb) | `ui-design` / `en` | no | 1,010★ · 2026-08-05 | Toolkit injecting aesthetic guardrails into AI UI workflows. |
 | [funboy322/avoid-ai-design](https://github.com/funboy322/avoid-ai-design) | `ui-design` / `en` | no | 166★ · 2026-11-18 | Lightweight guide and checker replacing default purple-pink gradients and boilerplate UI styles. |
+| [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | `ui-design` / `en` | no | 152,711★ · 2026-11-22 | Multi-platform UI/UX design-intelligence skill providing industry-specific tokens, font pairings, and layout specs. |
+| [vercel-labs/agent-skills (web-design-guidelines)](https://github.com/vercel-labs/agent-skills) | `ui-design` / `en` | no | 34,714★ · 2026-11-20 | Vercel's official agent skill collection including Web Interface Guidelines for usability, forms, and accessibility review. |
+| [cesaroeduardo/antiwebslop](https://github.com/cesaroeduardo/antiwebslop) | `ui-design` / `en` | yes | 44★ · 2026-11-17 | Web design anti-slop skills and validation scripts paired with scorecards and before/after galleries. |
 
 ## Code and PR Governance
 

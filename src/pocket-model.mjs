@@ -190,7 +190,8 @@ function stripFencedBlocksLinear(raw) {
 }
 
 export function cleanProseSurface(raw) {
-  let s = String(raw || "").replace(/\uFEFF/g, " ");
+  let s = String(raw || "").replace(/^\uFEFF/, "").replace(/\uFEFF/g, " ");
+  s = s.replace(/^[ \t]*---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?=\r?\n|$)/, " ");
   s = s.replace(DISLOP_QUOTE_BLOCK_RE, " ");
   s = s.replace(HTML_COMMENT_RE, " ");
   s = stripFencedBlocksLinear(s);
@@ -589,13 +590,23 @@ export function predictPackWithPocketRouter(text, customBundle = null) {
 
 function maskNewlinePreserving(text) {
   return String(text || "")
+    .replace(/^\uFEFF?[ \t]*---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?=\r?\n|$)/, (m) => m.replace(/[^\n]/g, " "))
     .replace(DISLOP_QUOTE_BLOCK_RE, (m) => m.replace(/[^\n]/g, " "))
     .replace(HTML_COMMENT_RE, (m) => m.replace(/[^\n]/g, " "));
 }
 
-function splitParagraphBlocks(raw) {
+function isUiShortLineStack(lines) {
+  if (!lines || lines.length < 3) return false;
+  const nonEmpty = lines.map((l) => l.trim()).filter(Boolean);
+  if (nonEmpty.length < 3) return false;
+  const shortCount = nonEmpty.filter((l) => cpLen(l) <= 16).length;
+  return shortCount * 2 >= nonEmpty.length;
+}
+
+function splitParagraphBlocks(raw, meta = null) {
   const text = maskNewlinePreserving(raw);
   const blocks = [];
+  let suppressedUiCount = 0;
   let lineNo = 1;
   let idx = 0;
   const lines = text.split("\n");
@@ -608,7 +619,9 @@ function splitParagraphBlocks(raw) {
     if (curLines.length === 0) return;
     const content = curLines.join("\n");
     const trimmed = content.trim();
-    if (
+    if (isUiShortLineStack(curLines)) {
+      suppressedUiCount += 1;
+    } else if (
       trimmed.length >= 24 &&
       !trimmed.startsWith("#") &&
       !trimmed.startsWith("|") &&
@@ -658,6 +671,7 @@ function splitParagraphBlocks(raw) {
     lineNo += 1;
   }
   flush(cpLen(text), lines.length);
+  if (meta) meta.suppressedUiCount = suppressedUiCount;
   return blocks;
 }
 
@@ -671,7 +685,8 @@ export function analyzeDocumentWithPocketModels(text, { threshold = null, custom
   const effectiveThreshold = threshold ?? bundle.thresholds?.stealthWarning ?? 0.755;
   const whole = scorePocketSpan(text, bundle);
   const packRouting = predictPackWithPocketRouter(text, bundle);
-  const blocks = splitParagraphBlocks(text);
+  const blockMeta = { suppressedUiCount: 0 };
+  const blocks = splitParagraphBlocks(text, blockMeta);
 
   const paragraphs = [];
   for (const b of blocks) {
@@ -691,8 +706,15 @@ export function analyzeDocumentWithPocketModels(text, { threshold = null, custom
 
   const maxParagraphProb =
     paragraphs.length > 0 ? maxOf(paragraphs.map((p) => p.slopProbability)) : whole.slopProbability;
-  const documentProbability = round4(Math.max(whole.slopProbability, maxParagraphProb));
   const flaggedParagraphs = paragraphs.filter((p) => p.flagged);
+  let documentProbability = round4(Math.max(whole.slopProbability, maxParagraphProb));
+  if (
+    flaggedParagraphs.length === 0 &&
+    (paragraphs.length > 0 || blockMeta.suppressedUiCount > 0 || !whole.eligible) &&
+    documentProbability >= effectiveThreshold
+  ) {
+    documentProbability = round4(Math.max(0, effectiveThreshold - 0.005));
+  }
 
   return {
     schema: bundle.schema,

@@ -1,6 +1,6 @@
 # dislop
 
-> Linter for AI Slop. Vetted community rules (7 packs, 42 rules, 53 patterns) and 87 curated tools so coding and office agents catch and fix AI slop in docs, web UI, and slides. Runs locally offline, or via Cloud MCP.
+> Cutting AI slop is real productivity. Linter for AI Slop with vetted community rules (7 packs, 53 rules, 65 patterns) and 90 curated tools so coding and office agents catch and fix AI slop in docs, web UI, and slides. Runs locally offline, or via Cloud MCP.
 
 Read the task page matching your work. If `skills/dislop/` is installed locally, use `./references/*.md` and `dislop check` offline.
 
@@ -11,17 +11,18 @@ Read the task page matching your work. If `skills/dislop/` is installed locally,
 - [Check files before release](https://dislop.com/tasks/pre-release-gate.md): Core `error` checks and git diff CI gating.
 
 ## Browse by topic
-- [Product Brief](https://dislop.com/methodology/product-brief.md): Core positioning, target users, selling points, and pitch.
-- [Methodology & Voice Guide](https://dislop.com/methodology/index.md): Plain writing guide, anti-pattern notes, and visual tokens.
-- [Examples & References](https://dislop.com/cases/index.md): Before / overcorrected / after contrasts and 31 print/type design references.
-- [Install & Integrations](https://dislop.com/tools/index.md): Pure-doc Skill, local CLI (`check`/`patterns`/`voice`), Plugin, and Cloud MCP.
-- [Awesome Anti-Slop](https://dislop.com/awesome/index.md): 87 checked tools, guides, and papers (`dislop.radar/2`, JSON at `/awesome/index.json`).
+- [Guides (EN & ZH)](https://dislop.com/en/guides/): 6 bilingual tutorials (prose, web UI, PPTX, CI, tools; ZH at `/guides/`).
+- [Product Brief](https://dislop.com/methodology/product-brief.md): Core positioning, target users, and pitch.
+- [Methodology & Voice Guide](https://dislop.com/methodology/index.md): Plain writing guide and visual tokens.
+- [Examples & References](https://dislop.com/cases/index.md): Contrasts and 31 print/type design references.
+- [Install & Integrations](https://dislop.com/tools/index.md): Pure-doc Skill, local CLI, Plugin, and Cloud MCP.
+- [Awesome Anti-Slop](https://dislop.com/awesome/index.md): 90 checked tools & papers (JSON at `/awesome/index.json`).
 - [Roadmap & Open Questions](https://dislop.com/roadmap.md): Active tracks and collaboration guide.
 
 ## Machine index & packs
 - [JSON Catalog](https://dislop.com/catalog.json): Versioned manifest (`dislop.catalog/1`) with sha256 and token estimates.
 - [Agent Skill](https://dislop.com/tools/skill.md): Mirror of `skills/dislop/SKILL.md` (`v0.7.1`); skip if loaded locally.
-- [Official Cloud MCP](https://dislop.com/tools/mcp-sdk-api.md): `https://dislop.com/mcp` (sign in for 30 free credits/mo; `dislop_review`, `dislop_deslop`).
-- [Rule Packs](https://dislop.com/packs/core.md): 7 packs & 42 `/rules/<id>.md` cards.
-- [Single-Fetch Bundle](https://dislop.com/llms-full.txt): All 42 rules compiled without test fixtures.
-- [Privacy & Data Boundaries](https://dislop.com/privacy.md): Offline Skill/CLI vs. zero-training Cloud MCP.
+- [Official Cloud MCP](https://dislop.com/tools/mcp-sdk-api.md): `https://dislop.com/mcp` (30 free credits/mo; `dislop_review`, `dislop_deslop`).
+- [Rule Packs](https://dislop.com/packs/core.md): 7 packs & 53 `/rules/<id>.md` cards.
+- [Single-Fetch Bundle](https://dislop.com/llms-full.txt): All 53 rules compiled without test fixtures.
+- [Privacy & Data Boundaries](https://dislop.com/privacy.md): Offline boundaries (Skill, CLI) and Cloud MCP Gemini API policy.

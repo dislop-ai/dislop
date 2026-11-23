@@ -34,7 +34,17 @@
       { "id": "zh-undoubtedly", "pattern": "毋庸置疑", "weight": 1.2 },
       { "id": "zh-wide-attention", "pattern": "引发了广泛关注", "weight": 1.3 },
       { "id": "zh-worth-pondering", "pattern": "值得深思的是", "weight": 1.3 },
-      { "id": "zh-long-run", "pattern": "从长远来看", "weight": 1.0 }
+      { "id": "zh-long-run", "pattern": "从长远来看", "weight": 1.0 },
+      { "id": "zh-worth-noting", "pattern": "值得注意的是", "weight": 1.1 },
+      { "id": "zh-bottom-line", "pattern": "归根结底", "weight": 1.2 },
+      { "id": "zh-all-in-all", "pattern": "总而言之", "weight": 1.1 },
+      { "id": "zh-not-hard-find", "pattern": "不难发现", "weight": 1.1 },
+      { "id": "zh-furthermore", "pattern": "进一步来说", "weight": 1.0 },
+      { "id": "zh-plainly-put", "pattern": "说白了就是", "weight": 1.3 },
+      { "id": "zh-essentially", "pattern": "本质上(?:来说|而言)", "weight": 1.2 },
+      { "id": "zh-new-stage", "pattern": "迈入新阶段", "weight": 1.4 },
+      { "id": "zh-solid-foundation", "pattern": "奠定(?:了)?坚实基础", "weight": 1.4 },
+      { "id": "zh-important-carrier", "pattern": "作为[^，。！？\\n]{1,12}的重要(?:载体|基石|桥梁)", "weight": 1.4 }
     ]
   },
   "enPhraseCluster": {
@@ -68,7 +78,15 @@
       { "id": "en-transformative", "pattern": "\\btransformative\\b", "weight": 1.2 },
       { "id": "en-paramount", "pattern": "\\bparamount\\b", "weight": 1.2 },
       { "id": "en-multifaceted", "pattern": "\\bmultifaceted\\b", "weight": 1.3 },
-      { "id": "en-streamline", "pattern": "\\bstreamline(?:s|d|ing)?\\b", "weight": 1.0 }
+      { "id": "en-streamline", "pattern": "\\bstreamline(?:s|d|ing)?\\b", "weight": 1.0 },
+      { "id": "en-testament-to", "pattern": "\\btestament to\\b", "weight": 1.3 },
+      { "id": "en-stands-as-a", "pattern": "\\bstands as a\\b", "weight": 1.2 },
+      { "id": "en-delve", "pattern": "\\bdelve(?:s|d|ing)?\\b", "weight": 1.3 },
+      { "id": "en-ever-changing", "pattern": "\\bever-changing\\b", "weight": 1.3 },
+      { "id": "en-game-changing", "pattern": "\\bgame[- ]changing\\b", "weight": 1.3 },
+      { "id": "en-worth-noting", "pattern": "\\bworth noting\\b", "weight": 1.0 },
+      { "id": "en-in-todays", "pattern": "\\bin today's\\b", "weight": 1.1 },
+      { "id": "en-notably", "pattern": "\\bnotably\\b", "weight": 0.9 }
     ]
   }
 }

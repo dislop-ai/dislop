@@ -1,0 +1,264 @@
+{
+  "schema": "dislop.visual-vlm-dataset/1",
+  "version": "1.0.0",
+  "description": "16 rendered visual anti-slop evaluation cases (8 slop + 8 clean hard negatives, including 3 static-blind visual/layout slop cases) across Web UI, PDF slides/reports, and SVG/PNG graphics.",
+  "cases": [
+    {
+      "id": "vlm-web-slop-gen1",
+      "group": "web",
+      "targetType": "webpage",
+      "label": "slop",
+      "staticBlind": false,
+      "filename": "gen1-hero.html",
+      "viewport": { "width": 1280, "height": 800 },
+      "notes": "Gen-1 neon purple-pink gradient hero, blur-3xl glow orbs, animated pill, emoji tiles, and pill soup.",
+      "html": "<!doctype html><html><head><meta charset=\"utf-8\"><style>*{box-sizing:border-box}body{margin:0;background:#090914;color:#f8fafc;font-family:system-ui,-apple-system,sans-serif;padding:56px 72px;position:relative;overflow:hidden}.orb1{position:absolute;top:-80px;left:120px;width:380px;height:380px;border-radius:9999px;background:rgba(168,85,247,.38);filter:blur(72px)}.orb2{position:absolute;bottom:-60px;right:140px;width:360px;height:360px;border-radius:9999px;background:rgba(236,72,153,.32);filter:blur(72px)}.pill-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(99,102,241,.18);border:1px solid rgba(168,85,247,.4);font-size:13px;color:#e9d5ff}.dot{width:8px;height:8px;border-radius:9999px;background:#34d399}h1{font-size:56px;line-height:1.1;margin:20px 0 14px;background:linear-gradient(90deg,#818cf8,#c084fc,#f472b6);-webkit-background-clip:text;color:transparent}.sub{color:#cbd5e1;font-size:19px;max-width:660px;margin:0 0 24px}.pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}.pill{padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);font-size:12px}.cta{display:inline-block;padding:12px 24px;border-radius:10px;background:linear-gradient(90deg,#6366f1,#ec4899);color:#fff;font-weight:700;text-decoration:none;box-shadow:0 12px 32px rgba(168,85,247,.45)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px}.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px}.tile{width:40px;height:40px;border-radius:12px;background:rgba(99,102,241,.22);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}</style></head><body><div class=\"orb1\"></div><div class=\"orb2\"></div><span class=\"pill-badge\"><span class=\"dot animate-ping\"></span>AI-Powered · Zero Hallucination</span><h1>Supercharge Your Workflow With Next-Gen AI</h1><p class=\"sub\">Unleash seamless synergy across every workspace in seconds.</p><div class=\"pills\"><span class=\"pill rounded-full\">Fast</span><span class=\"pill rounded-full\">Smart</span><span class=\"pill rounded-full\">SOC2</span><span class=\"pill rounded-full\">v4.0</span><span class=\"pill rounded-full\">Cloud</span><span class=\"pill rounded-full\">Realtime</span><span class=\"pill rounded-full\">Global</span></div><a href=\"#\" class=\"cta\">Get Started Now</a><section class=\"grid\"><div class=\"card\"><div class=\"tile\">🚀</div><h3>🚀 Blazing Speed</h3><p>Deploy globally in clicks.</p></div><div class=\"card\"><div class=\"tile\">✨</div><h3>✨ Smart Insights</h3><p>Unlock deep intelligence.</p></div><div class=\"card\"><div class=\"tile\">⚡</div><h3>⚡ Instant Scale</h3><p>Built for tomorrow.</p></div></section></body></html>"
+    },
+    {
+      "id": "vlm-web-slop-gen2",
+      "group": "web",
+      "targetType": "webpage",
+      "label": "slop",
+      "staticBlind": false,
+      "filename": "gen2-cream-terracotta.html",
+      "viewport": { "width": 1280, "height": 800 },
+      "notes": "Gen-2 tasteful AI slop: warm cream #FAF8F5 + terracotta #C45A3B + serif italic headline accent + Inter + uppercase tracked eyebrow + rounded-2xl shadow-xl 3-column numbered cards.",
+      "html": "<!doctype html><html><head><meta charset=\"utf-8\"><style>*{box-sizing:border-box}body{margin:0;background:#FAF8F5;color:#1F1D1A;font-family:'Inter',system-ui,sans-serif;padding:64px 80px}.eyebrow{display:inline-block;font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#C45A3B;margin-bottom:18px}h1{font-family:Georgia,'Times New Roman',serif;font-size:56px;line-height:1.08;font-weight:400;margin:0 0 18px;max-width:760px}h1 em{font-style:italic;color:#C45A3B}.lead{font-size:18px;line-height:1.6;color:#57534E;max-width:600px;margin:0 0 36px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.card{background:#FFFFFF;border:1px solid #EAE5DC;border-radius:20px;padding:28px;box-shadow:0 20px 35px -12px rgba(28,25,23,.08)}.num{display:inline-block;font-size:12px;font-weight:600;color:#C45A3B;margin-bottom:12px}h3{margin:0 0 8px;font-size:20px}p{margin:0;color:#57534E;font-size:15px;line-height:1.55}</style></head><body><span class=\"eyebrow tracking-widest uppercase\">EDITORIAL PLATFORM</span><h1>Craft systems that feel <em>effortless</em> at scale.</h1><p class=\"lead\">Thoughtful infrastructure designed with quiet precision for modern teams who care about every detail.</p><section class=\"grid\"><article class=\"card rounded-2xl shadow-xl\"><span class=\"num\">01</span><h3>Quiet clarity</h3><p>A calmer operating cadence for product organizations.</p></article><article class=\"card rounded-2xl shadow-xl\"><span class=\"num\">02</span><h3>Intentional rhythm</h3><p>Structured workflows built for thoughtful engineering craft.</p></article><article class=\"card rounded-2xl shadow-xl\"><span class=\"num\">03</span><h3>Durable trust</h3><p>Observable releases engineered for peace of mind.</p></article></section></body></html>"
+    },
+    {
+      "id": "vlm-web-slop-subtle-layout",
+      "group": "web",
+      "targetType": "webpage",
+      "label": "slop",
+      "staticBlind": true,
+      "filename": "subtle-slop-dashboard.html",
+      "viewport": { "width": 1280, "height": 800 },
+      "notes": "Static-blind Web UI slop: neutral slate/white palette triggers zero Gen-1/Gen-2 rules, yet has 4 competing primary buttons, unreadable light-grey micro-labels, inconsistent card padding, and meaningless flat placeholder bars.",
+      "html": "<!doctype html><html><head><meta charset=\"utf-8\"><style>*{box-sizing:border-box}body{margin:0;background:#f1f5f9;color:#1e293b;font-family:system-ui,sans-serif;padding:12px}.topbar{background:#fff;padding:8px 10px;border:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.btns{display:flex;gap:6px}.btn{background:#2563eb;color:#fff;border:none;padding:7px 14px;border-radius:4px;font-size:13px;font-weight:600}.row{display:grid;grid-template-columns:1.4fr .8fr 1.1fr;gap:6px;margin-bottom:8px}.c1{background:#fff;border:1px solid #cbd5e1;padding:6px 18px 26px 8px}.c2{background:#fff;border:1px solid #cbd5e1;padding:24px 6px 6px 20px}.c3{background:#fff;border:1px solid #cbd5e1;padding:10px}.micro{font-size:10px;color:#cbd5e1;margin-top:2px}.big{font-size:28px;font-weight:700;margin:4px 0}.chart{background:#fff;border:1px solid #cbd5e1;padding:12px;height:460px;display:flex;flex-direction:column;justify-content:flex-end}.bars{display:flex;align-items:flex-end;gap:14px;height:360px;border-bottom:1px solid #e2e8f0;padding-top:20px}.bar{flex:1;background:#94a3b8;height:180px;display:flex;align-items:flex-end;justify-content:center;color:#fff;font-size:11px;padding-bottom:6px}</style></head><body><header class=\"topbar\"><strong>Workspace Operations Console Monitor Portal</strong><div class=\"btns\"><button class=\"btn\" type=\"button\">Apply Changes</button><button class=\"btn\" type=\"button\">Export CSV</button><button class=\"btn\" type=\"button\">Compare Q2</button><button class=\"btn\" type=\"button\">Publish Live</button></div></header><div class=\"row\"><section class=\"c1\"><div>Active Queue Items</div><div class=\"big\">142</div><div class=\"micro\">updated continuously</div></section><section class=\"c2\"><div>Processing Health</div><div class=\"big\">Nominal</div><div class=\"micro\">telemetry active</div></section><section class=\"c3\"><div>Monthly Target Progress</div><div class=\"big\">84%</div><div class=\"micro\">tracking baseline</div></section></div><section class=\"chart\"><div style=\"font-size:13px;color:#64748b;margin-bottom:8px\">Weekly Volume Overview</div><div class=\"bars\"><div class=\"bar\">M1</div><div class=\"bar\">M2</div><div class=\"bar\">M3</div><div class=\"bar\">M4</div><div class=\"bar\">M5</div><div class=\"bar\">M6</div></div></section></body></html>"
+    },
+    {
+      "id": "vlm-web-clean-editorial",
+      "group": "web",
+      "targetType": "webpage",
+      "label": "clean",
+      "staticBlind": false,
+      "filename": "clean-editorial-release.html",
+      "viewport": { "width": 1280, "height": 800 },
+      "notes": "Crisp minimalist release changelog page: 1px hairline structure, clear hierarchy, high-contrast ink on paper ground.",
+      "html": "<!doctype html><html><head><meta charset=\"utf-8\"><style>*{box-sizing:border-box}body{margin:0;background:#F6F7F5;color:#15171A;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif}.wrap{max-width:860px;margin:0 auto;padding:56px 32px}header{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:18px;border-bottom:1px solid #D5D7D2}h1{font-size:36px;line-height:1.15;margin:36px 0 12px;letter-spacing:-0.02em}.meta{font-family:ui-monospace,SFMono-Regular,monospace;font-size:13px;color:#525860}.btn{display:inline-block;margin-top:18px;padding:10px 16px;background:#15171A;color:#F6F7F5;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600}table{width:100%;border-collapse:collapse;margin-top:40px;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid #D5D7D2;font-size:14px}th{font-size:12px;color:#525860;font-weight:600}</style></head><body><div class=\"wrap\"><header><strong>ledgerd</strong><span class=\"meta\">v2.4.1 · released 2026-11-18</span></header><h1>Checkout queue latency dropped 38% after moving address lookup async.</h1><p style=\"font-size:17px;line-height:1.6;color:#343A40;max-width:640px\">Version 2.4.1 decouples postal code validation from the synchronous submit handler and adds per-shard queue depth gauges.</p><a class=\"btn\" href=\"./release-2.4.1.md\">Read migration notes</a><table><thead><tr><th>Metric</th><th>v2.4.0</th><th>v2.4.1</th><th>Delta</th></tr></thead><tbody><tr><td>Checkout p95</td><td>4.20 s</td><td>2.61 s</td><td>-37.9%</td></tr><tr><td>Abandoned carts</td><td>19.4%</td><td>14.1%</td><td>-5.3 pp</td></tr><tr><td>Worker memory</td><td>312 MiB</td><td>284 MiB</td><td>-9.0%</td></tr></tbody></table></div></body></html>"
+    },
+    {
+      "id": "vlm-web-clean-dark",
+      "group": "web",
+      "targetType": "webpage",
+      "label": "clean",
+      "staticBlind": false,
+      "filename": "clean-dark-status.html",
+      "viewport": { "width": 1280, "height": 800 },
+      "notes": "Restrained developer dark mode incident dashboard: monotonic slate surfaces, 1px rules, tabular-nums, zero neon glow.",
+      "html": "<!doctype html><html><head><meta charset=\"utf-8\"><style>*{box-sizing:border-box}body{margin:0;background:#0F1115;color:#E6E8EB;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.wrap{max-width:980px;margin:0 auto;padding:48px 32px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #262B36;padding-bottom:16px}h1{font-size:26px;margin:28px 0 8px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}.panel{background:#161920;border:1px solid #262B36;border-radius:4px;padding:18px;font-variant-numeric:tabular-nums}.k{font-size:12px;color:#9BA3AF;margin-bottom:8px}.v{font-size:28px;font-weight:600;color:#F3F4F6}.s{margin-top:6px;font-size:13px;color:#9BA3AF}table{width:100%;border-collapse:collapse;margin-top:28px;background:#161920;border:1px solid #262B36}th,td{padding:11px 14px;border-bottom:1px solid #262B36;text-align:left;font-size:13px;font-variant-numeric:tabular-nums}th{color:#9BA3AF;font-weight:500}.ok{color:#4ADE80}</style></head><body><div class=\"wrap\"><header><strong>edge-ingest telemetry</strong><span style=\"font-size:13px;color:#9BA3AF\">us-west-2 · 2026-11-22 14:00 UTC</span></header><h1>All 4 ingest partitions operating within SLA.</h1><p style=\"color:#9BA3AF;font-size:14px;margin:0\">Last failover test completed 6 hours ago with zero dropped messages.</p><section class=\"grid\"><div class=\"panel\"><div class=\"k\">Ingest throughput</div><div class=\"v\">42,810 req/s</div><div class=\"s\">60-min rolling mean</div></div><div class=\"panel\"><div class=\"k\">p99 write latency</div><div class=\"v\">18.4 ms</div><div class=\"s\">SLA limit: 50.0 ms</div></div><div class=\"panel\"><div class=\"k\">Dead-letter queue</div><div class=\"v\">0</div><div class=\"s\">Past 24 hours</div></div></section><table><thead><tr><th>Shard</th><th>Role</th><th>Lag</th><th>Status</th></tr></thead><tbody><tr><td>ingest-a1</td><td>Primary</td><td>2 ms</td><td class=\"ok\">Healthy</td></tr><tr><td>ingest-b2</td><td>Replica</td><td>4 ms</td><td class=\"ok\">Healthy</td></tr><tr><td>ingest-c3</td><td>Replica</td><td>3 ms</td><td class=\"ok\">Healthy</td></tr></tbody></table></div></body></html>"
+    },
+    {
+      "id": "vlm-web-clean-warm-essay",
+      "group": "web",
+      "targetType": "webpage",
+      "label": "clean",
+      "staticBlind": false,
+      "filename": "clean-warm-essay.html",
+      "viewport": { "width": 1280, "height": 800 },
+      "notes": "Hard negative: clean warm-paper #FAF8F5 single-column essay reading layout with serif prose and zero marketing eyebrows or cards.",
+      "html": "<!doctype html><html><head><meta charset=\"utf-8\"><style>*{box-sizing:border-box}body{margin:0;background:#FAF8F5;color:#1F2428;font-family:Georgia,'Times New Roman',serif}.essay{max-width:640px;margin:0 auto;padding:64px 28px}h1{font-size:34px;line-height:1.22;margin:0 0 14px;font-weight:700}.byline{font-size:14px;color:#5A6168;padding-bottom:24px;border-bottom:1px solid #DED8CD;margin-bottom:28px;font-family:-apple-system,sans-serif}p{font-size:18px;line-height:1.72;margin:0 0 20px}</style></head><body><article class=\"essay\"><h1>Why We Stopped Using Synthetic Benchmarks for Parser Latency</h1><div class=\"byline\">Mina Patel · November 12, 2026 · 4 min read</div><p>Our XML reader passed every 4 KB unit fixture in under 0.3 milliseconds, yet customer exports containing 800-row spreadsheets stalled for six seconds on older laptops.</p><p>Replaying twelve anonymized production workbooks exposed an O(n²) attribute scan inside the shared-string table. Replacing two nested loops with a single linear pass cut real export time from 6.1 seconds to 94 milliseconds.</p><p>Microbenchmarks still verify edge cases, but actual export latency is now tracked against those twelve full workbooks on every pull request.</p></article></body></html>"
+    },
+    {
+      "id": "vlm-pdf-slop-wall",
+      "group": "pdf",
+      "targetType": "slide",
+      "label": "slop",
+      "staticBlind": false,
+      "filename": "pdf-word-wall-tiny.pdf",
+      "notes": "Landscape 960x540 PDF slide titled Overview with 145-word wall in tiny 8.5pt body text.",
+      "pdfSpec": {
+        "pages": [
+          {
+            "width": 960,
+            "height": 540,
+            "fontRuns": [
+              { "x": 48, "y": 486, "size": 10, "rgb": [0.1, 0.12, 0.16], "text": "Overview" },
+              { "x": 48, "y": 448, "size": 8.5, "rgb": [0.22, 0.25, 0.3], "text": "Comprehensive enterprise platform architecture enables seamless digital transformation across distributed teams by unifying workflows automation and intelligence." },
+              { "x": 48, "y": 424, "size": 8.5, "rgb": [0.22, 0.25, 0.3], "text": "Modern organizations leverage cloud telemetry analytics pipelines alongside adaptive governance models to maximize stakeholder alignment and operational agility." },
+              { "x": 48, "y": 400, "size": 8.5, "rgb": [0.22, 0.25, 0.3], "text": "Continuous optimization drives measurable efficiency gains while empowering cross functional squads to accelerate delivery cycles across regional hubs." },
+              { "x": 48, "y": 376, "size": 8.5, "rgb": [0.22, 0.25, 0.3], "text": "Strategic roadmap milestones establish scalable resilience patterns ensuring future ready readiness for evolving enterprise compliance mandates." },
+              { "x": 48, "y": 352, "size": 8.5, "rgb": [0.22, 0.25, 0.3], "text": "Integrated observability dashboards consolidate multi tier service indicators into actionable executive insights for proactive decision orchestration." },
+              { "x": 48, "y": 328, "size": 8.5, "rgb": [0.22, 0.25, 0.3], "text": "Automated policy enforcement validates configuration drift prior to deployment thereby strengthening reliability posture across every production environment." },
+              { "x": 48, "y": 304, "size": 8.5, "rgb": [0.22, 0.25, 0.3], "text": "Collaborative knowledge hubs synchronize documentation updates automatically across product engineering and customer success stakeholders." }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "vlm-pdf-slop-subtle-template",
+      "group": "pdf",
+      "targetType": "slide",
+      "label": "slop",
+      "staticBlind": true,
+      "filename": "pdf-subtle-3pillar-slide.pdf",
+      "notes": "Static-blind PDF slop: 1 page, 42 words, valid 22pt/13pt/11pt scale and restrained slate colors so static PDF rules emit 0 findings, yet visually shows generic empty AI 3-pillar card boilerplate.",
+      "pdfSpec": {
+        "pages": [
+          {
+            "width": 960,
+            "height": 540,
+            "rects": [
+              { "x": 0, "y": 0, "w": 960, "h": 540, "rgb": [0.97, 0.98, 0.99] },
+              { "x": 54, "y": 110, "w": 264, "h": 270, "rgb": [0.91, 0.94, 0.98] },
+              { "x": 348, "y": 110, "w": 264, "h": 270, "rgb": [0.91, 0.94, 0.98] },
+              { "x": 642, "y": 110, "w": 264, "h": 270, "rgb": [0.91, 0.94, 0.98] }
+            ],
+            "fontRuns": [
+              { "x": 54, "y": 468, "size": 22, "rgb": [0.12, 0.16, 0.23], "text": "Platform Strategy Pillars" },
+              { "x": 54, "y": 436, "size": 12, "rgb": [0.39, 0.45, 0.55], "text": "Driving next-generation value through three core pillars." },
+              { "x": 78, "y": 330, "size": 13, "rgb": [0.15, 0.25, 0.45], "text": "Pillar 1: Speed" },
+              { "x": 78, "y": 296, "size": 11, "rgb": [0.3, 0.35, 0.42], "text": "Accelerating workflows with modern tooling." },
+              { "x": 372, "y": 330, "size": 13, "rgb": [0.15, 0.25, 0.45], "text": "Pillar 2: Scale" },
+              { "x": 372, "y": 296, "size": 11, "rgb": [0.3, 0.35, 0.42], "text": "Growing seamlessly across global teams." },
+              { "x": 666, "y": 330, "size": 13, "rgb": [0.15, 0.25, 0.45], "text": "Pillar 3: Trust" },
+              { "x": 666, "y": 296, "size": 11, "rgb": [0.3, 0.35, 0.42], "text": "Delivering enterprise-grade peace of mind." }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "vlm-pdf-clean-exec",
+      "group": "pdf",
+      "targetType": "slide",
+      "label": "clean",
+      "staticBlind": false,
+      "filename": "pdf-clean-exec-slide.pdf",
+      "notes": "Clean landscape executive finding slide with assertion headline and crisp ruled table.",
+      "pdfSpec": {
+        "pages": [
+          {
+            "width": 960,
+            "height": 540,
+            "rects": [
+              { "x": 0, "y": 0, "w": 960, "h": 540, "rgb": [0.97, 0.97, 0.96] },
+              { "x": 56, "y": 270, "w": 848, "h": 34, "rgb": [0.91, 0.92, 0.90] }
+            ],
+            "lines": [
+              { "x1": 56, "y1": 392, "x2": 904, "y2": 392, "rgb": [0.75, 0.77, 0.74], "width": 1 },
+              { "x1": 56, "y1": 216, "x2": 904, "y2": 216, "rgb": [0.80, 0.82, 0.79], "width": 1 },
+              { "x1": 56, "y1": 162, "x2": 904, "y2": 162, "rgb": [0.80, 0.82, 0.79], "width": 1 },
+              { "x1": 56, "y1": 108, "x2": 904, "y2": 108, "rgb": [0.80, 0.82, 0.79], "width": 1 }
+            ],
+            "fontRuns": [
+              { "x": 56, "y": 472, "size": 24, "rgb": [0.08, 0.09, 0.10], "text": "Async postal lookup cut checkout p95 latency from 4.2s to 2.6s." },
+              { "x": 56, "y": 424, "size": 13, "rgb": [0.28, 0.30, 0.33], "text": "Measured over 1.4M US production checkouts between Oct 14 and Nov 18, 2026." },
+              { "x": 72, "y": 281, "size": 12, "rgb": [0.20, 0.22, 0.25], "text": "Metric                          Before (v2.4.0)           After (v2.4.1)            Delta" },
+              { "x": 72, "y": 234, "size": 13, "rgb": [0.08, 0.09, 0.10], "text": "Submit p95 latency              4,200 ms                  2,610 ms                  -37.9%" },
+              { "x": 72, "y": 180, "size": 13, "rgb": [0.08, 0.09, 0.10], "text": "Cart abandon rate               19.4%                     14.1%                     -5.3 pp" },
+              { "x": 72, "y": 126, "size": 13, "rgb": [0.08, 0.09, 0.10], "text": "Validation errors               0.12%                     0.11%                     -0.01 pp" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "vlm-pdf-clean-report",
+      "group": "pdf",
+      "targetType": "slide",
+      "label": "clean",
+      "staticBlind": false,
+      "filename": "pdf-clean-portrait-report.pdf",
+      "notes": "Clean portrait 612x792 operational technical report page.",
+      "pdfSpec": {
+        "pages": [
+          {
+            "width": 612,
+            "height": 792,
+            "lines": [
+              { "x1": 56, "y1": 674, "x2": 556, "y2": 674, "rgb": [0.78, 0.80, 0.78], "width": 1 },
+              { "x1": 56, "y1": 470, "x2": 556, "y2": 470, "rgb": [0.78, 0.80, 0.78], "width": 1 }
+            ],
+            "fontRuns": [
+              { "x": 56, "y": 726, "size": 20, "rgb": [0.08, 0.09, 0.10], "text": "Q3 Database Failover Drill Report" },
+              { "x": 56, "y": 694, "size": 11, "rgb": [0.35, 0.37, 0.40], "text": "Author: Platform Storage Group  |  2026-11-10" },
+              { "x": 56, "y": 636, "size": 12, "rgb": [0.12, 0.13, 0.15], "text": "1. Summary" },
+              { "x": 56, "y": 608, "size": 11, "rgb": [0.15, 0.16, 0.18], "text": "Primary promotion in eu-central-1 finished in 11.4 seconds against a 30-second SLO." },
+              { "x": 56, "y": 584, "size": 11, "rgb": [0.15, 0.16, 0.18], "text": "Zero committed writes were lost across 4,200 active client connections." },
+              { "x": 56, "y": 546, "size": 11, "rgb": [0.15, 0.16, 0.18], "text": "Two read replicas lagged by 900 ms due to unthrottled backfill compaction; fix shipped in #481." },
+              { "x": 56, "y": 496, "size": 12, "rgb": [0.12, 0.13, 0.15], "text": "2. Measured Recovery Timings" },
+              { "x": 56, "y": 442, "size": 11, "rgb": [0.15, 0.16, 0.18], "text": "Fence stale primary: 2.1 s  |  Promote standby: 6.8 s  |  DNS TTL drain: 2.5 s" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "vlm-gfx-slop-neon-svg",
+      "group": "graphics",
+      "targetType": "slide",
+      "label": "slop",
+      "staticBlind": false,
+      "filename": "gfx-neon-svg-banner.svg",
+      "viewport": { "width": 960, "height": 540 },
+      "notes": "SVG hero banner with purple-pink linearGradient and heavy Gaussian glow blur.",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 960 540\" width=\"960\" height=\"540\"><defs><linearGradient id=\"bg\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0%\" stop-color=\"#0f172a\"/><stop offset=\"55%\" stop-color=\"#312e81\"/><stop offset=\"100%\" stop-color=\"#701a75\"/></linearGradient><linearGradient id=\"acc\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0%\" stop-color=\"#6366f1\"/><stop offset=\"100%\" stop-color=\"#ec4899\"/></linearGradient><filter id=\"glow\"><feGaussianBlur stdDeviation=\"24\"/></filter></defs><rect width=\"960\" height=\"540\" fill=\"url(#bg)\"/><circle cx=\"240\" cy=\"160\" r=\"150\" fill=\"#a855f7\" opacity=\"0.45\" filter=\"url(#glow)\"/><circle cx=\"740\" cy=\"380\" r=\"160\" fill=\"#ec4899\" opacity=\"0.4\" filter=\"url(#glow)\"/><rect x=\"96\" y=\"150\" width=\"768\" height=\"240\" rx=\"24\" fill=\"rgba(255,255,255,0.08)\" stroke=\"rgba(255,255,255,0.22)\"/><text x=\"148\" y=\"245\" font-family=\"system-ui,sans-serif\" font-size=\"44\" font-weight=\"700\" fill=\"url(#acc)\">AI-Powered Growth Engine</text><text x=\"148\" y=\"300\" font-family=\"system-ui,sans-serif\" font-size=\"22\" fill=\"#e2e8f0\">Seamless synergy 🚀 ✨ ⚡</text></svg>"
+    },
+    {
+      "id": "vlm-gfx-slop-overlap-svg",
+      "group": "graphics",
+      "targetType": "slide",
+      "label": "slop",
+      "staticBlind": false,
+      "filename": "gfx-overlap-diagram.svg",
+      "viewport": { "width": 800, "height": 420 },
+      "notes": "SVG architecture diagram missing viewBox and containing colliding overlapping <text> labels.",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"800\" height=\"420\"><rect width=\"800\" height=\"420\" fill=\"#f8fafc\"/><rect x=\"60\" y=\"120\" width=\"200\" height=\"100\" rx=\"16\" fill=\"#c7d2fe\" stroke=\"#4f46e5\" stroke-width=\"3\"/><rect x=\"210\" y=\"145\" width=\"200\" height=\"100\" rx=\"16\" fill=\"#fbcfe8\" stroke=\"#db2777\" stroke-width=\"3\"/><rect x=\"480\" y=\"120\" width=\"220\" height=\"100\" rx=\"16\" fill=\"#fde68a\" stroke=\"#d97706\" stroke-width=\"3\"/><text x=\"130\" y=\"175\" font-family=\"system-ui,sans-serif\" font-size=\"18\" fill=\"#1e1b4b\">Ingestion Hub</text><text x=\"134\" y=\"179\" font-family=\"system-ui,sans-serif\" font-size=\"18\" fill=\"#be185d\">Core Router Layer</text><text x=\"520\" y=\"175\" font-family=\"system-ui,sans-serif\" font-size=\"18\" fill=\"#78350f\">Analytics Warehouse</text></svg>"
+    },
+    {
+      "id": "vlm-gfx-slop-subtle-poster",
+      "group": "graphics",
+      "targetType": "slide",
+      "label": "slop",
+      "staticBlind": true,
+      "filename": "gfx-subtle-cluttered-poster.png",
+      "kind": "poster",
+      "viewport": { "width": 960, "height": 720 },
+      "notes": "Static-blind raster graphic slop: muted slate-blue poster (passes PNG neon-purple and high-sat plastic thresholds) with overlapping decorative circles, buzzword tag clutter, and unbalanced alignment.",
+      "html": "<!doctype html><html><head><meta charset=\"utf-8\"><style>*{box-sizing:border-box}body{margin:0;width:960px;height:720px;background:#e8eef5;color:#1e293b;font-family:system-ui,sans-serif;position:relative;overflow:hidden}.blob1{position:absolute;top:-50px;right:-40px;width:320px;height:320px;border-radius:50%;background:#cbd5e1;opacity:.65}.blob2{position:absolute;bottom:-60px;left:-30px;width:280px;height:280px;border-radius:50%;background:#bfdbfe;opacity:.55}.card{position:relative;margin:42px 34px;background:#f8fafc;border:2px solid #94a3b8;padding:24px 18px}.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tag{background:#dbeafe;color:#1d4ed8;padding:4px 10px;font-size:12px;font-weight:700;border-radius:16px}h1{font-size:38px;margin:0 0 8px;line-height:1.1}.boxrow{display:flex;gap:12px;margin-top:24px}.b1{flex:1;background:#fff;border:1px solid #cbd5e1;padding:10px;margin-top:18px}.b2{flex:1;background:#fff;border:1px solid #cbd5e1;padding:26px 8px}.b3{flex:1;background:#fff;border:1px solid #cbd5e1;padding:12px;margin-top:34px}</style></head><body><div class=\"blob1\"></div><div class=\"blob2\"></div><div class=\"card\"><div class=\"tags\"><span class=\"tag\">SYNERGY</span><span class=\"tag\">WORKFLOWS</span><span class=\"tag\">SCALE</span><span class=\"tag\">INSIGHTS</span><span class=\"tag\">AUTOMATION</span><span class=\"tag\">CLOUD NATIVE</span></div><h1>Elevate Business Productivity Seamlessly Today</h1><p style=\"margin:0;color:#64748b;font-size:17px\">Unlock transformative multi-modal workflows in one unified workspace hub</p><div class=\"boxrow\"><div class=\"b1\"><strong>Pillar A</strong><p style=\"font-size:13px;color:#64748b\">Optimize agility fast</p></div><div class=\"b2\"><strong>Pillar B</strong><p style=\"font-size:13px;color:#64748b\">Scale effortlessly now</p></div><div class=\"b3\"><strong>Pillar C</strong><p style=\"font-size:13px;color:#64748b\">Deliver seamless value</p></div></div></div></body></html>"
+    },
+    {
+      "id": "vlm-gfx-clean-og",
+      "group": "graphics",
+      "targetType": "webpage",
+      "label": "clean",
+      "staticBlind": false,
+      "filename": "assets/og-card.png",
+      "assetPath": "assets/og-card.png",
+      "notes": "Production dislop Open Graph card (PNG asset)."
+    },
+    {
+      "id": "vlm-gfx-clean-demo",
+      "group": "graphics",
+      "targetType": "webpage",
+      "label": "clean",
+      "staticBlind": false,
+      "filename": "assets/demos/cli-check-en-v1-poster.png",
+      "assetPath": "assets/demos/cli-check-en-v1-poster.png",
+      "notes": "Production CLI demo poster frame (PNG asset)."
+    },
+    {
+      "id": "vlm-gfx-clean-diagram",
+      "group": "graphics",
+      "targetType": "slide",
+      "label": "clean",
+      "staticBlind": false,
+      "filename": "gfx-clean-architecture.svg",
+      "viewport": { "width": 840, "height": 340 },
+      "notes": "Clean Swiss editorial SVG architecture diagram: explicit viewBox, well-spaced monochrome nodes, crisp arrows, 0 overlapping text.",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 840 340\" width=\"840\" height=\"340\"><rect width=\"840\" height=\"340\" fill=\"#F6F7F5\"/><text x=\"48\" y=\"52\" font-family=\"-apple-system,sans-serif\" font-size=\"20\" font-weight=\"700\" fill=\"#15171A\">Two-Stage Document &amp; Visual Check Pipeline</text><line x1=\"48\" y1=\"70\" x2=\"792\" y2=\"70\" stroke=\"#D5D7D2\" stroke-width=\"1\"/><rect x=\"48\" y=\"120\" width=\"200\" height=\"110\" rx=\"4\" fill=\"#FFFFFF\" stroke=\"#15171A\" stroke-width=\"1.5\"/><text x=\"68\" y=\"158\" font-family=\"-apple-system,sans-serif\" font-size=\"15\" font-weight=\"700\" fill=\"#15171A\">1. Local Parsers</text><text x=\"68\" y=\"184\" font-family=\"ui-monospace,monospace\" font-size=\"12\" fill=\"#525860\">MD · HTML · SVG · PNG · PDF</text><text x=\"68\" y=\"206\" font-family=\"-apple-system,sans-serif\" font-size=\"12\" fill=\"#525860\">Zero network · ~2 ms/file</text><line x1=\"248\" y1=\"175\" x2=\"312\" y2=\"175\" stroke=\"#15171A\" stroke-width=\"1.5\"/><polygon points=\"312,175 302,170 302,180\" fill=\"#15171A\"/><rect x=\"316\" y=\"120\" width=\"210\" height=\"110\" rx=\"4\" fill=\"#FFFFFF\" stroke=\"#15171A\" stroke-width=\"1.5\"/><text x=\"336\" y=\"158\" font-family=\"-apple-system,sans-serif\" font-size=\"15\" font-weight=\"700\" fill=\"#15171A\">2. Hard Gates (49 Rules)</text><text x=\"336\" y=\"184\" font-family=\"-apple-system,sans-serif\" font-size=\"12\" fill=\"#525860\">Leaks, prompt residue, collisions</text><text x=\"336\" y=\"206\" font-family=\"-apple-system,sans-serif\" font-size=\"12\" fill=\"#525860\">Structured signals emitted</text><line x1=\"526\" y1=\"175\" x2=\"590\" y2=\"175\" stroke=\"#15171A\" stroke-width=\"1.5\"/><polygon points=\"590,175 580,170 580,180\" fill=\"#15171A\"/><rect x=\"594\" y=\"120\" width=\"198\" height=\"110\" rx=\"4\" fill=\"#15171A\"/><text x=\"614\" y=\"158\" font-family=\"-apple-system,sans-serif\" font-size=\"15\" font-weight=\"700\" fill=\"#F6F7F5\">3. Optional VLM</text><text x=\"614\" y=\"184\" font-family=\"-apple-system,sans-serif\" font-size=\"12\" fill=\"#D5D7D2\">Rendered screenshot audit</text><text x=\"614\" y=\"206\" font-family=\"-apple-system,sans-serif\" font-size=\"12\" fill=\"#D5D7D2\">Hierarchy · focus · Gen-2</text></svg>"
+    }
+  ]
+}

@@ -2,10 +2,10 @@
 content-type: reference-data
 schema: dislop.radar/2
 snapshot: 2026-11-21
-entries: 87
+entries: 90
 ---
 
-# Awesome Anti-Slop (87 Curated Resources)
+# Awesome Anti-Slop (90 Curated Resources)
 
 Verified on 2026-11-21 via GitHub REST API and HTTP status checks. Machine-readable JSON: [`/awesome/index.json`](./index.json). Interactive filter page: [`/awesome/`](https://dislop.com/awesome/).
 
@@ -68,7 +68,7 @@ Verified on 2026-11-21 via GitHub REST API and HTTP status checks. Machine-reada
 - [FeedHive/ai-slop-detector](https://github.com/FeedHive/ai-slop-detector) (113★ · 2026-10-12 · prose · en · deterministic): 9 大类 120 条英文模式清单，提供浏览器在线检查页与配套 Agent Skill。
 - [dislop-ai/dislop (本仓库)](https://github.com/dislop-ai/dislop) (2026-11-22 · multi-modal · multilingual · deterministic): 开源本地零依赖去 AI 味工具：内置 7 套场景规则包与 5 轴节奏统计，离线检查中英文稿、网页组件、Word 与 PPT 并锁死改稿数字与限定词，附零上传浏览器工作台、Skill 与 MCP。
 
-## UI, Design & Diagrams / 前端 UI、设计与图表 (12)
+## UI, Design & Diagrams / 前端 UI、设计与图表 (15)
 
 - [anthropics/skills (frontend-design)](https://github.com/anthropics/skills/tree/main/skills/frontend-design) (198134★ · 2026-11-16 · ui-design · en · prompt/policy): Anthropic 官方 Agent Skills 仓内的前端设计基准技能（子目录 LICENSE.txt 为 Apache-2.0），要求先立设计方向再编码。
 - [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (119423★ · 2026-11-08 · ui-design · en · deterministic): 结合艺术指导、参考图、浏览器检查以及 scripts/gate.mjs（Stop hook）与 copy-lint.mjs 门禁的前端审美技能。
@@ -82,6 +82,9 @@ Verified on 2026-11-21 via GitHub REST API and HTTP status checks. Machine-reada
 - [superdesigndev/superdesign-skill](https://github.com/superdesigndev/superdesign-skill) (1038★ · 2026-08-21 · ui-design · en · prompt/policy): 面向编程 Agent 的反通用 AI 界面设计技能。
 - [Yu-369/VibeCurb](https://github.com/Yu-369/VibeCurb) (1010★ · 2026-08-05 · ui-design · en · prompt/policy): 向 AI 界面工作流注入审美品味约束的工具集。
 - [funboy322/avoid-ai-design](https://github.com/funboy322/avoid-ai-design) (166★ · 2026-11-18 · ui-design · en · prompt/policy): 审查并重写紫粉渐变等常见默认前端样式的轻量项目。
+- [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) (152711★ · 2026-11-22 · ui-design · en · prompt/policy): 按行业场景与界面风格提供完整设计令牌、字体搭配与排版规范的多平台 UI/UX 技能库。
+- [vercel-labs/agent-skills (web-design-guidelines)](https://github.com/vercel-labs/agent-skills) (34714★ · 2026-11-20 · ui-design · en · prompt/policy): Vercel 官方 Agent Skills 集合，含覆盖交互可用性、表单行为与可访问性的 Web 界面审查规范。
+- [cesaroeduardo/antiwebslop](https://github.com/cesaroeduardo/antiwebslop) (44★ · 2026-11-17 · ui-design · en · deterministic): 面向网页设计的去 AI 味技能与脚本合集，配套前后对比画廊与验证评分卡。
 
 ## Code & PR Governance / 代码与 PR 治理 (8)
 

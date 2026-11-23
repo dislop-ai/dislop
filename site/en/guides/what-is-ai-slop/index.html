@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" data-static-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks — dislop</title>
+  <meta name="description" content="A breakdown of the four layers of AI slop across prose, websites, and slides—backed by empirical benchmarks, Wikipedia's cleanup catalog, and real repository examples.">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/en/guides/what-is-ai-slop/">
+  <meta property="og:title" content="What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks — dislop">
+  <meta property="og:description" content="A breakdown of the four layers of AI slop across prose, websites, and slides—backed by empirical benchmarks, Wikipedia's cleanup catalog, and real repository examples.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks — dislop">
+  <meta name="twitter:description" content="A breakdown of the four layers of AI slop across prose, websites, and slides—backed by empirical benchmarks, Wikipedia's cleanup catalog, and real repository examples.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
+  <link rel="canonical" href="https://dislop.com/en/guides/what-is-ai-slop/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/what-is-ai-slop/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/what-is-ai-slop/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/what-is-ai-slop/">
+  <link rel="alternate" type="application/atom+xml" href="../../../en/feed.xml" title="dislop Guides (EN)">
+  <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../../assets/logo.svg">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/en/guides/what-is-ai-slop/",
+      "url": "https://dislop.com/en/guides/what-is-ai-slop/",
+      "headline": "What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks",
+      "description": "A breakdown of the four layers of AI slop across prose, websites, and slides—backed by empirical benchmarks, Wikipedia's cleanup catalog, and real repository examples.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-23",
+      "dateModified": "2026-11-23",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "image": "https://dislop.com/assets/og-card.png",
+      "citation": [
+        "https://simonwillison.net/2024/May/8/slop/",
+        "https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing",
+        "https://arxiv.org/abs/2406.07016",
+        "https://arxiv.org/abs/2510.22954",
+        "https://eqbench.com/slop-score.html",
+        "https://daniel.haxx.se/blog/2026/01/26/the-end-of-the-curl-bug-bounty/",
+        "https://www.coderabbit.ai/reports-guides"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/en/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Guides",
+          "item": "https://dislop.com/en/guides/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "What Is AI Slop?",
+          "item": "https://dislop.com/en/guides/what-is-ai-slop/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why does writing still sound like AI after I delete words like 'delve' and 'leverage'?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "When models lose cliché nouns and verbs, post-trained RLHF habits shift to structural templates—especially 'Not just X — it's Y' contrast slogans, three-word staccato chains, and moralizing final sentences."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are the fastest AI delivery leftovers to catch before shipping?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Check for leftover chat replies, unfilled bracketed placeholders (`TODO` markers), raw Markdown asterisks pasted into Word or PowerPoint, and dead `href=\\\"#\\\"` placeholder buttons in web pages."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is there hard evidence on how widespread AI slop has become?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Kobak et al. ([arXiv:2406.07016](https://arxiv.org/abs/2406.07016), Science Advances 2025, n=15M PubMed abstracts) measured excess-vocabulary shifts showing at least 13.5% of 2024 biomedical abstracts reflected LLM processing. In software, CodeRabbit (2025) found AI-generated pull requests averaged 10.83 issues vs. 6.45 in human PRs."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../../en/">
+        <img src="../../../assets/logo.svg" width="28" height="28" alt="dislop icon">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../../?lang=en#workbench">Workbench</a>
+        <a href="../../../en/guides/" aria-current="page">Guides</a>
+        <a href="../../../en/awesome/">Directory</a>
+        <a href="../../../en/rules/">Rules</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../../guides/what-is-ai-slop/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../../en/">dislop</a> / <a href="../">Guides</a> / <span aria-current="page">What Is AI Slop?</span>
+      </nav>
+
+      <article>
+        <header>
+          <h1 class="lead-heading" style="max-width:30ch;">What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks</h1>
+          <div class="article-meta">
+            <span>Fundamentals</span>
+            <span>Updated 2026-11-23</span>
+            <span>6 min read</span>
+            <a href="./index.md">Markdown</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">DIRECT ANSWER</div>
+            <p>AI slop is unreviewed, low-signal machine output driven by statistical averaging. Beyond banned words like 'delve' and 'tapestry', it shows up as 'Not X, but Y' contrast slogans, purple-pink SaaS web templates, dense PowerPoint word walls, and stray chatbot greetings.</p>
+          </div>
+        </header>
+
+        <div class="article-shell">
+          <div class="article-prose">
+<p>Open an unedited draft from an LLM and you rarely see broken grammar. Instead, you see the same smooth filler, the same contrast slogans, and the same purple-gradient hero cards across completely unrelated projects. Developers and editors call this <strong>AI slop</strong>.</p>
+
+<p>Simon Willison popularized the term in May 2024 as an analogy to email spam: unsolicited, unreviewed AI-generated material pushed downstream onto readers and maintainers. By 2026, documented cases span peer-reviewed journals, open-source security trackers, product UIs, and internal slide decks.</p>
+
+<h2 id="1-measured-impact-across-writing-and-code">1. Measured impact across writing and code</h2>
+
+<p>AI slop is not caused by one sloppy prompt. Post-training rewards safe, average phrasing that repeats across runs and vendors:</p>
+
+<ol>
+<li><strong>Academic literature drift</strong>: Analyzing 15 million PubMed abstracts, Kobak et al. (<em>Science Advances</em>, <a href="https://arxiv.org/abs/2406.07016" target="_blank" rel="noopener">arXiv:2406.07016</a>, 2025) estimated at least 13.5% of 2024 biomedical abstracts reflected LLM processing through excess vocabulary such as <em>delve</em>, <em>intricate</em>, and <em>pivotal</em>.</li>
+<li><strong>Cross-model homogenization</strong>: In <em>Artificial Hivemind</em> (NeurIPS 2025, <a href="https://arxiv.org/abs/2510.22954" target="_blank" rel="noopener">arXiv:2510.22954</a>), researchers tested models on the Infinity-Chat dataset and documented both intra-model repetition and strong inter-model convergence—meaning switching providers does not automatically restore distinct voice.</li>
+<li><strong>Maintainer fatigue in open source</strong>: On January 26, 2026, curl maintainer Daniel Stenberg shut down curl's bug bounty program after AI-generated junk reports pulled valid report rates from above 15% down below 5%. Separately, CodeRabbit's 2025 benchmark reported AI-authored PRs averaging 10.83 issues compared with 6.45 for human PRs (~1.7x higher).</li>
+</ol>
+
+<h2 id="2-the-four-layers-of-ai-slop">2. The four layers of AI slop</h2>
+
+<p>Most real-world artifacts break down into four distinct layers tracked by Wikipedia's <em>Signs of AI writing</em> (<code>WP:AISIGNS</code>) and EQ-Bench Slop Score:</p>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Layer</th><th>What it looks like</th><th>Why teams catch it first</th></tr></thead><tbody>
+<tr><td><strong>Hard delivery artifacts</strong></td><td><code>&quot;Certainly! Here is...&quot;</code>, <code>[INSERT METRIC]</code>, <code>**bold**</code> asterisks in <code>.docx</code>/<code>.pptx</code>, <code>&lt;a href=&quot;#&quot;&gt;</code> buttons</td><td>Proves nobody reviewed the output before sending</td></tr>
+<tr><td><strong>Stock lexicon &amp; padding</strong></td><td><code>&quot;It is worth noting that&quot;</code>, <code>&quot;game-changer&quot;</code>, <code>&quot;leverage&quot;</code>, <code>&quot;seamless&quot;</code>, <code>&quot;robust&quot;</code></td><td>Replaces concrete actors and mechanisms with PR fluff</td></tr>
+<tr><td><strong>Second-order cadence</strong></td><td><code>&quot;It's not X — it's Y&quot;</code>, <code>&quot;Signals drop. Photos vanish. Trust dies.&quot;</code>, 3-part semicolon pitches</td><td>Happens right after banning stock words without changing structure</td></tr>
+<tr><td><strong>Template UI &amp; deck sprawl</strong></td><td>Indigo-to-pink gradients, 8+ pill badges per card, 140-word PowerPoint walls, <code>&quot;Overview&quot;</code> slide titles</td><td>Makes distinct products and quarterly updates look identical</td></tr>
+</tbody></table></div>
+
+<p>Look at how a release note fails at layer 1, shifts into layer 3 when edited carelessly, and finally lands clean:</p>
+
+<!-- dislop-quote-start -->
+<pre><code class="language-text">bad:  Certainly! Here is the launch note. It's worth noting that CSV exports are a game-changer, finishing in up to 12 minutes for workspaces above 500,000 rows.
+trap: CSV exports finish in up to 12 minutes for workspaces above 500,000 rows. This isn't just an upgrade — it's a new standard.
+good: CSV exports finish in up to 12 minutes for workspaces above 500,000 rows.</code></pre>
+<!-- dislop-quote-end -->
+
+<p>Notice that <code>trap</code> removed every obvious buzzword, yet the added contrast slogan (<code>This isn't just...</code>) still reads like generated marketing copy.</p>
+
+<figure class="guide-demo" data-demo-card="proof-cycle" data-demo-prefix="../../../" data-demo-lang="en" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../../../assets/demos/proof-cycle-en-v2-poster.png" data-demo-poster="proof-cycle">
+              <source type="image/webp" srcset="../../../assets/demos/proof-cycle-en-v2.webp" data-demo-webp="proof-cycle">
+              <img src="../../../assets/demos/proof-cycle-en-v2.gif" alt="dislop three-state check: flagging chatbot greeting and filler, catching a 2nd-order slogan, and passing with exit code 0" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="proof-cycle">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">1. Three states of one note: catching 2nd-order slop</strong>
+              <span class="demo-cap-badge">3-state proof · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">Strikes the leftover chat greeting in red, catches the 'Not X, but Y' slogan in blue, and ends clean at 12 minutes and 500,000 rows.</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="proof-cycle" aria-pressed="false">Pause</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="proof-cycle">Zoom</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<h2 id="3-a-practical-order-for-cleaning-drafts">3. A practical order for cleaning drafts</h2>
+
+<ol>
+<li><strong>Block core artifacts first</strong>: Strip stray chat wrappers, placeholders, unrendered Markdown in Office files, and dead UI links. In <code>dislop</code>, <code>packs/core</code> treats these as hard <code>error</code> failures.</li>
+<li><strong>Apply the Deletion Test</strong>: For every flagged phrase or contrast frame, ask what specific number, mechanism, or boundary remains if you delete it. If nothing is lost, cut the span.</li>
+<li><strong>Verify layout and visual craft</strong>: Check slide density (<code>&lt;= 120</code> words per slide), heading clarity, and CSS/HTML restraint before shipping.</li>
+</ol>
+
+<p>Run <code>npx --yes dislop check .</code> locally with zero network calls to see which layers appear in your current repo or docs.</p>
+<h2 id="faq">Frequently asked questions</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>Why does writing still sound like AI after I delete words like 'delve' and 'leverage'?</h3>
+            <p>When models lose cliché nouns and verbs, post-trained RLHF habits shift to structural templates—especially 'Not just X — it's Y' contrast slogans, three-word staccato chains, and moralizing final sentences.</p>
+          </div>
+          <div class="faq-item">
+            <h3>What are the fastest AI delivery leftovers to catch before shipping?</h3>
+            <p>Check for leftover chat replies, unfilled bracketed placeholders (<code>TODO</code> markers), raw Markdown asterisks pasted into Word or PowerPoint, and dead <code>href=\&quot;#\&quot;</code> placeholder buttons in web pages.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Is there hard evidence on how widespread AI slop has become?</h3>
+            <p>Yes. Kobak et al. (<a href="https://arxiv.org/abs/2406.07016" target="_blank" rel="noopener">arXiv:2406.07016</a>, Science Advances 2025, n=15M PubMed abstracts) measured excess-vocabulary shifts showing at least 13.5% of 2024 biomedical abstracts reflected LLM processing. In software, CodeRabbit (2025) found AI-generated pull requests averaged 10.83 issues vs. 6.45 in human PRs.</p>
+          </div>
+        </div>
+<h2 id="related-rules">Matching deterministic rules</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../../en/rules/chatbot-artifact/"><code>chatbot-artifact</code> · Chatbot greeting</a>
+<a class="related-link-chip" href="../../../en/rules/en-cliche-lexicon/"><code>en-cliche-lexicon</code> · Stock AI buzzword</a>
+<a class="related-link-chip" href="../../../en/rules/negation-pivot-frame/"><code>negation-pivot-frame</code> · &quot;Not X, but Y&quot; slogan frame</a>
+<a class="related-link-chip" href="../../../en/rules/ui-ai-gradient/"><code>ui-ai-gradient</code> · Default purple-pink AI gradient</a>
+<a class="related-link-chip" href="../../../en/rules/slide-word-wall/"><code>slide-word-wall</code> · Slide word wall</a>
+</div>
+<h2 id="next-guides">Next guides</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../remove-ai-slop-writing/">Remove AI Slop From Writing</a>
+<a class="related-link-chip" href="../fix-ai-slop-web-ui/">Fix AI Slop in Web UI</a>
+<a class="related-link-chip" href="../deslop-pptx-docx/">Clean Up PPTX &amp; DOCX</a>
+</div>
+<h2 id="sources">Verified references</h2>
+        <ul>
+          <li><a href="https://simonwillison.net/2024/May/8/slop/" target="_blank" rel="noopener">Simon Willison: Slop is the new name for unwanted AI-generated content</a> — Published 2024-05-08; popularized 'slop' for unsolicited, unreviewed AI-generated content by analogy to email spam.</li>
+          <li><a href="https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing" target="_blank" rel="noopener">Wikipedia: Signs of AI writing (WP:AISIGNS)</a> — WikiProject AI Cleanup's living taxonomy of AI prose defects: inflated significance, stock vocabulary, rule-of-three lists, negative parallelisms, chatbot wrappers, and formatting artifacts.</li>
+          <li><a href="https://arxiv.org/abs/2406.07016" target="_blank" rel="noopener">Delving into LLM-assisted writing in biomedical publications through excess vocabulary (Science Advances 2025)</a> — Analyzed 15M PubMed abstracts and estimated at least 13.5% of 2024 biomedical abstracts were processed with LLMs (lower bound), marked by excess words like 'delve', 'intricate', and 'pivotal'.</li>
+          <li><a href="https://arxiv.org/abs/2510.22954" target="_blank" rel="noopener">Artificial Hivemind: The Open-Ended Homogeneity of Language Models (and Beyond) (NeurIPS 2025)</a> — Using the Infinity-Chat dataset, demonstrated both intra-model repetition and inter-model homogeneity across different LLM families.</li>
+          <li><a href="https://eqbench.com/slop-score.html" target="_blank" rel="noopener">EQ-Bench Slop Score</a> — Public composite index (60% slop words + 25% 'not X but Y' contrast frames + 15% overused trigrams) measuring LLM output templating.</li>
+          <li><a href="https://daniel.haxx.se/blog/2026/01/26/the-end-of-the-curl-bug-bounty/" target="_blank" rel="noopener">Daniel Stenberg: The end of the curl bug bounty</a> — Published 2026-01-26; ended curl's bug bounty effective 2026-01-31 after low-quality AI-generated reports pushed valid report rates from &gt;15% down below 5%.</li>
+          <li><a href="https://www.coderabbit.ai/reports-guides" target="_blank" rel="noopener">CodeRabbit: State of AI vs Human Code Generation Report</a> — Measured AI-generated PRs averaging ~1.7x more issues (10.83 vs 6.45), 75% more logic errors, and &gt;3x readability/formatting issues compared with human PRs.</li>
+        </ul>
+<div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../../?lang=en#workbench">Try in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks](https://dislop.com/en/guides/what-is-ai-slop/) — A breakdown of the four layers of AI slop across prose, websites, and slides—backed by empirical benchmarks, Wikipedia's cleanup catalog, and real repository examples.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
+        </div>
+          </div>
+        <aside class="toc-rail" aria-label="On this page">
+          <h2 class="toc-rail-title">On this page</h2>
+          <ol>
+            <li><a href="#1-measured-impact-across-writing-and-code">1. Measured impact across writing and code</a></li>
+            <li><a href="#2-the-four-layers-of-ai-slop">2. The four layers of AI slop</a></li>
+            <li><a href="#3-a-practical-order-for-cleaning-drafts">3. A practical order for cleaning drafts</a></li>
+          </ol>
+        </aside>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>This site passes dislop check site/ with 0 issues. For agents, start at <a href="../../../llms.txt">/llms.txt</a>.</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../../en/guides/">Guides</a>
+        <a href="../../../en/awesome/">Awesome list</a>
+        <a href="../../../en/rules/">All rules</a>
+        <a href="../../../privacy.md">Privacy</a>
+        <a href="../../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">Close</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../../static-ui.js"></script>
+
+</body>
+</html>

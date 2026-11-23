@@ -14,15 +14,15 @@ snapshot: 2026-11-21
 
 ---
 
-## 1. 当前进度（`v0.6.0` 已落地）
+## 1. 当前进度（`v0.7.1` 已落地）
 
 | 模块 | 现已实现 | 核心目录 |
 |---|---|---|
-| 双端零依赖内核 | Node.js 20+ 与 Python 3.10+ 双端零外部依赖，通过 160 项规则样本断言（83 命中 + 77 干净）、53 条反模式库核验、离线个人文风提取及 26 项 Python `unittest` 跨运行时一致性与引擎单测 | `src/core.mjs`、`src/dislop/engine.py`、`tests/test_conformance.py` |
-| 全内置规则包与轻量模型 | 全部 7 套场景与行业包（42 条规则）直接内置离线运行：`core`、`business-brief`、`engineering-spec`、`regulated-comms`、`literary-essay`、`deck-and-ui`、`executive-deck`；附 11 条扩展模式库探针（`--patterns`）、随包 `14.6 KB` gzip 零依赖集成模型（`pocket-slop-v1`）与本机内存/芯片小模型选装向导（`dislop model`） | `packs/*/pack.json`、`patterns/`、`models/`、`src/local-model.mjs` |
-| 支持格式 | `.md`、`.mdx`、`.txt`、`.html`、`.css`、`.jsx`、`.tsx`、`.svg`、`.docx`、`.pptx` | `src/binary-node.mjs`、`src/dislop/engine.py` |
+| 双端零依赖内核 | Node.js 20+ 与 Python 3.10+ 双端零外部依赖，通过 214 项规则样本断言、65 条反模式库核验、离线个人文风提取及 Python `unittest` 跨运行时一致性与引擎单测 | `src/core.mjs`、`src/dislop/engine.py`、`tests/test_conformance.py` |
+| 全内置规则包与轻量模型 | 全部 7 套场景与行业包（53 条规则）直接内置离线运行：`core`、`business-brief`、`engineering-spec`、`regulated-comms`、`literary-essay`、`deck-and-ui`、`executive-deck`；附 12 条扩展模式库探针（`--patterns`）、随包 `14.6 KB` gzip 零依赖集成模型（`pocket-slop-v1`）与本机内存/芯片小模型选装向导（`dislop model`） | `packs/*/pack.json`、`patterns/`、`models/`、`src/local-model.mjs` |
+| 支持格式 | `.md`、`.mdx`、`.txt`、`.html`、`.css`、`.jsx`、`.tsx`、`.svg`、`.docx`、`.pptx`、`.pdf`、`.png`、`.jpg`、`.jpeg`、`.webp` | `src/binary-node.mjs`、`src/dislop/engine.py` |
 | 官网与在线工作台 | 默认简体中文的 `dislop.com`（一键切原生英文、严格零混排），采用两种标线（红实线硬伤 / 蓝虚线套话提醒）、5 格白话节奏条、本地检查与云增强（MCP）双模式文风抽屉及 `/llms.txt` 端点 | `scripts/build_site.mjs`、`site/` |
-| Awesome Anti-Slop | 87 条双语核验清单（`dislop.radar/2`），同源生成纯英文 `awesome/README.md`、纯中文 `awesome/README.zh-CN.md` 与 `dislop.com/awesome/` 离线筛选页 | `docs/research/anti-slop-radar-index.json`、`awesome/` |
+| Awesome Anti-Slop | 90 条双语核验清单（`dislop.radar/2`），同源生成纯英文 `awesome/README.md`、纯中文 `awesome/README.zh-CN.md` 与 `dislop.com/awesome/` 网页筛选页 | `docs/research/anti-slop-radar-index.json`、`awesome/` |
 | 多平台清单与编辑器集成 | 同源生成并受 CI 校验的分发清单与集成包：npm（`dislop`）、PyPI（`dislop`）、官方 MCP Registry（`io.github.dislop-ai/dislop`，直连官方云端 `https://dislop.com/mcp`）、纯文档 Agent Skill（`skills/dislop/` 含 4 张本地参考卡与 `agents/openai.yaml`）、Claude Code 插件（`.claude-plugin/`，常驻仅约 130 tokens）、Codex 插件（`.codex-plugin/` 与 `.agents/plugins/marketplace.json`）、Cursor 插件（`.cursor-plugin/`）、Antigravity 插件包（`integrations/antigravity/`）、VS Code / Open VSX 轻量 Web 扩展（`integrations/vscode/`）、可复用 GitHub Action（`action.yml`）与 `.pre-commit-hooks.yaml` | `scripts/sync_manifests.mjs`、`integrations/`、`server.json`、`action.yml` |
 
 ---
@@ -56,29 +56,35 @@ snapshot: 2026-11-21
 
 目标：从首批 Coding Agent 用户向 WorkBuddy、千问、Claude Cowork 等办公 Agent 用户及日常写方案、周报的人群延伸，并用公开可复现数据持续验证检出率。
 
-- [x] 交付 `dislop-bench v2`：112 份核心检测基准与 154 份多角度反模式基准（准确率 `100.0%`、召回率 `100.0%`、干净原稿误报率 `0.0%`、双端一致率 `100.0%`）、18 组端到端改稿评测（`18/18` 全过）与 5 模型真实在线对比（[benchmarks/REPORT.md](./benchmarks/REPORT.md)）。
+- [x] 交付 `dislop-bench v2`：112 份核心检测基准与 154 份多角度反模式基准（精确率 `100.0%`、召回率 `100.0%`、干净原稿误报率 `0.0%`、双端一致率 `100.0%`）、18 组端到端改稿评测（`18/18` 全过）与 5 模型真实在线对比（[benchmarks/REPORT.md](./benchmarks/REPORT.md)）。
 - [ ] 复用纯 JS `src/core.mjs` 打包上架 **Obsidian Community Plugins**（单文件离线检查 + 可选云端改写）与 **Raycast Store**（系统快捷键检查选中文本 / 剪贴板）。
-- [ ] 扩充真实长文、多页管理汇报 `.pptx` 与跨模型盲评样本，按双周复盘各商店自然下载量与云端激活转化率。
+- [ ] 扩充真实长文、多页管理汇报 `.pptx` 与跨模型盲评样本，按双周复盘各商店安装量。
 
 **验收标准**：CI 断网执行 `node scripts/run_benchmark.mjs --assert` 全绿，Obsidian 与 Raycast 扩展通过各自社区仓库机器校验。
 
 ### 轨道 D — `Awesome Anti-Slop` 持续维护与拆仓阈值（并行推进）
 
-目标：保持 87 条中英文工具清单准确、中立、好查，同时不分散主仓库注意力。
+目标：保持 90 条中英文工具清单准确、中立、好查，同时不分散主仓库注意力。
 
 - [x] 增加 Awesome Anti-Slop 的 GitHub Issue 投稿表单模板（`.github/ISSUE_TEMPLATE/awesome_submission.yml`，含链接、类别、语种与中英各一句用途说明）。
-- [x] 增加定时巡检 87 条清单外链与仓库健康度的脚本与工作流（`scripts/check_awesome_links.mjs` 与每周运行的 `.github/workflows/awesome-links.yml`）。
+- [x] 增加定时巡检 90 条清单外链与仓库健康度的脚本与工作流（`scripts/check_awesome_links.mjs` 与每周运行的 `.github/workflows/awesome-links.yml`）。
 - [ ] 冷启动阶段继续把 `awesome/README.md`、`awesome/README.zh-CN.md` 与 `https://dislop.com/awesome/` 留在 `dislop-ai/dislop` 主仓维护。
 - [ ] **拆仓阈值**：仅当外部有效目录 PR 持续达到 `>= 5 条/月` 时，再按 `dislop.radar/3` 预案切出独立 CC0-1.0 仓库 `dislop-ai/awesome-anti-slop`，永久保持 `https://dislop.com/awesome/` 地址不变。
 
 ### 轨道 E — 真实评测驱动的智能审校与闭源云端能力（`v0.7.0+`）
 
-完整定价与成本测算见 [docs/research/business-model-and-open-core.zh-CN.md](https://github.com/dislop-ai/dislop/blob/main/docs/research/business-model-and-open-core.zh-CN.md)。**开源与闭源边界**：按 `PRODUCT.md` 收敛为三层产品形态——纯文档 `Skill`、零依赖本地 `CLI`（`dislop-ai/dislop`，Apache-2.0，含全部 7 套内置包 42 条规则、53 条反模式库、`14.6 KB` 集成模型、浏览器基础工作台、`Awesome Anti-Slop`、开源单步审校 Prompt 与 `dislop-bench v2`）保持开源；官方云端 MCP（`https://dislop.com/mcp`）与多模型流水线独立在闭源 `dislop-cloud` 运营。**先评测再精简代码**：在真实保留集完成评测对比前，保留既有离线规则、Pocket ML 与 Python 双端代码不删。
+完整定价与成本测算见 [docs/research/business-model-and-open-core.zh-CN.md](https://github.com/dislop-ai/dislop/blob/main/docs/research/business-model-and-open-core.zh-CN.md)。**先评测再精简代码**：在真实保留集完成评测对比前，保留既有离线规则、Pocket ML 与 Python 双端代码不删。
 
-- [x] **阶段 0（云端上线与登录试用收口）**：官方 `dislop-cloud` 已上线 `https://dislop.com/mcp` 与 `/api/v1/*`，启用登录领取每月 30 免费额度（关闭未登录云端白嫖）、全局日限额硬熔断与 Pro / 按量包 / Team 预约登记；`v0.7.0` 起 CLI 0 命中输出改为“未发现已知模式”并统一全部插件清单直连官方云端 MCP。
+- **开源部分（`dislop-ai/dislop`，Apache-2.0）**：
+  - 纯文档 `SKILL.md` 与 `./references/*.md`
+  - 零依赖本地 `CLI`，内置全部 7 套规则包（53 条规则）、65 条反模式库与 `14.6 KB` 轻量集成模型
+  - 浏览器基础工作台、`Awesome Anti-Slop`、开源单步审校 Prompt 与 `dislop-bench v2`
+- **闭源部分（`dislop-cloud`）**：官方云端 MCP（`https://dislop.com/mcp`）与多模型流水线。
+
+- [x] **阶段 0（云端上线与登录试用收口）**：官方 `dislop-cloud` 已上线 `https://dislop.com/mcp` 与 `/api/v1/*`，启用登录领取每月 30 免费额度，并开放 Pro / 按量包 / Team 预约；`v0.7.0` 起 CLI 0 命中输出改为“未发现已知模式”并统一全部插件清单直连官方云端 MCP。
 - [ ] **真实语料保留评测集与 4 臂盲评**：收集覆盖叙事随笔、思辨论述、公文简报与工程文档的真实中英文文章并人工标注，对比离线快检、单个开源 Prompt、纯云端大模型与混合流水线（离线规则 + 5 轴特征注入 + 分文体大模型审校 + 确定性护栏），用保留集结果决定后续代码取舍。
 - [ ] **分文体结构化审校协议（`revision` + `register`）与 CLI 自带密钥 `review`**：输出 `edit` / `rewrite` / `ask` 结构化问题清单与 `expressive` / `argumentative` / `official` 文体路由，让本地宿主 Agent 结合完整上下文改稿；允许开发者在 CLI 显式配置自有 OpenAI 兼容密钥。
-- [ ] **按地区多模型路由与保留原排版去味导出（`.docx` / `.pptx` Round-Trip）**：接入国内零训练模型与海外模型自动切换，拆解 OOXML、去掉 AI 味并复核数字与限定词后保留原样式导出。
+- [ ] **按地区多模型路由与保留原排版去味导出（`.docx` / `.pptx` Round-Trip）**：按地区切换不拿稿子训练的付费模型接口，拆解 OOXML、去掉 AI 味并复核数字与限定词后保留原样式导出。
 - [ ] **网页与 PPT 视觉多模态审查（Visual Anti-Slop）与团队共享文风库**：无头渲染真实截图 + VLM 审校版式拥挤度、模板审美与连续同版式，并支持跨成员复用 `dislop.voice/1`。
 
 ---
@@ -89,7 +95,7 @@ snapshot: 2026-11-21
 
 1. VS Code 与 Open VSX 扩展是在保存文件（`onSave`）时再刷新波浪线，还是默认开启 `300ms` 停顿实时刷新？长文写作时实时划线会不会打断思路？
 2. 目前默认建议 Agent 的 `PostToolUse` / `Stop` Hook 只对 `packs/core` 的 `error` 硬伤返回非零退出码、同一文件连续拦截 2 次即放行转人工；是否还需要一套一键严苛预设（连 `regulated-comms` 极限词也一起硬拦）？
-3. 在 Orca 和 Conductor 新建子 Git Worktree 时，除了 `.dislop.local.json` 私有词表，是否默认把 `.dislop.local/voice.json` 个人声纹卡也一并软链过去？
+3. 在 Orca 和 Conductor 新建子 Git Worktree 时，除了 `.dislop.local.json` 私有词表，是否默认把 `.dislop.local/voice.json` 个人文风卡也一并软链过去？
 4. PR diff 增量检查里，`dislop` 是继续专注文档、文案、PPT 与前端 UI 文件（把代码 AST 交给 Oxlint / ESLint / Ruff），还是给空话 PR 描述和假 JSDoc 单独做一条可选探针？
 5. 长文作者在 Obsidian 里更需要侧边栏整篇节奏体检面板，还是直接在正文编辑区划蓝虚线？
 

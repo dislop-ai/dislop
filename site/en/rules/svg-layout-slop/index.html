@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-static-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>SVG missing viewBox or text overlap (svg-layout-slop) — dislop</title>
+  <meta name="description" content="SVG missing viewBox or text overlap: SVG graphic has structural generation defects: missing `viewBox` on a large canvas, overlapping `&lt;text&gt;` coordinates, or &gt;= 2 orphaned `&lt;defs&gt;` entries.">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/en/rules/svg-layout-slop/">
+  <meta property="og:title" content="SVG missing viewBox or text overlap (svg-layout-slop) — dislop">
+  <meta property="og:description" content="SVG missing viewBox or text overlap: SVG graphic has structural generation defects: missing `viewBox` on a large canvas, overlapping `&lt;text&gt;` coordinates, or &gt;= 2 orphaned `&lt;defs&gt;` entries.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="SVG missing viewBox or text overlap (svg-layout-slop) — dislop">
+  <meta name="twitter:description" content="SVG missing viewBox or text overlap: SVG graphic has structural generation defects: missing `viewBox` on a large canvas, overlapping `&lt;text&gt;` coordinates, or &gt;= 2 orphaned `&lt;defs&gt;` entries.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
+  <link rel="canonical" href="https://dislop.com/en/rules/svg-layout-slop/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/svg-layout-slop/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/svg-layout-slop/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/svg-layout-slop/">
+  <link rel="alternate" type="application/atom+xml" href="../../../en/feed.xml" title="dislop Guides (EN)">
+  <link rel="alternate" type="text/markdown" href="../../../rules/svg-layout-slop.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../../assets/logo.svg">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/en/rules/svg-layout-slop/",
+      "url": "https://dislop.com/en/rules/svg-layout-slop/",
+      "headline": "SVG missing viewBox or text overlap (svg-layout-slop)",
+      "description": "Add an explicit `viewBox`, separate `\u003ctext>` coordinates cleanly, and delete unused gradients or filters from `\u003cdefs>`.",
+      "inLanguage": "en",
+      "dateModified": "2026-11-23",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/en/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Rules",
+          "item": "https://dislop.com/en/rules/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "svg-layout-slop",
+          "item": "https://dislop.com/en/rules/svg-layout-slop/"
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../../en/">
+        <img src="../../../assets/logo.svg" width="28" height="28" alt="dislop icon">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../../?lang=en#workbench">Workbench</a>
+        <a href="../../../en/guides/">Guides</a>
+        <a href="../../../en/awesome/">Directory</a>
+        <a href="../../../en/rules/" aria-current="page">Rules</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../../rules/svg-layout-slop/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../../en/">dislop</a> / <a href="../">Rules</a> / <span aria-current="page"><code>svg-layout-slop</code></span>
+      </nav>
+
+      <article class="article-prose">
+        <header>
+          <h1 class="lead-heading" style="max-width:28ch;">SVG missing viewBox or text overlap</h1>
+          <div class="article-meta">
+            <span><code>svg-layout-slop</code></span>
+            <span>Slide Deck, Web UI &amp; Graphic Layout (<code>deck-and-ui</code>)</span>
+            <span>warning</span>
+            <span><code>svg</code></span>
+            <a href="../../../rules/svg-layout-slop.md">Markdown card</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">HOW TO JUDGE</div>
+            <p>Add an explicit <code>viewBox</code>, separate <code>&lt;text&gt;</code> coordinates cleanly, and delete unused gradients or filters from <code>&lt;defs&gt;</code>.</p>
+          </div>
+        </header>
+
+        <h2>What this rule catches</h2>
+        <p>SVG graphic has structural generation defects: missing <code>viewBox</code> on a large canvas, overlapping <code>&lt;text&gt;</code> coordinates, or &gt;= 2 orphaned <code>&lt;defs&gt;</code> entries.</p>
+
+        <h2>Before and after examples</h2>
+<!-- dislop-quote-start -->
+        <div class="rule-contrast-grid">
+          <div class="rule-contrast-cell is-bad">
+            <div class="rule-contrast-label">Original (flagged)</div>
+            <pre><code>&lt;svg width=&quot;640&quot; height=&quot;360&quot;&gt;&lt;text x=&quot;40&quot; y=&quot;50&quot;&gt;Step 1&lt;/text&gt;&lt;text x=&quot;42&quot; y=&quot;52&quot;&gt;Overlap&lt;/text&gt;&lt;/svg&gt;</code></pre>
+          </div>
+          <div class="rule-contrast-cell is-trap">
+            <div class="rule-contrast-label">Fallback trap (still sounds like AI)</div>
+            <pre><code>&lt;svg viewBox=&quot;0 0 640 360&quot; width=&quot;640&quot; height=&quot;360&quot;&gt;&lt;defs&gt;&lt;linearGradient id=&quot;u1&quot;/&gt;&lt;linearGradient id=&quot;u2&quot;/&gt;&lt;/defs&gt;&lt;rect width=&quot;640&quot; height=&quot;360&quot;/&gt;&lt;/svg&gt;</code></pre>
+          </div>
+          <div class="rule-contrast-cell is-good">
+            <div class="rule-contrast-label">Clean version</div>
+            <pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 640 360&quot; width=&quot;640&quot; height=&quot;360&quot;&gt;&lt;text x=&quot;40&quot; y=&quot;50&quot;&gt;Step 1&lt;/text&gt;&lt;text x=&quot;40&quot; y=&quot;96&quot;&gt;Step 2&lt;/text&gt;&lt;/svg&gt;</code></pre>
+          </div>
+        </div>
+        <!-- dislop-quote-end -->
+<p class="rule-note"><strong>Edit note:</strong> Non-icon SVGs need a responsive <code>viewBox</code>, non-overlapping text coordinates, and zero orphaned <code>&lt;defs&gt;</code> bloat.</p>
+
+        <h2>Run locally via CLI</h2>
+        <pre><code>npx --yes dislop explain svg-layout-slop
+npx --yes dislop check . --pack deck-and-ui</code></pre>
+
+        <h2>Related guides</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../../en/guides/fix-ai-slop-web-ui/">Fix AI Slop in Web UI</a>
+</div>
+        <h2>Other rules in deck-and-ui</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../slide-word-wall/"><code>slide-word-wall</code> · Slide word wall</a>
+<a class="related-link-chip" href="../slide-bullet-overload/"><code>slide-bullet-overload</code> · Too many bullets on one slide</a>
+<a class="related-link-chip" href="../slide-autofit-shrink/"><code>slide-autofit-shrink</code> · Slide text auto-shrunk too small</a>
+<a class="related-link-chip" href="../slide-weak-topic-title/"><code>slide-weak-topic-title</code> · Generic slide title</a>
+<a class="related-link-chip" href="../ui-ai-gradient/"><code>ui-ai-gradient</code> · Default purple-pink AI gradient</a>
+<a class="related-link-chip" href="../ui-pill-soup/"><code>ui-pill-soup</code> · Pill-badge soup</a>
+<a class="related-link-chip" href="../ui-box-in-box/"><code>ui-box-in-box</code> · Three-level nested boxes</a>
+<a class="related-link-chip" href="../ui-prompt-echo-badge/"><code>ui-prompt-echo-badge</code> · Prompt-echo marketing badge</a>
+</div>
+        <div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../../?lang=en#try=svg-layout-slop">Try this rule in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[`svg-layout-slop`](https://dislop.com/en/rules/svg-layout-slop/): SVG graphic has structural generation defects: missing `viewBox` on a large canvas, overlapping `&lt;text&gt;` coordinates, or &gt;= 2 orphaned `&lt;defs&gt;` entries.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>This site passes dislop check site/ with 0 issues. For agents, start at <a href="../../../llms.txt">/llms.txt</a>.</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../../en/guides/">Guides</a>
+        <a href="../../../en/awesome/">Awesome list</a>
+        <a href="../../../en/rules/">All rules</a>
+        <a href="../../../privacy.md">Privacy</a>
+        <a href="../../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">Close</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../../static-ui.js"></script>
+
+</body>
+</html>

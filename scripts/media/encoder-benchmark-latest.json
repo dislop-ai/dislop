@@ -1,0 +1,118 @@
+{
+  "schema": "dislop.media-bench/1",
+  "generated_at": "2026-11-23T08:24:22+0800",
+  "records": [
+    {
+      "scene": "proof-cycle-zh",
+      "pipeline": "gif-diff-none",
+      "size_kb": 186.9,
+      "psnr_db": 47.94,
+      "paper_purity_pct": 100.0,
+      "encode_sec": 0.93
+    },
+    {
+      "scene": "proof-cycle-zh",
+      "pipeline": "gif-full-sierra",
+      "size_kb": 215.8,
+      "psnr_db": 50.56,
+      "paper_purity_pct": 99.79,
+      "encode_sec": 2.2
+    },
+    {
+      "scene": "proof-cycle-zh",
+      "pipeline": "gif-diff-bayer3",
+      "size_kb": 242.7,
+      "psnr_db": 39.95,
+      "paper_purity_pct": 38.66,
+      "encode_sec": 1.1
+    },
+    {
+      "scene": "proof-cycle-zh",
+      "pipeline": "gif-2x-lanczos-none",
+      "size_kb": 256.4,
+      "psnr_db": 36.74,
+      "paper_purity_pct": 93.73,
+      "encode_sec": 1.01
+    },
+    {
+      "scene": "proof-cycle-zh",
+      "pipeline": "webp-anim-q84",
+      "size_kb": 174.9,
+      "psnr_db": 39.87,
+      "paper_purity_pct": 45.93,
+      "encode_sec": 1.04
+    },
+    {
+      "scene": "proof-cycle-zh",
+      "pipeline": "webp-anim-lossless",
+      "size_kb": 197.7,
+      "psnr_db": 99.9,
+      "paper_purity_pct": 100.0,
+      "encode_sec": 0.88
+    },
+    {
+      "scene": "proof-cycle-zh",
+      "pipeline": "mp4-h264-crf22",
+      "size_kb": 105.8,
+      "psnr_db": 38.83,
+      "paper_purity_pct": 49.2,
+      "encode_sec": 0.34
+    },
+    {
+      "scene": "ui-slop-zh",
+      "pipeline": "gif-diff-none",
+      "size_kb": 145.1,
+      "psnr_db": 41.36,
+      "paper_purity_pct": 100.0,
+      "encode_sec": 0.76
+    },
+    {
+      "scene": "ui-slop-zh",
+      "pipeline": "gif-full-sierra",
+      "size_kb": 165.9,
+      "psnr_db": 46.0,
+      "paper_purity_pct": 99.8,
+      "encode_sec": 2.02
+    },
+    {
+      "scene": "ui-slop-zh",
+      "pipeline": "gif-diff-bayer3",
+      "size_kb": 182.2,
+      "psnr_db": 38.33,
+      "paper_purity_pct": 34.97,
+      "encode_sec": 0.92
+    },
+    {
+      "scene": "ui-slop-zh",
+      "pipeline": "gif-2x-lanczos-none",
+      "size_kb": 190.4,
+      "psnr_db": 33.57,
+      "paper_purity_pct": 89.66,
+      "encode_sec": 1.02
+    },
+    {
+      "scene": "ui-slop-zh",
+      "pipeline": "webp-anim-q84",
+      "size_kb": 141.9,
+      "psnr_db": 37.29,
+      "paper_purity_pct": 20.72,
+      "encode_sec": 0.75
+    },
+    {
+      "scene": "ui-slop-zh",
+      "pipeline": "webp-anim-lossless",
+      "size_kb": 137.9,
+      "psnr_db": 99.9,
+      "paper_purity_pct": 100.0,
+      "encode_sec": 0.86
+    },
+    {
+      "scene": "ui-slop-zh",
+      "pipeline": "mp4-h264-crf22",
+      "size_kb": 86.8,
+      "psnr_db": 37.07,
+      "paper_purity_pct": 28.3,
+      "encode_sec": 0.29
+    }
+  ]
+}

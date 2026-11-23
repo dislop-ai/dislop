@@ -6,9 +6,15 @@
 import {
   buildLineStarts,
   buildZones,
+  deriveFixStrategy,
   detectModality,
   fnv1aHex,
+  isAllowedMatch,
+  isSentenceBreakAt,
   offsetToLineCol,
+  parseSuppressions,
+  sliceCodepoints,
+  stripParentheticals,
 } from "./core.mjs";
 
 export const PATTERN_ENGINE_VERSION = "1.0.0";
@@ -90,9 +96,10 @@ function makePatternFinding({
   match,
   metric = "",
   message,
+  deletionTest = null,
 }) {
   const loc = location || `${line}:${col}`;
-  const cleanMatch = String(match || "").replace(/\s+/g, " ").trim().slice(0, 140);
+  const cleanMatch = sliceCodepoints(String(match || "").replace(/\s+/g, " ").trim(), 140);
   const fp = `${ruleId}:${fnv1aHex(`${ruleId}|${cleanMatch.toLowerCase()}|${loc}`)}`;
   return {
     fingerprint: fp,
@@ -101,6 +108,7 @@ function makePatternFinding({
     dimension,
     detectionAngle,
     severity,
+    fixStrategy: deriveFixStrategy({ id: ruleId, severity }),
     file: filename,
     modality,
     location: loc,
@@ -109,7 +117,27 @@ function makePatternFinding({
     match: cleanMatch,
     metric,
     message,
+    ...(deletionTest ? { deletionTest } : {}),
   };
+}
+
+function iterSentenceSpansInPara(rawPara) {
+  const spans = [];
+  let start = 0;
+  for (let i = 0; i < rawPara.length; i += 1) {
+    if (rawPara[i] === "\n") {
+      start = i + 1;
+      continue;
+    }
+    if (isSentenceBreakAt(rawPara, i)) {
+      const text = rawPara.slice(start, i + 1);
+      if (text.trim().length > 0) {
+        spans.push({ text, index: start });
+      }
+      start = i + 1;
+    }
+  }
+  return spans;
 }
 
 // ---------- Angle: Rhythm & Cadence Statistics ----------
@@ -118,13 +146,11 @@ function probeCommaChain(proseText, rawText, cfg) {
   const hits = [];
   for (const para of iterProseParagraphs(proseText)) {
     if (para.skippable) continue;
-    const sentRe = /[^.!?。！？\n]+[.!?。！？]/gu;
-    let sm;
-    while ((sm = sentRe.exec(para.raw)) !== null) {
-      const sent = sm[0];
+    for (const sm of iterSentenceSpansInPara(para.raw)) {
+      const sent = sm.text;
       const normalized = stripFormattedNumbersAndCode(sent);
       const lang = detectPrimaryLang(normalized);
-      const noParens = normalized.replace(/\([^)\n]{1,120}\)|（[^）\n]{1,120}）/gu, "");
+      const noParens = stripParentheticals(normalized);
       const commas = noParens.match(/[，,]/g) || [];
       if (commas.length < (cfg.minCommas || 5)) continue;
 
@@ -159,11 +185,9 @@ function probeSentenceLengthMonotony(proseText, cfg) {
   for (const para of iterProseParagraphs(proseText)) {
     if (para.skippable) continue;
     const lang = detectPrimaryLang(para.trimmed);
-    const sentRe = /[^.!?。！？\n]+[.!?。！？]/gu;
     const lengths = [];
-    let sm;
-    while ((sm = sentRe.exec(para.raw)) !== null) {
-      const u = measureUnits(sm[0], lang);
+    for (const sm of iterSentenceSpansInPara(para.raw)) {
+      const u = measureUnits(sm.text, lang);
       if (u >= (cfg.minSentenceUnits || 4)) lengths.push(u);
     }
     if (lengths.length < (cfg.minSentences || 5)) continue;
@@ -208,13 +232,11 @@ function probeOpenerAnaphora(proseText, cfg) {
   for (const para of iterProseParagraphs(proseText)) {
     if (para.skippable) continue;
     const lang = detectPrimaryLang(para.trimmed);
-    const sentRe = /[^.!?。！？\n]+[.!?。！？]/gu;
     const sentences = [];
-    let sm;
-    while ((sm = sentRe.exec(para.raw)) !== null) {
-      const s = sm[0].trim();
+    for (const sm of iterSentenceSpansInPara(para.raw)) {
+      const s = sm.text.trim();
       const opener = extractSentenceOpener(s, lang, cfg);
-      const lead = sm[0].search(/\S/);
+      const lead = sm.text.search(/\S/);
       sentences.push({
         opener,
         start: para.blockStart + sm.index + (lead >= 0 ? lead : 0),
@@ -663,31 +685,102 @@ function probeCompositeMultiSignal(proseText, rawText, banks, existingFindings) 
   return hits;
 }
 
+function probeUiGen2TastefulSlop(rawText, cfg) {
+  const clean = maskUiMarkup(rawText);
+  const minSignals = cfg.minSignals || 2;
+  const signals = [];
+  let firstHit = null;
+
+  // Signal 1: Warm cream ground + terracotta/clay accent
+  const creamMatch = clean.match(/#(?:faf8f5|f7f5f0|fbf9f6|f5f2eb|f9f6f0|fdfbf7|f4efe6)\b|\bbg-(?:stone|amber)-50\b/i);
+  const terraMatch = clean.match(/#(?:c45a3b|d97757|b85038|c85a32|c2410c|b45309)\b|\bterracotta\b|\b(?:text|bg)-orange-700\b/i);
+  if (creamMatch && terraMatch) {
+    signals.push("cream-terracotta");
+    firstHit = { index: creamMatch.index, length: creamMatch[0].length };
+  }
+
+  // Signal 2: Serif italic accent word inside display heading
+  const italicMatch = clean.match(/<h[1-3]\b[^>]*>[\s\S]{0,160}<(?:em|i|span[^>]*\bitalic\b)[^>]*>[^<]{2,40}<\/(?:em|i|span)>/i);
+  if (italicMatch) {
+    signals.push("serif-italic-headline");
+    if (!firstHit) firstHit = { index: italicMatch.index, length: Math.min(80, italicMatch[0].length) };
+  }
+
+  // Signal 3: Inter default font stack
+  const interMatch = clean.match(/font-family\s*:[^;\n]{0,80}['"]?Inter['"]?|font-\[\s*['"]?Inter['"]?\s*\]/i);
+  if (interMatch) {
+    signals.push("inter-default");
+    if (!firstHit) firstHit = { index: interMatch.index, length: interMatch[0].length };
+  }
+
+  // Signal 4: Tracked uppercase eyebrow + rounded-2xl / shadow-xl combo
+  const eyebrowMatch = clean.match(/\b(?:tracking-(?:widest|wider|\[0\.[12]\d*em\])[^"'\n>]{0,40}\buppercase\b|\buppercase[^"'\n>]{0,40}\btracking-(?:widest|wider|\[0\.[12]\d*em\]))|letter-spacing\s*:\s*0\.[1-3]\d*em[^;]{0,60}text-transform\s*:\s*uppercase/i);
+  const shellMatch = /\b(?:rounded-2xl|rounded-3xl|shadow-xl|shadow-lg)\b/.test(clean);
+  if (eyebrowMatch && shellMatch) {
+    signals.push("tracked-eyebrow-shell");
+    if (!firstHit) firstHit = { index: eyebrowMatch.index, length: eyebrowMatch[0].length };
+  }
+
+  if (signals.length >= minSignals && firstHit) {
+    return [{ ...firstHit, metric: `gen2Signals=${signals.length} [${signals.join("+")}]` }];
+  }
+  return [];
+}
+
 // ---------- Main Pattern Library Multi-Angle Auditor ----------
 
-export function auditPatterns(text, { filename = "<memory>", modality = null, banks = {}, angles = null, ooxml = null } = {}) {
+export function auditPatterns(text, { filename = "<memory>", modality = null, banks = {}, angles = null, ooxml = null, config = {} } = {}) {
   const mod = modality || detectModality(filename) || "markdown";
   const lineStarts = buildLineStarts(text);
-  const zones = buildZones(text, mod);
+  const zones = buildZones(text, mod, {
+    proseFences: config?.proseFences,
+    maskBlockquotes: config?.maskBlockquotes,
+  });
+  const { byTargetLine } = parseSuppressions(text);
+  const allowList = config?.allow || [];
+  const ruleOverrides = config?.rules || {};
   const allowAngle = (a) => !angles || angles.includes(a);
   const findings = [];
 
-  const emitHits = (ruleMeta, hits, message) => {
+  const isRuleSuppressedOrOff = (ruleId, line, rawMatch) => {
+    const ov = ruleOverrides[ruleId];
+    if (ov === "off" || ov === false) return true;
+    if (rawMatch && isAllowedMatch(rawMatch, allowList)) return true;
+    const sups = byTargetLine.get(line) || [];
+    for (const sup of sups) {
+      if (sup.ruleIds.includes("all") || sup.ruleIds.includes("*") || sup.ruleIds.includes(ruleId)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const resolveSeverity = (ruleId, baseSev) => {
+    const ov = ruleOverrides[ruleId];
+    if (ov === "error" || ov === "warning" || ov === "info") return ov;
+    return baseSev || "info";
+  };
+
+  const emitHits = (ruleMeta, hits, message, deletionTest = null) => {
+    if (ruleOverrides[ruleMeta.ruleId] === "off" || ruleOverrides[ruleMeta.ruleId] === false) return;
     for (const h of hits) {
+      const rawMatch = text.slice(h.index, h.index + h.length);
       const { line, col } = offsetToLineCol(text, lineStarts, h.index);
+      if (isRuleSuppressedOrOff(ruleMeta.ruleId, line, rawMatch)) continue;
       findings.push(
         makePatternFinding({
           ruleId: ruleMeta.ruleId,
           dimension: ruleMeta.dimension,
           detectionAngle: ruleMeta.detectionAngle,
-          severity: ruleMeta.severity || "info",
+          severity: resolveSeverity(ruleMeta.ruleId, ruleMeta.severity),
           filename,
           modality: mod,
           line,
           col,
-          match: text.slice(h.index, h.index + h.length),
+          match: rawMatch,
           metric: h.metric || "",
           message,
+          deletionTest,
         })
       );
     }
@@ -700,30 +793,45 @@ export function auditPatterns(text, { filename = "<memory>", modality = null, ba
         emitHits(dr.commaChain, probeCommaChain(zones.prose, text, dr.commaChain), {
           en: "Single sentence chains 5+ comma-separated clauses in a flat cadence.",
           zh: "单句连续串联 5 个及以上逗号分句，形成平铺拖沓的逗号链节奏。",
+        }, {
+          en: "Split into 2–3 shorter sentences at causal or chronological boundaries without dropping numbers.",
+          zh: "按因果或时间停顿拆成 2 到 3 句，保留全部条件与数字，删掉多余顺承逗号。",
         });
       }
       if (dr.sentenceLengthMonotony) {
         emitHits(dr.sentenceLengthMonotony, probeSentenceLengthMonotony(zones.prose, dr.sentenceLengthMonotony), {
           en: "Paragraph exhibits metronome sentence-length uniformity (CV < 0.16 across >= 5 sentences).",
           zh: "段落内连续 5 句以上句长高度均一（CV < 0.16），呈现节拍器生成韵律。",
+        }, {
+          en: "Merge related clauses or cut one sentence short to create natural length contrast.",
+          zh: "把相邻因果合并成长句，并收短关键结论句，拉开长短句起伏。",
         });
       }
       if (dr.openerAnaphora) {
         emitHits(dr.openerAnaphora, probeOpenerAnaphora(zones.prose, dr.openerAnaphora), {
           en: "4+ consecutive prose sentences open with the identical mechanical prefix.",
           zh: "段落内连续 4 句及以上使用完全相同的机械句首开头。",
+        }, {
+          en: "Vary sentence openings or move shared context into one topic sentence or clean list.",
+          zh: "改写句首起笔，或把并列动作收拢成一句话或真实列表。",
         });
       }
       if (dr.inlineBoldSaturation && (mod === "markdown" || mod === "text")) {
         emitHits(dr.inlineBoldSaturation, probeInlineBoldSaturation(zones.prose, text, dr.inlineBoldSaturation), {
           en: "Dense inline `**bold**` highlight confetti inside a normal prose paragraph.",
           zh: "普通自然段内高密度堆砌 `**加粗词**` 高亮，呈现助手式排版噪点。",
+        }, {
+          en: "Unbold inline phrases and keep emphasis only on 1 genuine key decision or caveat.",
+          zh: "去掉多余行内加粗，仅保留最关键的一处结论或风险提示。",
         });
       }
       if (dr.paragraphLengthUniformity) {
         emitHits(dr.paragraphLengthUniformity, probeParagraphLengthUniformity(zones.prose, dr.paragraphLengthUniformity), {
           en: "Long document allocates nearly identical word budgets across >= 5 consecutive paragraphs.",
           zh: "连续 5 段及以上正文自然段字数高度均一（CV < 0.13），呈现均匀切块模板感。",
+        }, {
+          en: "Combine two thin subsections or expand the load-bearing section with concrete details.",
+          zh: "合并偏薄的过渡段落，把篇幅集中到真正有数据或机制的核心段落。",
         });
       }
     }
@@ -731,6 +839,9 @@ export function auditPatterns(text, { filename = "<memory>", modality = null, ba
       emitHits(dr.discourseMarkers, probeDiscourseMarkerCluster(zones.prose, dr.discourseMarkers), {
         en: "Mechanical transition signposts stacked across consecutive paragraphs or sentences.",
         zh: "连续段落或句子堆砌机械过渡路标词（如“首先/其次/此外/最后”或连续“Furthermore/Moreover/Additionally”）。",
+      }, {
+        en: "Delete additive signposts (`Moreover`, `Furthermore`) and connect steps by causal order.",
+        zh: "删掉“首先/其次/此外/最后”一类空路标词，直接按动作先后或因果衔接。",
       });
     }
   }
@@ -741,12 +852,18 @@ export function auditPatterns(text, { filename = "<memory>", modality = null, ba
       emitHits(lex.zhCalqueCluster, probeLexicalCluster(zones.prose, lex.zhCalqueCluster), {
         en: "Chinese AI translation-calque and hollow-connector cluster inside one paragraph.",
         zh: "单段内聚集多处中文 AI 翻译腔或空洞连接套语（如“在……的背景下/不可否认的是/扮演着重要角色”）。",
+      }, {
+        en: "Cut hollow wrappers (`undeniably`, `plays a vital role`) and state the subject and action directly.",
+        zh: "直接删掉“不可否认/扮演着角色/奠定基础”等空架子，主语紧接具体动作与结果。",
       });
     }
     if (lex.enPhraseCluster) {
       emitHits(lex.enPhraseCluster, probeLexicalCluster(zones.prose, lex.enPhraseCluster), {
         en: "Dense cluster of empirically over-represented English AI vocabulary in one paragraph.",
         zh: "单段内高频聚集多个大模型超额偏好英文词组（如 `meticulous`/`pivotal`/`holistic`/`foster`/`underscore`）。",
+      }, {
+        en: "Swap abstract buzzwords (`foster`, `pivotal`, `seamless`) for plain verbs and concrete facts.",
+        zh: "把虚浮高频词换成直白动词与可验证指标，不用靠叠词制造分量。",
       });
     }
   }
@@ -758,6 +875,9 @@ export function auditPatterns(text, { filename = "<memory>", modality = null, ba
       emitHits(syn.concessionSymmetry, probeProseRegexPatterns(zones.prose, pats), {
         en: "Formulaic both-sides concession frame ('While X presents challenges, it also offers tremendous opportunities').",
         zh: "模板化两面平衡让步句式（“虽然……面临挑战，但也带来了巨大机遇”）。",
+      }, {
+        en: "Drop the both-sides cushion and state a clear recommendation with exact boundary conditions.",
+        zh: "撤掉“有利有弊/既要又要”的端水套壳，直接给出明确判断或写清触发阈值。",
       });
     }
     if (syn.pullQuoteCloser) {
@@ -769,6 +889,10 @@ export function auditPatterns(text, { filename = "<memory>", modality = null, ba
         {
           en: "Poster-style pull-quote punchline closer.",
           zh: "段尾硬加广告卡片式金句收尾（如“笔一直在你手里”“这才是……真正的温度”）。",
+        },
+        {
+          en: "Cut the bumper-sticker sign-off and end on the last concrete fact or next action.",
+          zh: "删掉结尾口号金句，让文章停在最后一条具体事实或下一步动作上。",
         }
       );
     }
@@ -776,6 +900,9 @@ export function auditPatterns(text, { filename = "<memory>", modality = null, ba
       emitHits(syn.rhetoricalSelfQa, probeProseRegexPatterns(zones.prose, syn.rhetoricalSelfQa.patterns || []), {
         en: "Staged rhetorical self-Q&A transition ('Why does this matter? Because...', '这意味着什么？意味着……').",
         zh: "正文内使用主持词式自问自答过渡句（如“这意味着什么？意味着……”“结果呢？……”）。",
+      }, {
+        en: "Remove the staged question and state the consequence in one direct declarative sentence.",
+        zh: "去掉“为什么重要？因为……”问答腔，用一句直白陈述句直接交代原因或后果。",
       });
     }
   }
@@ -787,24 +914,40 @@ export function auditPatterns(text, { filename = "<memory>", modality = null, ba
         emitHits(vd.glassmorphismOveruse, probeUiPatternCount(text, vd.glassmorphismOveruse), {
           en: "Repeated `backdrop-blur` translucent panels (>= 3 per view) mimic default AI glassmorphism templates.",
           zh: "单视图重复堆砌 3 处及以上 `backdrop-blur` 毛玻璃半透明面板，呈现典型生成式模板特征。",
+        }, {
+          en: "Replace stacked blur cards with crisp 1px borders and solid surface contrast.",
+          zh: "撤掉满屏毛玻璃半透明层，改用清晰 1px 边框与实体背景区分层级。",
         });
       }
       if (vd.accentStripeCard) {
         emitHits(vd.accentStripeCard, probeUiPatternCount(text, vd.accentStripeCard), {
-          en: "Repeated thick left accent-stripe cards (`border-l-4` / `border-left: >=3px solid`, >= 3 per view) signal boilerplate dashboards.",
-          zh: "单视图堆叠 3 处及以上左侧粗彩条卡片（`border-l-4` / `border-left: >=3px solid`），呈现典型 AI 后台面板套路。",
+          en: "Repeated thick left accent-stripe cards (`border-l-4` / `border-left: >=4px solid`, >= 3 per view) signal boilerplate dashboards.",
+          zh: "单视图堆叠 3 处及以上左侧粗彩条卡片（`border-l-4` / `border-left: >=4px solid`），呈现典型 AI 后台面板套路。",
+        }, {
+          en: "Drop thick decorative side stripes and rely on alignment, spacing, and typography scale.",
+          zh: "去掉卡片左侧装饰粗彩条，靠留白对齐和字阶主次划分模块。",
+        });
+      }
+      if (vd.gen2TastefulSlop) {
+        emitHits(vd.gen2TastefulSlop, probeUiGen2TastefulSlop(text, vd.gen2TastefulSlop), {
+          en: "Second-generation 'tasteful' AI UI template cluster (>= 2 of warm-cream/terracotta, serif-italic headline accent, Inter stack, tracked-uppercase eyebrow).",
+          zh: "第二代“伪人文精致模板”组合特征（同时命中暖米白+陶土红配色、标题斜体强调词、Inter 默认字体或宽字距全大写眉题中 2 项及以上）。",
+        }, {
+          en: "Cut generic template chrome (uppercase kickers, italic buzzword spans) and keep layout purposeful.",
+          zh: "删掉宽字距全大写眉题和标题斜体装点，用项目真实品牌字体与克制版式。",
         });
       }
     }
-    if (mod === "pptx" && ooxml && vd.pptxLayoutMonotony) {
+    if (mod === "pptx" && ooxml && vd.pptxLayoutMonotony && ruleOverrides[vd.pptxLayoutMonotony.ruleId] !== "off" && ruleOverrides[vd.pptxLayoutMonotony.ruleId] !== false) {
       const slideHits = probePptxLayoutMonotony(ooxml, vd.pptxLayoutMonotony);
       for (const sh of slideHits) {
+        if (isRuleSuppressedOrOff(vd.pptxLayoutMonotony.ruleId, sh.slideNum, sh.match)) continue;
         findings.push(
           makePatternFinding({
             ruleId: vd.pptxLayoutMonotony.ruleId,
             dimension: vd.pptxLayoutMonotony.dimension,
             detectionAngle: vd.pptxLayoutMonotony.detectionAngle,
-            severity: vd.pptxLayoutMonotony.severity || "info",
+            severity: resolveSeverity(vd.pptxLayoutMonotony.ruleId, vd.pptxLayoutMonotony.severity),
             filename,
             modality: mod,
             line: sh.slideNum,
@@ -815,6 +958,10 @@ export function auditPatterns(text, { filename = "<memory>", modality = null, ba
             message: {
               en: "4+ consecutive content slides share the identical plain-bullet layout with no table, chart, or diagram.",
               zh: "连续 4 页及以上正文幻灯片均退化为纯字要点列表页（无图表、表格或配图），版式过于单调。",
+            },
+            deletionTest: {
+              en: "Turn data points into a comparison table or chart, or pair one claim with concrete visual evidence.",
+              zh: "把连续文字清单改排成对比表格、结构图或数据卡片，打破连页纯字版式。",
             },
           })
         );
@@ -827,6 +974,9 @@ export function auditPatterns(text, { filename = "<memory>", modality = null, ba
     emitHits(comp, probeCompositeMultiSignal(zones.prose, text, banks, findings), {
       en: "Multiple sub-threshold AI signals (lexical + discourse + framing/cadence) co-occur in one low-fact paragraph.",
       zh: "同一低事实段落内叠加多个跨维度弱 AI 味信号（套词 + 过渡路标 + 抽象框架/节奏），虽未单点越线但整体 AI 腔明显。",
+    }, {
+      en: "Trim empty framing phrases and anchor the paragraph in at least one metric, file, date, or concrete decision.",
+      zh: "删掉空泛套词与过渡壳，至少补进一条实测指标、文件名、日期或明确取舍结论。",
     });
   }
 

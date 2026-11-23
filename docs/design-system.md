@@ -22,7 +22,7 @@ Current AI-generated developer pages cluster around two recognizable defaults:
 - **Wordmark**: Lowercase `dislop` set in tight geometric sans (`font-weight: 700`, `letter-spacing: -0.025em`) without version pills, sparkles, or nested badge rings.
 - **Repository Banners (`assets/banner-light.svg`, `assets/banner-dark.svg`)**: Paired via HTML `<picture>` (`prefers-color-scheme`) so GitHub renders native light and dark galley proofs rather than a bright white rectangle on dark mode. Both themes keep the master `#F04438` Vermilion loop in the logo tile and reserve Vermilion strictly for `core` `error` defects (`chatbot-artifact`), paired with Cobalt Blue dashed marks for style warnings.
 - **Social Preview Card (`assets/og-card.svg`, `assets/og-card.png`, `1200×630`)**: Architectural galley proof Open Graph card synced into `site/assets/` for X, GitHub, Slack, Discord, and messaging previews.
-- **Animated Demo GIFs (`assets/demos/*-{zh,en}-v1.gif`)**: Language-separated demo GIFs for README, `dislop.com`, and integrations with `prefers-reduced-motion` static posters; production rules and hosting layout are documented in [gif-production-guide.zh-CN.md](./gif-production-guide.zh-CN.md).
+- **Animated Demo Clips (`assets/demos/*-{zh,en}-v2.{gif,webp}` and `-poster.png`)**: Language-separated demo animations for README, `dislop.com`, `/guides/`, and editor marketplaces delivered via `<picture>` (reduced-motion PNG poster, lossless animated WebP, no-dither GIF fallback); production workflow and G0–G5 gates are documented in [gif-production-guide.md](./gif-production-guide.md) ([简体中文](./gif-production-guide.zh-CN.md)).
 
 ## 3. Color Tokens & Monotonic Dark Elevation
 

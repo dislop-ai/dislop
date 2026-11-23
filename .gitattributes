@@ -1,0 +1,6 @@
+site/en/** linguist-generated=true
+site/guides/** linguist-generated=true
+site/rules/** linguist-generated=true
+site/awesome/index.html linguist-generated=true
+site/awesome/awesome-data.mjs linguist-generated=true
+site/engine/** linguist-generated=true

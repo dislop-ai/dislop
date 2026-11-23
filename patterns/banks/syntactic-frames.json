@@ -12,10 +12,14 @@
     "detectionAngle": "syntactic-frame",
     "severity": "info",
     "enPatterns": [
-      "\\b(?:While|Although)\\s+[^.!?\\n]{4,75}\\b(?:challenges?|hurdles?|drawbacks?|limitations?|complexities)\\b[^.!?\\n]{0,40},\\s+(?:it|they|this|these)\\s+(?:also\\s+)?(?:offers?|brings?|presents?|delivers?|unlocks?|provides?)\\s+(?:tremendous|significant|meaningful|immense|unprecedented|substantial)\\s+(?:opportunities?|value|benefits?|potential|advantages?)\\b"
+      "\\b(?:While|Although)\\s+[^.!?\\n]{4,75}\\b(?:challenges?|hurdles?|drawbacks?|limitations?|complexities)\\b[^.!?\\n]{0,40},\\s+(?:it|they|this|these)\\s+(?:also\\s+)?(?:offers?|brings?|presents?|delivers?|unlocks?|provides?)\\s+(?:tremendous|significant|meaningful|immense|unprecedented|substantial)\\s+(?:opportunities?|value|benefits?|potential|advantages?)\\b",
+      "\\bon the one hand\\b[^.!?\\n]{5,90}\\bon the other hand\\b[^.!?\\n]{0,70}\\b(?:depends?|balance|trade-?offs?|ultimately)\\b",
+      ",\\s+(?:highlighting|underscoring|showcasing|fostering)\\s+(?:the\\s+)?(?:importance|significance|crucial|vital|pivotal|growing|transformative|broader)\\b"
     ],
     "zhPatterns": [
-      "(?:虽然|尽管)[^。！？\\n]{2,28}(?:面临|存在|带来)[^。！？\\n]{0,12}(?:挑战|局限|难题|风险)[，,]\\s*(?:但(?:是)?(?:不可否认)?[^。！？\\n]{0,16})?(?:也|同时)(?:带来|蕴含|提供|创造)了[^。！？\\n]{0,12}(?:机遇|价值|潜力|空间)"
+      "(?:虽然|尽管)[^。！？\\n]{2,28}(?:面临|存在|带来)[^。！？\\n]{0,12}(?:挑战|局限|难题|风险)[，,]\\s*(?:但(?:是)?(?:不可否认)?[^。！？\\n]{0,16})?(?:也|同时)(?:带来|蕴含|提供|创造)了[^。！？\\n]{0,12}(?:机遇|价值|潜力|空间)",
+      "有利有弊[^。！？\\n]{0,20}(?:取决于|因人而异|综合考量|具体场景)",
+      "仁者见仁[，,、]?智者见智"
     ]
   },
   "pullQuoteCloser": {
@@ -27,9 +31,12 @@
     "patterns": [
       "笔一直在你手里",
       "这才是[^。！？\\n]{2,18}真正的(?:温度|力量|底气|价值|魅力|意义)",
+      "真正的[^。！？\\n]{2,14}从来不是",
       "\\bthe pen stays in your hand\\b",
       "\\bbuilt for the future\\b",
-      "\\bquality ships\\."
+      "\\bquality ships\\.",
+      "\\bLet that sink in\\.",
+      "\\bAnd that changes everything\\."
     ]
   },
   "rhetoricalSelfQa": {

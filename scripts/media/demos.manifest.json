@@ -1,0 +1,200 @@
+{
+  "schema": "dislop.demos/2",
+  "version": "v2",
+  "assetsDir": "assets/demos",
+  "siteAssetsDir": "site/assets/demos",
+  "scenes": [
+    {
+      "slug": "proof-cycle",
+      "kind": "virtual-clock",
+      "profile": "flat-paper",
+      "width": 960,
+      "height": 500,
+      "fps": 16,
+      "duration": 6.8,
+      "poster_t": 1.3,
+      "max_colors": 96,
+      "dither": "none",
+      "lossy": 20,
+      "webp_quality": 84,
+      "budgets": {
+        "gif_kb": 450,
+        "webp_kb": 240,
+        "poster_kb": 45
+      },
+      "surfaces": ["home", "enHome", "readme", "guides", "integrations"],
+      "zh": {
+        "title": "1. 同一段话的三个版本：防改过头换成反转口号",
+        "desc": "先用红实线划掉开头寒暄，再用蓝虚线抓出“不是……而是……”反转口号，最后只留动作和 45 秒真实指标。",
+        "alt": "dislop 检查上线说明：标出 AI 寒暄与空话、拦下二阶口号、改干净后退出码 0",
+        "badge": "3 步对照 · 6.8s"
+      },
+      "en": {
+        "title": "1. Three states of one note: catching 2nd-order slop",
+        "desc": "Strikes the leftover chat greeting in red, catches the 'Not X, but Y' slogan in blue, and ends clean at 12 minutes and 500,000 rows.",
+        "alt": "dislop 3-state proof: flagging chatbot artifact, catching 2nd-order slogan, passing with exit 0",
+        "badge": "3-state proof · 6.8s"
+      }
+    },
+    {
+      "slug": "cli-check",
+      "kind": "virtual-clock",
+      "profile": "dark-terminal",
+      "width": 920,
+      "height": 460,
+      "fps": 15,
+      "duration": 6.4,
+      "poster_t": 2.3,
+      "max_colors": 64,
+      "dither": "none",
+      "lossy": 15,
+      "webp_quality": 84,
+      "budgets": {
+        "gif_kb": 350,
+        "webp_kb": 200,
+        "poster_kb": 45
+      },
+      "surfaces": ["home", "enHome", "readme", "guides"],
+      "zh": {
+        "title": "2. 命令行门禁：Node 与 Python 结果一致",
+        "desc": "本地跑 dislop check --profile，硬伤直接返回退出码 1 卡住 CI，顺带输出句长起伏与具体度体检。",
+        "alt": "dislop CLI 本地离线检查：原稿退出码 1，清掉套话后复检退出码 0",
+        "badge": "CLI 离线 · 6.4s"
+      },
+      "en": {
+        "title": "2. Offline CLI gate: Node & Python parity",
+        "desc": "Runs dislop check --profile locally: core artifacts exit 1 to block CI while rhythm and concreteness telemetry prints inline.",
+        "alt": "dislop CLI offline check: exit code 1 on draft and exit code 0 after cleanup",
+        "badge": "Offline CLI · 6.4s"
+      }
+    },
+    {
+      "slug": "workbench-live",
+      "kind": "live-dom",
+      "profile": "live-dom",
+      "width": 1140,
+      "height": 640,
+      "fps": 12,
+      "duration": 6.8,
+      "poster_t": 0.4,
+      "max_colors": 128,
+      "dither": "bayer",
+      "lossy": 15,
+      "webp_quality": 84,
+      "budgets": {
+        "gif_kb": 550,
+        "webp_kb": 300,
+        "poster_kb": 65
+      },
+      "surfaces": ["home", "enHome", "readme", "guides"],
+      "zh": {
+        "title": "3. 浏览器离线工作台：真机操作实录",
+        "desc": "就是本页上方的工作台。贴稿子、点切规则包、实时对齐右侧行号批注与 5 轴体检，全程在当前标签页完成。",
+        "alt": "dislop.com 浏览器离线工作台真实操作：点击切换原稿、二阶 AI 味与改干净版本",
+        "badge": "真机实录 · 6.8s"
+      },
+      "en": {
+        "title": "3. Zero-upload browser workbench in action",
+        "desc": "Live capture of the workbench on dislop.com: toggle between draft, 2nd-order slop, and clean copy with 5-axis telemetry.",
+        "alt": "dislop.com browser workbench capture: checking draft, 2nd-order slop, and clean copy",
+        "badge": "Live DOM · 6.8s"
+      }
+    },
+    {
+      "slug": "ui-slop",
+      "kind": "virtual-clock",
+      "profile": "flat-paper",
+      "width": 960,
+      "height": 500,
+      "fps": 16,
+      "duration": 6.8,
+      "poster_t": 2.0,
+      "max_colors": 96,
+      "dither": "none",
+      "lossy": 25,
+      "webp_quality": 84,
+      "budgets": {
+        "gif_kb": 480,
+        "webp_kb": 260,
+        "poster_kb": 50
+      },
+      "surfaces": ["home", "enHome", "readme", "guides"],
+      "zh": {
+        "title": "4. 网页与组件：清掉默认紫粉模板和死按钮",
+        "desc": "直接扫 HTML/CSS/JSX 里的渐变标题、装饰徽章、胶囊堆叠和 href=\"#\" 假按钮，退回干净可用的界面。",
+        "alt": "网页组件模板味排查：标出紫粉渐变、胶囊标签墙与空链接，改为 1px 白底版式",
+        "badge": "网页去模板 · 6.8s"
+      },
+      "en": {
+        "title": "4. Web UI audit: strip gradients & dead controls",
+        "desc": "Flags indigo-purple gradients, prompt-echo badges, pill walls, and dead href='#' buttons before switching to a 1px paper sheet.",
+        "alt": "UI template slop check: flagging AI gradient, pill wall, and dead href='#' control",
+        "badge": "UI audit · 6.8s"
+      }
+    },
+    {
+      "slug": "deck-office",
+      "kind": "virtual-clock",
+      "profile": "flat-paper",
+      "width": 960,
+      "height": 500,
+      "fps": 16,
+      "duration": 6.8,
+      "poster_t": 1.8,
+      "max_colors": 96,
+      "dither": "none",
+      "lossy": 20,
+      "webp_quality": 84,
+      "budgets": {
+        "gif_kb": 480,
+        "webp_kb": 260,
+        "poster_kb": 50
+      },
+      "surfaces": ["home", "enHome", "readme", "guides"],
+      "zh": {
+        "title": "5. Word / PPT 检查：揪出裸星号、字墙和过程标题",
+        "desc": "直接解包 .pptx 检查未渲染的 **加粗** 符号、单页字墙、68% 自动缩字与空泛标题，改回结论先行的干净页。",
+        "alt": "dislop 检查 quarterly-review.pptx：标出裸 Markdown、字墙、缩排和过程标题后改为结论页",
+        "badge": "PPTX 实检 · 6.8s"
+      },
+      "en": {
+        "title": "5. PPTX & DOCX audit: catch walls & shrunk text",
+        "desc": "Unpacks .pptx slides locally to flag raw **markdown** leaks, word walls, 68% autofit shrink, and process titles.",
+        "alt": "dislop auditing quarterly-review.pptx for markdown leaks, word walls, autofit shrink, and process titles",
+        "badge": "PPTX audit · 6.8s"
+      }
+    },
+    {
+      "slug": "agent-workflow",
+      "kind": "virtual-clock",
+      "profile": "dark-terminal",
+      "width": 960,
+      "height": 500,
+      "fps": 16,
+      "duration": 6.8,
+      "poster_t": 2.2,
+      "max_colors": 64,
+      "dither": "none",
+      "lossy": 15,
+      "webp_quality": 84,
+      "budgets": {
+        "gif_kb": 420,
+        "webp_kb": 240,
+        "poster_kb": 50
+      },
+      "surfaces": ["home", "enHome", "readme", "guides", "integrations"],
+      "zh": {
+        "title": "6. 编码 Agent + CI 闭环：写前读 Skill，提交前过门禁",
+        "desc": "Agent 先读取纯文档 SKILL.md，再用 --changed origin/main 拦下 PR 寒暄与复读 diff，修完复检确认数字零丢失。",
+        "alt": "Agent 闭环工作流：加载 SKILL.md、增量门禁退出码 1、修复后复检退出码 0",
+        "badge": "Agent 闭环 · 6.8s"
+      },
+      "en": {
+        "title": "6. Coding Agent + CI loop: Skill, diff gate & re-check",
+        "desc": "Agent reads pure-Markdown SKILL.md, gates changed PR lines with exit 1, and re-checks the clean edit to confirm metrics stay intact.",
+        "alt": "Agent workflow loop: loading SKILL.md, PR diff gate exit 1, and passing re-check with exit 0",
+        "badge": "Agent loop · 6.8s"
+      }
+    }
+  ]
+}

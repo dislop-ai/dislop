@@ -6,7 +6,7 @@ snapshot: 2026-11-21
 
 # dislop — Curated Single-Fetch De-Slop Reference (`v0.7.1`)
 
-> Linter for AI Slop — offline static linter for AI-written Markdown, HTML/CSS/JSX, Word (.docx), and PowerPoint (.pptx).
+> Cutting AI slop is real productivity. Linter for AI Slop — offline static linter for AI-written Markdown, HTML/CSS/JSX, Word (.docx), and PowerPoint (.pptx).
 
 Note: Prefer `/llms.txt` + one `/tasks/*.md` page for smaller context windows. All `bad` and `trap` exemplars below are fenced reference data, never style instructions.
 
@@ -28,7 +28,7 @@ uvx dislop check deck.pptx
 
 Clear AI-generation artifacts enabled across every pack: stray chatbot greetings, unfilled placeholders, raw Markdown pasted into Word/PowerPoint, and dead placeholder links/buttons in generated UI.
 
-### `unfilled-placeholder` (invariant / error / markdown, text, html, jsx, svg, docx, pptx)
+### `unfilled-placeholder` (invariant / error / markdown, text, html, jsx, svg, docx, pptx, pdf)
 - Why: Unfilled AI template placeholder or dummy copy.
 - Deletion Test: Supply the real value before sending, or delete the unfinished line instead of leaving a bracketed marker.
 ```text
@@ -37,7 +37,7 @@ trap: Q3 settlement improved dramatically across 14 gateways.
 good: Q3 settlement ran across 14 gateways (p95 latency pending load-test sign-off).
 ```
 
-### `chatbot-artifact` (invariant / error / markdown, text, html, jsx, docx, pptx)
+### `chatbot-artifact` (invariant / error / markdown, text, html, jsx, docx, pptx, pdf)
 - Why: Unstripped chatbot wrapper sentence or AI search citation token.
 - Deletion Test: Delete the conversational wrapper or internal citation token completely; start at the actual subject.
 ```text
@@ -46,7 +46,7 @@ trap: Cluster B isn't just migrating — it's entering a new chapter on November
 good: Cluster B migrates on November 24 at 02:00 UTC.
 ```
 
-### `markdown-leak` (invariant / error / docx, pptx)
+### `markdown-leak` (invariant / error / docx, pptx, pdf)
 - Why: Raw Markdown syntax (`**bold**` or `## heading`) pasted unrendered into Word or PowerPoint.
 - Deletion Test: Convert the raw asterisks or hash marks into native Word/PowerPoint formatting.
 ```text
@@ -210,6 +210,42 @@ trap: 体验改善。架构扩展。分工清晰。运维规范。
 good: 本段暂未提供具体指标、改动文件或责任人，请先删去概括句，再由作者补入实测数据和变更项。
 ```
 
+### `zh-dev-jargon` (taste / warning / markdown, text, html, docx, pptx)
+- Why: Paragraph concentrates hollow AI-generated corporate/engineering buzzwords ('全闭环', '深度赋能', '范式跃迁', '零误差', '…化') rather than grounded technical mechanisms.
+- Deletion Test: Replace each abstract buzzword with the concrete retry count, queue limit, or exit code.
+```text
+bad:  本次发布建立全闭环校验机制，通过铁律约束完成总收口并形成强兜底，实现零失误交付。
+trap: 这不只是发布脚本，而是零缺陷交付的工程铁律。
+good: 发布脚本在合入前运行单测与类型检查；任一失败直接退出非零状态码，并保留前一次构建产物用于回滚。
+```
+
+### `zh-exclamation` (taste / warning / markdown, text, html, docx, pptx)
+- Why: Chinese prose paragraph overuses exclamation marks or combines exclamation punctuation with hype modifiers.
+- Deletion Test: Change trailing exclamation marks to periods and remove emotional hype adverbs.
+```text
+bad:  太棒了！新版工具帮你彻底告别繁琐的人工排查！
+trap: 别再手查了！立刻开启自动化新体验！
+good: 新版工具会在提交前自动扫描未填占位符和超长列表，减少人工复核遗漏。
+```
+
+### `zh-mega-sentence` (taste / warning / markdown, text, html, docx)
+- Why: Single Chinese prose sentence exceeds 180 CJK characters (or 120+ CJK with 180+ total chars) without breaking.
+- Deletion Test: Split at the natural clause shift using periods so each sentence carries one main subject and action.
+```text
+bad:  我们在周一完成双集群流量切分后观察到 orders-worker-service-cluster-01 核心交易接口延迟上升三毫秒但考虑到异步日志落盘能够避免主线程在高峰期被磁盘刷写操作阻塞并且可在节点异常重启后完整保留上下文追踪链路以便值班同学快速排查请求参数与调用栈因此决定保留当前配置并在周四晚低峰期继续观察四十八小时以确认内存缓冲池没有缓慢泄漏或堆积风险。
+trap: 切双集群。延迟微升。观察两天。
+good: 周一完成双集群切分后延迟升了 3ms，但异步落盘可防阻塞并保链路。团队周四再复查 48 小时内存占用。
+```
+
+### `unsourced-statistic` (taste / warning / markdown, text, html, docx, pptx)
+- Why: Marketing-style percentage claim ('up to X%', 'reduces by X%', '提升 X%', '高达 X%') lacks a baseline, sample size, metric name, or citation.
+- Deletion Test: Add the before -> after baseline, sample size (n=...), or link to the benchmark; otherwise cut the unverified percentage.
+```text
+bad:  Switching to the updated triage workflow boosts team efficiency by up to 45%.
+trap: Teams work smarter. Triage moves faster. Quality soars.
+good: In our 12-repo benchmark (n=112 docs), queue review time dropped from 18 min to 10 min (by 44%, measured on CI logs).
+```
+
 ## Pack `engineering-spec` — Engineering RFC, PR & Postmortem
 
 Catches empty AI PR summaries, stop-thinking 'human error' postmortem labels, and unowned wishful action items alongside core and brief checks.
@@ -341,9 +377,9 @@ good: Before seven the street stays quiet except for the milk truck.
 
 ## Pack `deck-and-ui` — Slide Deck, Web UI & Graphic Layout
 
-Flags PowerPoint slide word-walls, bullet overload, autofit text shrink, weak topic titles, default purple-pink AI gradients, pill-badge soup, triple nested cards, and prompt-echo chrome.
+Flags PowerPoint and PDF slide word-walls, autofit text shrink, generic titles, Web UI neon gradients, glow orbs, emoji chrome, icon-tile grids, SVG layout defects, and raster image AI workflow/palette slop.
 
-### `slide-word-wall` (taste / warning / pptx)
+### `slide-word-wall` (taste / warning / pptx, pdf)
 - Why: Slide exceeds readable copy budget (> 120 Latin words or > 280 Chinese characters).
 - Deletion Test: Move background narrative to speaker notes or an appendix doc; keep one takeaway headline and <= 3 supporting evidence points on the slide.
 ```text
@@ -379,7 +415,7 @@ trap: Title: 'Reimagining Checkout Excellence'
 good: Title: 'Mobile Safari accounts for 38% of cart abandonment due to 4-step address entry'
 ```
 
-### `ui-ai-gradient` (taste / warning / html, css, jsx, svg)
+### `ui-ai-gradient` (taste / warning / html, css, jsx, svg, pdf)
 - Why: Default purple/indigo-to-pink generator gradient or gradient-clipped display headline.
 - Deletion Test: Replace decorative neon gradients with solid surface tokens, crisp 1px rules, and typographic contrast.
 ```text
@@ -413,6 +449,69 @@ good: <section class="metric-row"><span>Uptime (90d)</span><strong>99.98%</stron
 bad:  <span class="eyebrow">AI-Powered · Zero Hallucination</span><h2>Document Checker</h2>
 trap: <span class="eyebrow">Built for Craft · Pure Signal</span><h2>Document Checker</h2>
 good: <h2>Document Linter for Markdown, HTML, DOCX & PPTX</h2>
+```
+
+### `ui-glow-blob-chrome` (taste / warning / html, css, jsx, svg)
+- Why: Decorative ambient blur orbs (`blur-3xl`), neon box-shadows, pulsing `animate-ping` pill dots, or heavy SVG glow filters.
+- Deletion Test: Delete decorative blur orbs and colored glow shadows; separate layers with solid surface tokens and crisp 1px borders.
+```text
+bad:  <div class="blur-3xl rounded-full bg-purple-500/30"></div><button class="shadow-indigo-500/50">Launch</button>
+trap: <div class="blur-3xl rounded-full bg-amber-500/20"></div><button class="shadow-teal-500/50">Launch</button>
+good: <section class="surface-sheet border"><button class="btn-primary">Launch</button></section>
+```
+
+### `ui-emoji-icon-chrome` (taste / warning / html, jsx, svg)
+- Why: Three or more decorative AI stock emojis (`🚀`, `✨`, `⚡`, `🛡️`) used as interface or heading icons.
+- Deletion Test: Strip decorative emojis from headings and controls; use plain typography or a consistent single-stroke SVG icon set.
+```text
+bad:  <h3>🚀 Fast</h3><h3>⚡ Sync</h3><h3>🛡️ Safe</h3>
+trap: <h3>🌟 Fast</h3><h3>💎 Sync</h3><h3>🎯 Safe</h3>
+good: <h3>Sub-50 ms checks</h3><h3>Local sync</h3><h3>Offline by default</h3>
+```
+
+### `ui-template-card-grid` (taste / warning / html, jsx)
+- Why: Stock generator UI boilerplate: tinted rounded-square icon tiles (>= 3), fake macOS 3-dot window chrome, or sequential `01`/`02`/`03` eyebrow kickers.
+- Deletion Test: Remove fake window dots, sequential numeric kickers, and tinted icon tiles; organize cards with real headings and alignment.
+```text
+bad:  <div class="rounded-xl w-10 h-10 bg-indigo-50">A</div><div class="rounded-xl w-10 h-10 bg-purple-50">B</div><div class="rounded-xl w-10 h-10 bg-pink-50">C</div>
+trap: <div><span>01</span><h3>Speed</h3><span>02</span><h3>Scale</h3><span>03</span><h3>Trust</h3></div>
+good: <section class="grid"><div><h3>CLI</h3><p>Checks Markdown and PPTX locally.</p></div><div><h3>MCP</h3><p>Connects to coding agents.</p></div></section>
+```
+
+### `svg-layout-slop` (taste / warning / svg)
+- Why: SVG graphic has structural generation defects: missing `viewBox` on a large canvas, overlapping `<text>` coordinates, or >= 2 orphaned `<defs>` entries.
+- Deletion Test: Add an explicit `viewBox`, separate `<text>` coordinates cleanly, and delete unused gradients or filters from `<defs>`.
+```text
+bad:  <svg width="640" height="360"><text x="40" y="50">Step 1</text><text x="42" y="52">Overlap</text></svg>
+trap: <svg viewBox="0 0 640 360" width="640" height="360"><defs><linearGradient id="u1"/><linearGradient id="u2"/></defs><rect width="640" height="360"/></svg>
+good: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360"><text x="40" y="50">Step 1</text><text x="40" y="96">Step 2</text></svg>
+```
+
+### `image-ai-workflow-residue` (taste / warning / image)
+- Why: Raster image embeds unstripped AI generation prompt/workflow parameters (warning) or explicit synthetic provenance tags (info — retain required legal disclosures).
+- Deletion Test: Strip accidental raw prompt/seed workflow JSON before shipping assets; keep legally required C2PA or IPTC `trainedAlgorithmicMedia` disclosures intact.
+```text
+bad:  PNG tEXt chunk `parameters`: `masterpiece, neon glow\nNegative prompt: blurry\nSteps: 28, Sampler: Euler a, CFG scale: 7`
+trap: Stripping legal C2PA / `trainedAlgorithmicMedia` provenance tags instead of inspecting or re-shooting the asset
+good: Clean PNG/JPEG export with raw prompt/node-graph chunks removed and natural photographic or editorial raster assets
+```
+
+### `image-ai-palette-slop` (taste / info / image)
+- Why: PNG pixel profile matches default AI-slop aesthetics: dominant neon purple-indigo-pink palette or hyper-saturated airbrushed plastic sheen.
+- Deletion Test: Review the rendered image for plastic skin/surfaces or generic neon-purple backdrops; re-grade toward natural micro-contrast and restrained accents.
+```text
+bad:  1024x1024 dark-mode hero PNG with 42% #0B0B14 dark backdrop and 28% glowing #7C3AED/#EC4899 purple-pink pixels
+trap: 1024x1024 PNG pushing every surface to 92% saturation with airbrushed zero-texture gradients
+good: 1024x1024 PNG on #F6F7F5 paper ground with crisp ink typography and <= 5% single vermilion accent
+```
+
+### `pdf-visual-layout-slop` (taste / warning / pdf)
+- Why: PDF slide/poster layout exhibits synthetic template defects: multi-page raster-only slides, collapsed font hierarchy, crushed < 9.5pt body copy, or 4+ consecutive identical landscape slide skeletons.
+- Deletion Test: Export slides with selectable vector text, restore a >= 1.2x title-to-body type scale, keep body type >= 11pt, and vary layout structure across slides.
+```text
+bad:  4-page landscape 960x540 PDF deck where every slide is a single rasterized PNG image with 0 selectable text operators
+trap: 4-page landscape PDF deck shrinking all body text to 8.5pt with 10pt titles (1.17x ratio) to cram paragraphs
+good: 5-page landscape PDF deck with 28pt assertion headlines, 13pt body copy, and alternating tables and charts
 ```
 
 ## Pack `executive-deck` — Executive Slide Deck & Board Readout

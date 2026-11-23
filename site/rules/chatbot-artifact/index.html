@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-static-lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>留在正文里的 AI 寒暄 (chatbot-artifact) — dislop</title>
+  <meta name="description" content="留在正文里的 AI 寒暄: 残留未清理的 AI 对话寒暄壳或检索引用内部标记。">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/rules/chatbot-artifact/">
+  <meta property="og:title" content="留在正文里的 AI 寒暄 (chatbot-artifact) — dislop">
+  <meta property="og:description" content="留在正文里的 AI 寒暄: 残留未清理的 AI 对话寒暄壳或检索引用内部标记。">
+  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="留在正文里的 AI 寒暄 (chatbot-artifact) — dislop">
+  <meta name="twitter:description" content="留在正文里的 AI 寒暄: 残留未清理的 AI 对话寒暄壳或检索引用内部标记。">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <link rel="canonical" href="https://dislop.com/rules/chatbot-artifact/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/chatbot-artifact/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/chatbot-artifact/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/chatbot-artifact/">
+  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop 实用指南（中文）">
+  <link rel="alternate" type="text/markdown" href="../../rules/chatbot-artifact.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/rules/chatbot-artifact/",
+      "url": "https://dislop.com/rules/chatbot-artifact/",
+      "headline": "留在正文里的 AI 寒暄 (chatbot-artifact)",
+      "description": "直接删掉对话寒暄句或内部引用残迹，正文从实际内容开始。",
+      "inLanguage": "zh-CN",
+      "dateModified": "2026-11-23",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "规则百科",
+          "item": "https://dislop.com/rules/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "chatbot-artifact",
+          "item": "https://dislop.com/rules/chatbot-artifact/"
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳至正文</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../">
+        <img src="../../assets/logo.svg" width="28" height="28" alt="dislop 图标">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a href="../../#workbench">在线试</a>
+        <a href="../../guides/">指南</a>
+        <a href="../../awesome/">工具清单</a>
+        <a href="../../rules/" aria-current="page">规则</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../en/rules/chatbot-artifact/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="Switch to English">EN</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="面包屑导航">
+        <a href="../../">dislop</a> / <a href="../">规则百科</a> / <span aria-current="page"><code>chatbot-artifact</code></span>
+      </nav>
+
+      <article class="article-prose">
+        <header>
+          <h1 class="lead-heading" style="max-width:28ch;">留在正文里的 AI 寒暄</h1>
+          <div class="article-meta">
+            <span><code>chatbot-artifact</code></span>
+            <span>交付底线 (<code>core</code>)</span>
+            <span>error</span>
+            <span><code>markdown, text, html, jsx, docx, pptx, pdf</code></span>
+            <a href="../../rules/chatbot-artifact.md">Markdown card</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">判断方法</div>
+            <p>直接删掉对话寒暄句或内部引用残迹，正文从实际内容开始。</p>
+          </div>
+        </header>
+
+        <h2>这条规则查什么</h2>
+        <p>残留未清理的 AI 对话寒暄壳或检索引用内部标记。</p>
+
+        <h2>原句与改法对照</h2>
+<!-- dislop-quote-start -->
+        <div class="rule-contrast-grid">
+          <div class="rule-contrast-cell is-bad">
+            <div class="rule-contrast-label">原句（会标出问题）</div>
+            <pre><code>好的，以下是修改后的上线说明：集群 B 已于 02:00 UTC 完成迁移。</code></pre>
+          </div>
+          <div class="rule-contrast-cell is-trap">
+            <div class="rule-contrast-label">换了种 AI 味</div>
+            <pre><code>没问题，集群 B 已于 02:00 UTC 完成迁移。</code></pre>
+          </div>
+          <div class="rule-contrast-cell is-good">
+            <div class="rule-contrast-label">改干净的版本</div>
+            <pre><code>集群 B 已于 02:00 UTC 完成迁移。</code></pre>
+          </div>
+        </div>
+        <!-- dislop-quote-end -->
+<p class="rule-note"><strong>改法要点：</strong> 删去对话开场白，直接进入正题。</p>
+
+        <h2>命令行单独查看或检查</h2>
+        <pre><code>npx --yes dislop explain chatbot-artifact
+npx --yes dislop check . --pack core</code></pre>
+
+        <h2>相关教程</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../guides/agent-cli-mcp-tutorial/">Agent 与 CI 接入教程</a>
+<a class="related-link-chip" href="../../guides/linter-vs-detector-vs-skill/">去 AI 味工具对比</a>
+<a class="related-link-chip" href="../../guides/what-is-ai-slop/">什么是 AI 味</a>
+</div>
+        <h2>同场景其他规则（core）</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../unfilled-placeholder/"><code>unfilled-placeholder</code> · 忘了填的占位符</a>
+<a class="related-link-chip" href="../markdown-leak/"><code>markdown-leak</code> · 没渲染的 Markdown 符号</a>
+<a class="related-link-chip" href="../ui-dead-control/"><code>ui-dead-control</code> · 点不动的假按钮或空链接</a>
+</div>
+        <div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../?lang=zh#try=chatbot-artifact">在工作台试试这条规则 →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">复制引用（PR / 群聊）</button><code id="share-cite-payload" hidden>[`chatbot-artifact`](https://dislop.com/rules/chatbot-artifact/)：残留未清理的 AI 对话寒暄壳或检索引用内部标记。</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">投稿翻车样本</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub 收藏 ★</a>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>这个页面自己也跑过 dislop check site/，0 处问题。给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../guides/">实用指南</a>
+        <a href="../../awesome/">工具清单</a>
+        <a href="../../rules/">全部规则</a>
+        <a href="../../privacy.md">隐私说明</a>
+        <a href="../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">关闭</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../static-ui.js"></script>
+
+</body>
+</html>

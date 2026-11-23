@@ -6,8 +6,15 @@
 
 ## 中文
 
+### Slogan
+去 AI 味才是真正的生产力！
+
 ### 定位
 **AI 味检查工具。** 帮你（的 Agent）在文档、网页和 PPT 发出前，挑出并改掉里面的 AI 味。
+
+### 中英文与多语种原则
+- 网站（`dislop.com` 与 `/awesome/`）根据访问者浏览器语言自动默认中文或英文，不写死单一语种，并保留一键手动切换。
+- 中英文各自面向独立受众做原生表达、原生案例和原生视觉物料，不做逐字翻译；X 等同时覆盖中英文读者的渠道，可分别发布独立中文帖与独立英文帖，单条内容严格不混排。
 
 ### 用户
 第一批是 Coding Agent 用户，第二批是办公 Agent 用户，最后是所有用 AI 交付成果的人。
@@ -18,7 +25,7 @@
 3. **官方 MCP 与网页工作台（云端服务）**：不用配本地环境，登录就能在办公或编码 Agent 里接入远程 MCP，或者直接在网页工作台使用。云端按文体做多模型深度审校，返回具体问题和改法建议，交给你的 Agent 结合本地上下文去改，也支持保留原排版的 Word/PPT 处理。
 
 ### 卖点
-1. **集成社区优质成果**：整合经过核验的开源去味项目、语料经验与工具清单，覆盖文稿、网页和 Word/PPT，不用自己到处搜集拼凑。
+1. **社区规则和工具一处拿全**：整合经过核验的开源去味规则、语料经验与 87 条精选工具，覆盖文稿、网页和 Word/PPT，不用自己到处搜集拼凑。
 2. **多端与多场景兼容**：内置研发、商务、前端与演示等场景包，提供 Skill、Plugin、CLI 与官方 MCP，快速接入主流 Agent 和编辑器。
 3. **本地离线保护隐私**：CLI 与本地插件支持纯本地运行、零上传，私密文稿与代码不出本机。
 
@@ -29,8 +36,15 @@
 
 ## English
 
+### Slogan
+Cutting AI slop is real productivity.
+
 ### Positioning
 **Linter for AI Slop.** Helps you (and your agent) catch and fix AI-sounding text and template layouts in docs, web pages, and slides before sending.
+
+### Bilingual & Market Independence
+- `dislop.com` and `/awesome/` auto-detect the visitor's browser language (`zh` or `en`) instead of hardcoding one default, with a one-click manual toggle.
+- Chinese and English materials are authored independently for their own audiences—separate examples, banners, social cards, and posts rather than word-for-word translations. Bilingual channels like X can run separate native Chinese and native English posts without mixing languages inside a single post.
 
 ### Users
 First coding agent users, then office agent users, and finally everyone who delivers work with AI.
@@ -42,7 +56,7 @@ First coding agent users, then office agent users, and finally everyone who deli
 
 ### Selling Points
 1. **Curated community work**: Combines vetted open-source rules, corpus findings, and an indexed tool directory across docs, web UI, Word, and PowerPoint, without hunting down scattered prompts.
-2. **Broad host and scenario fit**: Ships domain packs for engineering, business, UI, and decks across Skill, Plugin, CLI, and Cloud MCP, connecting to major agents and editors in seconds.
+2. **Broad host and scenario fit**: Ships domain packs for engineering, business, UI, and decks across Skill, Plugin, CLI, and Cloud MCP, connecting to major agents and editors in one command.
 3. **Local, offline, private**: The CLI and local plugins run on your machine with zero uploads, keeping private drafts and source code local.
 
 ### One-Sentence Pitch

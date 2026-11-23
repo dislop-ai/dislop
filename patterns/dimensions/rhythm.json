@@ -201,6 +201,58 @@
         "good": "One crisp 22-character thesis paragraph followed by a detailed 140-character walkthrough and a 35-character constraint note.",
         "source": "original"
       }
+    },
+    {
+      "id": "pat-zh-exclamation",
+      "ruleId": "zh-exclamation",
+      "packId": "business-brief",
+      "category": "language-rhythm",
+      "detectionAngle": "rhythm-statistics",
+      "status": "active",
+      "severityDefault": "warning",
+      "languages": ["zh"],
+      "modalities": ["markdown", "text", "html", "docx", "pptx"],
+      "evidenceLevel": "editorial-consensus",
+      "name": { "en": "Chinese Hype Exclamation Stacking", "zh": "中文正文感叹号煽动语气" },
+      "mechanism": {
+        "en": "Multi-sentence Chinese prose paragraphs stack exclamation marks (`！`/`!`) or pair exclamations with hype phrases (`太棒了`, `重磅`, `彻底告别`).",
+        "zh": "中文正文段出现多处感叹号或“太棒了/重磅/彻底告别”等煽动感叹句，破坏工作文档克制平实的语气。"
+      },
+      "tags": ["exclamation", "zh", "hype", "punctuation", "感叹号", "鸡血腔"],
+      "falsePositiveGuards": ["Exempts short standalone taglines (<20 CJK chars), quoted dialogue, parentheticals, and literal prompt examples."],
+      "modelTendencies": ["general-llm", "marketing-llm"],
+      "exemplar": {
+        "bad": "太棒了！新版工具帮你彻底告别繁琐的人工排查！",
+        "trap": "别再手查了！立刻开启自动化新体验！",
+        "good": "新版工具会在提交前自动扫描未填占位符和超长列表，减少人工复核遗漏。",
+        "source": "original"
+      }
+    },
+    {
+      "id": "pat-zh-mega-sentence",
+      "ruleId": "zh-mega-sentence",
+      "packId": "business-brief",
+      "category": "language-rhythm",
+      "detectionAngle": "rhythm-statistics",
+      "status": "active",
+      "severityDefault": "warning",
+      "languages": ["zh"],
+      "modalities": ["markdown", "text", "html", "docx"],
+      "evidenceLevel": "empirical-corpus",
+      "name": { "en": "Chinese Mega-Sentence (>180 CJK chars)", "zh": "中文单句超长一逗到底" },
+      "mechanism": {
+        "en": "LLM Chinese explanations pack 180+ CJK characters into a single period-free clause chain with weak topic transitions.",
+        "zh": "大模型解释复杂机制时容易写出超过 180 汉字不打句号的连续逗号长句，挤压读者工作记忆。"
+      },
+      "tags": ["mega-sentence", "run-on", "zh", "长难句", "一逗到底"],
+      "falsePositiveGuards": ["Protects decimals and version strings during sentence segmentation."],
+      "modelTendencies": ["general-llm", "claude-family"],
+      "exemplar": {
+        "bad": "我们在周一完成双集群切分后虽然平均延迟上升三毫秒但考虑到异步落盘可避开主线程阻塞并保留链路信息于是决定周四继续观察四十八小时内存波动直到大促前定容。",
+        "trap": "切双集群。延迟升三毫秒。决定周四再看。",
+        "good": "周一双集群切分后平均延迟上升 3ms，但异步落盘能防主线程阻塞并保留链路信息。团队将在周四继续观察 48 小时内存波动后再定扩容阈值。",
+        "source": "original"
+      }
     }
   ]
 }

@@ -1164,6 +1164,68 @@ export const AWESOME_DATA = {
       "summaryEn": "Lightweight guide and checker replacing default purple-pink gradients and boilerplate UI styles."
     },
     {
+      "id": "nextlevelbuilder-ui-ux-pro-max-skill",
+      "section": "ui-design-and-media",
+      "name": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "stars": 152711,
+      "pushedAt": "2026-11-22",
+      "archived": false,
+      "license": "MIT",
+      "modality": "ui-design",
+      "locale": "en",
+      "stages": [
+        "upstream-prompt"
+      ],
+      "format": "agent-skill",
+      "hasDeterministicCheck": false,
+      "summary": "按行业场景与界面风格提供完整设计令牌、字体搭配与排版规范的多平台 UI/UX 技能库。",
+      "summaryEn": "Multi-platform UI/UX design-intelligence skill providing industry-specific tokens, font pairings, and layout specs."
+    },
+    {
+      "id": "vercel-labs-agent-skills",
+      "section": "ui-design-and-media",
+      "name": "vercel-labs/agent-skills (web-design-guidelines)",
+      "url": "https://github.com/vercel-labs/agent-skills",
+      "repo": "vercel-labs/agent-skills",
+      "stars": 34714,
+      "pushedAt": "2026-11-20",
+      "archived": false,
+      "license": null,
+      "modality": "ui-design",
+      "locale": "en",
+      "stages": [
+        "upstream-prompt",
+        "downstream-lint"
+      ],
+      "format": "agent-skill",
+      "hasDeterministicCheck": false,
+      "summary": "Vercel 官方 Agent Skills 集合，含覆盖交互可用性、表单行为与可访问性的 Web 界面审查规范。",
+      "summaryEn": "Vercel's official agent skill collection including Web Interface Guidelines for usability, forms, and accessibility review."
+    },
+    {
+      "id": "cesaroeduardo-antiwebslop",
+      "section": "ui-design-and-media",
+      "name": "cesaroeduardo/antiwebslop",
+      "url": "https://github.com/cesaroeduardo/antiwebslop",
+      "repo": "cesaroeduardo/antiwebslop",
+      "stars": 44,
+      "pushedAt": "2026-11-17",
+      "archived": false,
+      "license": "MIT",
+      "modality": "ui-design",
+      "locale": "en",
+      "stages": [
+        "upstream-prompt",
+        "downstream-lint"
+      ],
+      "format": "agent-skill",
+      "hasDeterministicCheck": true,
+      "summary": "面向网页设计的去 AI 味技能与脚本合集，配套前后对比画廊与验证评分卡。",
+      "summaryEn": "Web design anti-slop skills and validation scripts paired with scorecards and before/after galleries."
+    },
+    {
       "id": "cursor-plugins-deslop",
       "section": "code-and-pr-governance",
       "name": "cursor/plugins (deslop)",

@@ -11,17 +11,17 @@
   "entryPoints": {
     "llmsTxt": {
       "path": "/llms.txt",
-      "bytes": 2403,
-      "approxTokens": 601
+      "bytes": 2452,
+      "approxTokens": 613
     },
     "llmsFullTxt": {
       "path": "/llms-full.txt",
-      "bytes": 28349,
-      "approxTokens": 7087
+      "bytes": 36424,
+      "approxTokens": 9106
     },
     "awesomeJson": {
       "path": "/awesome/index.json",
-      "entries": 87,
+      "entries": 90,
       "schema": "dislop.radar/2"
     }
   },
@@ -32,7 +32,7 @@
       "kind": "site-mirror",
       "title": {
         "en": "dislop — Linter for AI Slop",
-        "zh": "dislop — AI 味检查工具（Linter for AI Slop）"
+        "zh": "dislop — AI 味检查工具"
       },
       "path": "/index.md",
       "modalities": [
@@ -43,7 +43,9 @@
         "jsx",
         "svg",
         "docx",
-        "pptx"
+        "pptx",
+        "pdf",
+        "image"
       ],
       "languages": [
         "en",
@@ -58,8 +60,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 2951,
-      "approxTokens": 738,
+      "bytes": 3041,
+      "approxTokens": 760,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -67,7 +69,7 @@
         "mcp",
         "cli"
       ],
-      "sha256": "9cfe9b52a9bf0914837ff747246fe11d158b6dfca696e7e75dbd0fec7799d27a"
+      "sha256": "03f1e097c3f5713054699cc788b6986ca99ea030e293d1546b8ef33afe101279"
     },
     {
       "id": "methodology-index",
@@ -100,7 +102,7 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 1107,
+      "bytes": 1106,
       "approxTokens": 277,
       "relatedTools": [
         "skill",
@@ -108,7 +110,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "05c8701b7785c0c579c9837f5b427c8ea39f735ac5f7775fd0c31e6e7a633eea"
+      "sha256": "79c2e2890e8a57f9ed68c24403bebf563639108257fecf3956d94f3a16e3e7b2"
     },
     {
       "id": "methodology-deletion-test",
@@ -182,7 +184,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "1ad93d34154d569eb6be895fcb3c5a37b044bffd25961fad334e86f86f3dece4"
+      "sha256": "337bce08ce1ceae95e552b207d38c837b229af388cee49e1a024c803be39fdf7"
     },
     {
       "id": "methodology-positive-divergence",
@@ -249,8 +251,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 4070,
-      "approxTokens": 1018,
+      "bytes": 5116,
+      "approxTokens": 1279,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -258,7 +260,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "0729d64b584e2afb9879830f86aa74d0584c212cbf4599d31a244cb210216cb0"
+      "sha256": "bab812cf2519f6683ea541d323cd69676158aca0c68deb1113cfe88571042b4f"
     },
     {
       "id": "methodology-brand-voice",
@@ -289,13 +291,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 7690,
-      "approxTokens": 1923,
+      "bytes": 8117,
+      "approxTokens": 2029,
       "relatedTools": [
         "browser-workbench",
         "cli"
       ],
-      "sha256": "6e1dc0e8aa036febe1711b8469dde36276baea0f22277f046bf8c11a5daffe90"
+      "sha256": "a2d38801555633675054ab2f24fe273cd778134ca606c0d8244580b9e9015f2e"
     },
     {
       "id": "methodology-design-system",
@@ -360,14 +362,14 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 586,
-      "approxTokens": 147,
+      "bytes": 576,
+      "approxTokens": 144,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "ca2480073b157a70a7ef707d036cacfcde49310f9e76f662948eded35bbe2601"
+      "sha256": "0769e101609d7b337a0419a746f14e4b9868c97cc0f75f70fe915190ff50e8c4"
     },
     {
       "id": "cases-copy-contrasts",
@@ -434,13 +436,13 @@
         "business-brief",
         "deck-and-ui"
       ],
-      "bytes": 1195,
-      "approxTokens": 299,
+      "bytes": 1209,
+      "approxTokens": 302,
       "relatedTools": [
         "cli",
         "browser-workbench"
       ],
-      "sha256": "7612bbe7533862feabef96f10ac7201c5f43d125af52fa2dfc5b5bb5143f6b01"
+      "sha256": "81fd7d4c3ad85ec54b068a1ef00d41b694052109da3c6584a125e6f116200aed"
     },
     {
       "id": "cases-ui-specimens",
@@ -512,7 +514,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "85d2526a3312f17f388b229af5cec67e056cc2d8a886bc34e75dc0265dd9ecc7"
+      "sha256": "1e8f68218e14eb1a926c2115727645a29ac5c4722343f9081a0e37cd20b6b110"
     },
     {
       "id": "tools-skill",
@@ -547,24 +549,24 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 2831,
-      "approxTokens": 708,
+      "bytes": 4385,
+      "approxTokens": 1096,
       "relatedTools": [
         "skill",
         "cli",
         "mcp"
       ],
-      "sha256": "83af7fe1ec599e76f97c690fcb54545f808426e28ef687f8c3bcbcb82946f2cb"
+      "sha256": "96cbe4e71befbf83d5f2ad9263361458cc459677dd6de47b4784b6704363c3b0"
     },
     {
-      "id": "tools-skill-ref-business-and-rfc",
+      "id": "tools-skill-ref-work-docs",
       "pillar": "tools",
       "kind": "skill-reference",
       "title": {
-        "en": "Skill Reference: Business Briefs, RFCs & Postmortems",
-        "zh": "Skill 本地参考卡：工作文档与研发复盘"
+        "en": "Skill Reference: Work Docs, Specs & Regulated Comms",
+        "zh": "Skill 参考卡（英文）：工作文档与对外通告"
       },
-      "path": "/tools/references/business-and-rfc.md",
+      "path": "/tools/references/work-docs.md",
       "modalities": [
         "markdown",
         "text",
@@ -575,7 +577,44 @@
         "pptx"
       ],
       "languages": [
-        "en",
+        "en"
+      ],
+      "packs": [
+        "core",
+        "business-brief",
+        "engineering-spec",
+        "regulated-comms",
+        "literary-essay",
+        "deck-and-ui",
+        "executive-deck"
+      ],
+      "bytes": 2679,
+      "approxTokens": 670,
+      "relatedTools": [
+        "skill",
+        "cli"
+      ],
+      "sha256": "fa901d8b39f9a674250a8556ad3128c151e2748aeb2b7a5d542be799312924a5"
+    },
+    {
+      "id": "tools-skill-ref-work-docs.zh-CN",
+      "pillar": "tools",
+      "kind": "skill-reference",
+      "title": {
+        "en": "Skill Reference (ZH): Work Docs, Postmortems & Notices",
+        "zh": "Skill 参考卡（中文）：工作文档、研发复盘与通告"
+      },
+      "path": "/tools/references/work-docs.zh-CN.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "css",
+        "jsx",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
         "zh"
       ],
       "packs": [
@@ -587,23 +626,23 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 1978,
-      "approxTokens": 495,
+      "bytes": 2798,
+      "approxTokens": 700,
       "relatedTools": [
         "skill",
         "cli"
       ],
-      "sha256": "99f66e817c4370e76203097921671376b1f447fafe2d4c7cb4afc6e9fca5af01"
+      "sha256": "0398407d1c0bc53db36453351af31d0d823b9cbc467dc39a70246fe495b90283"
     },
     {
-      "id": "tools-skill-ref-editorial-and-essay",
+      "id": "tools-skill-ref-essay",
       "pillar": "tools",
       "kind": "skill-reference",
       "title": {
-        "en": "Skill Reference: Editorial & Literary Writing",
-        "zh": "Skill 本地参考卡：随笔与长文"
+        "en": "Skill Reference: Essays & Narrative Non-Fiction",
+        "zh": "Skill 参考卡（英文）：随笔与长文"
       },
-      "path": "/tools/references/editorial-and-essay.md",
+      "path": "/tools/references/essay.md",
       "modalities": [
         "markdown",
         "text",
@@ -614,7 +653,44 @@
         "pptx"
       ],
       "languages": [
-        "en",
+        "en"
+      ],
+      "packs": [
+        "core",
+        "business-brief",
+        "engineering-spec",
+        "regulated-comms",
+        "literary-essay",
+        "deck-and-ui",
+        "executive-deck"
+      ],
+      "bytes": 2095,
+      "approxTokens": 524,
+      "relatedTools": [
+        "skill",
+        "cli"
+      ],
+      "sha256": "6e999138e4e117749d5be49713cb411c47b348915b4d22277d7184fa172b593a"
+    },
+    {
+      "id": "tools-skill-ref-essay.zh-CN",
+      "pillar": "tools",
+      "kind": "skill-reference",
+      "title": {
+        "en": "Skill Reference (ZH): Essays & Long-Form Prose",
+        "zh": "Skill 参考卡（中文）：随笔、专栏与非虚构长文"
+      },
+      "path": "/tools/references/essay.zh-CN.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "css",
+        "jsx",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
         "zh"
       ],
       "packs": [
@@ -626,23 +702,23 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 1598,
-      "approxTokens": 400,
+      "bytes": 2271,
+      "approxTokens": 568,
       "relatedTools": [
         "skill",
         "cli"
       ],
-      "sha256": "9b89a1d156351160d7c267f59dcb591704c8c94de3c2f25be60f30f2165ccb72"
+      "sha256": "45b6a377fadfe7876ed9d0b90e1151be914ba7f75e5b4d37bc7535e52d315ce6"
     },
     {
-      "id": "tools-skill-ref-web-ui-and-deck",
+      "id": "tools-skill-ref-office",
       "pillar": "tools",
       "kind": "skill-reference",
       "title": {
-        "en": "Skill Reference: Web UI & Slide Decks",
-        "zh": "Skill 本地参考卡：网页与演示文稿"
+        "en": "Skill Reference: Word (.docx) & PowerPoint (.pptx)",
+        "zh": "Skill 参考卡（英文）：Word 与演示文稿"
       },
-      "path": "/tools/references/web-ui-and-deck.md",
+      "path": "/tools/references/office.md",
       "modalities": [
         "markdown",
         "text",
@@ -653,7 +729,44 @@
         "pptx"
       ],
       "languages": [
-        "en",
+        "en"
+      ],
+      "packs": [
+        "core",
+        "business-brief",
+        "engineering-spec",
+        "regulated-comms",
+        "literary-essay",
+        "deck-and-ui",
+        "executive-deck"
+      ],
+      "bytes": 2384,
+      "approxTokens": 596,
+      "relatedTools": [
+        "skill",
+        "cli"
+      ],
+      "sha256": "017921ebf1bf151290c96ae4fd04258164bdb47f11ccff0caa29f878759586e2"
+    },
+    {
+      "id": "tools-skill-ref-office.zh-CN",
+      "pillar": "tools",
+      "kind": "skill-reference",
+      "title": {
+        "en": "Skill Reference (ZH): Word (.docx) & PowerPoint (.pptx)",
+        "zh": "Skill 参考卡（中文）：Word 与演示文稿"
+      },
+      "path": "/tools/references/office.zh-CN.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "css",
+        "jsx",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
         "zh"
       ],
       "packs": [
@@ -665,23 +778,23 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 2100,
-      "approxTokens": 525,
+      "bytes": 2428,
+      "approxTokens": 607,
       "relatedTools": [
         "skill",
         "cli"
       ],
-      "sha256": "ab44f799a229beed4a4b794a6d18f4abc49466f425c955ea5fac9160f950be2b"
+      "sha256": "2fbd193afe775782390a9a2cfe3369fc9730cb6a644b2e6835c044aa3ee2ff6a"
     },
     {
-      "id": "tools-skill-ref-regulated-and-precision",
+      "id": "tools-skill-ref-web-ui",
       "pillar": "tools",
       "kind": "skill-reference",
       "title": {
-        "en": "Skill Reference: Regulated External Comms & Rewrite Precision",
-        "zh": "Skill 本地参考卡：对外合规与改写精度"
+        "en": "Skill Reference: Web UI & Interface Copy",
+        "zh": "Skill 参考卡（英文）：网页界面与文案"
       },
-      "path": "/tools/references/regulated-and-precision.md",
+      "path": "/tools/references/web-ui.md",
       "modalities": [
         "markdown",
         "text",
@@ -692,7 +805,44 @@
         "pptx"
       ],
       "languages": [
-        "en",
+        "en"
+      ],
+      "packs": [
+        "core",
+        "business-brief",
+        "engineering-spec",
+        "regulated-comms",
+        "literary-essay",
+        "deck-and-ui",
+        "executive-deck"
+      ],
+      "bytes": 2627,
+      "approxTokens": 657,
+      "relatedTools": [
+        "skill",
+        "cli"
+      ],
+      "sha256": "e6e3b3fe90fec7732aa1a525892174fe014baf6f0dc8cec613bc82900459fd52"
+    },
+    {
+      "id": "tools-skill-ref-web-ui.zh-CN",
+      "pillar": "tools",
+      "kind": "skill-reference",
+      "title": {
+        "en": "Skill Reference (ZH): Web UI & Interface Copy",
+        "zh": "Skill 参考卡（中文）：网页界面与界面文案"
+      },
+      "path": "/tools/references/web-ui.zh-CN.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "css",
+        "jsx",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
         "zh"
       ],
       "packs": [
@@ -704,13 +854,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 1950,
-      "approxTokens": 488,
+      "bytes": 2560,
+      "approxTokens": 640,
       "relatedTools": [
         "skill",
         "cli"
       ],
-      "sha256": "1d33677d0039967a6b141e768eb14fc42f6850f6acc8f7cbc8eeb229c8865279"
+      "sha256": "7a41d6b75789fe1d0c466d27bc0395ea2ae11ca921cb62c2f0d3082082548d4c"
     },
     {
       "id": "tools-prompts",
@@ -786,7 +936,7 @@
       "relatedTools": [
         "cli"
       ],
-      "sha256": "1209b16f96427bf9a80fd32617dddacd4e4e8904c9d11c287f02317ce3acaef6"
+      "sha256": "532a62cc312d13c1bcf91aee0d7f980d93fad9151af860fce5a46428f0c7c0e1"
     },
     {
       "id": "tools-mcp-sdk-api",
@@ -821,13 +971,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 2418,
-      "approxTokens": 605,
+      "bytes": 2601,
+      "approxTokens": 650,
       "relatedTools": [
         "mcp",
         "cli"
       ],
-      "sha256": "9aa6bbe99921d48b3cd2862d846a09c1e3450dd9f3a79ed16d75c65da4f1bd24"
+      "sha256": "d5a1d7a6499aede974b4f7aed6cab299d157d0062a0e24c4e9316f72c495c8b4"
     },
     {
       "id": "privacy-policy",
@@ -847,14 +997,14 @@
         "zh"
       ],
       "packs": [],
-      "bytes": 2121,
-      "approxTokens": 530,
+      "bytes": 2397,
+      "approxTokens": 599,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "08be32f5fef8675ce5c7c0599eb4d0959c0a065a9a8862104a116546bcb7962b"
+      "sha256": "e6b907655c3b6d85f66564c49abc65202495816f6578da0adde83e0d1f729133"
     },
     {
       "id": "pack-core",
@@ -873,7 +1023,9 @@
         "jsx",
         "svg",
         "docx",
-        "pptx"
+        "pptx",
+        "pdf",
+        "image"
       ],
       "languages": [
         "en",
@@ -882,22 +1034,22 @@
       "packs": [
         "core"
       ],
-      "bytes": 3882,
-      "approxTokens": 971,
+      "bytes": 3897,
+      "approxTokens": 974,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "01cb23d1a46a97e133d922789cf4db8381cbe8e87e707d6355001f0a94f2bea7"
+      "sha256": "653803247751eb62174893baba2186e264f43c1a6ea10c88eb13922f2ca637e9"
     },
     {
       "id": "pack-business-brief",
       "pillar": "methodology",
       "kind": "pack",
       "title": {
-        "en": "Pack: Business Brief & Technical Proposal (15 rules)",
-        "zh": "规则包：商业方案与技术简报（15 条）"
+        "en": "Pack: Business Brief & Technical Proposal (19 rules)",
+        "zh": "规则包：商业方案与技术简报（19 条）"
       },
       "path": "/packs/business-brief.md",
       "modalities": [
@@ -914,14 +1066,14 @@
       "packs": [
         "business-brief"
       ],
-      "bytes": 16605,
-      "approxTokens": 4151,
+      "bytes": 21243,
+      "approxTokens": 5311,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "38bcd241f29077603c50c62d6140ca48e7f1d455f534188eeb55119749d6f445"
+      "sha256": "dd22ec9016fe7ab92caac8fd90073a0f794113e061c5e6c5d22b3d6611780ef1"
     },
     {
       "id": "pack-engineering-spec",
@@ -1021,8 +1173,8 @@
       "pillar": "methodology",
       "kind": "pack",
       "title": {
-        "en": "Pack: Slide Deck, Web UI & Graphic Layout (8 rules)",
-        "zh": "规则包：演示文稿、Web 界面与平面视觉（8 条）"
+        "en": "Pack: Slide Deck, Web UI & Graphic Layout (15 rules)",
+        "zh": "规则包：演示文稿、Web 界面与平面视觉（15 条）"
       },
       "path": "/packs/deck-and-ui.md",
       "modalities": [
@@ -1030,7 +1182,9 @@
         "css",
         "jsx",
         "svg",
-        "pptx"
+        "pptx",
+        "pdf",
+        "image"
       ],
       "languages": [
         "en",
@@ -1039,14 +1193,14 @@
       "packs": [
         "deck-and-ui"
       ],
-      "bytes": 8196,
-      "approxTokens": 2049,
+      "bytes": 16453,
+      "approxTokens": 4113,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "3b1f69f5536aae5e23014d62cc3e394637059508fbee4af758d794385457cc39"
+      "sha256": "6953a9e1c0c43d10d9f9f69505c0ff792aadab526c9f020eb2b441d99ac61ad9"
     },
     {
       "id": "pack-executive-deck",
@@ -1094,7 +1248,8 @@
         "jsx",
         "svg",
         "docx",
-        "pptx"
+        "pptx",
+        "pdf"
       ],
       "languages": [
         "en",
@@ -1103,14 +1258,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 994,
-      "approxTokens": 249,
+      "bytes": 999,
+      "approxTokens": 250,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "222f4f3377ba889bf46e7632f02266a46faf2f3c62fde4fa7a5e5a75d685aef2"
+      "sha256": "2b985c4c39ac9f62aecc5ac87df3e37f1f971be46c0b65b82c878f5667bb0fac"
     },
     {
       "id": "rule-chatbot-artifact",
@@ -1127,7 +1282,8 @@
         "html",
         "jsx",
         "docx",
-        "pptx"
+        "pptx",
+        "pdf"
       ],
       "languages": [
         "en",
@@ -1136,14 +1292,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 1025,
-      "approxTokens": 256,
+      "bytes": 1030,
+      "approxTokens": 258,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "0b139572be6c96b9e0319ca35d419eb5e6c31a7263435d98131e09e1c376eea6"
+      "sha256": "45de6b9866fac8d391c88fd786da303e4a4a426fa3133dd529fed5382494e0ab"
     },
     {
       "id": "rule-markdown-leak",
@@ -1156,7 +1312,8 @@
       "path": "/rules/markdown-leak.md",
       "modalities": [
         "docx",
-        "pptx"
+        "pptx",
+        "pdf"
       ],
       "languages": [
         "en",
@@ -1165,14 +1322,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 965,
-      "approxTokens": 241,
+      "bytes": 970,
+      "approxTokens": 243,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "73afa133e0e3f91741e5d22173fd54708b2614bd2105394056e25a8fa77baa7b"
+      "sha256": "0c8fb4699e671d64de9e7d405db1d8b9116136e95027ad651a74b93800151704"
     },
     {
       "id": "rule-ui-dead-control",
@@ -1671,6 +1828,130 @@
       "sha256": "20b1a35d8ad1c166a006c6f9d683f73c5693cc6dabac433f98a560952add7dea"
     },
     {
+      "id": "rule-zh-dev-jargon",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: zh-dev-jargon",
+        "zh": "规则：zh-dev-jargon"
+      },
+      "path": "/rules/zh-dev-jargon.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "business-brief"
+      ],
+      "bytes": 1394,
+      "approxTokens": 349,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "a4ecd1f2bcea6a58e4aea8b63419a814ff199f1ad735aa4cce3bcd92822a7614"
+    },
+    {
+      "id": "rule-zh-exclamation",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: zh-exclamation",
+        "zh": "规则：zh-exclamation"
+      },
+      "path": "/rules/zh-exclamation.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "business-brief"
+      ],
+      "bytes": 1150,
+      "approxTokens": 288,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "a357e1f7606a93c188e898e74365e9e5cfae4f6fb8eb95396463c8db337ab7b2"
+    },
+    {
+      "id": "rule-zh-mega-sentence",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: zh-mega-sentence",
+        "zh": "规则：zh-mega-sentence"
+      },
+      "path": "/rules/zh-mega-sentence.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "business-brief"
+      ],
+      "bytes": 1608,
+      "approxTokens": 402,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "7833eb235c71468365e99354e9e34e6bd86c719c6c8ab3291f431804f0745952"
+    },
+    {
+      "id": "rule-unsourced-statistic",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: unsourced-statistic",
+        "zh": "规则：unsourced-statistic"
+      },
+      "path": "/rules/unsourced-statistic.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "packs": [
+        "business-brief"
+      ],
+      "bytes": 1278,
+      "approxTokens": 320,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "492df4a3ea5d605cf1ae411b095754f3bdaebd0352def8144c60c9b17b54599b"
+    },
+    {
       "id": "rule-eng-pr-diff-parrot",
       "pillar": "cases",
       "kind": "rule",
@@ -2078,7 +2359,8 @@
       },
       "path": "/rules/slide-word-wall.md",
       "modalities": [
-        "pptx"
+        "pptx",
+        "pdf"
       ],
       "languages": [
         "en",
@@ -2087,14 +2369,14 @@
       "packs": [
         "deck-and-ui"
       ],
-      "bytes": 1246,
-      "approxTokens": 312,
+      "bytes": 1251,
+      "approxTokens": 313,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "763f6df07f014d27e68c45bf349d994c1c264b33d79eeb74aa04dc9ff98cf575"
+      "sha256": "9770b0a33ba719dd57d637fc1eef3cec879ffcfc45461c84aede004c48069508"
     },
     {
       "id": "rule-slide-bullet-overload",
@@ -2193,7 +2475,8 @@
         "html",
         "css",
         "jsx",
-        "svg"
+        "svg",
+        "pdf"
       ],
       "languages": [
         "en",
@@ -2202,14 +2485,14 @@
       "packs": [
         "deck-and-ui"
       ],
-      "bytes": 1146,
-      "approxTokens": 287,
+      "bytes": 1151,
+      "approxTokens": 288,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "11a40a7030125deb035f86c480e7bcdd905cc123ee446c639fdb6525e7fd7bac"
+      "sha256": "d6862069e29dd14a0580e8e4df0c723e9412efac1cd374fca3259c6a156fce1f"
     },
     {
       "id": "rule-ui-pill-soup",
@@ -2300,6 +2583,208 @@
       "sha256": "d8eebdb90ec6d25f63a282b1d9772111dfa81fb1429758e597d6cac440a55eb6"
     },
     {
+      "id": "rule-ui-glow-blob-chrome",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: ui-glow-blob-chrome",
+        "zh": "规则：ui-glow-blob-chrome"
+      },
+      "path": "/rules/ui-glow-blob-chrome.md",
+      "modalities": [
+        "html",
+        "css",
+        "jsx",
+        "svg"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "packs": [
+        "deck-and-ui"
+      ],
+      "bytes": 1262,
+      "approxTokens": 316,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "248f100fac1089805cc457ff72781d4443e5a53a40e9c0b4e43e5fcdcf2c7624"
+    },
+    {
+      "id": "rule-ui-emoji-icon-chrome",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: ui-emoji-icon-chrome",
+        "zh": "规则：ui-emoji-icon-chrome"
+      },
+      "path": "/rules/ui-emoji-icon-chrome.md",
+      "modalities": [
+        "html",
+        "jsx",
+        "svg"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "packs": [
+        "deck-and-ui"
+      ],
+      "bytes": 1119,
+      "approxTokens": 280,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "c41612b623904e2eee19b3684790f51d39a2071ffe8987da2db228bf8fe99c12"
+    },
+    {
+      "id": "rule-ui-template-card-grid",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: ui-template-card-grid",
+        "zh": "规则：ui-template-card-grid"
+      },
+      "path": "/rules/ui-template-card-grid.md",
+      "modalities": [
+        "html",
+        "jsx"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "packs": [
+        "deck-and-ui"
+      ],
+      "bytes": 1410,
+      "approxTokens": 353,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "14f5dbeac2ae693e92da9230fc28f4d5c487c09aa39632ab1d62e1f528b856e4"
+    },
+    {
+      "id": "rule-svg-layout-slop",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: svg-layout-slop",
+        "zh": "规则：svg-layout-slop"
+      },
+      "path": "/rules/svg-layout-slop.md",
+      "modalities": [
+        "svg"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "packs": [
+        "deck-and-ui"
+      ],
+      "bytes": 1412,
+      "approxTokens": 353,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "19a23e7e342bc5e2e0738f8e14215084bd6100b371a6a776e5c081ecc6dc58f6"
+    },
+    {
+      "id": "rule-image-ai-workflow-residue",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: image-ai-workflow-residue",
+        "zh": "规则：image-ai-workflow-residue"
+      },
+      "path": "/rules/image-ai-workflow-residue.md",
+      "modalities": [
+        "image"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "packs": [
+        "deck-and-ui"
+      ],
+      "bytes": 1516,
+      "approxTokens": 379,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "8d04b50cb29343a65b074baf57f9100299fdae0043025acf5f8bdaa7f65984f4"
+    },
+    {
+      "id": "rule-image-ai-palette-slop",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: image-ai-palette-slop",
+        "zh": "规则：image-ai-palette-slop"
+      },
+      "path": "/rules/image-ai-palette-slop.md",
+      "modalities": [
+        "image"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "packs": [
+        "deck-and-ui"
+      ],
+      "bytes": 1315,
+      "approxTokens": 329,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "d241d2e573ddd8440a149ebbdaa7064a2bffa3d102d04a5ae24f2fc291cb400e"
+    },
+    {
+      "id": "rule-pdf-visual-layout-slop",
+      "pillar": "cases",
+      "kind": "rule",
+      "title": {
+        "en": "Rule: pdf-visual-layout-slop",
+        "zh": "规则：pdf-visual-layout-slop"
+      },
+      "path": "/rules/pdf-visual-layout-slop.md",
+      "modalities": [
+        "pdf"
+      ],
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "packs": [
+        "deck-and-ui"
+      ],
+      "bytes": 1481,
+      "approxTokens": 370,
+      "relatedTools": [
+        "browser-workbench",
+        "cli",
+        "mcp"
+      ],
+      "sha256": "87ceec2b6e6b49f0b46891251b7767b446b3a2843f8765deff29d10e5e23fe7f"
+    },
+    {
       "id": "rule-slide-process-not-finding-title",
       "pillar": "cases",
       "kind": "rule",
@@ -2379,15 +2864,15 @@
         "core",
         "business-brief"
       ],
-      "bytes": 4669,
-      "approxTokens": 1167,
+      "bytes": 5481,
+      "approxTokens": 1370,
       "relatedTools": [
         "browser-workbench",
         "skill",
         "cli",
         "mcp"
       ],
-      "sha256": "0cbbadad0563f36028072a45e218b005da1a9e7302df0dedf6e3bda37eb76f5e"
+      "sha256": "fccf0be49eeb5f50990f5c2c8ce576ee6f81b427bc6343e11fbc9945230f07be"
     },
     {
       "id": "task-web-and-deck",
@@ -2413,15 +2898,15 @@
         "core",
         "deck-and-ui"
       ],
-      "bytes": 3282,
-      "approxTokens": 821,
+      "bytes": 4846,
+      "approxTokens": 1212,
       "relatedTools": [
         "browser-workbench",
         "skill",
         "cli",
         "mcp"
       ],
-      "sha256": "b0eaf23b8af62965dab2eaa5afc8c8695081095d3992a3ff102a099dc0d731ca"
+      "sha256": "602b633b7175457f646976ce25261016878d1560b96bdedc99d2a8eb20b20ba1"
     },
     {
       "id": "task-editorial-writing",
@@ -2496,8 +2981,8 @@
       "pillar": "cases",
       "kind": "awesome",
       "title": {
-        "en": "Awesome Anti-Slop (87 Curated Entries)",
-        "zh": "去 AI 味精选清单 · Awesome Anti-Slop（87 条实测核验）"
+        "en": "Awesome Anti-Slop (90 Curated Entries)",
+        "zh": "去 AI 味精选清单 · Awesome Anti-Slop（90 条实测核验）"
       },
       "path": "/awesome/index.md",
       "modalities": [
@@ -2513,12 +2998,384 @@
         "zh"
       ],
       "packs": [],
-      "bytes": 21555,
-      "approxTokens": 5389,
+      "bytes": 22348,
+      "approxTokens": 5587,
       "relatedTools": [
         "browser-workbench"
       ],
-      "sha256": "8dfec60fe97578993c734e2e8eceb2ec9f59b1fcbf9e422bff875af509c33192"
+      "sha256": "06fff3bcea1415be2192d5e53f242a27fd042842519448f85a441075847c4d2f"
+    },
+    {
+      "id": "guide-agent-cli-mcp-tutorial-zh",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions",
+        "zh": "把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程"
+      },
+      "path": "/guides/agent-cli-mcp-tutorial/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 5832,
+      "approxTokens": 1458,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "89a59f6a30fb8e0678360dd2a8589a598fbba3357c3410ca58c1c4eb8e6d2c33"
+    },
+    {
+      "id": "guide-agent-cli-mcp-tutorial-en",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions",
+        "zh": "把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程"
+      },
+      "path": "/en/guides/agent-cli-mcp-tutorial/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "en"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 5805,
+      "approxTokens": 1451,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "2f729ea7fe0c5f20c378447b3c05afd0abdd944b3c18daa4043e46b29e9e2275"
+    },
+    {
+      "id": "guide-deslop-pptx-docx-zh",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)",
+        "zh": "AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程"
+      },
+      "path": "/guides/deslop-pptx-docx/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 7069,
+      "approxTokens": 1767,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "28c52bf3f07f224fbf11d94daa418a787c3ae3c249ce2515b951345584c1ea3d"
+    },
+    {
+      "id": "guide-deslop-pptx-docx-en",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)",
+        "zh": "AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程"
+      },
+      "path": "/en/guides/deslop-pptx-docx/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "en"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 5830,
+      "approxTokens": 1458,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "6ff41290b70036248e6d08eba276643bf5ffa6669568e7888813bd8a37b9a020"
+    },
+    {
+      "id": "guide-fix-ai-slop-web-ui-zh",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons",
+        "zh": "Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮"
+      },
+      "path": "/guides/fix-ai-slop-web-ui/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 6562,
+      "approxTokens": 1641,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "15808239dac3245a5d3494319547f99658d63f26473ecc347484f0efeed9f61f"
+    },
+    {
+      "id": "guide-fix-ai-slop-web-ui-en",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons",
+        "zh": "Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮"
+      },
+      "path": "/en/guides/fix-ai-slop-web-ui/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "en"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 6375,
+      "approxTokens": 1594,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "5679d3881d9729b2940826d829c9cc62fac650406f95083bf0d2f9a99a1ebfc0"
+    },
+    {
+      "id": "guide-linter-vs-detector-vs-skill-zh",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "AI Slop Linter vs. AI Detectors vs. Prompt Skills: How to Choose in 2026",
+        "zh": "去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比"
+      },
+      "path": "/guides/linter-vs-detector-vs-skill/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 6767,
+      "approxTokens": 1692,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "061a05b585ee33b4adb5c7327cbf8e61c39eb270a498602f7625e261a280b479"
+    },
+    {
+      "id": "guide-linter-vs-detector-vs-skill-en",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "AI Slop Linter vs. AI Detectors vs. Prompt Skills: How to Choose in 2026",
+        "zh": "去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比"
+      },
+      "path": "/en/guides/linter-vs-detector-vs-skill/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "en"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 6118,
+      "approxTokens": 1530,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "3de7e7fec6903c00937fa7d2fdb8db573c140b6984b6e7144494859888e40b1b"
+    },
+    {
+      "id": "guide-remove-ai-slop-writing-zh",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "How to Remove AI Slop From Writing Without Triggering Second-Order Clichés",
+        "zh": "中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话"
+      },
+      "path": "/guides/remove-ai-slop-writing/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 8226,
+      "approxTokens": 2057,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "530a58d2968ce61f9898e41a3a1e72d5282350a783f6087bc25f4ae468cab38b"
+    },
+    {
+      "id": "guide-remove-ai-slop-writing-en",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "How to Remove AI Slop From Writing Without Triggering Second-Order Clichés",
+        "zh": "中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话"
+      },
+      "path": "/en/guides/remove-ai-slop-writing/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "en"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 7840,
+      "approxTokens": 1960,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "00b87dfe0ec114587ca1998adcb222019e28de454d2f5ec308cd3805934b763e"
+    },
+    {
+      "id": "guide-what-is-ai-slop-zh",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks",
+        "zh": "什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱"
+      },
+      "path": "/guides/what-is-ai-slop/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 7656,
+      "approxTokens": 1914,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "c8f7f586ed1d243ec645ecca90a1aeb8108b8792418a7610b945abe52020abf8"
+    },
+    {
+      "id": "guide-what-is-ai-slop-en",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks",
+        "zh": "什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱"
+      },
+      "path": "/en/guides/what-is-ai-slop/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "en"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 7584,
+      "approxTokens": 1896,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "1a28f4b764a405fbfd15d8d90b8cf45dd8c93a7c5cd20c65cd217e8156f3a9fd"
     },
     {
       "id": "roadmap-en",
@@ -2552,15 +3409,15 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 13629,
-      "approxTokens": 3407,
+      "bytes": 13506,
+      "approxTokens": 3377,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp",
         "skill"
       ],
-      "sha256": "2bba8363f78550b94316beccb4d16f95f3bc762a3aac7fec6b8dcf7dfbbf6b9d"
+      "sha256": "c943128c298b19f2542b7c7c9404990e9576d8348d2e7bc99f640ed909140c38"
     }
   ]
 }

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-static-lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱 — dislop</title>
+  <meta name="description" content="拆解中文写作、前端网页和 Word/PPT 里常见的四层 AI 味信号，附上行业研究数据与可落地的判断方法。">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/guides/what-is-ai-slop/">
+  <meta property="og:title" content="什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱 — dislop">
+  <meta property="og:description" content="拆解中文写作、前端网页和 Word/PPT 里常见的四层 AI 味信号，附上行业研究数据与可落地的判断方法。">
+  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱 — dislop">
+  <meta name="twitter:description" content="拆解中文写作、前端网页和 Word/PPT 里常见的四层 AI 味信号，附上行业研究数据与可落地的判断方法。">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <link rel="canonical" href="https://dislop.com/guides/what-is-ai-slop/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/what-is-ai-slop/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/what-is-ai-slop/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/what-is-ai-slop/">
+  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop 实用指南（中文）">
+  <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/guides/what-is-ai-slop/",
+      "url": "https://dislop.com/guides/what-is-ai-slop/",
+      "headline": "什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱",
+      "description": "拆解中文写作、前端网页和 Word/PPT 里常见的四层 AI 味信号，附上行业研究数据与可落地的判断方法。",
+      "inLanguage": "zh-CN",
+      "datePublished": "2026-11-23",
+      "dateModified": "2026-11-23",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "image": "https://dislop.com/assets/og-card-zh.png",
+      "citation": [
+        "https://simonwillison.net/2024/May/8/slop/",
+        "https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing",
+        "https://arxiv.org/abs/2406.07016",
+        "https://arxiv.org/abs/2510.22954",
+        "https://github.com/op7418/Humanizer-zh",
+        "https://daniel.haxx.se/blog/2026/01/26/the-end-of-the-curl-bug-bounty/",
+        "https://www.coderabbit.ai/reports-guides"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "实用指南",
+          "item": "https://dislop.com/guides/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "什么是 AI 味",
+          "item": "https://dislop.com/guides/what-is-ai-slop/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "删掉公文黑话和空泛动词之后，为什么文章还是像 AI 写的？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "因为模型会退回结构模板。禁用高频套词后，大模型最常见的替代写法是“不是 A，而是 B”反转口号、三段工整分号排比和段尾升华总结，这些同样可以通过句法规则标出来。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "哪些文件最容易混进 AI 味残留？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "最常见的是从对话窗口直接复制粘贴的内容：文稿开头的对话寒暄、Word 和 PPT 里没渲染的星号加粗符号、忘了替换的括号占位文字，以及网页里点不动的 `href=\\\"#\\\"` 空按钮。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "AI 味问题有多普遍，有实证数据吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "有。Kobak 等人在 Science Advances（2025，n=1,500 万篇 PubMed 摘要）通过超额词汇测算，2024 年至少 13.5% 的生物医学摘要经过 LLM 处理；CodeRabbit 实测（2025）也显示，AI 生成的代码 PR 平均多出约 1.7 倍问题（10.83 个对比人类 6.45 个）。"
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳至正文</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../">
+        <img src="../../assets/logo.svg" width="28" height="28" alt="dislop 图标">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a href="../../#workbench">在线试</a>
+        <a href="../../guides/" aria-current="page">指南</a>
+        <a href="../../awesome/">工具清单</a>
+        <a href="../../rules/">规则</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../en/guides/what-is-ai-slop/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="Switch to English">EN</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="面包屑导航">
+        <a href="../../">dislop</a> / <a href="../">实用指南</a> / <span aria-current="page">什么是 AI 味</span>
+      </nav>
+
+      <article>
+        <header>
+          <h1 class="lead-heading" style="max-width:30ch;">什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱</h1>
+          <div class="article-meta">
+            <span>基础识别</span>
+            <span>更新于 2026-11-23</span>
+            <span>6 分钟阅读</span>
+            <a href="./index.md">Markdown</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">先说结论</div>
+            <p>AI 味（AI slop）指大模型按训练统计均值批量吐出的低信息密度内容，不仅包括抽象公文黑话和开头寒暄，还包括删掉套词后冒出来的反转句式、紫粉渐变网页模板，以及挤满字墙的 PPT。</p>
+          </div>
+        </header>
+
+        <div class="article-shell">
+          <div class="article-prose">
+<p>收到一份 AI 帮忙起草的周报、网页或 PPT 时，很多人第一眼会觉得“说得都对，但一眼假”。程序员和写作者通常把这种未经认真审阅、直接堆出来的内容叫做 <strong>AI 味（AI slop）</strong>。</p>
+
+<p>2024 年 5 月，开发者 Simon Willison 在一篇讨论文章里把类比垃圾邮件（spam）的未经审阅 AI 产物定名为 slop。到了 2025—2026 年，这个问题已经从博客蔓延到科研文献、开源仓库和办公交付物里。</p>
+
+<h2 id="1-行业里看到的真实规模">1. 行业里看到的真实规模</h2>
+
+<p>AI 味是经过对齐微调的模型按高概率均值生成的默认习惯，很少只出现在某一个词上：</p>
+
+<ol>
+<li><strong>科研论文用词偏移</strong>：Kobak 等人在 <em>Science Advances</em>（<a href="https://arxiv.org/abs/2406.07016" target="_blank" rel="noopener">arXiv:2406.07016</a>，2025）统计了 1,500 万篇 PubMed 摘要，估算出 2024 年至少 13.5% 的生物医学摘要带有明显的模型超额词汇，比例远高于往年基线。</li>
+<li><strong>模型之间高度趋同</strong>：NeurIPS 2025 论文 <em>Artificial Hivemind</em>（<a href="https://arxiv.org/abs/2510.22954" target="_blank" rel="noopener">arXiv:2510.22954</a>）用 Infinity-Chat 数据集对比了多个主流模型，发现不同模型面对开放问题时不仅自重复，彼此给出的句式和套路也非常接近。</li>
+<li><strong>开源协作被水文拖垮</strong>：2026 年 1 月，curl 维护者 Daniel Stenberg 宣布关闭漏洞赏金计划，原因是大量 AI 生成的低质量漏洞报告把有效率从 15% 以上拉低到 5% 以下；CodeRabbit（2025）对真实开源 PR 的统计也发现，AI 生成的 PR 平均出现 10.83 个问题，约为人工 PR（6.45 个）的 1.7 倍。</li>
+</ol>
+
+<h2 id="2-怎么一眼拆出四类常见-ai-味">2. 怎么一眼拆出四类常见 AI 味</h2>
+
+<p>不管是文档、网页还是汇报 PPT，AI 味主要集中在这四层：</p>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>层级</th><th>中文里最常见的样子</th><th>为什么必须优先清掉</th></tr></thead><tbody>
+<tr><td><strong>交付残留硬伤</strong></td><td>开头留着“好的，以下是润色后版本”、没填的 <code>【待补充】</code>、贴进 Word 的 <code>**加粗**</code>、网页 <code>href=&quot;#&quot;</code> 死链接</td><td>一眼暴露没自己看一遍就往外发，属于硬伤</td></tr>
+<tr><td><strong>词面套话与黑话</strong></td><td>“值得注意的是”“抓手”“全面赋能”“形成闭环”“显著提升”</td><td>把具体的操作主体和改动动作糊成抽象词</td></tr>
+<tr><td><strong>二阶句式与节奏</strong></td><td>“不是 X，而是 Y”反转口号、三段分号对称排比、四字套话连串、自问自答、段尾金句升华</td><td>只删禁词不改结构时，模型立刻换成这类演出来的强调句</td></tr>
+<tr><td><strong>网页与 PPT 模板</strong></td><td>Tailwind 紫粉霓虹渐变、满屏圆角胶囊标签、三层框套框、PPT 单页塞满纯字、自动缩字、<code>概述/背景</code> 标题</td><td>每一份不同主题的页面长成同一个模板脸，信息反而不突出</td></tr>
+</tbody></table></div>
+
+<p>下面是一段上线说明从原稿到换壳、再到改干净的真实对照：</p>
+
+<!-- dislop-quote-start -->
+<pre><code class="language-text">bad:  好的，以下是修改后的上线说明。值得注意的是，本次改造以队列分级为重要抓手，全面赋能一线运维团队，故障恢复时间最多 45 秒。
+trap: 队列分级已经落地，故障恢复时间最多 45 秒。这不是一次简单的升级，而是一场效率革命。
+good: 这次改造给队列分了级，一线运维团队的故障恢复时间最多 45 秒。</code></pre>
+<!-- dislop-quote-end -->
+
+<p>第二句 <code>trap</code> 里把抽象黑话全删掉了，但读起来依然像推广文案，原因就在“这不是……而是……”把正常技术事实硬拔成了空口号。</p>
+
+<figure class="guide-demo" data-demo-card="proof-cycle" data-demo-prefix="../../" data-demo-lang="zh" data-demo-ver="v2">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="../../assets/demos/proof-cycle-zh-v2-poster.png" data-demo-poster="proof-cycle">
+              <source type="image/webp" srcset="../../assets/demos/proof-cycle-zh-v2.webp" data-demo-webp="proof-cycle">
+              <img src="../../assets/demos/proof-cycle-zh-v2.gif" alt="dislop 检查上线说明三步对照：标出 AI 寒暄与空话、拦下二阶口号、改干净后退出码 0" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="proof-cycle">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title">1. 同一段话的三个版本：防改过头换成反转口号</strong>
+              <span class="demo-cap-badge">3 步对照 · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc">先用红实线划掉开头寒暄，再用蓝虚线抓出“不是……而是……”反转口号，最后只留动作和 45 秒真实指标。</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="proof-cycle" aria-pressed="false">定格</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="proof-cycle">放大看</button>
+            </div>
+          </figcaption>
+        </figure>
+
+<h2 id="3-先查哪一层最省时间">3. 先查哪一层最省时间</h2>
+
+<ol>
+<li><strong>先把交付底线清干净</strong>：删掉寒暄壳、占位符、Word/PPT 里的裸星号和空链接。如果用 <code>dislop check .</code>，这一层对应 <code>packs/core</code>，默认作为报错拦住。</li>
+<li><strong>再看保留信息</strong>：对着标出来的套话或反转句，只问自己一句“删掉这半句之后，读者会少知道哪个数字、机制或边界？”没有新增信息就直接砍掉。</li>
+<li><strong>最后过一遍排版与标点</strong>：中文正文检查有没有误夹英文半角逗号括号、每页 PPT 有没有退化成字墙、网页有没有堆无用装饰渐变。</li>
+</ol>
+
+<p>想立刻测试手头的文字、Markdown、Word、PPT 或 HTML，可以直接用 <code>npx --yes dislop check .</code> 在本地离线扫一遍，也可以打开首页工作台粘贴试查。</p>
+<h2 id="faq">常见问题</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>删掉公文黑话和空泛动词之后，为什么文章还是像 AI 写的？</h3>
+            <p>因为模型会退回结构模板。禁用高频套词后，大模型最常见的替代写法是“不是 A，而是 B”反转口号、三段工整分号排比和段尾升华总结，这些同样可以通过句法规则标出来。</p>
+          </div>
+          <div class="faq-item">
+            <h3>哪些文件最容易混进 AI 味残留？</h3>
+            <p>最常见的是从对话窗口直接复制粘贴的内容：文稿开头的对话寒暄、Word 和 PPT 里没渲染的星号加粗符号、忘了替换的括号占位文字，以及网页里点不动的 <code>href=\&quot;#\&quot;</code> 空按钮。</p>
+          </div>
+          <div class="faq-item">
+            <h3>AI 味问题有多普遍，有实证数据吗？</h3>
+            <p>有。Kobak 等人在 Science Advances（2025，n=1,500 万篇 PubMed 摘要）通过超额词汇测算，2024 年至少 13.5% 的生物医学摘要经过 LLM 处理；CodeRabbit 实测（2025）也显示，AI 生成的代码 PR 平均多出约 1.7 倍问题（10.83 个对比人类 6.45 个）。</p>
+          </div>
+        </div>
+<h2 id="related-rules">对应的自动检查规则</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../rules/chatbot-artifact/"><code>chatbot-artifact</code> · 留在正文里的 AI 寒暄</a>
+<a class="related-link-chip" href="../../rules/zh-bureaucratic-padding/"><code>zh-bureaucratic-padding</code> · 公文黑话与空泛词</a>
+<a class="related-link-chip" href="../../rules/negation-pivot-frame/"><code>negation-pivot-frame</code> · “不是 A，而是 B”套句</a>
+<a class="related-link-chip" href="../../rules/ui-ai-gradient/"><code>ui-ai-gradient</code> · 默认紫粉霓虹渐变</a>
+<a class="related-link-chip" href="../../rules/slide-word-wall/"><code>slide-word-wall</code> · 单页 PPT 字太多</a>
+</div>
+<h2 id="next-guides">延伸阅读</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../remove-ai-slop-writing/">写作怎么去 AI 味</a>
+<a class="related-link-chip" href="../fix-ai-slop-web-ui/">前端页面去 AI 味</a>
+<a class="related-link-chip" href="../deslop-pptx-docx/">PPT 与 Word 去模板味</a>
+</div>
+<h2 id="sources">参考与一手出处</h2>
+        <ul>
+          <li><a href="https://simonwillison.net/2024/May/8/slop/" target="_blank" rel="noopener">Simon Willison: Slop is the new name for unwanted AI-generated content</a> — Published 2024-05-08; popularized 'slop' for unsolicited, unreviewed AI-generated content by analogy to email spam.</li>
+          <li><a href="https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing" target="_blank" rel="noopener">Wikipedia: Signs of AI writing (WP:AISIGNS)</a> — WikiProject AI Cleanup's living taxonomy of AI prose defects: inflated significance, stock vocabulary, rule-of-three lists, negative parallelisms, chatbot wrappers, and formatting artifacts.</li>
+          <li><a href="https://arxiv.org/abs/2406.07016" target="_blank" rel="noopener">Delving into LLM-assisted writing in biomedical publications through excess vocabulary (Science Advances 2025)</a> — Analyzed 15M PubMed abstracts and estimated at least 13.5% of 2024 biomedical abstracts were processed with LLMs (lower bound), marked by excess words like 'delve', 'intricate', and 'pivotal'.</li>
+          <li><a href="https://arxiv.org/abs/2510.22954" target="_blank" rel="noopener">Artificial Hivemind: The Open-Ended Homogeneity of Language Models (and Beyond) (NeurIPS 2025)</a> — Using the Infinity-Chat dataset, demonstrated both intra-model repetition and inter-model homogeneity across different LLM families.</li>
+          <li><a href="https://github.com/op7418/Humanizer-zh" target="_blank" rel="noopener">op7418/Humanizer-zh: 中文去 AI 味写作技能</a> — 23,450 星标（2026-11-21 快照）；针对中文写作里的套话、公文腔与翻译腔整理对照清单，适合作为写作前提示参考。</li>
+          <li><a href="https://daniel.haxx.se/blog/2026/01/26/the-end-of-the-curl-bug-bounty/" target="_blank" rel="noopener">Daniel Stenberg: The end of the curl bug bounty</a> — Published 2026-01-26; ended curl's bug bounty effective 2026-01-31 after low-quality AI-generated reports pushed valid report rates from &gt;15% down below 5%.</li>
+          <li><a href="https://www.coderabbit.ai/reports-guides" target="_blank" rel="noopener">CodeRabbit: State of AI vs Human Code Generation Report</a> — Measured AI-generated PRs averaging ~1.7x more issues (10.83 vs 6.45), 75% more logic errors, and &gt;3x readability/formatting issues compared with human PRs.</li>
+        </ul>
+<div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../?lang=zh#workbench">去工作台试查 →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">复制引用（PR / 群聊）</button><code id="share-cite-payload" hidden>[什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱](https://dislop.com/guides/what-is-ai-slop/) — 拆解中文写作、前端网页和 Word/PPT 里常见的四层 AI 味信号，附上行业研究数据与可落地的判断方法。</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">投稿翻车样本</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub 收藏 ★</a>
+        </div>
+          </div>
+        <aside class="toc-rail" aria-label="本文目录">
+          <h2 class="toc-rail-title">本文目录</h2>
+          <ol>
+            <li><a href="#1-行业里看到的真实规模">1. 行业里看到的真实规模</a></li>
+            <li><a href="#2-怎么一眼拆出四类常见-ai-味">2. 怎么一眼拆出四类常见 AI 味</a></li>
+            <li><a href="#3-先查哪一层最省时间">3. 先查哪一层最省时间</a></li>
+          </ol>
+        </aside>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>这个页面自己也跑过 dislop check site/，0 处问题。给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../guides/">实用指南</a>
+        <a href="../../awesome/">工具清单</a>
+        <a href="../../rules/">全部规则</a>
+        <a href="../../privacy.md">隐私说明</a>
+        <a href="../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">关闭</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../static-ui.js"></script>
+
+</body>
+</html>

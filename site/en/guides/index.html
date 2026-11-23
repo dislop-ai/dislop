@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-static-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Anti-Slop Guides &amp; Tutorials — dislop</title>
+  <meta name="description" content="Practical guides to catch and fix AI slop in prose, web UI, PowerPoint decks, and coding agent workflows.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/en/guides/">
+  <meta property="og:title" content="Anti-Slop Guides &amp; Tutorials — dislop">
+  <meta property="og:description" content="Practical guides to catch and fix AI slop in prose, web UI, PowerPoint decks, and coding agent workflows.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="Anti-Slop Guides &amp; Tutorials — dislop">
+  <meta name="twitter:description" content="Practical guides to catch and fix AI slop in prose, web UI, PowerPoint decks, and coding agent workflows.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
+  <link rel="canonical" href="https://dislop.com/en/guides/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/">
+  <link rel="alternate" type="application/atom+xml" href="../../en/feed.xml" title="dislop Guides (EN)">
+  <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": "https://dislop.com/en/guides/",
+      "url": "https://dislop.com/en/guides/",
+      "name": "Anti-Slop Guides & Tutorials — dislop",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/en/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Guides",
+          "item": "https://dislop.com/en/guides/"
+        }
+      ]
+    },
+    {
+      "@type": "ItemList",
+      "numberOfItems": 6,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions",
+          "url": "https://dislop.com/en/guides/agent-cli-mcp-tutorial/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)",
+          "url": "https://dislop.com/en/guides/deslop-pptx-docx/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons",
+          "url": "https://dislop.com/en/guides/fix-ai-slop-web-ui/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "AI Slop Linter vs. AI Detectors vs. Prompt Skills: How to Choose in 2026",
+          "url": "https://dislop.com/en/guides/linter-vs-detector-vs-skill/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "How to Remove AI Slop From Writing Without Triggering Second-Order Clichés",
+          "url": "https://dislop.com/en/guides/remove-ai-slop-writing/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks",
+          "url": "https://dislop.com/en/guides/what-is-ai-slop/"
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../en/">
+        <img src="../../assets/logo.svg" width="28" height="28" alt="dislop icon">
+        <span class="brand-wordmark">dislop</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../?lang=en#workbench">Workbench</a>
+        <a href="../../en/guides/" aria-current="page">Guides</a>
+        <a href="../../en/awesome/">Directory</a>
+        <a href="../../en/rules/">Rules</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../guides/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../">dislop</a> / <span aria-current="page">Guides</span>
+      </nav>
+      <h1 class="lead-heading" style="max-width:26ch;">Anti-slop guides &amp; tutorials</h1>
+      <p class="section-desc">
+        Six field guides covering prose, web UI, PowerPoint decks, agent setups, and linter selection—each grounded in verifiable sources and runnable commands.
+      </p>
+      <div class="guide-grid">
+          <article class="guide-card">
+            <div class="guide-card-cat">Setup &amp; CI · 6 min read</div>
+            <h2><a href="./agent-cli-mcp-tutorial/">Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions</a></h2>
+            <p>How to combine the pure-Markdown Agent Skill, zero-dependency offline CLI, incremental git-diff PR gates, and Cloud MCP.</p>
+            <div class="guide-card-foot"><a href="./agent-cli-mcp-tutorial/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">Docs &amp; Decks · 6 min read</div>
+            <h2><a href="./deslop-pptx-docx/">Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)</a></h2>
+            <p>How to catch raw Markdown asterisks, 140-word slide walls, shrunk autofit text, and process-only headlines in Word, PowerPoint, and PDF decks.</p>
+            <div class="guide-card-foot"><a href="./deslop-pptx-docx/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">UI &amp; Visual Craft · 6 min read</div>
+            <h2><a href="./fix-ai-slop-web-ui/">Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons</a></h2>
+            <p>How to catch and replace the 7 most common AI-generated frontend templates—purple gradients, pill walls, nested boxes, and href='#' dead buttons—before shipping.</p>
+            <div class="guide-card-foot"><a href="./fix-ai-slop-web-ui/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">Selection &amp; Benchmarks · 6 min read</div>
+            <h2><a href="./linter-vs-detector-vs-skill/">AI Slop Linter vs. AI Detectors vs. Prompt Skills: How to Choose in 2026</a></h2>
+            <p>Comparing probabilistic AI detectors (Fast-DetectGPT, Binoculars, Pangram), Markdown skills (humanizer, stop-slop, Impeccable), and deterministic linters (Vale, dislop).</p>
+            <div class="guide-card-foot"><a href="./linter-vs-detector-vs-skill/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">Writing &amp; Editing · 7 min read</div>
+            <h2><a href="./remove-ai-slop-writing/">How to Remove AI Slop From Writing Without Triggering Second-Order Clichés</a></h2>
+            <p>Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.</p>
+            <div class="guide-card-foot"><a href="./remove-ai-slop-writing/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+          <article class="guide-card">
+            <div class="guide-card-cat">Fundamentals · 6 min read</div>
+            <h2><a href="./what-is-ai-slop/">What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks</a></h2>
+            <p>A breakdown of the four layers of AI slop across prose, websites, and slides—backed by empirical benchmarks, Wikipedia's cleanup catalog, and real repository examples.</p>
+            <div class="guide-card-foot"><a href="./what-is-ai-slop/">Read guide →</a><span>Updated 2026-11-23</span></div>
+          </article>
+      </div>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div>
+        <span>This site passes dislop check site/ with 0 issues. For agents, start at <a href="../../llms.txt">/llms.txt</a>.</span>
+      </div>
+      <div class="colophon-links">
+        <a href="../../en/guides/">Guides</a>
+        <a href="../../en/awesome/">Awesome list</a>
+        <a href="../../en/rules/">All rules</a>
+        <a href="../../privacy.md">Privacy</a>
+        <a href="../../llms.txt">llms.txt</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+      </div>
+    </footer>
+  </div>
+  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
+    <div class="demo-lightbox-head">
+      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
+      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">Close</button>
+    </div>
+    <div class="demo-lightbox-body">
+      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    </div>
+  </dialog>
+  <script defer src="../../static-ui.js"></script>
+
+</body>
+</html>
