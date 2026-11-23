@@ -123,33 +123,33 @@
 <body>
   <a class="skip-link" href="#main-content" data-i18n="nav.skip">跳至正文</a>
   <div class="rail-shell">
-    <!-- Top Bar -->
+    <!-- Masthead -->
     <header class="topbar band-rule">
       <a class="brand-lockup" href="#top">
-        <img src="./assets/logo.svg" width="28" height="28" alt="dislop 图标">
+        <img src="./assets/logo.svg" width="30" height="30" alt="">
         <span class="brand-wordmark">dislop</span>
+        <span class="brand-meta"><span data-i18n="nav.brandMeta">AI 味检查</span> · <span class="brand-ver">v0.8.2</span></span>
       </a>
 
       <nav class="nav-links" aria-label="主导航">
-        <a href="#workbench" data-i18n="nav.workbench">在线试</a>
+        <a href="#workbench" data-i18n="nav.workbench">工作台</a>
+        <a href="#surfaces" data-i18n="nav.surfaces">接入</a>
         <a href="#cases" data-i18n="nav.cases">案例</a>
-        <a href="#surfaces" data-i18n="nav.surfaces">怎么用</a>
-        <a href="#pricing" data-i18n="nav.pricing">开源与云端</a>
         <a href="./guides/" id="nav-guides-link" data-i18n="nav.guides">指南</a>
-        <a href="./awesome/" data-i18n="nav.awesome">工具清单</a>
         <a href="#rules" data-i18n="nav.rules">规则</a>
-        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" data-i18n="nav.github">GitHub ★</a>
+        <a href="./awesome/" data-i18n="nav.awesome">工具清单</a>
       </nav>
 
       <div class="top-controls">
         <button type="button" id="topbar-account-btn" class="ctrl-btn topbar-acct-btn" data-i18n="nav.signIn">登录 · 30 免费额度</button>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label" data-i18n="nav.github">GitHub ★</span></a>
         <button type="button" id="lang-toggle" class="ctrl-btn" aria-label="Switch to English">EN</button>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
       </div>
     </header>
 
     <main id="main-content">
-    <!-- Hero -->
+    <!-- Chapter 1: Hero (dele loop + agent prompt + galley proof slip + three pillars) -->
     <section id="top" class="band-rule">
       <div class="lead-band band-rule">
         <div class="lead-copy">
@@ -157,58 +157,58 @@
             <!-- dislop-quote-start -->
             <div class="hero-strike-wrap" aria-hidden="true">
               <del class="hero-strike" id="hero-strike-text">好的，以下是为您润色后的版本。</del>
-              <svg class="hero-pen-svg" viewBox="0 0 320 18" preserveAspectRatio="none" focusable="false">
-                <path class="hero-pen-path" d="M3 10 C86 6 196 13 317 8"/>
+              <svg class="hero-pen-svg" viewBox="0 0 340 40" preserveAspectRatio="none" focusable="false">
+                <path class="hero-pen-path" d="M4 26H314C321.9 26 327.5 20.6 327.5 13.6C327.5 8.4 323.9 5 319.4 5C314.6 5 311.4 8.75 311.4 14.15C311.4 22.85 318.1 31.6 328.3 35.8"/>
               </svg>
             </div>
             <!-- dislop-quote-end -->
             <h1 class="lead-heading" data-i18n="lead.title">去 AI 味才是真正的生产力！</h1>
-            <p class="lead-sub" data-i18n="lead.sub">
-              专用的 AI 味检查工具。整合社区验证过的去味规则、语料经验与 90 条精选工具，一行命令接进主流 Coding Agent、办公 Agent 与编辑器，在文档、网页和 PPT 发出前标出硬伤、套话和模板布局。
-            </p>
+            <p class="lead-sub" data-i18n="lead.sub">专用的 AI 味检查工具。在文档、网页和 Word/PPT 发出前，标出开头寒暄、空话套话、反转口号和默认紫粉模板。一行命令接进主流 Agent 与编辑器，默认纯本地运行。</p>
           </div>
 
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div class="hero-cta-row">
-              <a href="#workbench" class="btn-primary" style="min-height:36px;padding:7px 16px;font-size:0.86rem;" data-i18n="lead.cta">在工作台试用（本地 / 云端）↓</a>
-              <a href="#surfaces" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" data-i18n="lead.installBtn">装进 Agent / 编辑器（本地离线）</a>
+          <div class="hero-cta-row">
+            <a href="#workbench" class="btn-primary" data-i18n="lead.cta">在工作台试一段 ↓</a>
+            <a href="#surfaces" class="ctrl-btn" data-i18n="lead.installBtn">装进 Agent 或编辑器</a>
+          </div>
+
+          <div class="hero-cli-inline hero-agent-card ink-stage">
+            <div class="hero-agent-head">
+              <svg class="hero-agent-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.2 14H12.3C16.7 14 19.8 10.9 19.8 7C19.8 4.1 17.8 2.2 15.3 2.2C12.6 2.2 10.8 4.3 10.8 7.3C10.8 12.2 14.6 17.1 20.3 19.4"/></svg>
+              <span class="hero-cli-label" data-i18n="lead.promptLabel">发给 Agent · 自动评估与安装</span>
             </div>
-            <p class="hero-reassure" data-i18n="lead.reassure">CLI 与本地插件纯本地运行、零上传；下方工作台支持切换本地检查与云端审校。</p>
-          </div>
-
-          <div class="hero-cli-inline">
-            <span class="hero-cli-label" data-i18n="lead.promptLabel">或者直接把这句话发给你的 Agent，让它完成评估、安装和试跑</span>
             <div class="cmd-box is-prompt">
               <code id="hero-prompt" data-i18n="lead.promptText">请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。</code>
-              <button type="button" class="ctrl-btn" style="min-height:32px;padding:5px 12px;font-size:0.8rem;flex-shrink:0;" data-copy-target="hero-prompt" data-i18n="lead.copyPromptBtn">复制发给 Agent</button>
+              <button type="button" class="ctrl-btn is-ink-primary" data-copy-target="hero-prompt" data-i18n="lead.copyPromptBtn">复制发给 Agent</button>
             </div>
           </div>
         </div>
 
-        <!-- Right column: Live 3-State Proof Card -->
+        <!-- Right column: live 3-state proof on a galley slip -->
         <div class="hero-proof" aria-label="首屏检查示例">
           <div class="hero-proof-head">
             <div class="mode-tabs" id="hero-proof-tabs" role="tablist" aria-label="切换示例版本">
-              <button type="button" id="hp-tab-bad" role="tab" aria-selected="true" class="ctrl-btn is-active" data-hero-state="bad" data-i18n="hp.tabBad">原稿</button>
-              <button type="button" id="hp-tab-trap" role="tab" aria-selected="false" class="ctrl-btn" data-hero-state="trap" data-i18n="hp.tabTrap">换了种 AI 味</button>
-              <button type="button" id="hp-tab-good" role="tab" aria-selected="false" class="ctrl-btn" data-hero-state="good" data-i18n="hp.tabGood">改干净了</button>
+              <button type="button" id="hp-tab-bad" role="tab" aria-selected="true" aria-controls="hero-proof-slip" tabindex="0" class="ctrl-btn is-active" data-hero-state="bad" data-i18n="hp.tabBad">原稿</button>
+              <button type="button" id="hp-tab-trap" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="trap" data-i18n="hp.tabTrap">换了种 AI 味</button>
+              <button type="button" id="hp-tab-good" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="good" data-i18n="hp.tabGood">改干净了</button>
             </div>
-            <button type="button" id="hp-autoplay-btn" class="ctrl-btn ctrl-btn-sm" aria-pressed="true" data-i18n="hp.pauseBtn">暂停演示</button>
+            <button type="button" id="hp-autoplay-btn" class="ctrl-btn ctrl-btn-sm sheet-btn" aria-pressed="true" data-i18n="hp.pauseBtn">暂停演示</button>
           </div>
           <div class="hero-proof-progress" aria-hidden="true"><div class="hero-proof-progress-bar" id="hero-proof-progress-bar"></div></div>
 
-          <!-- dislop-quote-start -->
-          <div class="hero-proof-stage" id="hero-proof-stage" aria-live="polite">
-            <!-- dislop-ignore-next-line chatbot-artifact -- intentional before-edit hero proof specimen -->
-            <span class="mark-span mark-error">好的，以下是修改后</span>的上线说明。<span class="mark-span mark-warn">值得注意的是，</span>本次改造以队列分级为重要<span class="mark-span mark-warn">抓手</span>，<span class="mark-span mark-warn">全面赋能</span>一线运维团队，故障恢复时间最多 45 秒。
-          </div>
-          <!-- dislop-quote-end -->
-
-          <div id="hero-proof-feedback">
-            <ul class="hero-proof-notes">
-              <li><span class="hero-note-dot is-error"></span><span><strong>红实线：</strong>开头留着 AI 寒暄，删掉就行。</span></li>
-              <li><span class="hero-note-dot is-warn"></span><span><strong>蓝虚线：</strong>“值得注意的是”“抓手”“全面赋能”都是空话，可以直接说做了什么。</span></li>
-            </ul>
+          <div class="hero-slip" id="hero-proof-slip" role="tabpanel" aria-labelledby="hp-tab-bad">
+            <div class="hero-slip-head" aria-hidden="true"><span>launch-note.md</span><span>business-brief</span></div>
+            <!-- dislop-quote-start -->
+            <div class="hero-proof-stage" id="hero-proof-stage" aria-live="polite">
+              <!-- dislop-ignore-next-line chatbot-artifact -- intentional before-edit hero proof specimen -->
+              <span class="mark-span mark-error">好的，以下是修改后</span>的上线说明。<span class="mark-span mark-warn">值得注意的是，</span>本次改造以队列分级为重要<span class="mark-span mark-warn">抓手</span>，<span class="mark-span mark-warn">全面赋能</span>一线运维团队，故障恢复时间最多 45 秒。
+            </div>
+            <!-- dislop-quote-end -->
+            <div id="hero-proof-feedback">
+              <ul class="hero-proof-notes">
+                <li><span class="hero-note-dot is-error"></span><span><strong>红实线：</strong>开头留着 AI 寒暄，删掉就行。</span></li>
+                <li><span class="hero-note-dot is-warn"></span><span><strong>蓝虚线：</strong>“值得注意的是”“抓手”“全面赋能”都是空话，可以直接说做了什么。</span></li>
+              </ul>
+            </div>
           </div>
 
           <div class="hero-proof-foot">
@@ -218,34 +218,34 @@
         </div>
       </div>
 
-      <!-- Three Pillars: Aligned with PRODUCT.md -->
+      <!-- Three pillars (aligned with PRODUCT.md selling points) -->
       <div class="marks-strip" aria-label="核心卖点">
         <div class="mark-pillar">
           <div class="mark-pillar-head">
-            <h2 class="mark-pillar-title" data-i18n="m1.title">社区规则和工具一处拿全</h2>
+            <h2 class="mark-pillar-title" data-i18n="m1.title">社区规则与工具一处拿全</h2>
           </div>
-          <p class="mark-pillar-desc" data-i18n="m1.desc">整合经过核验的去味规则、语料经验与 90 条精选工具，覆盖文稿、网页和 Word/PPT，不用自己到处搜集拼凑。</p>
+          <p class="mark-pillar-desc" data-i18n="m1.desc">内置 53 条规则和 12 个扩展句式检查，另收录 90 条精选去味工具，覆盖文档、网页和 Word/PPT。</p>
         </div>
         <div class="mark-pillar">
           <div class="mark-pillar-head">
-            <h2 class="mark-pillar-title" data-i18n="m2.title">一行命令接入主流 Agent 与编辑器</h2>
+            <h2 class="mark-pillar-title" data-i18n="m2.title">一行命令接进 Agent 与编辑器</h2>
           </div>
-          <p class="mark-pillar-desc" data-i18n="m2.desc">内置 7 套场景包，支持 Codex、Claude Code、Cursor、WorkBuddy 等工具，在终端、编辑器或 CI 里都能直接跑。</p>
+          <p class="mark-pillar-desc" data-i18n="m2.desc">支持 Codex、Claude Code、Cursor、WorkBuddy 与 GitHub Actions，终端、编辑器和 CI 直接跑。</p>
         </div>
         <div class="mark-pillar">
           <div class="mark-pillar-head">
-            <h2 class="mark-pillar-title" data-i18n="m3.title">稿子默认留在你电脑上</h2>
+            <h2 class="mark-pillar-title" data-i18n="m3.title">文稿默认留在本地</h2>
           </div>
-          <p class="mark-pillar-desc" data-i18n="m3.desc">CLI 与本地插件在自己电脑上跑，不上传文稿；切到工作台或远程 MCP 的云端模式，可调用多模型深度审校与一键改写。</p>
+          <p class="mark-pillar-desc" data-i18n="m3.desc">Skill 与 CLI 纯本地离线运行，零上传。切到工作台或远程 MCP 的云端模式，再做多模型深层审校。</p>
         </div>
       </div>
     </section>
 
-    <!-- Workbench -->
+    <!-- Chapter 2: Galley workbench -->
     <section id="workbench" class="band-rule" aria-labelledby="wb-heading">
       <div class="workbench-header band-rule">
         <div class="workbench-title-group">
-          <h2 class="sub-heading" id="wb-heading" tabindex="-1" style="margin:0;" data-i18n="wb.heading">在线试用</h2>
+          <h2 class="sub-heading" id="wb-heading" tabindex="-1" style="margin:0;" data-i18n="wb.heading">工作台</h2>
           <span class="workbench-subtitle" data-i18n="wb.subhint">粘贴文字，或把文档 / 网页 / PPT / PDF / 图片拖进稿纸</span>
         </div>
         <div class="workbench-toolbar">
@@ -298,11 +298,11 @@
             </div>
             <div class="quick-actions">
               <button type="button" id="btn-paste-own" class="ctrl-btn" data-i18n="wb.pasteOwn">贴我的稿子</button>
-              <button type="button" id="btn-apply-good" class="ctrl-btn" data-i18n="wb.applyClean">看改好的</button>
-              <button type="button" id="btn-apply-trap" class="ctrl-btn" data-i18n="wb.tryTrap">看换了种 AI 味的</button>
-              <button type="button" id="btn-copy-draft" class="ctrl-btn" data-i18n="wb.copyDraft">复制正文</button>
-              <button type="button" id="wb-share-link-btn" class="ctrl-btn" data-i18n="wb.shareLink">生成分享链接</button>
-              <button type="button" id="btn-reset" class="ctrl-btn" data-i18n="wb.reset">还原</button>
+              <button type="button" id="btn-apply-good" class="ctrl-btn sheet-btn" data-i18n="wb.applyClean">看改好的</button>
+              <button type="button" id="btn-apply-trap" class="ctrl-btn sheet-btn" data-i18n="wb.tryTrap">看换了种 AI 味的</button>
+              <button type="button" id="btn-copy-draft" class="ctrl-btn sheet-btn" data-i18n="wb.copyDraft">复制正文</button>
+              <button type="button" id="wb-share-link-btn" class="ctrl-btn sheet-btn" data-i18n="wb.shareLink">生成分享链接</button>
+              <button type="button" id="btn-reset" class="ctrl-btn sheet-btn" data-i18n="wb.reset">还原</button>
             </div>
           </div>
 
@@ -360,16 +360,16 @@
 
           <details class="voice-drawer" id="voice-drawer">
             <summary class="voice-drawer-summary">
-              <span data-i18n="voice.drawerTitle">可选：提取个人文风（支持本地统计，或云端 AI 提炼）</span>
+              <span data-i18n="voice.drawerTitle">可选：提取个人文风（支持本地统计，或云端提炼）</span>
               <span id="voice-active-badge" class="voice-active-badge" hidden></span>
             </summary>
             <div class="voice-drawer-body">
-              <p class="voice-drawer-desc" data-i18n="voice.drawerDesc">贴入 1–3 段你自己写过的干净文字（用空行隔开）。点「本地统计文风」在当前标签页完成；也可登录免费密钥调用云端模型提炼个人文风。</p>
+              <p class="voice-drawer-desc" data-i18n="voice.drawerDesc">贴入 1–3 段你自己写过的干净文字（用空行隔开）。点「本地统计文风」在当前标签页完成；保存的文风会在点「云端改写」时自动套用。</p>
               <textarea id="voice-samples-input" class="voice-textarea" rows="3" placeholder="粘贴 1–3 段你自己写过的段落，段与段之间留一个空行…" aria-label="个人写作样稿"></textarea>
               <div class="quick-actions" style="margin-top:8px;">
-                <button type="button" id="btn-voice-offline" class="ctrl-btn ctrl-btn-sm" data-i18n="voice.offlineBtn">本地统计文风（0 额度 · 不联网）</button>
-                <button type="button" id="btn-voice-extract" class="ctrl-btn ctrl-btn-sm" data-i18n="voice.extractBtn">云端提炼文风（2 额度）</button>
-                <button type="button" id="btn-voice-clear" class="ctrl-btn ctrl-btn-sm" hidden data-i18n="voice.clearBtn">清除已保存文风</button>
+                <button type="button" id="btn-voice-offline" class="ctrl-btn ctrl-btn-sm sheet-btn" data-i18n="voice.offlineBtn">本地统计文风（0 额度 · 不联网）</button>
+                <button type="button" id="btn-voice-extract" class="ctrl-btn ctrl-btn-sm sheet-btn" data-i18n="voice.extractBtn">云端提炼文风（2 额度）</button>
+                <button type="button" id="btn-voice-clear" class="ctrl-btn ctrl-btn-sm sheet-btn" hidden data-i18n="voice.clearBtn">清除已保存文风</button>
               </div>
               <div id="voice-output-box" class="cloud-output-box" hidden></div>
             </div>
@@ -402,273 +402,64 @@
       <div class="wb-nudge">
         <span id="wb-nudge-text" data-i18n="wb.nudgeText">想在自己电脑上离线查，就装开源 Skill 或 CLI。想让 Agent 用云端审校，登录后每月有 30 免费额度。</span>
         <div class="quick-actions">
-          <button type="button" id="wb-nudge-cloud-btn" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;" data-i18n="wb.nudgeCloud">领免费 30 额度</button>
-          <a href="#surfaces" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;" data-i18n="wb.nudgeInstall">装开源 Skill / CLI ↓</a>
-          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;" data-i18n="wb.nudgeStar">GitHub ★</a>
+          <button type="button" id="wb-nudge-cloud-btn" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;" data-i18n="wb.nudgeCloud">验证码登录 · 30 免费额度</button>
+          <a href="#surfaces" class="ctrl-btn ctrl-btn-sm sheet-btn" data-i18n="wb.nudgeInstall">装开源 Skill / CLI ↓</a>
+          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn ctrl-btn-sm sheet-btn" data-i18n="wb.nudgeStar">GitHub ★</a>
         </div>
       </div>
     </section>
 
-    <!-- Animated Demos (Zero-External, Progressive WebP + GIF + Reduced-Motion Poster) -->
-    <section id="demos" class="section-block band-rule" aria-labelledby="demos-heading">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" id="demos-heading" data-i18n="demos.title">6 秒看懂怎么查：从文字、网页到 PPT 和 Agent 闭环</h2>
-          <p class="section-desc" data-i18n="demos.desc">
-            六段动画对应六个真实场景，全部离线渲染并内置无损动态 WebP 与 GIF 回退，零外域请求。点击卡片下方按钮可随时定格、重播或放大查看。
-          </p>
+    <!-- Chapter 3: Setup (ledger + charcoal ink terminal) -->
+    <section id="surfaces" class="section-block band-rule" aria-labelledby="surfaces-heading">
+      <div class="surfaces-split">
+        <div class="surfaces-intro">
+          <h2 class="section-title" id="surfaces-heading" data-i18n="surf.title">三种接入方式：Skill、本地 CLI 和云端 MCP</h2>
+          <p class="section-desc" data-i18n="surf.desc">按你手上的工具选一种，每种都有能直接复制的配置。</p>
+          <ol class="setup-ledger">
+            <li>
+              <h3 data-i18n="surf.w1Title">纯文档 Agent Skill</h3>
+              <p data-i18n="surf.w1Desc">按文体整理的写作与界面避坑卡，不带脚本。装进 Claude Code、Codex、Cursor 或 Antigravity，Agent 动笔前读取，写完再调用本地 CLI 自检。</p>
+            </li>
+            <li>
+              <h3 data-i18n="surf.w2Title">开源本地 CLI 与插件</h3>
+              <p data-i18n="surf.w2Desc">零依赖，安装包不到 250 KB，内置 7 套场景包。断网也能查文档、Word、PPT 和 Git 改动，适合终端、编辑器和 CI。开发者也可以配自己的模型密钥。</p>
+            </li>
+            <li>
+              <h3 data-i18n="surf.w3Title">官方云端 MCP 与网页工作台</h3>
+              <p data-i18n="surf.w3Desc">在 WorkBuddy、千问、Claude Cowork 或编辑器里直连，登录后每月 30 免费额度，按文体做多模型审校并返回改法。</p>
+              <span class="setup-ledger-url">https://dislop.com/mcp</span>
+            </li>
+            <li class="is-agent-note">
+              <h3 data-i18n="surf.w4Title">一句话让 Agent 自己接管</h3>
+              <p data-i18n="surf.w4Desc">把 dislop.com/llms.txt 发给你的 Agent，它会自己判断装 Skill、CLI 还是远程 MCP，再拿现有文件试跑一次。</p>
+            </li>
+          </ol>
+          <a href="./tools/index.md" class="surfaces-more" data-i18n="surf.readTools">完整接入文档（.md）→</a>
         </div>
-        <a href="https://github.com/dislop-ai/dislop/blob/main/docs/gif-production-guide.zh-CN.md" target="_blank" rel="noopener" data-i18n="demos.guideLink">动画与 GIF 制作规范 →</a>
-      </div>
 
-      <div class="demos-grid">
-        <figure class="demo-card" data-demo-card="proof-cycle">
-          <div class="demo-media">
-            <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/proof-cycle-zh-v2-poster.png" data-demo-poster="proof-cycle">
-              <source type="image/webp" srcset="./assets/demos/proof-cycle-zh-v2.webp" data-demo-webp="proof-cycle">
-              <img src="./assets/demos/proof-cycle-zh-v2.gif" alt="dislop 检查上线说明：标出 AI 寒暄与空话、拦下二阶口号、改干净后退出码 0" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="proof-cycle">
-            </picture>
-          </div>
-          <figcaption class="demo-caption">
-            <div class="demo-cap-head">
-              <strong class="demo-cap-title" data-i18n="demos.c1Title">1. 同一段话的三个版本：防改过头换成反转口号</strong>
-              <span class="demo-cap-badge" data-i18n="demos.c1Badge">3 步对照 · 6.8s</span>
+        <!-- Copyable snippets on the charcoal ink terminal -->
+        <div class="code-panel ink-stage" id="cli-mcp">
+          <div class="code-panel-head">
+            <div class="mode-tabs" id="snippet-tabs" role="tablist" aria-label="用法与安装示例">
+              <button type="button" id="tab-prompt" role="tab" aria-selected="true" aria-controls="snippet-panel" tabindex="0" class="ctrl-btn is-active" data-snippet="prompt" data-i18n="snip.prompt">发给 Agent</button>
+              <button type="button" id="tab-skill" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="skill">Skill</button>
+              <button type="button" id="tab-cloud" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cloud" data-i18n="snip.cloud">云端 MCP</button>
+              <button type="button" id="tab-plugin" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="plugin" data-i18n="snip.plugin">插件</button>
+              <button type="button" id="tab-cli" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cli" data-i18n="snip.cli">命令行</button>
+              <button type="button" id="tab-ci" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="ci">GitHub Actions</button>
+              <button type="button" id="tab-config" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="config">.dislop.json</button>
             </div>
-            <span class="demo-cap-desc" data-i18n="demos.c1Desc">先用红实线划掉开头寒暄，再用蓝虚线抓出“不是……而是……”反转口号，最后只留动作和 45 秒真实指标。</span>
-            <div class="demo-card-actions">
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="proof-cycle" aria-pressed="false" data-i18n="demos.pause">定格</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="proof-cycle" data-i18n="demos.replay">重播</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="proof-cycle" data-i18n="demos.zoom">放大看</button>
-            </div>
-          </figcaption>
-        </figure>
-
-        <figure class="demo-card" data-demo-card="cli-check">
-          <div class="demo-media">
-            <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/cli-check-zh-v2-poster.png" data-demo-poster="cli-check">
-              <source type="image/webp" srcset="./assets/demos/cli-check-zh-v2.webp" data-demo-webp="cli-check">
-              <img src="./assets/demos/cli-check-zh-v2.gif" alt="dislop CLI 本地离线检查：原稿退出码 1，清掉套话后复检退出码 0" width="920" height="460" loading="lazy" decoding="async" data-demo-gif="cli-check">
-            </picture>
+            <button type="button" id="copy-snippet-btn" class="ctrl-btn ctrl-btn-sm is-ink-primary" data-i18n="btn.copy">复制</button>
           </div>
-          <figcaption class="demo-caption">
-            <div class="demo-cap-head">
-              <strong class="demo-cap-title" data-i18n="demos.c2Title">2. 命令行门禁：Node 与 Python 结果一致</strong>
-              <span class="demo-cap-badge" data-i18n="demos.c2Badge">CLI 离线 · 6.4s</span>
-            </div>
-            <span class="demo-cap-desc" data-i18n="demos.c2Desc">本地跑 dislop check --profile，硬伤直接返回退出码 1 卡住 CI，顺带输出句长起伏与具体度体检。</span>
-            <div class="demo-card-actions">
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="cli-check" aria-pressed="false" data-i18n="demos.pause">定格</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="cli-check" data-i18n="demos.replay">重播</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="cli-check" data-i18n="demos.zoom">放大看</button>
-            </div>
-          </figcaption>
-        </figure>
-
-        <figure class="demo-card" data-demo-card="workbench-live">
-          <div class="demo-media">
-            <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/workbench-live-zh-v2-poster.png" data-demo-poster="workbench-live">
-              <source type="image/webp" srcset="./assets/demos/workbench-live-zh-v2.webp" data-demo-webp="workbench-live">
-              <img src="./assets/demos/workbench-live-zh-v2.gif" alt="dislop.com 浏览器离线工作台真实操作：点击切换原稿、二阶 AI 味与改干净版本" width="1140" height="640" loading="lazy" decoding="async" data-demo-gif="workbench-live">
-            </picture>
-          </div>
-          <figcaption class="demo-caption">
-            <div class="demo-cap-head">
-              <strong class="demo-cap-title" data-i18n="demos.c3Title">3. 浏览器离线工作台：真机操作实录</strong>
-              <span class="demo-cap-badge" data-i18n="demos.c3Badge">真机实录 · 6.8s</span>
-            </div>
-            <span class="demo-cap-desc" data-i18n="demos.c3Desc">就是本页上方的工作台。贴稿子、点切规则包、实时对齐右侧行号批注与 5 轴体检，全程在当前标签页完成。</span>
-            <div class="demo-card-actions">
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="workbench-live" aria-pressed="false" data-i18n="demos.pause">定格</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="workbench-live" data-i18n="demos.replay">重播</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="workbench-live" data-i18n="demos.zoom">放大看</button>
-            </div>
-          </figcaption>
-        </figure>
-
-        <figure class="demo-card" data-demo-card="ui-slop">
-          <div class="demo-media">
-            <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/ui-slop-zh-v2-poster.png" data-demo-poster="ui-slop">
-              <source type="image/webp" srcset="./assets/demos/ui-slop-zh-v2.webp" data-demo-webp="ui-slop">
-              <img src="./assets/demos/ui-slop-zh-v2.gif" alt="网页组件模板味排查：标出紫粉渐变、胶囊标签墙与空链接，改为 1px 白底版式" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="ui-slop">
-            </picture>
-          </div>
-          <figcaption class="demo-caption">
-            <div class="demo-cap-head">
-              <strong class="demo-cap-title" data-i18n="demos.c4Title">4. 网页与组件：清掉默认紫粉模板和死按钮</strong>
-              <span class="demo-cap-badge" data-i18n="demos.c4Badge">网页去模板 · 6.8s</span>
-            </div>
-            <span class="demo-cap-desc" data-i18n="demos.c4Desc">直接扫 HTML/CSS/JSX 里的渐变标题、装饰徽章、胶囊堆叠和 href=&quot;#&quot; 假按钮，退回干净可用的界面。</span>
-            <div class="demo-card-actions">
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="ui-slop" aria-pressed="false" data-i18n="demos.pause">定格</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="ui-slop" data-i18n="demos.replay">重播</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="ui-slop" data-i18n="demos.zoom">放大看</button>
-            </div>
-          </figcaption>
-        </figure>
-
-        <figure class="demo-card" data-demo-card="deck-office">
-          <div class="demo-media">
-            <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/deck-office-zh-v2-poster.png" data-demo-poster="deck-office">
-              <source type="image/webp" srcset="./assets/demos/deck-office-zh-v2.webp" data-demo-webp="deck-office">
-              <img src="./assets/demos/deck-office-zh-v2.gif" alt="dislop 检查 quarterly-review.pptx：标出裸 Markdown、字墙、缩排和过程标题后改为结论页" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="deck-office">
-            </picture>
-          </div>
-          <figcaption class="demo-caption">
-            <div class="demo-cap-head">
-              <strong class="demo-cap-title" data-i18n="demos.c5Title">5. Word / PPT 检查：揪出裸星号、字墙和过程标题</strong>
-              <span class="demo-cap-badge" data-i18n="demos.c5Badge">PPTX 实检 · 6.8s</span>
-            </div>
-            <span class="demo-cap-desc" data-i18n="demos.c5Desc">直接解包 .pptx 检查未渲染的 **加粗** 符号、单页字墙、68% 自动缩字与空泛标题，改回结论先行的干净页。</span>
-            <div class="demo-card-actions">
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="deck-office" aria-pressed="false" data-i18n="demos.pause">定格</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="deck-office" data-i18n="demos.replay">重播</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="deck-office" data-i18n="demos.zoom">放大看</button>
-            </div>
-          </figcaption>
-        </figure>
-
-        <figure class="demo-card" data-demo-card="agent-workflow">
-          <div class="demo-media">
-            <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/agent-workflow-zh-v2-poster.png" data-demo-poster="agent-workflow">
-              <source type="image/webp" srcset="./assets/demos/agent-workflow-zh-v2.webp" data-demo-webp="agent-workflow">
-              <img src="./assets/demos/agent-workflow-zh-v2.gif" alt="Agent 闭环工作流：加载 SKILL.md、增量门禁退出码 1、修复后复检退出码 0" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="agent-workflow">
-            </picture>
-          </div>
-          <figcaption class="demo-caption">
-            <div class="demo-cap-head">
-              <strong class="demo-cap-title" data-i18n="demos.c6Title">6. 编码 Agent + CI 闭环：写前读 Skill，提交前过门禁</strong>
-              <span class="demo-cap-badge" data-i18n="demos.c6Badge">Agent 闭环 · 6.8s</span>
-            </div>
-            <span class="demo-cap-desc" data-i18n="demos.c6Desc">Agent 先读取纯文档 SKILL.md，再用 --changed origin/main 拦下 PR 寒暄与复读 diff，修完复检确认数字零丢失。</span>
-            <div class="demo-card-actions">
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="agent-workflow" aria-pressed="false" data-i18n="demos.pause">定格</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="agent-workflow" data-i18n="demos.replay">重播</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="agent-workflow" data-i18n="demos.zoom">放大看</button>
-            </div>
-          </figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <!-- Real Cases Showcase -->
-    <section id="cases" class="section-block band-rule" aria-labelledby="cases-heading">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" id="cases-heading" data-i18n="cases.title">三组对照：为什么删了套词还是像 AI</h2>
-          <p class="section-desc" data-i18n="cases.desc">
-            删掉“抓手”“赋能”这类高频词之后，模型常会换成“不是 A，而是 B”这类反转口号，或者写出规则报 0 问题、读起来依然像推销稿的句子。下面三组对照可以直接试，也可以一键复制分享。
-          </p>
-        </div>
-        <a href="./cases/copy-contrasts.md" data-i18n="cases.readAll">看全部对照案例（.md）→</a>
-      </div>
-
-      <!-- dislop-quote-start -->
-      <div class="cases-grid" id="cases-grid">
-        <article class="case-card">
-          <span class="case-kicker">案例 01 · 发版简报（去套话 + 核对数字）</span>
-          <h3 class="case-title">清掉寒暄、官话与口号，四个核心指标一个不丢</h3>
-          <div class="case-body">
-            <!-- dislop-ignore-next-line chatbot-artifact -- intentional before-edit case example -->
-            <div class="case-step is-bad"><span class="case-step-label">原稿（AI 寒暄 + 黑话 + 喊口号）</span>好的，以下是 Q4 结算引擎升级说明。值得注意的是，本次以异步化为核心抓手，全面赋能商户体验。峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，一致性达 99.99%。</div>
-            <div class="case-step is-trap"><span class="case-step-label">换了种 AI 味（掉进反转口号）</span>这绝非一次普通升级，而是结算架构的效率跃迁，性能实现数倍提升。</div>
-            <div class="case-step is-good"><span class="case-step-label">改干净（只留动作和真实数字）</span>Q4 结算引擎改为全链路异步化后，峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，数据一致性 99.99%。</div>
-          </div>
-          <div class="case-actions">
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="brief">在工作台试一下 ↑</button>
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-share-case="doc">复制这段分享</button>
-          </div>
-        </article>
-
-        <article class="case-card">
-          <span class="case-kicker">案例 02 · 上一版首屏复盘（句式推销味）</span>
-          <h3 class="case-title">检查报 0 处问题，但我们自己上一版首屏照样像 AI</h3>
-          <div class="case-body">
-            <div class="case-step is-bad"><span class="case-step-label">翻车原稿（0 命中，却满屏 AI 味）</span>把稿子、PPT 或网页贴进来。不能发的硬伤，dislop 直接划掉；听着像套话的地方，它在页边问你一句；等你改完，再拿原稿逐条对一遍。它不替你改稿，笔一直在你手里。</div>
-            <p class="case-note">毛病不在单个词，在于“三段对称分号推销句 + 假装老校对 + 段尾金句收尾”。这就是为什么单靠脚本标红线不够，必须把写作规矩一起写进 Skill，并在云端叠加深度文风审校。</p>
-            <div class="case-step is-good"><span class="case-step-label">改回人话</span>AI 写完的文档、Word、PPT 和网页，经常留着开头寒暄、空话套话、满页字墙或默认紫粉模板。你可以装进本地 Coding Agent 离线运行，也可以在这里切换本地检查与云增强（MCP）模式。</div>
-          </div>
-          <div class="case-actions">
-            <a href="./methodology/brand-and-voice.md" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;">看完整复盘 →</a>
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-share-case="autopsy">复制这段分享</button>
-          </div>
-        </article>
-
-        <article class="case-card">
-          <span class="case-kicker">案例 03 · 网页与 PPT 模板味</span>
-          <h3 class="case-title">紫粉渐变 + 装饰徽章 + 点不动的空链接</h3>
-          <div class="case-body">
-            <div class="case-step is-bad"><span class="case-step-label">生成式模板原稿</span><code>from-indigo via-purple to-pink</code> 渐变标题 + <code>AI 强力驱动</code> 徽章 + <code>href=&quot;#&quot;</code> 假下载按钮。</div>
-            <div class="case-step is-good"><span class="case-step-label">改干净</span>纯色纸面和 1px 分界线、去掉装饰徽章、按钮接上真实报告路径 <code>./report.html</code>。</div>
-            <p class="case-note">同一套引擎也能直接读 `.pptx`，挑出单页字墙（&gt; 280 字）、要点超过 6 条、文字自动缩排和空泛标题。</p>
-          </div>
-          <div class="case-actions">
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="ui-chrome">在工作台试一下 ↑</button>
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-share-case="ui">复制这段分享</button>
-          </div>
-        </article>
-      </div>
-      <!-- dislop-quote-end -->
-    </section>
-
-    <!-- How to Use & Install (Human-friendly guide + Folded Agent technical details) -->
-    <section id="surfaces" class="section-block band-rule">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" data-i18n="surf.title">怎么用：纯文档 Skill → 开源本地 CLI → 官方云端 MCP</h2>
-          <p class="section-desc" data-i18n="surf.desc">
-            三种用法按需选：纯文档 Skill 在动笔前避坑，开源本地 CLI 在终端和 CI 做离线检查，官方云端 MCP（https://dislop.com/mcp）免装环境做多模型审校。
-          </p>
-        </div>
-        <a href="./tools/index.md" data-i18n="surf.readTools">完整接入文档（.md）→</a>
-      </div>
-
-      <div class="where-grid">
-        <div class="where-item">
-          <h3 data-i18n="surf.w1Title">1. 开源纯文档 Skill（动笔前防呆）</h3>
-          <p data-i18n="surf.w1Desc">按文体整理的写作与界面避坑参考卡，不含可执行脚本。装进 Claude Code、Codex、Cursor 或 Antigravity 后，动笔前读取，写完调用本地 CLI 自检。</p>
-        </div>
-        <div class="where-item">
-          <h3 data-i18n="surf.w2Title">2. 开源本地 CLI 与插件（零依赖快检）</h3>
-          <p data-i18n="surf.w2Desc">安装包不到 250 KB，零依赖，内置全部 7 套规则包。断网也能查文档、Word、PPT 和 Git 改动，适合终端、编辑器和 CI，开发者也可以配自己的模型密钥。</p>
-        </div>
-        <div class="where-item">
-          <h3 data-i18n="surf.w3Title">3. 官方云端 MCP（办公与编码 Agent 直连）</h3>
-          <p data-i18n="surf.w3Desc">在 WorkBuddy、千问、Claude Cowork 或编辑器里直连 https://dislop.com/mcp，登录领每月 30 免费额度，做多模型分文体审校并返回结构化改法。</p>
-        </div>
-        <div class="where-item">
-          <h3 data-i18n="surf.w4Title">4. 网页工作台与一句话让 Agent 接管安装</h3>
-          <p data-i18n="surf.w4Desc">浏览器工作台可先看对比样例和做本地基础检查，登录后使用云端审校；也可以只给自己的 Agent 发一句 dislop.com/llms.txt，由它自行判断装 Skill、CLI 还是远程 MCP 并完成首轮试跑。</p>
-        </div>
-      </div>
-
-      <!-- Copyable Snippets -->
-      <div class="code-panel" id="cli-mcp">
-        <div class="code-panel-head">
-          <div class="mode-tabs" id="snippet-tabs" role="tablist" aria-label="用法与安装示例">
-            <button type="button" id="tab-prompt" role="tab" aria-selected="true" aria-controls="snippet-panel" tabindex="0" class="ctrl-btn is-active" data-snippet="prompt" data-i18n="snip.prompt">发给 Agent</button>
-            <button type="button" id="tab-skill" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="skill">Skill</button>
-            <button type="button" id="tab-cloud" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cloud" data-i18n="snip.cloud">官方 MCP（云端）</button>
-            <button type="button" id="tab-plugin" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="plugin">Plugin</button>
-            <button type="button" id="tab-cli" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cli" data-i18n="snip.cli">命令行</button>
-            <button type="button" id="tab-ci" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="ci">GitHub Actions</button>
-            <button type="button" id="tab-config" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="config">.dislop.json</button>
-          </div>
-          <button type="button" id="copy-snippet-btn" class="ctrl-btn" data-i18n="btn.copy">复制</button>
-        </div>
-        <pre class="code-pre" id="snippet-panel" role="tabpanel" aria-labelledby="tab-prompt" tabindex="0"><code id="snippet-code"><!-- BUILD:DEFAULT_SNIPPET -->
+          <pre class="code-pre" id="snippet-panel" role="tabpanel" aria-labelledby="tab-prompt" tabindex="0"><code id="snippet-code"><!-- BUILD:DEFAULT_SNIPPET -->
 # 复制下面这句话发给你的 Agent（自动评估、安装并试跑）：
 请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。
 <!-- /BUILD:DEFAULT_SNIPPET --></code></pre>
+        </div>
       </div>
 
-      <!-- Folded Agent-Specific Technical Endpoints (Clean for humans, full DOM for Agents) -->
-      <details class="agent-fold" id="agent-endpoints-fold">
+      <!-- Folded agent-facing static endpoints (full DOM for agents, folded for people) -->
+      <details class="agent-fold surfaces-fold" id="agent-endpoints-fold">
         <summary>
           <span>
             <span data-i18n="ep.foldTitle">给 Agent / 开发者看：静态 Markdown 与 JSON 接口</span>
@@ -781,223 +572,221 @@
       </details>
     </section>
 
-    <!-- Open Source vs. Hosted Cloud Pricing & Free MCP Token -->
-    <section id="pricing" class="section-block band-rule" aria-labelledby="pricing-heading">
+    <!-- Chapter 4: Three galley contrasts -->
+    <section id="cases" class="section-block band-rule" aria-labelledby="cases-heading">
       <div class="section-header">
         <div>
-          <h2 class="section-title" id="pricing-heading" data-i18n="price.title">本地工具都免费，只有云端审校要用额度</h2>
-          <p class="section-desc" data-i18n="price.desc">
-            Skill、CLI 与规则库按 Apache-2.0 开源，纯本地离线运行、不上传文稿。需要多模型深层审校、复检改写与远程 MCP 时，可在登录工作台后使用（免费版每月 30 额度，付费版模型接口不拿你的稿子训练）。
-          </p>
+          <h2 class="section-title" id="cases-heading" data-i18n="cases.title">三组前后对照：删了热词还像 AI 的写法</h2>
+          <p class="section-desc" data-i18n="cases.desc">删掉“抓手”“赋能”这类热词之后，模型常换成“不是 A，而是 B”的反转口号，或者写出检查报 0 处问题、读起来仍像推销稿的句子。三组都能在工作台里直接试。</p>
         </div>
-        <a href="https://github.com/dislop-ai/dislop/blob/main/benchmarks/MODEL-COMPARISON.md" target="_blank" rel="noopener" data-i18n="price.benchLink">看 5 模型实测对比 →</a>
+        <a href="./cases/copy-contrasts.md" data-i18n="cases.readAll">看全部对照案例（.md）→</a>
       </div>
 
-      <div class="pricing-grid">
-        <div class="pricing-col">
-          <div class="pricing-head">
-            <h3 data-i18n="price.t1Name">开源本地（Skill + CLI）</h3>
-            <span class="pricing-amount" data-i18n="price.t1Price">$0 · 永久免费</span>
+      <!-- dislop-quote-start -->
+      <div class="cases-grid" id="cases-grid">
+        <article class="case-card">
+          <span class="case-kicker">发版简报（去套话 + 核对数字）</span>
+          <h3 class="case-title">清掉寒暄、官话与口号，四个核心指标一个不丢</h3>
+          <div class="case-body">
+            <!-- dislop-ignore-next-line chatbot-artifact -- intentional before-edit case example -->
+            <div class="case-step is-bad"><span class="case-step-label"><span>原稿（AI 寒暄 + 黑话 + 喊口号）</span><span class="case-step-tag">没通过</span></span>好的，以下是 Q4 结算引擎升级说明。值得注意的是，本次以异步化为核心抓手，全面赋能商户体验。峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，一致性达 99.99%。</div>
+            <div class="case-step is-trap"><span class="case-step-label"><span>换了种 AI 味（掉进反转口号）</span><span class="case-step-tag">没通过</span></span>这绝非一次普通升级，而是结算架构的效率跃迁，性能实现数倍提升。</div>
+            <div class="case-step is-good"><span class="case-step-label"><span>改干净（只留动作和真实数字）</span><span class="case-step-tag">通过</span></span>Q4 结算引擎改为全链路异步化后，峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，数据一致性 99.99%。</div>
           </div>
-          <p class="pricing-sub" data-i18n="price.t1Sub">适合稿子不能上传的场景，比如内网和私有仓库。代码和规则都开源。</p>
-          <ul class="pricing-list">
-            <li data-i18n="price.t1F1">纯文档 Agent Skill（不含脚本）与开源本地 CLI（Apache-2.0）</li>
-            <li data-i18n="price.t1F2">全量内置 7 套场景与行业包（53 条规则），离线查文档、Word、PPT、PDF、图片与网页</li>
-            <li data-i18n="price.t1F3">内置 5 轴节奏体检、14.6 KB 轻量本地模型（--ml）与 dislop voice 离线个人文风</li>
-            <li data-i18n="price.t1F4">零联网零上传；开发者也可配自有密钥做单步审校</li>
-          </ul>
-          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
-            <a href="#surfaces" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" data-i18n="price.t1Cta">安装 Skill / CLI ↑</a>
+          <div class="case-actions">
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="brief">在工作台试一下 ↑</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="doc">复制这段分享</button>
           </div>
-        </div>
+        </article>
 
-        <div class="pricing-col is-featured">
-          <div class="pricing-head">
-            <h3 data-i18n="price.t2Name">云端免费版（远程 MCP）</h3>
-            <span class="pricing-amount" data-i18n="price.t2Price">$0 · 30 额度 / 月</span>
+        <article class="case-card">
+          <span class="case-kicker">上一版首屏复盘（句式推销味）</span>
+          <h3 class="case-title">检查报 0 处问题，但我们自己上一版首屏照样像 AI</h3>
+          <div class="case-body">
+            <div class="case-step is-bad"><span class="case-step-label"><span>翻车原稿（0 命中，却满屏 AI 味）</span><span class="case-step-tag">没通过</span></span>把稿子、PPT 或网页贴进来。不能发的硬伤，dislop 直接划掉；听着像套话的地方，它在页边问你一句；等你改完，再拿原稿逐条对一遍。它不替你改稿，笔一直在你手里。</div>
+            <p class="case-note">毛病不在单个词，在于“三段对称分号推销句 + 假装老校对 + 段尾金句收尾”。这就是为什么单靠脚本标红线不够，必须把写作规矩一起写进 Skill，并在云端叠加深度文风审校。</p>
+            <div class="case-step is-good"><span class="case-step-label"><span>改回人话</span><span class="case-step-tag">通过</span></span>AI 写完的文档、Word、PPT 和网页，经常留着开头寒暄、空话套话、满页字墙或默认紫粉模板。你可以装进本地 Coding Agent 离线运行，也可以在这里切换本地检查与云增强（MCP）模式。</div>
           </div>
-          <p class="pricing-sub" data-i18n="price.t2Sub">邮箱验证码登录，免密码免绑卡，立即在网页工作台或远程 MCP 使用。</p>
-          <ul class="pricing-list">
-            <li data-i18n="price.t2F1">直连 https://dislop.com/mcp，支持 OAuth 免填密钥或生成 API 密钥（单次最长 12,000 字）</li>
-            <li data-i18n="price.t2F2">云增强审校（1 额度）：查出推销腔、官话与套话，给出具体改法</li>
-            <li data-i18n="price.t2F3">云增强改写（2 额度）：自动改写后复检，核对原稿数字与限定词</li>
-            <li data-i18n="price.t2F4">Word/PPT 原排版去味与个人文风（2–3 额度）：保留样式与修订，云端文风同步给远程 MCP</li>
-          </ul>
-          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
-            <a href="#cloud-token-box" class="btn-primary" style="min-height:32px;padding:6px 14px;font-size:0.82rem;" data-i18n="price.t2Cta">下方 10 秒验证码登录 ↓</a>
+          <div class="case-actions">
+            <a href="./methodology/brand-and-voice.md" class="ctrl-btn ctrl-btn-sm">看完整复盘 →</a>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="autopsy">复制这段分享</button>
           </div>
-        </div>
+        </article>
 
-        <div class="pricing-col">
-          <div class="pricing-head">
-            <h3 data-i18n="price.t3Name">Pro · 按量包 · Team（预约）</h3>
-            <span class="pricing-amount" data-i18n="price.t3Price">$12/月 · $10 按量</span>
+        <article class="case-card">
+          <span class="case-kicker">网页与 PPT 模板味</span>
+          <h3 class="case-title">紫粉渐变 + 装饰徽章 + 点不动的空链接</h3>
+          <div class="case-body">
+            <div class="case-step is-bad"><span class="case-step-label"><span>生成式模板原稿</span><span class="case-step-tag">没通过</span></span><code>from-indigo via-purple to-pink</code> 渐变标题 + <code>AI 强力驱动</code> 徽章 + <code>href=&quot;#&quot;</code> 假下载按钮。</div>
+            <div class="case-step is-good"><span class="case-step-label"><span>改干净</span><span class="case-step-tag">通过</span></span>纯色纸面和 1px 分界线、去掉装饰徽章、按钮接上真实报告路径 <code>./report.html</code>。</div>
+            <p class="case-note">同一套引擎也能直接读 .pptx，挑出单页字墙（&gt; 280 字）、要点超过 6 条、文字自动缩排和空泛标题。</p>
           </div>
-          <p class="pricing-sub" data-i18n="price.t3Sub">经常写选 Pro，每额度比按量省 36%；偶尔用买按量包，额度不过期。</p>
-          <ul class="pricing-list">
-            <li data-i18n="price.t3F1">Pro（$12/月）：1,500 额度/月（约 $0.008/额度），长文不限字数 + 10 份个人文风</li>
-            <li data-i18n="price.t3F2">按量额度包（$10 / 800 额度）：一次买断，额度不过期，适合偶尔用的人</li>
-            <li data-i18n="price.t3F3">Team（$29/席位/月）：5,000 额度 + 团队共享品牌文风与 PR 审核</li>
-            <li data-i18n="price.t3F4">统一调用 Google Gemini 付费版接口，不存草稿，不拿你的稿子训练</li>
-          </ul>
-          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
-            <a href="#cloud-waitlist-box" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" data-i18n="price.t3Cta">预约开通通知 ↓</a>
+          <div class="case-actions">
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="ui-chrome">在工作台试一下 ↑</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="ui">复制这段分享</button>
           </div>
+        </article>
+      </div>
+      <!-- dislop-quote-end -->
+    </section>
+
+    <!-- Chapter 5: Charcoal dark-room demo stage (six scenes; plain grid without JS) -->
+    <section id="demos" class="section-block band-rule" aria-labelledby="demos-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="demos-heading" data-i18n="demos.title">6 个真实场景：文字、网页、PPT 与 Agent 门禁</h2>
+          <p class="section-desc" data-i18n="demos.desc">每段 7 秒左右，用真实规则离线录制。选一个场景，可以定格、重播或放大看。</p>
         </div>
+        <a href="https://github.com/dislop-ai/dislop/blob/main/docs/gif-production-guide.zh-CN.md" target="_blank" rel="noopener" data-i18n="demos.guideLink">动画与 GIF 制作规范 →</a>
       </div>
 
-      <div class="cloud-forms-grid">
-        <div class="cloud-form-pane" id="cloud-token-box">
-          <h3 class="sub-heading" style="margin:0 0 6px;" data-i18n="cloud.tokenTitle">登录领取每月 30 免费额度 · 管理远程 MCP</h3>
-          <p class="cloud-form-desc" data-i18n="cloud.tokenDesc">
-            邮箱 6 位验证码登录，免密码免绑卡。登录后可直接在工作台审校与改写 Word/PPT，也能管理 MCP 密钥、已连应用与云端文风（不存草稿，详见底部隐私说明）。
-          </p>
-          <div id="cloud-account-status" class="cloud-status-bar" hidden></div>
-          <div id="cloud-auth-panel">
-            <form id="free-token-form" class="cloud-stack-form">
-              <div class="cloud-inline-form">
-                <input type="email" id="token-email-input" class="cloud-input" required autocomplete="email" placeholder="输入你的常用邮箱，例如 you@company.com" aria-label="邮箱地址">
-                <button type="submit" id="token-submit-btn" class="btn-primary" style="min-height:36px;padding:6px 14px;font-size:0.84rem;" data-i18n="cloud.tokenBtn">发验证码</button>
-              </div>
-              <div id="token-otp-step" class="cloud-inline-form" hidden>
-                <input type="text" id="token-otp-input" class="cloud-input" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="输入邮件里的 6 位数字验证码" aria-label="6 位验证码">
-                <button type="button" id="token-otp-verify-btn" class="btn-primary" style="min-height:36px;padding:6px 14px;font-size:0.84rem;" data-i18n="cloud.otpVerifyBtn">验证并登录</button>
-                <button type="button" id="token-otp-change-btn" class="ctrl-btn ctrl-btn-sm" data-i18n="cloud.otpChangeBtn">换个邮箱</button>
-              </div>
-            </form>
-            <div id="cloud-google-row" class="cloud-alt-row" hidden>
-              <a id="cloud-github-btn" href="/api/v1/auth/github/start?return=%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" hidden style="text-decoration:none;display:inline-flex;align-items:center;" data-i18n="cloud.githubBtn">用 GitHub 账号登录</a>
-              <a id="cloud-google-btn" href="/api/v1/auth/google/start?return=%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" hidden style="text-decoration:none;display:inline-flex;align-items:center;" data-i18n="cloud.googleBtn">用 Google 账号登录</a>
-            </div>
-            <details id="cloud-legacy-key-fold" class="cloud-legacy-fold">
-              <summary data-i18n="cloud.legacyKeySummary">已有 dslp_... 密钥？点此直接绑定</summary>
-              <form id="legacy-key-bind-form" class="cloud-inline-form" style="margin-top:8px;">
-                <input type="text" id="legacy-key-input" class="cloud-input" autocomplete="off" placeholder="dslp_..." aria-label="已有密钥">
-                <button type="submit" id="legacy-key-btn" class="ctrl-btn ctrl-btn-sm" data-i18n="cloud.legacyKeyBtn">验证并绑定</button>
-              </form>
-            </details>
-          </div>
-          <div id="cloud-account-hub" class="account-hub" hidden></div>
-          <div id="token-output-box" class="cloud-output-box" hidden></div>
+      <div class="demo-stage" data-demo-stage>
+        <div class="demo-stage-rail" role="tablist" aria-label="选择演示场景" hidden>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-proof-cycle" aria-selected="true" aria-controls="demo-card-proof-cycle" data-demo-select="proof-cycle"><span data-i18n="demos.tab1">三步改稿对照</span></button>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-cli-check" aria-selected="false" aria-controls="demo-card-cli-check" tabindex="-1" data-demo-select="cli-check"><span data-i18n="demos.tab2">命令行门禁</span></button>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-workbench-live" aria-selected="false" aria-controls="demo-card-workbench-live" tabindex="-1" data-demo-select="workbench-live"><span data-i18n="demos.tab3">工作台实录</span></button>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-ui-slop" aria-selected="false" aria-controls="demo-card-ui-slop" tabindex="-1" data-demo-select="ui-slop"><span data-i18n="demos.tab4">网页去模板</span></button>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-deck-office" aria-selected="false" aria-controls="demo-card-deck-office" tabindex="-1" data-demo-select="deck-office"><span data-i18n="demos.tab5">Word / PPT</span></button>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-agent-workflow" aria-selected="false" aria-controls="demo-card-agent-workflow" tabindex="-1" data-demo-select="agent-workflow"><span data-i18n="demos.tab6">Agent + CI</span></button>
         </div>
 
-        <div class="cloud-form-pane" id="cloud-waitlist-box">
-          <h3 class="sub-heading" style="margin:0 0 6px;" data-i18n="cloud.wlTitle">预约 Pro / 按量包 / Team</h3>
-          <p class="cloud-form-desc" data-i18n="cloud.wlDesc">
-            自助支付还没上线。留下邮箱和想用的方案，上线后通知你。
-          </p>
-          <form id="waitlist-form" class="cloud-stack-form">
-            <div class="cloud-inline-form">
-              <select id="wl-plan-select" class="pack-select" aria-label="选择方案">
-                <option value="pro" data-i18n="cloud.planPro">Pro（$12/月 · 1,500 额度）</option>
-                <option value="credits" data-i18n="cloud.planCredits">按量包（$10 / 800 额度 · 永不过期）</option>
-                <option value="team" data-i18n="cloud.planTeam">Team（$29/席位 · 团队文风）</option>
-              </select>
-              <input type="email" id="wl-email-input" class="cloud-input" required placeholder="联系邮箱" aria-label="预约邮箱">
+        <div class="demos-grid">
+        <figure class="demo-card" id="demo-card-proof-cycle" data-demo-card="proof-cycle">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/proof-cycle-zh-v2-poster.png" data-demo-poster="proof-cycle">
+              <source type="image/webp" srcset="./assets/demos/proof-cycle-zh-v2.webp" data-demo-webp="proof-cycle">
+              <img src="./assets/demos/proof-cycle-zh-v2.gif" alt="dislop 检查上线说明：标出 AI 寒暄与空话、拦下二阶口号、改干净后退出码 0" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="proof-cycle">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c1Title">同一段话的三个版本：防改过头换成反转口号</strong>
+              <span class="demo-cap-badge" data-i18n="demos.c1Badge">3 步对照 · 6.8s</span>
             </div>
-            <div class="cloud-inline-form">
-              <input type="text" id="wl-note-input" class="cloud-input" maxlength="200" placeholder="选填：主要场景（如周报 / PPT / 公众号 / 团队文档）" aria-label="使用场景备注">
-              <button type="submit" id="wl-submit-btn" class="ctrl-btn" style="min-height:36px;padding:6px 14px;" data-i18n="cloud.wlBtn">提交预约</button>
+            <span class="demo-cap-desc" data-i18n="demos.c1Desc">先用红实线划掉开头寒暄，再用蓝虚线抓出“不是……而是……”反转口号，最后只留动作和 45 秒真实指标。</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="proof-cycle" aria-pressed="false" data-i18n="demos.pause">定格</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="proof-cycle" data-i18n="demos.replay">重播</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="proof-cycle" data-i18n="demos.zoom">放大看</button>
             </div>
-          </form>
-          <div id="wl-output-box" class="cloud-output-box" hidden></div>
+          </figcaption>
+        </figure>
+
+        <figure class="demo-card" id="demo-card-cli-check" data-demo-card="cli-check">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/cli-check-zh-v2-poster.png" data-demo-poster="cli-check">
+              <source type="image/webp" srcset="./assets/demos/cli-check-zh-v2.webp" data-demo-webp="cli-check">
+              <img src="./assets/demos/cli-check-zh-v2.gif" alt="dislop CLI 本地离线检查：原稿退出码 1，清掉套话后复检退出码 0" width="920" height="460" loading="lazy" decoding="async" data-demo-gif="cli-check">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c2Title">命令行门禁：Node 与 Python 结果一致</strong>
+              <span class="demo-cap-badge" data-i18n="demos.c2Badge">CLI 离线 · 6.4s</span>
+            </div>
+            <span class="demo-cap-desc" data-i18n="demos.c2Desc">本地跑 dislop check --profile，硬伤直接返回退出码 1 卡住 CI，顺带输出句长起伏与具体度体检。</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="cli-check" aria-pressed="false" data-i18n="demos.pause">定格</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="cli-check" data-i18n="demos.replay">重播</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="cli-check" data-i18n="demos.zoom">放大看</button>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="demo-card" id="demo-card-workbench-live" data-demo-card="workbench-live">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/workbench-live-zh-v2-poster.png" data-demo-poster="workbench-live">
+              <source type="image/webp" srcset="./assets/demos/workbench-live-zh-v2.webp" data-demo-webp="workbench-live">
+              <img src="./assets/demos/workbench-live-zh-v2.gif" alt="dislop.com 浏览器离线工作台真实操作：点击切换原稿、二阶 AI 味与改干净版本" width="1140" height="640" loading="lazy" decoding="async" data-demo-gif="workbench-live">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c3Title">浏览器离线工作台：真机操作实录</strong>
+              <span class="demo-cap-badge" data-i18n="demos.c3Badge">真机实录 · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc" data-i18n="demos.c3Desc">就是本页上方的工作台。贴稿子、点切规则包、实时对齐右侧行号批注与 5 轴体检，全程在当前标签页完成。</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="workbench-live" aria-pressed="false" data-i18n="demos.pause">定格</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="workbench-live" data-i18n="demos.replay">重播</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="workbench-live" data-i18n="demos.zoom">放大看</button>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="demo-card" id="demo-card-ui-slop" data-demo-card="ui-slop">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/ui-slop-zh-v2-poster.png" data-demo-poster="ui-slop">
+              <source type="image/webp" srcset="./assets/demos/ui-slop-zh-v2.webp" data-demo-webp="ui-slop">
+              <img src="./assets/demos/ui-slop-zh-v2.gif" alt="网页组件模板味排查：标出紫粉渐变、胶囊标签墙与空链接，改为 1px 白底版式" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="ui-slop">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c4Title">网页与组件：清掉默认紫粉模板和死按钮</strong>
+              <span class="demo-cap-badge" data-i18n="demos.c4Badge">网页去模板 · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc" data-i18n="demos.c4Desc">直接扫 HTML/CSS/JSX 里的渐变标题、装饰徽章、胶囊堆叠和 href=&quot;#&quot; 假按钮，退回干净可用的界面。</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="ui-slop" aria-pressed="false" data-i18n="demos.pause">定格</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="ui-slop" data-i18n="demos.replay">重播</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="ui-slop" data-i18n="demos.zoom">放大看</button>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="demo-card" id="demo-card-deck-office" data-demo-card="deck-office">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/deck-office-zh-v2-poster.png" data-demo-poster="deck-office">
+              <source type="image/webp" srcset="./assets/demos/deck-office-zh-v2.webp" data-demo-webp="deck-office">
+              <img src="./assets/demos/deck-office-zh-v2.gif" alt="dislop 检查 quarterly-review.pptx：标出裸 Markdown、字墙、缩排和过程标题后改为结论页" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="deck-office">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c5Title">Word / PPT 检查：揪出裸星号、字墙和过程标题</strong>
+              <span class="demo-cap-badge" data-i18n="demos.c5Badge">PPTX 实检 · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc" data-i18n="demos.c5Desc">直接解包 .pptx 检查未渲染的 **加粗** 符号、单页字墙、68% 自动缩字与空泛标题，改回结论先行的干净页。</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="deck-office" aria-pressed="false" data-i18n="demos.pause">定格</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="deck-office" data-i18n="demos.replay">重播</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="deck-office" data-i18n="demos.zoom">放大看</button>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="demo-card" id="demo-card-agent-workflow" data-demo-card="agent-workflow">
+          <div class="demo-media">
+            <picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="./assets/demos/agent-workflow-zh-v2-poster.png" data-demo-poster="agent-workflow">
+              <source type="image/webp" srcset="./assets/demos/agent-workflow-zh-v2.webp" data-demo-webp="agent-workflow">
+              <img src="./assets/demos/agent-workflow-zh-v2.gif" alt="Agent 闭环工作流：加载 SKILL.md、增量门禁退出码 1、修复后复检退出码 0" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="agent-workflow">
+            </picture>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c6Title">编码 Agent + CI 闭环：写前读 Skill，提交前过门禁</strong>
+              <span class="demo-cap-badge" data-i18n="demos.c6Badge">Agent 闭环 · 6.8s</span>
+            </div>
+            <span class="demo-cap-desc" data-i18n="demos.c6Desc">Agent 先读取纯文档 SKILL.md，再用 --changed origin/main 拦下 PR 寒暄与复读 diff，修完复检确认数字零丢失。</span>
+            <div class="demo-card-actions">
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="agent-workflow" aria-pressed="false" data-i18n="demos.pause">定格</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="agent-workflow" data-i18n="demos.replay">重播</button>
+              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="agent-workflow" data-i18n="demos.zoom">放大看</button>
+            </div>
+          </figcaption>
+        </figure>
         </div>
       </div>
     </section>
 
-    <!-- Awesome Anti-Slop (Curated Content & Ecosystem Hub) -->
-    <section id="awesome" class="section-block band-rule">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" data-i18n="awesome.title">去 AI 味工具清单：90 个核验工具与参考资料</h2>
-          <p class="section-desc" data-i18n="awesome.desc">
-            除了 dislop 自己，我们也维护了一份按场景整理的去 AI 味资源索引，包含 Vale、Impeccable 等常用工具、中英文写作规范、代码 PR 治理规则和实证论文。全部链接在 2026-11-21 逐条核过一遍。
-          </p>
-        </div>
-        <a href="./awesome/" data-i18n="awesome.openFull">打开完整清单 →</a>
-      </div>
-
-      <div class="radar-split">
-        <div class="radar-split-col">
-          <h3 class="sub-heading" data-i18n="awesome.ecoTitle">按用途筛选，也可以直接给 Agent 读</h3>
-          <p style="margin:0;font-size:0.88rem;color:var(--ink-2);" data-i18n="awesome.ecoDesc">
-            按写作、网页、代码、研究分类筛选，或者只看能本地自动检查的工具。AI 检测器和规避工具单独放在最下面做对照。
-          </p>
-<!-- BUILD:RADAR_STATS -->
-          <div class="stat-strip">
-            <div class="stat-cell"><span class="stat-num">90</span><span class="stat-label" data-i18n="stat.entries">条资料</span></div>
-            <div class="stat-cell"><span class="stat-num">8</span><span class="stat-label" data-i18n="stat.sections">个分类</span></div>
-            <div class="stat-cell"><span class="stat-num">20</span><span class="stat-label" data-i18n="stat.det">个可自动检查</span></div>
-            <div class="stat-cell"><span class="stat-num">21</span><span class="stat-label" data-i18n="stat.zh">条中文 / 多语种</span></div>
-          </div>
-<!-- /BUILD:RADAR_STATS -->
-          <div class="quick-actions" style="margin-top:14px;">
-            <a href="./awesome/" class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" data-i18n="awesome.browseBtn">在线筛选 90 条清单 →</a>
-            <a href="https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md" target="_blank" rel="noopener" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" id="awesome-gh-link" data-i18n="awesome.ghBtn">GitHub 中文版</a>
-            <button type="button" class="ctrl-btn" id="copy-awesome-share-btn" data-i18n="awesome.shareBtn">复制清单推荐语</button>
-            <a href="./awesome/index.json" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;">index.json</a>
-          </div>
-        </div>
-
-        <div class="radar-split-col">
-          <h3 class="sub-heading" data-i18n="awesome.posTitle">不想长成 AI 模板？看看这些设计参考</h3>
-          <p style="margin:0;font-size:0.86rem;color:var(--ink-2);" data-i18n="awesome.posDesc">
-            除了去套话，还存了 31 个印刷、字体厂和独立出版站点，做网页或排版时拿来找灵感很管用。
-          </p>
-<!-- BUILD:POSITIVE_REFS -->
-          <ul class="ref-list">
-            <li><a href="https://www.norm.to" target="_blank" rel="noopener">Norm (Zurich)</a><span class="ref-note" data-i18n="pos.norm-zurich">苏黎世独立设计事务所，用严格的模数网格排版。</span></li>
-            <li><a href="https://www.stiftung-buchkunst.de" target="_blank" rel="noopener">Stiftung Buchkunst (Best Book Design from all over the World)</a><span class="ref-note" data-i18n="pos.stiftung-buchkunst">世界最美的书评选档案：看页边距、版心比例与长篇阅读怎么排得不挤。</span></li>
-            <li><a href="https://fontsinuse.com" target="_blank" rel="noopener">Fonts In Use</a><span class="ref-note" data-i18n="pos.fonts-in-use">真实印刷品与网页里的字体搭配库。</span></li>
-            <li><a href="https://abcdinamo.com" target="_blank" rel="noopener">Dinamo</a><span class="ref-note" data-i18n="pos.dinamo">瑞士独立字厂，看可变字重与大号字阶怎么撑起实用界面。</span></li>
-            <li><a href="https://www.thetype.com" target="_blank" rel="noopener">The Type</a><span class="ref-note" data-i18n="pos.the-type">中文排印评论，细聊标点挤压、混排细节与出版规范。</span></li>
-            <li><a href="https://www.are.na" target="_blank" rel="noopener">Are.na</a><span class="ref-note" data-i18n="pos.arena">研究者自己攒的视觉线索库：旧印刷、路牌与独立小书。</span></li>
-          </ul>
-<!-- /BUILD:POSITIVE_REFS -->
-          <p style="margin:12px 0 0;font-size:0.8rem;"><a href="./cases/ui-specimens.md" data-i18n="awesome.posAll">全部 31 个参考（.md）→</a></p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Share & GitHub Star Conversion Strip -->
-    <section id="share" class="section-block band-rule" aria-labelledby="share-heading">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" id="share-heading" data-i18n="share.title">觉得顺手？发给同事，或者去 GitHub 收藏</h2>
-          <p class="section-desc" data-i18n="share.desc">
-            Skill、本地 CLI 和 53 条内置规则按 Apache-2.0 开源，可纯本地离线运行；网页工作台和官方云端 MCP 登录后可使用多模型审校，不存草稿。
-          </p>
-        </div>
-      </div>
-
-      <div class="share-grid">
-        <div class="share-col">
-          <h3 data-i18n="share.c1Title">一键分享给团队或朋友</h3>
-          <p data-i18n="share.c1Desc">复制一段直白不浮夸的介绍（带官网试用链接、案例页和工具清单），直接贴到群聊或文档里就行。</p>
-          <div class="quick-actions">
-            <button type="button" class="ctrl-btn" id="copy-site-share-btn" data-i18n="share.copySiteBtn">复制项目推荐语</button>
-            <button type="button" class="ctrl-btn" id="copy-cases-link-btn" data-i18n="share.copyCasesBtn">复制案例页链接</button>
-          </div>
-        </div>
-        <div class="share-col">
-          <h3 data-i18n="share.c2Title">去 GitHub 收藏仓库</h3>
-          <p data-i18n="share.c2Desc">检查引擎、纯文档 Skill、Plugin、命令行和 Awesome Anti-Slop 清单都在同一个仓库，点个 Star 方便以后找。</p>
-          <div class="quick-actions">
-            <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="btn-primary" style="min-height:32px;padding:6px 14px;font-size:0.82rem;" data-i18n="share.starCta">GitHub 点 Star ★</a>
-          </div>
-        </div>
-        <div class="share-col">
-          <h3 data-i18n="share.c3Title">一起补案例、规则和工具</h3>
-          <p data-i18n="share.c3Desc">遇到特别典型的 AI 味翻车案例，或者发现好用的去 AI 味工具没进清单，欢迎在路线图或 Issue 里一起补。</p>
-          <div class="quick-actions">
-            <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" id="share-roadmap-link" data-i18n="share.roadmapCta">看路线图 →</a>
-            <a href="https://github.com/dislop-ai/dislop/issues" target="_blank" rel="noopener" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" data-i18n="share.issueCta">投稿案例 / 工具</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- What it checks (Concise Formats Reference) -->
+    <!-- Chapter 6: Honest format matrix -->
     <section id="coverage" class="section-block band-rule">
       <div class="section-header">
         <div>
@@ -1055,7 +844,7 @@
       </div>
     </section>
 
-    <!-- Rule Catalog (Folded by default so humans see the big picture; auto-opens on #rule-* or click) -->
+    <!-- Rule encyclopedia (folded by default; opens on #rule-* or click) -->
     <section id="rules" class="section-block band-rule">
       <div class="section-header">
         <div>
@@ -1095,14 +884,14 @@
 
           <div class="filter-bar">
             <div class="filter-group" id="rule-filters" role="group" aria-label="按规则包筛选">
-              <button type="button" class="ctrl-btn is-active" data-pack-filter="all" data-i18n="rules.filterAll">全部</button>
-              <button type="button" class="ctrl-btn" data-pack-filter="core" data-i18n="rules.filterCore">交付底线</button>
-              <button type="button" class="ctrl-btn" data-pack-filter="business-brief" data-i18n="rules.filterBrief">工作文档</button>
-              <button type="button" class="ctrl-btn" data-pack-filter="engineering-spec" data-i18n="rules.filterEng">研发文档与复盘</button>
-              <button type="button" class="ctrl-btn" data-pack-filter="regulated-comms" data-i18n="rules.filterReg">对外合规</button>
-              <button type="button" class="ctrl-btn" data-pack-filter="literary-essay" data-i18n="rules.filterEssay">随笔长文</button>
-              <button type="button" class="ctrl-btn" data-pack-filter="deck-and-ui" data-i18n="rules.filterUi">PPT 和网页</button>
-              <button type="button" class="ctrl-btn" data-pack-filter="executive-deck" data-i18n="rules.filterExec">管理汇报</button>
+              <button type="button" class="ctrl-btn sheet-btn is-active" data-pack-filter="all" data-i18n="rules.filterAll">全部</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="core" data-i18n="rules.filterCore">交付底线</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="business-brief" data-i18n="rules.filterBrief">工作文档</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="engineering-spec" data-i18n="rules.filterEng">研发文档与复盘</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="regulated-comms" data-i18n="rules.filterReg">对外合规</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="literary-essay" data-i18n="rules.filterEssay">随笔长文</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="deck-and-ui" data-i18n="rules.filterUi">PPT 和网页</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="executive-deck" data-i18n="rules.filterExec">管理汇报</button>
             </div>
           </div>
 
@@ -1125,7 +914,7 @@
                 <strong>忘了填的占位符</strong>
                 <div style="margin-top:2px;"><code>unfilled-placeholder</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="unfilled-placeholder" aria-label="在工作台试试 忘了填的占位符">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="unfilled-placeholder" aria-label="在工作台试试 忘了填的占位符">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/unfilled-placeholder.md" aria-label="查看 unfilled-placeholder 规则卡片">.md</a>
                 </div>
               </td>
@@ -1143,7 +932,7 @@
                 <strong>留在正文里的 AI 寒暄</strong>
                 <div style="margin-top:2px;"><code>chatbot-artifact</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="chatbot-artifact" aria-label="在工作台试试 留在正文里的 AI 寒暄">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="chatbot-artifact" aria-label="在工作台试试 留在正文里的 AI 寒暄">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/chatbot-artifact.md" aria-label="查看 chatbot-artifact 规则卡片">.md</a>
                 </div>
               </td>
@@ -1177,7 +966,7 @@
                 <strong>点不动的假按钮或空链接</strong>
                 <div style="margin-top:2px;"><code>ui-dead-control</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="ui-dead-control" aria-label="在工作台试试 点不动的假按钮或空链接">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-dead-control" aria-label="在工作台试试 点不动的假按钮或空链接">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/ui-dead-control.md" aria-label="查看 ui-dead-control 规则卡片">.md</a>
                 </div>
               </td>
@@ -1194,7 +983,7 @@
                 <strong>英文铺垫开场白</strong>
                 <div style="margin-top:2px;"><code>en-throat-clearing-opener</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="en-throat-clearing-opener" aria-label="在工作台试试 英文铺垫开场白">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="en-throat-clearing-opener" aria-label="在工作台试试 英文铺垫开场白">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/en-throat-clearing-opener.md" aria-label="查看 en-throat-clearing-opener 规则卡片">.md</a>
                 </div>
               </td>
@@ -1212,7 +1001,7 @@
                 <strong>英文高频套词</strong>
                 <div style="margin-top:2px;"><code>en-cliche-lexicon</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="en-cliche-lexicon" aria-label="在工作台试试 英文高频套词">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="en-cliche-lexicon" aria-label="在工作台试试 英文高频套词">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/en-cliche-lexicon.md" aria-label="查看 en-cliche-lexicon 规则卡片">.md</a>
                 </div>
               </td>
@@ -1230,7 +1019,7 @@
                 <strong>公文黑话与空泛词</strong>
                 <div style="margin-top:2px;"><code>zh-bureaucratic-padding</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="zh-bureaucratic-padding" aria-label="在工作台试试 公文黑话与空泛词">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-bureaucratic-padding" aria-label="在工作台试试 公文黑话与空泛词">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/zh-bureaucratic-padding.md" aria-label="查看 zh-bureaucratic-padding 规则卡片">.md</a>
                 </div>
               </td>
@@ -1248,7 +1037,7 @@
                 <strong>“不是 A，而是 B”套句</strong>
                 <div style="margin-top:2px;"><code>negation-pivot-frame</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="negation-pivot-frame" aria-label="在工作台试试 “不是 A，而是 B”套句">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="negation-pivot-frame" aria-label="在工作台试试 “不是 A，而是 B”套句">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/negation-pivot-frame.md" aria-label="查看 negation-pivot-frame 规则卡片">.md</a>
                 </div>
               </td>
@@ -1266,7 +1055,7 @@
                 <strong>英文短句口号连发</strong>
                 <div style="margin-top:2px;"><code>staccato-slogan-run</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="staccato-slogan-run" aria-label="在工作台试试 英文短句口号连发">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="staccato-slogan-run" aria-label="在工作台试试 英文短句口号连发">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/staccato-slogan-run.md" aria-label="查看 staccato-slogan-run 规则卡片">.md</a>
                 </div>
               </td>
@@ -1284,7 +1073,7 @@
                 <strong>四字排比串</strong>
                 <div style="margin-top:2px;"><code>zh-four-char-triad</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="zh-four-char-triad" aria-label="在工作台试试 四字排比串">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-four-char-triad" aria-label="在工作台试试 四字排比串">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/zh-four-char-triad.md" aria-label="查看 zh-four-char-triad 规则卡片">.md</a>
                 </div>
               </td>
@@ -1302,7 +1091,7 @@
                 <strong>没写明出处的“研究表明”</strong>
                 <div style="margin-top:2px;"><code>unsourced-attribution</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="unsourced-attribution" aria-label="在工作台试试 没写明出处的“研究表明”">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="unsourced-attribution" aria-label="在工作台试试 没写明出处的“研究表明”">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/unsourced-attribution.md" aria-label="查看 unsourced-attribution 规则卡片">.md</a>
                 </div>
               </td>
@@ -1320,7 +1109,7 @@
                 <strong>满屏“加粗词 + 冒号”清单</strong>
                 <div style="margin-top:2px;"><code>bold-lead-list-wall</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="bold-lead-list-wall" aria-label="在工作台试试 满屏“加粗词 + 冒号”清单">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="bold-lead-list-wall" aria-label="在工作台试试 满屏“加粗词 + 冒号”清单">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/bold-lead-list-wall.md" aria-label="查看 bold-lead-list-wall 规则卡片">.md</a>
                 </div>
               </td>
@@ -1340,7 +1129,7 @@
                 <strong>低事实段落堆叠空泛动词</strong>
                 <div style="margin-top:2px;"><code>cooccurrence-slop-cluster</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="cooccurrence-slop-cluster" aria-label="在工作台试试 低事实段落堆叠空泛动词">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="cooccurrence-slop-cluster" aria-label="在工作台试试 低事实段落堆叠空泛动词">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/cooccurrence-slop-cluster.md" aria-label="查看 cooccurrence-slop-cluster 规则卡片">.md</a>
                 </div>
               </td>
@@ -1358,7 +1147,7 @@
                 <strong>三段对称分号推销句</strong>
                 <div style="margin-top:2px;"><code>semicolon-tricolon</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="semicolon-tricolon" aria-label="在工作台试试 三段对称分号推销句">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="semicolon-tricolon" aria-label="在工作台试试 三段对称分号推销句">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/semicolon-tricolon.md" aria-label="查看 semicolon-tricolon 规则卡片">.md</a>
                 </div>
               </td>
@@ -1376,7 +1165,7 @@
                 <strong>自问自答式营销设问</strong>
                 <div style="margin-top:2px;"><code>rhetorical-qa-cadence</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="rhetorical-qa-cadence" aria-label="在工作台试试 自问自答式营销设问">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="rhetorical-qa-cadence" aria-label="在工作台试试 自问自答式营销设问">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/rhetorical-qa-cadence.md" aria-label="查看 rhetorical-qa-cadence 规则卡片">.md</a>
                 </div>
               </td>
@@ -1394,7 +1183,7 @@
                 <strong>五连逗号一逗到底长句</strong>
                 <div style="margin-top:2px;"><code>comma-chain-runon</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="comma-chain-runon" aria-label="在工作台试试 五连逗号一逗到底长句">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="comma-chain-runon" aria-label="在工作台试试 五连逗号一逗到底长句">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/comma-chain-runon.md" aria-label="查看 comma-chain-runon 规则卡片">.md</a>
                 </div>
               </td>
@@ -1412,7 +1201,7 @@
                 <strong>趋势帽开场与展望帽收尾</strong>
                 <div style="margin-top:2px;"><code>narrative-sandwich-frame</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="narrative-sandwich-frame" aria-label="在工作台试试 趋势帽开场与展望帽收尾">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="narrative-sandwich-frame" aria-label="在工作台试试 趋势帽开场与展望帽收尾">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/narrative-sandwich-frame.md" aria-label="查看 narrative-sandwich-frame 规则卡片">.md</a>
                 </div>
               </td>
@@ -1430,7 +1219,7 @@
                 <strong>连续三段同构句首填表腔</strong>
                 <div style="margin-top:2px;"><code>template-skeleton-echo</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="template-skeleton-echo" aria-label="在工作台试试 连续三段同构句首填表腔">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="template-skeleton-echo" aria-label="在工作台试试 连续三段同构句首填表腔">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/template-skeleton-echo.md" aria-label="查看 template-skeleton-echo 规则卡片">.md</a>
                 </div>
               </td>
@@ -1452,7 +1241,7 @@
                 <strong>句长齐平且缺具体事实</strong>
                 <div style="margin-top:2px;"><code>low-burstiness-vapor</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="low-burstiness-vapor" aria-label="在工作台试试 句长齐平且缺具体事实">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="low-burstiness-vapor" aria-label="在工作台试试 句长齐平且缺具体事实">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/low-burstiness-vapor.md" aria-label="查看 low-burstiness-vapor 规则卡片">.md</a>
                 </div>
               </td>
@@ -1470,7 +1259,7 @@
                 <strong>中文研发与产品自嗨黑话</strong>
                 <div style="margin-top:2px;"><code>zh-dev-jargon</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="zh-dev-jargon" aria-label="在工作台试试 中文研发与产品自嗨黑话">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-dev-jargon" aria-label="在工作台试试 中文研发与产品自嗨黑话">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/zh-dev-jargon.md" aria-label="查看 zh-dev-jargon 规则卡片">.md</a>
                 </div>
               </td>
@@ -1488,7 +1277,7 @@
                 <strong>中文正文鸡血感叹号</strong>
                 <div style="margin-top:2px;"><code>zh-exclamation</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="zh-exclamation" aria-label="在工作台试试 中文正文鸡血感叹号">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-exclamation" aria-label="在工作台试试 中文正文鸡血感叹号">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/zh-exclamation.md" aria-label="查看 zh-exclamation 规则卡片">.md</a>
                 </div>
               </td>
@@ -1506,7 +1295,7 @@
                 <strong>中文超长一逗到底单句</strong>
                 <div style="margin-top:2px;"><code>zh-mega-sentence</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="zh-mega-sentence" aria-label="在工作台试试 中文超长一逗到底单句">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-mega-sentence" aria-label="在工作台试试 中文超长一逗到底单句">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/zh-mega-sentence.md" aria-label="查看 zh-mega-sentence 规则卡片">.md</a>
                 </div>
               </td>
@@ -1524,7 +1313,7 @@
                 <strong>无基线/出处的百分比宣称</strong>
                 <div style="margin-top:2px;"><code>unsourced-statistic</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="unsourced-statistic" aria-label="在工作台试试 无基线/出处的百分比宣称">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="unsourced-statistic" aria-label="在工作台试试 无基线/出处的百分比宣称">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/unsourced-statistic.md" aria-label="查看 unsourced-statistic 规则卡片">.md</a>
                 </div>
               </td>
@@ -1542,7 +1331,7 @@
                 <strong>空泛的 AI 提交摘要壳</strong>
                 <div style="margin-top:2px;"><code>eng-pr-diff-parrot</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="eng-pr-diff-parrot" aria-label="在工作台试试 空泛的 AI 提交摘要壳">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="eng-pr-diff-parrot" aria-label="在工作台试试 空泛的 AI 提交摘要壳">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/eng-pr-diff-parrot.md" aria-label="查看 eng-pr-diff-parrot 规则卡片">.md</a>
                 </div>
               </td>
@@ -1560,7 +1349,7 @@
                 <strong>复盘止步于“人为失误”</strong>
                 <div style="margin-top:2px;"><code>eng-shallow-root-cause</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="eng-shallow-root-cause" aria-label="在工作台试试 复盘止步于“人为失误”">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="eng-shallow-root-cause" aria-label="在工作台试试 复盘止步于“人为失误”">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/eng-shallow-root-cause.md" aria-label="查看 eng-shallow-root-cause 规则卡片">.md</a>
                 </div>
               </td>
@@ -1578,7 +1367,7 @@
                 <strong>无指标无负责人的改进项</strong>
                 <div style="margin-top:2px;"><code>eng-vague-action-item</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="eng-vague-action-item" aria-label="在工作台试试 无指标无负责人的改进项">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="eng-vague-action-item" aria-label="在工作台试试 无指标无负责人的改进项">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/eng-vague-action-item.md" aria-label="查看 eng-vague-action-item 规则卡片">.md</a>
                 </div>
               </td>
@@ -1596,7 +1385,7 @@
                 <strong>绝对化承诺与极限合规词</strong>
                 <div style="margin-top:2px;"><code>reg-unsubstantiated-superlative</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="reg-unsubstantiated-superlative" aria-label="在工作台试试 绝对化承诺与极限合规词">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="reg-unsubstantiated-superlative" aria-label="在工作台试试 绝对化承诺与极限合规词">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/reg-unsubstantiated-superlative.md" aria-label="查看 reg-unsubstantiated-superlative 规则卡片">.md</a>
                 </div>
               </td>
@@ -1614,7 +1403,7 @@
                 <strong>无基线的悬空倍数宣称</strong>
                 <div style="margin-top:2px;"><code>reg-unanchored-multiplier</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="reg-unanchored-multiplier" aria-label="在工作台试试 无基线的悬空倍数宣称">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="reg-unanchored-multiplier" aria-label="在工作台试试 无基线的悬空倍数宣称">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/reg-unanchored-multiplier.md" aria-label="查看 reg-unanchored-multiplier 规则卡片">.md</a>
                 </div>
               </td>
@@ -1632,7 +1421,7 @@
                 <strong>段尾说教式升华</strong>
                 <div style="margin-top:2px;"><code>zh-essay-moralizing-ending</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="zh-essay-moralizing-ending" aria-label="在工作台试试 段尾说教式升华">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-essay-moralizing-ending" aria-label="在工作台试试 段尾说教式升华">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/zh-essay-moralizing-ending.md" aria-label="查看 zh-essay-moralizing-ending 规则卡片">.md</a>
                 </div>
               </td>
@@ -1650,7 +1439,7 @@
                 <strong>英文段尾升华</strong>
                 <div style="margin-top:2px;"><code>en-essay-moralizing-ending</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="en-essay-moralizing-ending" aria-label="在工作台试试 英文段尾升华">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="en-essay-moralizing-ending" aria-label="在工作台试试 英文段尾升华">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/en-essay-moralizing-ending.md" aria-label="查看 en-essay-moralizing-ending 规则卡片">.md</a>
                 </div>
               </td>
@@ -1668,7 +1457,7 @@
                 <strong>金句腔“不是……而是……”</strong>
                 <div style="margin-top:2px;"><code>literary-negation-pivot</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="literary-negation-pivot" aria-label="在工作台试试 金句腔“不是……而是……”">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="literary-negation-pivot" aria-label="在工作台试试 金句腔“不是……而是……”">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/literary-negation-pivot.md" aria-label="查看 literary-negation-pivot 规则卡片">.md</a>
                 </div>
               </td>
@@ -1686,7 +1475,7 @@
                 <strong>破折号太密</strong>
                 <div style="margin-top:2px;"><code>excessive-em-dash-density</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="excessive-em-dash-density" aria-label="在工作台试试 破折号太密">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="excessive-em-dash-density" aria-label="在工作台试试 破折号太密">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/excessive-em-dash-density.md" aria-label="查看 excessive-em-dash-density 规则卡片">.md</a>
                 </div>
               </td>
@@ -1704,7 +1493,7 @@
                 <strong>中文里混了半角标点</strong>
                 <div style="margin-top:2px;"><code>zh-halfwidth-punctuation</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="zh-halfwidth-punctuation" aria-label="在工作台试试 中文里混了半角标点">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-halfwidth-punctuation" aria-label="在工作台试试 中文里混了半角标点">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/zh-halfwidth-punctuation.md" aria-label="查看 zh-halfwidth-punctuation 规则卡片">.md</a>
                 </div>
               </td>
@@ -1722,7 +1511,7 @@
                 <strong>散文三段分号排比腔</strong>
                 <div style="margin-top:2px;"><code>literary-semicolon-tricolon</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="literary-semicolon-tricolon" aria-label="在工作台试试 散文三段分号排比腔">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="literary-semicolon-tricolon" aria-label="在工作台试试 散文三段分号排比腔">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/literary-semicolon-tricolon.md" aria-label="查看 literary-semicolon-tricolon 规则卡片">.md</a>
                 </div>
               </td>
@@ -1740,7 +1529,7 @@
                 <strong>随笔自问自答抒情腔</strong>
                 <div style="margin-top:2px;"><code>literary-rhetorical-qa</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="literary-rhetorical-qa" aria-label="在工作台试试 随笔自问自答抒情腔">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="literary-rhetorical-qa" aria-label="在工作台试试 随笔自问自答抒情腔">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/literary-rhetorical-qa.md" aria-label="查看 literary-rhetorical-qa 规则卡片">.md</a>
                 </div>
               </td>
@@ -1758,7 +1547,7 @@
                 <strong>随笔时代大帽子与升华尾</strong>
                 <div style="margin-top:2px;"><code>literary-narrative-frame</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="literary-narrative-frame" aria-label="在工作台试试 随笔时代大帽子与升华尾">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="literary-narrative-frame" aria-label="在工作台试试 随笔时代大帽子与升华尾">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/literary-narrative-frame.md" aria-label="查看 literary-narrative-frame 规则卡片">.md</a>
                 </div>
               </td>
@@ -1840,7 +1629,7 @@
                 <strong>默认紫粉霓虹渐变</strong>
                 <div style="margin-top:2px;"><code>ui-ai-gradient</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="ui-ai-gradient" aria-label="在工作台试试 默认紫粉霓虹渐变">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-ai-gradient" aria-label="在工作台试试 默认紫粉霓虹渐变">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/ui-ai-gradient.md" aria-label="查看 ui-ai-gradient 规则卡片">.md</a>
                 </div>
               </td>
@@ -1857,7 +1646,7 @@
                 <strong>满屏胶囊小标签</strong>
                 <div style="margin-top:2px;"><code>ui-pill-soup</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="ui-pill-soup" aria-label="在工作台试试 满屏胶囊小标签">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-pill-soup" aria-label="在工作台试试 满屏胶囊小标签">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/ui-pill-soup.md" aria-label="查看 ui-pill-soup 规则卡片">.md</a>
                 </div>
               </td>
@@ -1874,7 +1663,7 @@
                 <strong>框套框套框（三层套盒）</strong>
                 <div style="margin-top:2px;"><code>ui-box-in-box</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="ui-box-in-box" aria-label="在工作台试试 框套框套框（三层套盒）">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-box-in-box" aria-label="在工作台试试 框套框套框（三层套盒）">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/ui-box-in-box.md" aria-label="查看 ui-box-in-box 规则卡片">.md</a>
                 </div>
               </td>
@@ -1891,7 +1680,7 @@
                 <strong>把提示词印成了界面徽章</strong>
                 <div style="margin-top:2px;"><code>ui-prompt-echo-badge</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="ui-prompt-echo-badge" aria-label="在工作台试试 把提示词印成了界面徽章">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-prompt-echo-badge" aria-label="在工作台试试 把提示词印成了界面徽章">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/ui-prompt-echo-badge.md" aria-label="查看 ui-prompt-echo-badge 规则卡片">.md</a>
                 </div>
               </td>
@@ -1908,7 +1697,7 @@
                 <strong>霓虹光晕球与闪烁圆点</strong>
                 <div style="margin-top:2px;"><code>ui-glow-blob-chrome</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="ui-glow-blob-chrome" aria-label="在工作台试试 霓虹光晕球与闪烁圆点">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-glow-blob-chrome" aria-label="在工作台试试 霓虹光晕球与闪烁圆点">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/ui-glow-blob-chrome.md" aria-label="查看 ui-glow-blob-chrome 规则卡片">.md</a>
                 </div>
               </td>
@@ -1925,7 +1714,7 @@
                 <strong>界面标题堆砌通用 Emoji</strong>
                 <div style="margin-top:2px;"><code>ui-emoji-icon-chrome</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="ui-emoji-icon-chrome" aria-label="在工作台试试 界面标题堆砌通用 Emoji">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-emoji-icon-chrome" aria-label="在工作台试试 界面标题堆砌通用 Emoji">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/ui-emoji-icon-chrome.md" aria-label="查看 ui-emoji-icon-chrome 规则卡片">.md</a>
                 </div>
               </td>
@@ -1942,7 +1731,7 @@
                 <strong>彩色图标方块与假窗口三点</strong>
                 <div style="margin-top:2px;"><code>ui-template-card-grid</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="ui-template-card-grid" aria-label="在工作台试试 彩色图标方块与假窗口三点">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-template-card-grid" aria-label="在工作台试试 彩色图标方块与假窗口三点">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/ui-template-card-grid.md" aria-label="查看 ui-template-card-grid 规则卡片">.md</a>
                 </div>
               </td>
@@ -1959,7 +1748,7 @@
                 <strong>SVG 缺 viewBox 或文字重叠</strong>
                 <div style="margin-top:2px;"><code>svg-layout-slop</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="svg-layout-slop" aria-label="在工作台试试 SVG 缺 viewBox 或文字重叠">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="svg-layout-slop" aria-label="在工作台试试 SVG 缺 viewBox 或文字重叠">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/svg-layout-slop.md" aria-label="查看 svg-layout-slop 规则卡片">.md</a>
                 </div>
               </td>
@@ -2024,7 +1813,7 @@
                 <strong>汇报标题只写“关于……的分析”</strong>
                 <div style="margin-top:2px;"><code>slide-process-not-finding-title</code></div>
                 <div class="rule-id-actions">
-                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="slide-process-not-finding-title" aria-label="在工作台试试 汇报标题只写“关于……的分析”">试试 ↑</button>
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="slide-process-not-finding-title" aria-label="在工作台试试 汇报标题只写“关于……的分析”">试试 ↑</button>
                   <a class="rule-md-link" href="./rules/slide-process-not-finding-title.md" aria-label="查看 slide-process-not-finding-title 规则卡片">.md</a>
                 </div>
               </td>
@@ -2062,28 +1851,289 @@
         </div>
       </details>
     </section>
+
+    <!-- Chapter 7: Open-source and cloud ledger -->
+    <section id="pricing" class="section-block band-rule" aria-labelledby="pricing-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="pricing-heading" data-i18n="price.title">本地工具永久免费，云端审校按额度计费</h2>
+          <p class="section-desc" data-i18n="price.desc">Skill、CLI 和规则库按 Apache-2.0 开源，离线运行不上传。云端审校、改写和远程 MCP 登录后使用，免费版每月 30 额度，付费版模型接口不拿你的稿子训练。</p>
+        </div>
+        <a href="https://github.com/dislop-ai/dislop/blob/main/benchmarks/MODEL-COMPARISON.md" target="_blank" rel="noopener" data-i18n="price.benchLink">看 5 模型实测对比 →</a>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="pricing-col">
+          <div class="pricing-head">
+            <h3 data-i18n="price.t1Name">开源本地（Skill + CLI）</h3>
+            <span class="pricing-amount" data-i18n="price.t1Price">$0 · 永久免费</span>
+          </div>
+          <p class="pricing-sub" data-i18n="price.t1Sub">适合稿子不能上传的场景，比如内网和私有仓库。代码和规则都开源。</p>
+          <ul class="pricing-list">
+            <li data-i18n="price.t1F1">纯文档 Agent Skill（不含脚本）与开源本地 CLI（Apache-2.0）</li>
+            <li data-i18n="price.t1F2">全量内置 7 套场景与行业包（53 条规则），离线查文档、Word、PPT、PDF、图片与网页</li>
+            <li data-i18n="price.t1F3">内置 5 轴节奏体检、14.6 KB 轻量本地模型（--ml）与 dislop voice 离线个人文风</li>
+            <li data-i18n="price.t1F4">零联网零上传；开发者也可配自有密钥做单步审校</li>
+          </ul>
+          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="#surfaces" class="ctrl-btn" data-i18n="price.t1Cta">安装 Skill / CLI ↑</a>
+          </div>
+        </div>
+
+        <div class="pricing-col is-featured">
+          <div class="pricing-head">
+            <h3 data-i18n="price.t2Name">云端免费版（远程 MCP）</h3>
+            <span class="pricing-amount" data-i18n="price.t2Price">$0 · 30 额度 / 月</span>
+          </div>
+          <p class="pricing-sub" data-i18n="price.t2Sub">邮箱验证码登录，免密码免绑卡，立即在网页工作台或远程 MCP 使用。</p>
+          <ul class="pricing-list">
+            <li data-i18n="price.t2F1">直连 https://dislop.com/mcp，支持 OAuth 免填密钥或生成 API 密钥（单次最长 12,000 字）</li>
+            <li data-i18n="price.t2F2">云增强审校（1 额度）：查出推销腔、官话与套话，给出具体改法</li>
+            <li data-i18n="price.t2F3">云增强改写（2 额度）：自动改写后复检，核对原稿数字与限定词</li>
+            <li data-i18n="price.t2F4">Word/PPT 原排版去味与个人文风（2–3 额度）：保留样式与修订，云端文风同步给远程 MCP</li>
+          </ul>
+          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="#cloud-token-box" class="btn-primary" style="min-height:32px;padding:6px 14px;font-size:0.82rem;" data-i18n="price.t2Cta">下方 10 秒验证码登录 ↓</a>
+          </div>
+        </div>
+
+        <div class="pricing-col">
+          <div class="pricing-head">
+            <h3 data-i18n="price.t3Name">Pro · 按量包 · Team（预约）</h3>
+            <span class="pricing-amount" data-i18n="price.t3Price">$12/月 · $10 按量</span>
+          </div>
+          <p class="pricing-sub" data-i18n="price.t3Sub">经常写选 Pro，每额度比按量省 36%；偶尔用买按量包，额度不过期。</p>
+          <ul class="pricing-list">
+            <li data-i18n="price.t3F1">Pro（$12/月）：1,500 额度/月（约 $0.008/额度），长文不限字数 + 10 份个人文风</li>
+            <li data-i18n="price.t3F2">按量额度包（$10 / 800 额度）：一次买断，额度不过期，适合偶尔用的人</li>
+            <li data-i18n="price.t3F3">Team（$29/席位/月）：5,000 额度 + 团队共享品牌文风与 PR 审核</li>
+            <li data-i18n="price.t3F4">统一调用 Google Gemini 付费版接口，不存草稿，不拿你的稿子训练</li>
+          </ul>
+          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="#cloud-waitlist-box" class="ctrl-btn" data-i18n="price.t3Cta">预约开通通知 ↓</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="cloud-forms-grid">
+        <div class="cloud-form-pane" id="cloud-token-box">
+          <h3 class="sub-heading" style="margin:0 0 6px;" data-i18n="cloud.tokenTitle">登录领取每月 30 免费额度 · 管理远程 MCP</h3>
+          <p class="cloud-form-desc" data-i18n="cloud.tokenDesc">
+            邮箱 6 位验证码登录，免密码免绑卡。登录后可直接在工作台审校与改写 Word/PPT，也能管理 MCP 密钥、已连应用与云端文风（不存草稿，详见底部隐私说明）。
+          </p>
+          <div id="cloud-account-status" class="cloud-status-bar" hidden></div>
+          <div id="cloud-auth-panel">
+            <form id="free-token-form" class="cloud-stack-form">
+              <div class="cloud-inline-form">
+                <input type="email" id="token-email-input" class="cloud-input" required autocomplete="email" placeholder="输入你的常用邮箱，例如 you@company.com" aria-label="邮箱地址">
+                <button type="submit" id="token-submit-btn" class="btn-primary" style="min-height:36px;padding:6px 14px;font-size:0.84rem;" data-i18n="cloud.tokenBtn">发验证码</button>
+              </div>
+              <div id="token-otp-step" class="cloud-inline-form" hidden>
+                <input type="text" id="token-otp-input" class="cloud-input" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="输入邮件里的 6 位数字验证码" aria-label="6 位验证码">
+                <button type="button" id="token-otp-verify-btn" class="btn-primary" style="min-height:36px;padding:6px 14px;font-size:0.84rem;" data-i18n="cloud.otpVerifyBtn">验证并登录</button>
+                <button type="button" id="token-otp-change-btn" class="ctrl-btn ctrl-btn-sm" data-i18n="cloud.otpChangeBtn">换个邮箱</button>
+              </div>
+            </form>
+            <div id="cloud-google-row" class="cloud-alt-row" hidden>
+              <a id="cloud-github-btn" href="/api/v1/auth/github/start?return=%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" hidden data-i18n="cloud.githubBtn">用 GitHub 账号登录</a>
+              <a id="cloud-google-btn" href="/api/v1/auth/google/start?return=%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" hidden data-i18n="cloud.googleBtn">用 Google 账号登录</a>
+            </div>
+            <details id="cloud-legacy-key-fold" class="cloud-legacy-fold">
+              <summary data-i18n="cloud.legacyKeySummary">已有 dslp_... 密钥？点此直接绑定</summary>
+              <form id="legacy-key-bind-form" class="cloud-inline-form" style="margin-top:8px;">
+                <input type="text" id="legacy-key-input" class="cloud-input" autocomplete="off" placeholder="dslp_..." aria-label="已有密钥">
+                <button type="submit" id="legacy-key-btn" class="ctrl-btn ctrl-btn-sm" data-i18n="cloud.legacyKeyBtn">验证并绑定</button>
+              </form>
+            </details>
+          </div>
+          <div id="cloud-account-hub" class="account-hub" hidden></div>
+          <div id="token-output-box" class="cloud-output-box" hidden></div>
+        </div>
+
+        <div class="cloud-form-pane" id="cloud-waitlist-box">
+          <h3 class="sub-heading" style="margin:0 0 6px;" data-i18n="cloud.wlTitle">预约 Pro / 按量包 / Team</h3>
+          <p class="cloud-form-desc" data-i18n="cloud.wlDesc">
+            自助支付还没上线。留下邮箱和想用的方案，上线后通知你。
+          </p>
+          <form id="waitlist-form" class="cloud-stack-form">
+            <div class="cloud-inline-form">
+              <select id="wl-plan-select" class="pack-select" aria-label="选择方案">
+                <option value="pro" data-i18n="cloud.planPro">Pro（$12/月 · 1,500 额度）</option>
+                <option value="credits" data-i18n="cloud.planCredits">按量包（$10 / 800 额度 · 永不过期）</option>
+                <option value="team" data-i18n="cloud.planTeam">Team（$29/席位 · 团队文风）</option>
+              </select>
+              <input type="email" id="wl-email-input" class="cloud-input" required placeholder="联系邮箱" aria-label="预约邮箱">
+            </div>
+            <div class="cloud-inline-form">
+              <input type="text" id="wl-note-input" class="cloud-input" maxlength="200" placeholder="选填：主要场景（如周报 / PPT / 公众号 / 团队文档）" aria-label="使用场景备注">
+              <button type="submit" id="wl-submit-btn" class="ctrl-btn" style="min-height:36px;padding:6px 14px;" data-i18n="cloud.wlBtn">提交预约</button>
+            </div>
+          </form>
+          <div id="wl-output-box" class="cloud-output-box" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Awesome Anti-Slop directory -->
+    <section id="awesome" class="section-block band-rule">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="awesome.title">去 AI 味工具清单：核验过的工具、规范与论文</h2>
+          <p class="section-desc" data-i18n="awesome.desc">
+            除了 dislop 自己，我们也维护了一份按场景整理的去 AI 味资源索引，包含 Vale、Impeccable 等常用工具、中英文写作规范、代码 PR 治理规则和实证论文。全部链接在 2026-11-21 逐条核过一遍。
+          </p>
+        </div>
+        <a href="./awesome/" data-i18n="awesome.openFull">打开完整清单 →</a>
+      </div>
+
+      <div class="radar-split">
+        <div class="radar-split-col">
+          <h3 class="sub-heading" data-i18n="awesome.ecoTitle">按用途筛选，也可以直接给 Agent 读</h3>
+          <p style="margin:0;font-size:0.88rem;color:var(--ink-2);" data-i18n="awesome.ecoDesc">
+            按写作、网页、代码、研究分类筛选，或者只看能本地自动检查的工具。AI 检测器和规避工具单独放在最下面做对照。
+          </p>
+<!-- BUILD:RADAR_STATS -->
+          <div class="stat-strip">
+            <div class="stat-cell"><span class="stat-num">90</span><span class="stat-label" data-i18n="stat.entries">条资料</span></div>
+            <div class="stat-cell"><span class="stat-num">8</span><span class="stat-label" data-i18n="stat.sections">个分类</span></div>
+            <div class="stat-cell"><span class="stat-num">20</span><span class="stat-label" data-i18n="stat.det">个可自动检查</span></div>
+            <div class="stat-cell"><span class="stat-num">21</span><span class="stat-label" data-i18n="stat.zh">条中文 / 多语种</span></div>
+          </div>
+<!-- /BUILD:RADAR_STATS -->
+          <div class="quick-actions" style="margin-top:14px;">
+            <a href="./awesome/" class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" data-i18n="awesome.browseBtn">打开在线筛选 →</a>
+            <a href="https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md" target="_blank" rel="noopener" class="ctrl-btn sheet-btn" id="awesome-gh-link" data-i18n="awesome.ghBtn">GitHub 中文版</a>
+            <button type="button" class="ctrl-btn sheet-btn" id="copy-awesome-share-btn" data-i18n="awesome.shareBtn">复制清单推荐语</button>
+            <a href="./awesome/index.json" class="ctrl-btn sheet-btn">index.json</a>
+          </div>
+        </div>
+
+        <div class="radar-split-col">
+          <h3 class="sub-heading" data-i18n="awesome.posTitle">31 个非模板排版与字体参考</h3>
+          <p style="margin:0;font-size:0.86rem;color:var(--ink-2);" data-i18n="awesome.posDesc">印刷、字体厂和独立出版站点，做网页或排版前可以拿来对照。</p>
+<!-- BUILD:POSITIVE_REFS -->
+          <ul class="ref-list">
+            <li><a href="https://www.norm.to" target="_blank" rel="noopener">Norm (Zurich)</a><span class="ref-note" data-i18n="pos.norm-zurich">苏黎世独立设计事务所，用严格的模数网格排版。</span></li>
+            <li><a href="https://www.stiftung-buchkunst.de" target="_blank" rel="noopener">Stiftung Buchkunst (Best Book Design from all over the World)</a><span class="ref-note" data-i18n="pos.stiftung-buchkunst">世界最美的书评选档案：看页边距、版心比例与长篇阅读怎么排得不挤。</span></li>
+            <li><a href="https://fontsinuse.com" target="_blank" rel="noopener">Fonts In Use</a><span class="ref-note" data-i18n="pos.fonts-in-use">真实印刷品与网页里的字体搭配库。</span></li>
+            <li><a href="https://abcdinamo.com" target="_blank" rel="noopener">Dinamo</a><span class="ref-note" data-i18n="pos.dinamo">瑞士独立字厂，看可变字重与大号字阶怎么撑起实用界面。</span></li>
+            <li><a href="https://www.thetype.com" target="_blank" rel="noopener">The Type</a><span class="ref-note" data-i18n="pos.the-type">中文排印评论，细聊标点挤压、混排细节与出版规范。</span></li>
+            <li><a href="https://www.are.na" target="_blank" rel="noopener">Are.na</a><span class="ref-note" data-i18n="pos.arena">研究者自己攒的视觉线索库：旧印刷、路牌与独立小书。</span></li>
+          </ul>
+<!-- /BUILD:POSITIVE_REFS -->
+          <p style="margin:12px 0 0;font-size:0.8rem;"><a href="./cases/ui-specimens.md" data-i18n="awesome.posAll">看全部参考（.md）→</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Six practical field guides -->
+    <section id="guides-home" class="section-block band-rule" aria-labelledby="guides-home-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="guides-home-heading" data-i18n="guides.title">6 篇实用指南：写作、网页、PPT 与接入</h2>
+          <p class="section-desc" data-i18n="guides.desc">每篇都带可复制的命令和前后对照，按手上的活挑一篇读。</p>
+        </div>
+        <a href="./guides/" id="guides-home-all" data-i18n="guides.all">全部指南 →</a>
+      </div>
+
+      <div class="guides-index">
+        <a class="guide-index-item" href="./guides/remove-ai-slop-writing/" data-guide-slug="remove-ai-slop-writing">
+          <span class="guide-index-cat" data-i18n="guides.g1Cat">写作与改稿 · 7 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g1Title">中文写作怎么去 AI 味</strong>
+          <span class="guide-index-desc" data-i18n="guides.g1Desc">别只靠禁词表，用删除测试避开换汤不换药的二阶套话。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/fix-ai-slop-web-ui/" data-guide-slug="fix-ai-slop-web-ui">
+          <span class="guide-index-cat" data-i18n="guides.g2Cat">前端与视觉 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g2Title">前端页面怎么去模板味</strong>
+          <span class="guide-index-desc" data-i18n="guides.g2Desc">清掉紫粉渐变、卡片套卡片和点不动的假按钮。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/deslop-pptx-docx/" data-guide-slug="deslop-pptx-docx">
+          <span class="guide-index-cat" data-i18n="guides.g3Cat">办公文档与演示 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g3Title">PPT 和 Word 去模板味</strong>
+          <span class="guide-index-desc" data-i18n="guides.g3Desc">排查裸星号、单页字墙、自动缩字和空泛标题。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/agent-cli-mcp-tutorial/" data-guide-slug="agent-cli-mcp-tutorial">
+          <span class="guide-index-cat" data-i18n="guides.g4Cat">工程接入 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g4Title">接进 Agent、编辑器与 CI</strong>
+          <span class="guide-index-desc" data-i18n="guides.g4Desc">Skill、本地 CLI、GitHub Actions 增量门禁和远程 MCP 的配置步骤。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/linter-vs-detector-vs-skill/" data-guide-slug="linter-vs-detector-vs-skill">
+          <span class="guide-index-cat" data-i18n="guides.g5Cat">选型与基准 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g5Title">检查器、检测器和写作 Skill 怎么选</strong>
+          <span class="guide-index-desc" data-i18n="guides.g5Desc">三类工具各能查什么、查不了什么。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/what-is-ai-slop/" data-guide-slug="what-is-ai-slop">
+          <span class="guide-index-cat" data-i18n="guides.g6Cat">基础识别 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g6Title">AI 味长什么样</strong>
+          <span class="guide-index-desc" data-i18n="guides.g6Desc">从词面套话、二阶句式到模板网页与 PPT 的四层信号。</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Compact share band -->
+    <section id="share" class="section-block band-rule" aria-labelledby="share-heading">
+      <div class="section-header">
+        <h2 class="section-title" id="share-heading" data-i18n="share.title">推荐给同事或一起补案例和规则</h2>
+      </div>
+
+      <div class="share-grid">
+        <div class="share-col">
+          <h3 data-i18n="share.c1Title">发给团队</h3>
+          <p data-i18n="share.c1Desc">复制一段直白的介绍，带官网、案例页和工具清单链接，贴进群聊或文档。</p>
+          <div class="quick-actions">
+            <button type="button" class="ctrl-btn" id="copy-site-share-btn" data-i18n="share.copySiteBtn">复制项目推荐语</button>
+            <button type="button" class="ctrl-btn sheet-btn" id="copy-cases-link-btn" data-i18n="share.copyCasesBtn">复制案例页链接</button>
+          </div>
+        </div>
+        <div class="share-col">
+          <h3 data-i18n="share.c2Title">在 GitHub 收藏</h3>
+          <p data-i18n="share.c2Desc">检查引擎、Skill、插件、命令行和工具清单都在同一个仓库。</p>
+          <div class="quick-actions">
+            <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="btn-primary" style="min-height:32px;padding:6px 14px;font-size:0.82rem;" data-i18n="share.starCta">GitHub 点 Star ★</a>
+          </div>
+        </div>
+        <div class="share-col">
+          <h3 data-i18n="share.c3Title">一起补案例、规则和工具</h3>
+          <p data-i18n="share.c3Desc">碰到典型的 AI 味翻车样本，或者好用的工具还没收录，开个 Issue 告诉我们。</p>
+          <div class="quick-actions">
+            <a href="https://github.com/dislop-ai/dislop/issues" target="_blank" rel="noopener" class="ctrl-btn" data-i18n="share.issueCta">投稿案例 / 工具</a>
+            <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener" class="ctrl-btn sheet-btn" id="share-roadmap-link" data-i18n="share.roadmapCta">看路线图 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
     </main>
 
-    <!-- Colophon Footer -->
+    <!-- Colophon: compact ledger -->
     <footer class="colophon">
-      <div>
+      <div class="colophon-note">
+        <a class="colophon-brand" href="#top"><img src="./assets/logo.svg" width="20" height="20" alt="">dislop</a>
         <span data-i18n="footer.selfAudit">这个页面自己也跑过 dislop check site/，0 处问题。</span>
-        <span style="margin-left:10px;" data-i18n="footer.agentHint">给 Agent 读的话，从 <a href="./llms.txt">/llms.txt</a> 开始。</span>
+        <span data-i18n="footer.agentHint">给 Agent 读的话，从 <a href="./llms.txt">/llms.txt</a> 开始。</span>
       </div>
-      <div class="colophon-links">
-        <a href="./guides/" id="footer-guides-link" data-i18n="footer.guides">实用指南</a>
-        <a href="./awesome/" data-i18n="footer.awesome">工具清单</a>
-        <a href="./rules/" id="footer-rules-link" data-i18n="footer.rules">全部规则</a>
-        <a href="./privacy.md" data-i18n="footer.privacy">隐私与数据边界</a>
-        <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener" id="footer-roadmap-link" data-i18n="footer.roadmap">路线图</a>
-        <a href="./methodology/brand-and-voice.md" data-i18n="footer.brand">文案基准</a>
-        <a href="./methodology/design-system.md" data-i18n="footer.design">视觉规范</a>
-        <a href="./llms.txt">llms.txt</a>
-        <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
-        <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
-        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
-        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
-      </div>
+      <nav class="colophon-groups" aria-label="页脚导航">
+        <div class="colophon-group">
+          <span class="colophon-group-title" data-i18n="footer.gResources">资料</span>
+          <a href="./guides/" id="footer-guides-link" data-i18n="footer.guides">实用指南</a>
+          <a href="./rules/" id="footer-rules-link" data-i18n="footer.rules">全部规则</a>
+          <a href="./awesome/" data-i18n="footer.awesome">工具清单</a>
+          <a href="./llms.txt">llms.txt</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title" data-i18n="footer.gProject">项目</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener" id="footer-roadmap-link" data-i18n="footer.roadmap">路线图</a>
+          <a href="./methodology/brand-and-voice.md" data-i18n="footer.brand">文案基准</a>
+          <a href="./methodology/design-system.md" data-i18n="footer.design">视觉规范</a>
+          <a href="./privacy.md" data-i18n="footer.privacy">隐私与数据边界</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title" data-i18n="footer.gElsewhere">外部链接</span>
+          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+          <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
+          <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
+          <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+        </div>
+      </nav>
     </footer>
   </div>
 

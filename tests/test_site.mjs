@@ -870,11 +870,52 @@ for (const homeRel of ["index.html", "en/index.html"]) {
     assert.ok(homeDoc.includes('data-copy-target="en-hero-prompt"'), "en/index.html missing copy button for #en-hero-prompt");
     assert.ok(homeDoc.includes("https://dislop.com/llms.txt"), "en/index.html prompt missing llms.txt reference");
   }
+  assert.ok(homeDoc.includes('class="hero-agent-mark"') && homeDoc.includes('d="M2.2 14H12.3'), `${homeRel} missing Hero Dele Loop SVG mark`);
+  for (const slug of demoSlugs) {
+    assert.ok(homeDoc.includes(`data-demo-select="${slug}"`), `${homeRel} missing #demos tab for ${slug}`);
+  }
+  assert.ok(homeDoc.includes('id="guides-home"'), `${homeRel} missing #guides-home section`);
+  for (const gf of fs.readdirSync(guidesDir).filter((f) => f.endsWith(".md") && !f.endsWith(".en.md") && !f.endsWith(".zh-CN.md"))) {
+    const guideSlug = gf.replace(/\.md$/, "");
+    assert.ok(homeDoc.includes(`data-guide-slug="${guideSlug}"`), `${homeRel} #guides-home missing guide card ${guideSlug}`);
+  }
   assert.ok(homeDoc.includes("https://www.npmjs.com/package/dislop"), `${homeRel} JSON-LD missing npm sameAs`);
   assert.ok(homeDoc.includes("https://pypi.org/project/dislop/"), `${homeRel} JSON-LD missing PyPI sameAs`);
   assert.ok(homeDoc.includes('"codeRepository": "https://github.com/dislop-ai/dislop"'), `${homeRel} JSON-LD missing codeRepository`);
   assert.ok(homeDoc.includes('"softwareHelp": "https://dislop.com/llms.txt"'), `${homeRel} JSON-LD missing softwareHelp`);
 }
+
+for (const navRel of [
+  "index.html",
+  "en/index.html",
+  "awesome/index.html",
+  "en/awesome/index.html",
+  "guides/index.html",
+  "rules/index.html",
+]) {
+  const navHtml = fs.readFileSync(path.join(SITE_DIR, navRel), "utf8");
+  const navMatch = navHtml.match(/<nav\b[^>]*class="nav-links"[^>]*>([\s\S]*?)<\/nav>/);
+  assert.ok(navMatch, `${navRel} missing <nav class="nav-links">`);
+  const navLinks = navMatch[1].match(/<a\b[^>]*>/g) || [];
+  assert.equal(navLinks.length, 6, `${navRel} primary nav should contain 6 links (got ${navLinks.length})`);
+}
+
+assert.ok(stylesCss.includes("--ink-stage:"), "site/styles.css missing --ink-stage token");
+assert.ok(stylesCss.includes(".sheet-btn"), "site/styles.css missing .sheet-btn tier rule");
+assert.ok(
+  stylesCss.includes('.sheet-btn:not(.is-active):not([aria-pressed="true"]):hover'),
+  "site/styles.css must protect selected .sheet-btn foreground on hover"
+);
+assert.ok(
+  stylesCss.includes('.rule-row.is-hash-target .sheet-btn:not(.is-active):not([aria-pressed="true"])'),
+  "site/styles.css must strengthen .sheet-btn border inside hash-highlighted rule rows"
+);
+assert.equal(/border-radius:\s*9999px/i.test(stylesCss), false, "site/styles.css must not reintroduce pill border-radius: 9999px");
+assert.equal(/radial-gradient\(/i.test(stylesCss), false, "site/styles.css must not reintroduce radial-gradient() backgrounds");
+assert.ok(
+  (stylesCss.match(/linear-gradient\(/gi) || []).length <= 1,
+  "site/styles.css must not add decorative linear-gradient() backgrounds beyond mobile table scroll shadow"
+);
 
 console.log(
   `dislop site-test: ok (${totalRules} rules, ${tryRulesChecked} Try demos, ${specimenCount} ZH/EN specimens + 2 hero proofs + 6 cases, ` +

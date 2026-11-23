@@ -79,20 +79,23 @@
   <div class="rail-shell">
     <header class="topbar band-rule">
       <a class="brand-lockup" href="../../">
-        <img src="../../assets/logo.svg" width="28" height="28" alt="dislop 图标">
+        <img src="../../assets/logo.svg" width="30" height="30" alt="">
         <span class="brand-wordmark">dislop</span>
+        <span class="brand-meta"><span>AI 味检查</span> · <span class="brand-ver">v0.8.2</span></span>
       </a>
 
       <nav class="nav-links" aria-label="主导航">
-        <a href="../../#workbench">在线试</a>
+        <a href="../../#workbench">工作台</a>
+        <a href="../../#surfaces">接入</a>
+        <a href="../../#cases">案例</a>
         <a href="../../guides/">指南</a>
-        <a href="../../awesome/">工具清单</a>
         <a href="../../rules/" aria-current="page">规则</a>
-        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+        <a href="../../awesome/">工具清单</a>
       </nav>
 
       <div class="top-controls">
-        <a href="../../en/rules/staccato-slogan-run/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="Switch to English">EN</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label">GitHub ★</span></a>
+        <a href="../../en/rules/staccato-slogan-run/" class="ctrl-btn" aria-label="Switch to English">EN</a>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
       </div>
     </header>
@@ -109,9 +112,9 @@
           <div class="article-meta">
             <span><code>staccato-slogan-run</code></span>
             <span>工作文档 (<code>business-brief</code>)</span>
-            <span>warning</span>
+            <span class="sev-tag sev-warning">提醒</span>
             <span><code>markdown, text, html, docx, pptx</code></span>
-            <a href="../../rules/staccato-slogan-run.md">Markdown card</a>
+            <a href="../../rules/staccato-slogan-run.md">Markdown 规则卡</a>
           </div>
           <div class="answer-box">
             <div class="answer-box-label">判断方法</div>
@@ -171,18 +174,34 @@ npx --yes dislop check . --pack business-brief</code></pre>
     </main>
 
     <footer class="colophon">
-      <div>
-        <span>这个页面自己也跑过 dislop check site/，0 处问题。给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
+      <div class="colophon-note">
+        <a class="colophon-brand" href="../../"><img src="../../assets/logo.svg" width="20" height="20" alt="">dislop</a>
+        <span>这个页面自己也跑过 dislop check site/，0 处问题。</span>
+        <span>给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
       </div>
-      <div class="colophon-links">
-        <a href="../../guides/">实用指南</a>
-        <a href="../../awesome/">工具清单</a>
-        <a href="../../rules/">全部规则</a>
-        <a href="../../privacy.md">隐私说明</a>
-        <a href="../../llms.txt">llms.txt</a>
-        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
-        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
-      </div>
+      <nav class="colophon-groups" aria-label="页脚导航">
+        <div class="colophon-group">
+          <span class="colophon-group-title">资料</span>
+          <a href="../../guides/">实用指南</a>
+          <a href="../../rules/">全部规则</a>
+          <a href="../../awesome/">工具清单</a>
+          <a href="../../llms.txt">llms.txt</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">项目</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener">路线图</a>
+          <a href="../../methodology/brand-and-voice.md">文案基准</a>
+          <a href="../../methodology/design-system.md">视觉规范</a>
+          <a href="../../privacy.md">隐私与数据边界</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">外部链接</span>
+          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+          <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
+          <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
+          <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+        </div>
+      </nav>
     </footer>
   </div>
   <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">

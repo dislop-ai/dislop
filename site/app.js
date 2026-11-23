@@ -43,13 +43,13 @@ const I18N = {
     "nav.skip": "跳至正文",
     "nav.signIn": "登录 · 30 免费额度",
     "nav.cases": "案例",
-    "nav.workbench": "在线试",
-    "nav.surfaces": "怎么用",
-    "nav.pricing": "开源与云端",
+    "nav.workbench": "工作台",
+    "nav.surfaces": "接入",
     "nav.guides": "指南",
     "nav.awesome": "工具清单",
     "nav.rules": "规则",
     "nav.github": "GitHub ★",
+    "nav.brandMeta": "AI 味检查",
     "theme.dark": "深色",
     "theme.light": "浅色",
     "btn.copy": "复制",
@@ -58,17 +58,13 @@ const I18N = {
     "lead.strike": "好的，以下是为您润色后的版本。",
     "lead.title": "去 AI 味才是真正的生产力！",
     "lead.sub":
-      "专用的 AI 味检查工具。整合社区验证过的去味规则、语料经验与 90 条精选工具，一行命令接进主流 Coding Agent、办公 Agent 与编辑器，在文档、网页和 PPT 发出前标出硬伤、套话和模板布局。",
-    "lead.promptLabel": "或者直接把这句话发给你的 Agent，让它完成评估、安装和试跑",
+      "专用的 AI 味检查工具。在文档、网页和 Word/PPT 发出前，标出开头寒暄、空话套话、反转口号和默认紫粉模板。一行命令接进主流 Agent 与编辑器，默认纯本地运行。",
+    "lead.promptLabel": "发给 Agent · 自动评估与安装",
     "lead.promptText":
       "请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。",
     "lead.copyPromptBtn": "复制发给 Agent",
-    "lead.cta": "在工作台试用（本地 / 云端）↓",
-    "lead.cloudBtn": "免费领 30 额度远程 MCP 密钥",
-    "lead.installBtn": "装进 Agent / 编辑器（本地离线）",
-    "lead.awesomeBtn": "工具清单 →",
-    "lead.starBtn": "GitHub ★",
-    "lead.reassure": "CLI 与本地插件纯本地运行、零上传；下方工作台支持切换本地检查与云端审校。",
+    "lead.cta": "在工作台试一段 ↓",
+    "lead.installBtn": "装进 Agent 或编辑器",
 
     "hp.tabBad": "原稿",
     "hp.tabTrap": "换了种 AI 味",
@@ -78,38 +74,44 @@ const I18N = {
     "hp.meta": "用同一个检查引擎实时跑的",
     "hp.openWb": "在下面工作台打开 →",
 
-    "m1.title": "社区规则和工具一处拿全",
-    "m1.desc": "整合经过核验的去味规则、语料经验与 90 条精选工具，覆盖文稿、网页和 Word/PPT，不用自己到处搜集拼凑。",
-    "m2.title": "一行命令接入主流 Agent 与编辑器",
-    "m2.desc": "内置 7 套场景包，支持 Codex、Claude Code、Cursor、WorkBuddy 等工具，在终端、编辑器或 CI 里都能直接跑。",
-    "m3.title": "稿子默认留在你电脑上",
-    "m3.desc": "CLI 与本地插件在自己电脑上跑，不上传文稿；切到工作台或远程 MCP 的云端模式，可调用多模型深度审校与一键改写。",
+    "m1.title": "社区规则与工具一处拿全",
+    "m1.desc": "内置 53 条规则和 12 个扩展句式检查，另收录 90 条精选去味工具，覆盖文档、网页和 Word/PPT。",
+    "m2.title": "一行命令接进 Agent 与编辑器",
+    "m2.desc": "支持 Codex、Claude Code、Cursor、WorkBuddy 与 GitHub Actions，终端、编辑器和 CI 直接跑。",
+    "m3.title": "文稿默认留在本地",
+    "m3.desc": "Skill 与 CLI 纯本地离线运行，零上传。切到工作台或远程 MCP 的云端模式，再做多模型深层审校。",
 
-    "cases.title": "三组对照：为什么删了套词还是像 AI",
+    "cases.title": "三组前后对照：删了热词还像 AI 的写法",
     "cases.desc":
-      "删掉“抓手”“赋能”这类高频词之后，模型常会换成“不是 A，而是 B”这类反转口号，或者写出规则报 0 问题、读起来依然像推销稿的句子。下面三组对照可以直接试，也可以一键复制分享。",
+      "删掉“抓手”“赋能”这类热词之后，模型常换成“不是 A，而是 B”的反转口号，或者写出检查报 0 处问题、读起来仍像推销稿的句子。三组都能在工作台里直接试。",
     "cases.readAll": "看全部对照案例（.md）→",
 
-    "demos.title": "6 秒看懂怎么查：从文字、网页到 PPT 和 Agent 闭环",
+    "demos.title": "6 个真实场景：文字、网页、PPT 与 Agent 门禁",
     "demos.desc":
-      "六段动画对应六个真实场景，全部离线渲染并内置无损动态 WebP 与 GIF 回退，零外域请求。点击卡片下方按钮可随时定格、重播或放大查看。",
+      "每段 7 秒左右，用真实规则离线录制。选一个场景，可以定格、重播或放大看。",
     "demos.guideLink": "动画与 GIF 制作规范 →",
-    "demos.c1Title": "1. 同一段话的三个版本：防改过头换成反转口号",
+    "demos.tab1": "三步改稿对照",
+    "demos.tab2": "命令行门禁",
+    "demos.tab3": "工作台实录",
+    "demos.tab4": "网页去模板",
+    "demos.tab5": "Word / PPT",
+    "demos.tab6": "Agent + CI",
+    "demos.c1Title": "同一段话的三个版本：防改过头换成反转口号",
     "demos.c1Badge": "3 步对照 · 6.8s",
     "demos.c1Desc": "先用红实线划掉开头寒暄，再用蓝虚线抓出“不是……而是……”反转口号，最后只留动作和 45 秒真实指标。",
-    "demos.c2Title": "2. 命令行门禁：Node 与 Python 结果一致",
+    "demos.c2Title": "命令行门禁：Node 与 Python 结果一致",
     "demos.c2Badge": "CLI 离线 · 6.4s",
     "demos.c2Desc": "本地跑 dislop check --profile，硬伤直接返回退出码 1 卡住 CI，顺带输出句长起伏与具体度体检。",
-    "demos.c3Title": "3. 浏览器离线工作台：真机操作实录",
+    "demos.c3Title": "浏览器离线工作台：真机操作实录",
     "demos.c3Badge": "真机实录 · 6.8s",
     "demos.c3Desc": "就是本页上方的工作台。贴稿子、点切规则包、实时对齐右侧行号批注与 5 轴体检，全程在当前标签页完成。",
-    "demos.c4Title": "4. 网页与组件：清掉默认紫粉模板和死按钮",
+    "demos.c4Title": "网页与组件：清掉默认紫粉模板和死按钮",
     "demos.c4Badge": "网页去模板 · 6.8s",
     "demos.c4Desc": "直接扫 HTML/CSS/JSX 里的渐变标题、装饰徽章、胶囊堆叠和 href=\"#\" 假按钮，退回干净可用的界面。",
-    "demos.c5Title": "5. Word / PPT 检查：揪出裸星号、字墙和过程标题",
+    "demos.c5Title": "Word / PPT 检查：揪出裸星号、字墙和过程标题",
     "demos.c5Badge": "PPTX 实检 · 6.8s",
     "demos.c5Desc": "直接解包 .pptx 检查未渲染的 **加粗** 符号、单页字墙、68% 自动缩字与空泛标题，改回结论先行的干净页。",
-    "demos.c6Title": "6. 编码 Agent + CI 闭环：写前读 Skill，提交前过门禁",
+    "demos.c6Title": "编码 Agent + CI 闭环：写前读 Skill，提交前过门禁",
     "demos.c6Badge": "Agent 闭环 · 6.8s",
     "demos.c6Desc": "Agent 先读取纯文档 SKILL.md，再用 --changed origin/main 拦下 PR 寒暄与复读 diff，修完复检确认数字零丢失。",
     "demos.pause": "定格",
@@ -118,7 +120,7 @@ const I18N = {
     "demos.zoom": "放大看",
     "demos.close": "关闭",
 
-    "wb.heading": "在线试用",
+    "wb.heading": "工作台",
     "wb.subhint": "粘贴文字，或把文档 / 网页 / PPT / PDF / 图片拖进稿纸",
     "wb.packLabel": "场景包：",
     "pack.auto": "自动识别",
@@ -171,26 +173,27 @@ const I18N = {
     "legend.error": "红实线：硬伤",
     "legend.warn": "蓝虚线：提醒（套话与模板味）",
 
-    "surf.title": "怎么用：纯文档 Skill → 开源本地 CLI → 官方云端 MCP",
+    "surf.title": "三种接入方式：Skill、本地 CLI 和云端 MCP",
     "surf.desc":
-      "三种用法按需选：纯文档 Skill 在动笔前避坑，开源本地 CLI 在终端和 CI 做离线检查，官方云端 MCP（https://dislop.com/mcp）免装环境做多模型审校。",
+      "按你手上的工具选一种，每种都有能直接复制的配置。",
     "surf.readTools": "完整接入文档（.md）→",
-    "surf.w1Title": "1. 开源纯文档 Skill（动笔前防呆）",
-    "surf.w1Desc": "按文体整理的写作与界面避坑参考卡，不含可执行脚本。装进 Claude Code、Codex、Cursor 或 Antigravity 后，动笔前读取，写完调用本地 CLI 自检。",
-    "surf.w2Title": "2. 开源本地 CLI 与插件（零依赖快检）",
-    "surf.w2Desc": "安装包不到 250 KB，零依赖，内置全部 7 套规则包。断网也能查文档、Word、PPT 和 Git 改动，适合终端、编辑器和 CI，开发者也可以配自己的模型密钥。",
-    "surf.w3Title": "3. 官方云端 MCP（办公与编码 Agent 直连）",
-    "surf.w3Desc": "在 WorkBuddy、千问、Claude Cowork 或编辑器里直连 https://dislop.com/mcp，登录领每月 30 免费额度，做多模型分文体审校并返回结构化改法。",
-    "surf.w4Title": "4. 网页工作台与一句话让 Agent 接管安装",
-    "surf.w4Desc": "浏览器工作台可先看对比样例和做本地基础检查，登录后使用云端审校；也可以只给自己的 Agent 发一句 dislop.com/llms.txt，由它自行判断装 Skill、CLI 还是远程 MCP 并完成首轮试跑。",
+    "surf.w1Title": "纯文档 Agent Skill",
+    "surf.w1Desc": "按文体整理的写作与界面避坑卡，不带脚本。装进 Claude Code、Codex、Cursor 或 Antigravity，Agent 动笔前读取，写完再调用本地 CLI 自检。",
+    "surf.w2Title": "开源本地 CLI 与插件",
+    "surf.w2Desc": "零依赖，安装包不到 250 KB，内置 7 套场景包。断网也能查文档、Word、PPT 和 Git 改动，适合终端、编辑器和 CI。开发者也可以配自己的模型密钥。",
+    "surf.w3Title": "官方云端 MCP 与网页工作台",
+    "surf.w3Desc": "在 WorkBuddy、千问、Claude Cowork 或编辑器里直连，登录后每月 30 免费额度，按文体做多模型审校并返回改法。",
+    "surf.w4Title": "一句话让 Agent 自己接管",
+    "surf.w4Desc": "把 dislop.com/llms.txt 发给你的 Agent，它会自己判断装 Skill、CLI 还是远程 MCP，再拿现有文件试跑一次。",
     "snip.prompt": "发给 Agent",
-    "snip.cloud": "官方 MCP（云端）",
+    "snip.cloud": "云端 MCP",
+    "snip.plugin": "插件",
     "snip.localMcp": "官方 MCP",
     "snip.cli": "命令行",
 
-    "price.title": "本地工具都免费，只有云端审校要用额度",
+    "price.title": "本地工具永久免费，云端审校按额度计费",
     "price.desc":
-      "Skill、CLI 与规则库按 Apache-2.0 开源，纯本地离线运行、不上传文稿。需要多模型深层审校、复检改写与远程 MCP 时，可在登录工作台后使用（免费版每月 30 额度，付费版模型接口不拿你的稿子训练）。",
+      "Skill、CLI 和规则库按 Apache-2.0 开源，离线运行不上传。云端审校、改写和远程 MCP 登录后使用，免费版每月 30 额度，付费版模型接口不拿你的稿子训练。",
     "price.benchLink": "看 5 模型实测对比 →",
     "price.t1Name": "开源本地（Skill + CLI）",
     "price.t1Price": "$0 · 永久免费",
@@ -249,34 +252,54 @@ const I18N = {
     "ep.method": "文案与设计基准",
     "ep.full": "单次拉取的全部 53 条规则",
 
-    "awesome.title": "去 AI 味工具清单：90 个核验工具与参考资料",
+    "awesome.title": "去 AI 味工具清单：核验过的工具、规范与论文",
     "awesome.desc":
       "除了 dislop 自己，我们也维护了一份按场景整理的去 AI 味资源索引，包含 Vale、Impeccable 等常用工具、中英文写作规范、代码 PR 治理规则和实证论文。全部链接在 2026-11-21 逐条核过一遍。",
     "awesome.openFull": "打开完整清单 →",
     "awesome.ecoTitle": "按用途筛选，也可以直接给 Agent 读",
     "awesome.ecoDesc": "按写作、网页、代码、研究分类筛选，或者只看能本地自动检查的工具。AI 检测器和规避工具单独放在最下面做对照。",
-    "awesome.browseBtn": "在线筛选 90 条清单 →",
+    "awesome.browseBtn": "打开在线筛选 →",
     "awesome.ghBtn": "GitHub 中文版",
     "awesome.shareBtn": "复制清单推荐语",
-    "awesome.posTitle": "不想长成 AI 模板？看看这些设计参考",
-    "awesome.posDesc": "除了去套话，还存了 31 个印刷、字体厂和独立出版站点，做网页或排版时拿来找灵感很管用。",
-    "awesome.posAll": "全部 31 个参考（.md）→",
+    "awesome.posTitle": "31 个非模板排版与字体参考",
+    "awesome.posDesc": "印刷、字体厂和独立出版站点，做网页或排版前可以拿来对照。",
+    "awesome.posAll": "看全部参考（.md）→",
     "stat.entries": "条资料",
     "stat.sections": "个分类",
     "stat.det": "个可自动检查",
     "stat.zh": "条中文 / 多语种",
+    "guides.title": "6 篇实用指南：写作、网页、PPT 与接入",
+    "guides.desc": "每篇都带可复制的命令和前后对照，按手上的活挑一篇读。",
+    "guides.all": "全部指南 →",
+    "guides.g1Cat": "写作与改稿 · 7 分钟",
+    "guides.g1Title": "中文写作怎么去 AI 味",
+    "guides.g1Desc": "别只靠禁词表，用删除测试避开换汤不换药的二阶套话。",
+    "guides.g2Cat": "前端与视觉 · 6 分钟",
+    "guides.g2Title": "前端页面怎么去模板味",
+    "guides.g2Desc": "清掉紫粉渐变、卡片套卡片和点不动的假按钮。",
+    "guides.g3Cat": "办公文档与演示 · 6 分钟",
+    "guides.g3Title": "PPT 和 Word 去模板味",
+    "guides.g3Desc": "排查裸星号、单页字墙、自动缩字和空泛标题。",
+    "guides.g4Cat": "工程接入 · 6 分钟",
+    "guides.g4Title": "接进 Agent、编辑器与 CI",
+    "guides.g4Desc": "Skill、本地 CLI、GitHub Actions 增量门禁和远程 MCP 的配置步骤。",
+    "guides.g5Cat": "选型与基准 · 6 分钟",
+    "guides.g5Title": "检查器、检测器和写作 Skill 怎么选",
+    "guides.g5Desc": "三类工具各能查什么、查不了什么。",
+    "guides.g6Cat": "基础识别 · 6 分钟",
+    "guides.g6Title": "AI 味长什么样",
+    "guides.g6Desc": "从词面套话、二阶句式到模板网页与 PPT 的四层信号。",
 
-    "share.title": "觉得顺手？发给同事，或者去 GitHub 收藏",
-    "share.desc": "Skill、本地 CLI 和 53 条内置规则按 Apache-2.0 开源，可纯本地离线运行；网页工作台和官方云端 MCP 登录后可使用多模型审校，不存草稿。",
-    "share.c1Title": "一键分享给团队或朋友",
-    "share.c1Desc": "复制一段直白不浮夸的介绍（带官网试用链接、案例页和工具清单），直接贴到群聊或文档里就行。",
+    "share.title": "推荐给同事或一起补案例和规则",
+    "share.c1Title": "发给团队",
+    "share.c1Desc": "复制一段直白的介绍，带官网、案例页和工具清单链接，贴进群聊或文档。",
     "share.copySiteBtn": "复制项目推荐语",
     "share.copyCasesBtn": "复制案例页链接",
-    "share.c2Title": "去 GitHub 收藏仓库",
-    "share.c2Desc": "检查引擎、纯文档 Skill、Plugin、命令行和 Awesome Anti-Slop 清单都在同一个仓库，点个 Star 方便以后找。",
+    "share.c2Title": "在 GitHub 收藏",
+    "share.c2Desc": "检查引擎、Skill、插件、命令行和工具清单都在同一个仓库。",
     "share.starCta": "GitHub 点 Star ★",
     "share.c3Title": "一起补案例、规则和工具",
-    "share.c3Desc": "遇到特别典型的 AI 味翻车案例，或者发现好用的去 AI 味工具没进清单，欢迎在路线图或 Issue 里一起补。",
+    "share.c3Desc": "碰到典型的 AI 味翻车样本，或者好用的工具还没收录，开个 Issue 告诉我们。",
     "share.roadmapCta": "看路线图 →",
     "share.issueCta": "投稿案例 / 工具",
 
@@ -341,19 +364,22 @@ const I18N = {
     "footer.roadmap": "路线图",
     "footer.brand": "文案基准",
     "footer.design": "视觉规范",
+    "footer.gResources": "资料",
+    "footer.gProject": "项目",
+    "footer.gElsewhere": "外部链接",
   },
   en: {
     "page.title": "dislop — Cutting AI slop is real productivity.",
     "nav.skip": "Skip to main content",
     "nav.signIn": "Sign in · 30 free",
     "nav.cases": "Cases",
-    "nav.workbench": "Try it",
-    "nav.surfaces": "How to use",
-    "nav.pricing": "Open & Cloud",
+    "nav.workbench": "Workbench",
+    "nav.surfaces": "Setup",
     "nav.guides": "Guides",
     "nav.awesome": "Directory",
     "nav.rules": "Rules",
     "nav.github": "GitHub ★",
+    "nav.brandMeta": "AI slop linter",
     "theme.dark": "Dark",
     "theme.light": "Light",
     "btn.copy": "Copy",
@@ -362,17 +388,13 @@ const I18N = {
     "lead.strike": "Certainly! Here is your polished draft.",
     "lead.title": "Cutting AI slop is real productivity.",
     "lead.sub":
-      "A dedicated linter for AI slop. Catches AI-sounding prose, filler phrases, and stock layouts in docs, web pages, and slides before you ship. Connects to coding agents, office agents, and editors in one command, locally offline or via Cloud MCP.",
-    "lead.promptLabel": "Or send this one-line prompt to your Agent to evaluate, install, and run a first check",
+      "A dedicated linter for AI slop. Flags leftover chat greetings, filler phrases, 'Not X, but Y' slogans, and stock template UI across docs, web pages, Word, and PowerPoint before you ship. Connects in one command and runs offline by default.",
+    "lead.promptLabel": "Agent prompt · auto-setup",
     "lead.promptText":
       "Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.",
-    "lead.copyPromptBtn": "Copy for Agent",
-    "lead.cta": "Try in workbench (Local / Cloud) ↓",
-    "lead.cloudBtn": "Free 30-credit Remote MCP key",
-    "lead.installBtn": "Install for Agent / Editor (runs offline)",
-    "lead.awesomeBtn": "90-tool directory →",
-    "lead.starBtn": "GitHub ★",
-    "lead.reassure": "CLI and local plugins run offline on your machine with zero uploads; the workbench switches between local checks and Cloud MCP.",
+    "lead.copyPromptBtn": "Copy for agent",
+    "lead.cta": "Try it in the workbench ↓",
+    "lead.installBtn": "Add to your agent or editor",
 
     "hp.tabBad": "Original",
     "hp.tabTrap": "Still sounds like AI",
@@ -383,37 +405,43 @@ const I18N = {
     "hp.openWb": "Open in workbench ↓",
 
     "m1.title": "Community rules and tools in one place",
-    "m1.desc": "Brings together vetted open-source rules, corpus findings, and 90 curated tools across docs, web UI, Word, and PowerPoint.",
-    "m2.title": "Works in Codex, Claude Code, Cursor, and editors",
-    "m2.desc": "Ships 7 domain packs across Skill, Plugin, CLI, and MCP, connecting to coding agents, office agents, and CI in one command.",
-    "m3.title": "Your drafts stay on your machine by default",
-    "m3.desc": "CLI and local plugins stay on your machine with zero uploads. Switch to Cloud MCP when you want multi-model review, rewrites, and synced style.",
+    "m1.desc": "Bundles 53 rules, 12 extended pattern checks, and 90 curated anti-slop tools for docs, web UI, Word, and PowerPoint.",
+    "m2.title": "One command into agents and editors",
+    "m2.desc": "Works with Codex, Claude Code, Cursor, WorkBuddy, and GitHub Actions, in the terminal, the editor, or CI.",
+    "m3.title": "Drafts stay on your machine",
+    "m3.desc": "The Skill and CLI run offline with zero uploads. Switch the workbench or remote MCP to cloud mode when you want multi-model review.",
 
-    "cases.title": "Three before/after cases: why cutting buzzwords still sounds like AI",
+    "cases.title": "Three before/after cases where cutting buzzwords was not enough",
     "cases.desc":
-      "After cutting cliché nouns, models often fall back on contrast slogans ('Not X, but Y') or pitch cadence that passes basic checks with 0 issues. Try them live or copy any case to share.",
+      "After the buzzwords go, models often fall back on 'Not X, but Y' slogans or pitch cadence that passes basic checks with 0 issues. Each case loads straight into the workbench.",
     "cases.readAll": "All contrast cases (.md) →",
 
-    "demos.title": "Six 6-second loops: prose, CLI, web UI, PPTX & agent gate",
+    "demos.title": "Six short clips: prose, CLI, workbench, web UI, decks, and agent CI",
     "demos.desc":
-      "Every clip is rendered offline from the real rules and browser workbench, shipped as lossless animated WebP with GIF and reduced-motion poster fallbacks. Use the controls below each card to pause, replay, or zoom.",
+      "Each clip runs about 7 seconds and is recorded offline from the real rules. Pick a scene, then pause, replay, or zoom in.",
     "demos.guideLink": "Animation & GIF guide →",
-    "demos.c1Title": "1. Three states of one note: catching 2nd-order slop",
+    "demos.tab1": "3-state proof",
+    "demos.tab2": "CLI gate",
+    "demos.tab3": "Workbench",
+    "demos.tab4": "Web UI",
+    "demos.tab5": "PPTX & DOCX",
+    "demos.tab6": "Agent + CI",
+    "demos.c1Title": "Three states of one note: catching 2nd-order slop",
     "demos.c1Badge": "3-state proof · 6.8s",
     "demos.c1Desc": "Strikes the leftover chat greeting in red, catches the 'Not X, but Y' slogan in blue, and ends clean at 12 minutes and 500,000 rows.",
-    "demos.c2Title": "2. Offline CLI gate: Node & Python parity",
+    "demos.c2Title": "Offline CLI gate: Node & Python parity",
     "demos.c2Badge": "Offline CLI · 6.4s",
     "demos.c2Desc": "Runs dislop check --profile locally: core artifacts exit 1 to block CI while rhythm and concreteness telemetry prints inline.",
-    "demos.c3Title": "3. Zero-upload browser workbench in action",
+    "demos.c3Title": "Zero-upload browser workbench in action",
     "demos.c3Badge": "Live DOM · 6.8s",
     "demos.c3Desc": "Live capture of the workbench above: toggle between draft, 2nd-order slop, and clean copy with 5-axis telemetry.",
-    "demos.c4Title": "4. Web UI audit: strip gradients & dead controls",
+    "demos.c4Title": "Web UI audit: strip gradients & dead controls",
     "demos.c4Badge": "UI audit · 6.8s",
     "demos.c4Desc": "Flags indigo-purple gradients, prompt-echo badges, pill walls, and dead href='#' buttons before switching to a 1px paper sheet.",
-    "demos.c5Title": "5. PPTX & DOCX audit: catch walls & shrunk text",
+    "demos.c5Title": "PPTX & DOCX audit: catch walls & shrunk text",
     "demos.c5Badge": "PPTX audit · 6.8s",
     "demos.c5Desc": "Unpacks .pptx slides locally to flag raw **markdown** leaks, word walls, 68% autofit shrink, and process titles.",
-    "demos.c6Title": "6. Coding Agent + CI loop: Skill, diff gate & re-check",
+    "demos.c6Title": "Coding agent + CI loop: Skill, diff gate & re-check",
     "demos.c6Badge": "Agent loop · 6.8s",
     "demos.c6Desc": "Agent reads pure-Markdown SKILL.md, gates changed PR lines with exit 1, and re-checks the clean edit to confirm metrics stay intact.",
     "demos.pause": "Pause",
@@ -422,7 +450,7 @@ const I18N = {
     "demos.zoom": "Zoom",
     "demos.close": "Close",
 
-    "wb.heading": "Try it live",
+    "wb.heading": "Workbench",
     "wb.subhint": "Paste text or drop a Markdown, HTML, SVG, Office, PDF, or image file",
     "wb.packLabel": "Pack:",
     "pack.auto": "Auto-detect",
@@ -475,26 +503,27 @@ const I18N = {
     "legend.error": "Red solid: hard bug",
     "legend.warn": "Blue dashed: warning (cliché / template)",
 
-    "surf.title": "How to use it: pure-doc Skill -> local CLI -> Official Cloud MCP",
+    "surf.title": "Three ways to run dislop: Skill, local CLI, and Cloud MCP",
     "surf.desc":
-      "Three ways to run dislop: a Markdown-only Skill to prevent clichés before drafting, an open-source offline CLI for fast checks and CI, and Official Cloud MCP (https://dislop.com/mcp) for multi-model review by genre.",
+      "Pick the one that matches your tools. Each comes with a copy-ready config.",
     "surf.readTools": "Full setup guide (.md) →",
-    "surf.w1Title": "1. Open-Source Pure-Doc Skill (drafting guardrails)",
-    "surf.w1Desc": "Genre-specific writing and UI reference cards with zero bundled scripts. Install into Claude Code, Codex, Cursor, or Antigravity to prevent clichés upfront and run local CLI checks afterward.",
-    "surf.w2Title": "2. Open-Source Local CLI & Plugins (zero-dep fast linter)",
-    "surf.w2Desc": "< 250 KB zero-dep CLI bundles all 7 packs for docs, Word, PowerPoint, and Git diffs in terminals, editors, and CI. Developers can also plug in their own model API key for deeper review.",
-    "surf.w3Title": "3. Official Cloud MCP (office & coding agents)",
-    "surf.w3Desc": "Connect https://dislop.com/mcp in Claude Cowork, WorkBuddy, Qwen, or editors after signing in (30 free credits/mo) for multi-model genre review returning structured guidance.",
-    "surf.w4Title": "4. Web Workbench & One-Line Agent Setup (/llms.txt)",
-    "surf.w4Desc": "Browse before/after examples and run basic local checks in this tab, sign in for cloud review, or paste dislop.com/llms.txt to your own Agent so it picks Skill, CLI, or MCP and runs a first check.",
+    "surf.w1Title": "Markdown-only Agent Skill",
+    "surf.w1Desc": "Writing and UI reference cards by genre, with no bundled scripts. Install it in Claude Code, Codex, Cursor, or Antigravity so the agent reads it before drafting and runs the local CLI afterward.",
+    "surf.w2Title": "Open-source local CLI and plugins",
+    "surf.w2Desc": "Zero dependencies, under 250 KB, with all 7 scenario packs built in. Checks docs, Word, PowerPoint, and Git diffs offline in terminals, editors, and CI. You can also plug in your own model key.",
+    "surf.w3Title": "Official Cloud MCP & web workbench",
+    "surf.w3Desc": "Connect from Claude Cowork, WorkBuddy, Qwen, or your editor. Sign in for 30 free credits a month and get multi-model review by genre with concrete edits.",
+    "surf.w4Title": "Let your agent set it up",
+    "surf.w4Desc": "Send dislop.com/llms.txt to your agent. It picks the Skill, CLI, or remote MCP, installs it, and runs a first check on your files.",
     "snip.prompt": "Send to Agent",
-    "snip.cloud": "Official MCP (Cloud)",
+    "snip.cloud": "Cloud MCP",
+    "snip.plugin": "Plugin",
     "snip.localMcp": "Official MCP",
     "snip.cli": "CLI",
 
-    "price.title": "Only cloud review costs credits",
+    "price.title": "Local tools stay free; cloud review uses credits",
     "price.desc":
-      "The pure-doc Skill, CLI, and all 7 scenario packs (53 rules) are Apache-2.0 open source and run offline locally. Sign in for Official Cloud MCP or workbench deep review and layout-preserving Office cleanup (30 free credits/mo; the paid API doesn't train on your text).",
+      "The Skill, CLI, and rules are Apache-2.0 and run offline. Cloud review, rewrites, and remote MCP need a sign-in: 30 free credits a month, and the paid model API does not train on your text.",
     "price.benchLink": "Read 5-model benchmark →",
     "price.t1Name": "Open Source Local (Skill + CLI)",
     "price.t1Price": "$0 · Forever free",
@@ -553,34 +582,54 @@ const I18N = {
     "ep.method": "Voice & design guide",
     "ep.full": "All 53 rules in one file",
 
-    "awesome.title": "Awesome Anti-Slop: 90 checked tools, guides & papers",
+    "awesome.title": "Awesome Anti-Slop: checked tools, guides, and papers",
     "awesome.desc":
       "Beyond dislop itself, we maintain a verified directory of anti-slop tools, writing guides, UI rules, PR policies, and papers—including Vale and Impeccable. Every link was checked on 2026-11-21.",
     "awesome.openFull": "Open full list →",
     "awesome.ecoTitle": "Filter by use case, or feed it to an agent",
     "awesome.ecoDesc": "Filter by writing, web UI, code, or research, or show only tools with automated checks. Detectors and bypass tools are kept separate at the bottom.",
-    "awesome.browseBtn": "Filter all 90 entries →",
+    "awesome.browseBtn": "Open the filterable list →",
     "awesome.ghBtn": "View on GitHub",
     "awesome.shareBtn": "Copy list blurb",
-    "awesome.posTitle": "Design references that don't look like AI templates",
-    "awesome.posDesc": "31 public print, type foundry, and independent publishing sites worth browsing when you want a page to look grounded.",
-    "awesome.posAll": "All 31 references (.md) →",
+    "awesome.posTitle": "31 typography and editorial layout references",
+    "awesome.posDesc": "Print, type foundry, and independent publishing sites to study before you lay out a page.",
+    "awesome.posAll": "All references (.md) →",
     "stat.entries": "entries",
     "stat.sections": "topics",
     "stat.det": "automated tools",
     "stat.zh": "zh / multilingual",
+    "guides.title": "Six field guides: writing, web UI, decks, and setup",
+    "guides.desc": "Each guide comes with copy-ready commands and before/after examples.",
+    "guides.all": "All guides →",
+    "guides.g1Cat": "Writing & Editing · 7 min",
+    "guides.g1Title": "Remove AI slop from writing",
+    "guides.g1Desc": "Skip flat banned-word lists and use the deletion test to avoid second-order clichés.",
+    "guides.g2Cat": "UI & Visual Craft · 6 min",
+    "guides.g2Title": "Fix AI slop in web UI",
+    "guides.g2Desc": "Replace purple gradients, pill walls, nested boxes, and dead buttons.",
+    "guides.g3Cat": "Docs & Decks · 6 min",
+    "guides.g3Title": "Clean up AI-made decks and docs",
+    "guides.g3Desc": "Catch raw asterisks, slide word walls, shrunk autofit text, and vague titles.",
+    "guides.g4Cat": "Setup & CI · 6 min",
+    "guides.g4Title": "Add dislop to agents and CI",
+    "guides.g4Desc": "Set up the Skill, offline CLI, GitHub Actions diff gate, and Cloud MCP.",
+    "guides.g5Cat": "Selection & Benchmarks · 6 min",
+    "guides.g5Title": "Linter vs. detector vs. skill",
+    "guides.g5Desc": "What each kind of tool can and cannot catch.",
+    "guides.g6Cat": "Fundamentals · 6 min",
+    "guides.g6Title": "What AI slop looks like",
+    "guides.g6Desc": "Four layers of signals across prose, web pages, and slides.",
 
-    "share.title": "Found this useful? Share it or bookmark the repo",
-    "share.desc": "The Markdown Skill, local CLI, and all 53 rules are Apache-2.0 open source and run offline with zero uploads. Sign in on the workbench or Official Cloud MCP for multi-model review without draft storage.",
-    "share.c1Title": "Share with a teammate or friend",
-    "share.c1Desc": "Copy a plain, no-hype blurb with the live workbench, before/after cases, and tool directory.",
+    "share.title": "Share with your team, or contribute a case",
+    "share.c1Title": "Send it to your team",
+    "share.c1Desc": "Copy a plain blurb with links to the workbench, the cases, and the Awesome list.",
     "share.copySiteBtn": "Copy project blurb",
     "share.copyCasesBtn": "Copy cases link",
-    "share.c2Title": "Star dislop on GitHub",
-    "share.c2Desc": "The engine, pure-doc Skill, Plugin, CLI, and Awesome Anti-Slop index all live in one repo.",
+    "share.c2Title": "Star it on GitHub",
+    "share.c2Desc": "The engine, Skill, plugins, CLI, and Awesome list live in one repo.",
     "share.starCta": "Star on GitHub ★",
     "share.c3Title": "Add a case, rule, or tool",
-    "share.c3Desc": "Have a classic AI-slop before/after example or a solid anti-slop tool missing from the list? Drop it in our Roadmap or Issues.",
+    "share.c3Desc": "Send a classic AI-slop sample or a tool we missed through a GitHub issue.",
     "share.roadmapCta": "View Roadmap →",
     "share.issueCta": "Submit case / tool",
 
@@ -645,6 +694,9 @@ const I18N = {
     "footer.roadmap": "Roadmap",
     "footer.brand": "Voice guide",
     "footer.design": "Design tokens",
+    "footer.gResources": "Resources",
+    "footer.gProject": "Project",
+    "footer.gElsewhere": "Elsewhere",
   },
 };
 
@@ -676,7 +728,7 @@ const HERO_PROOF_BY_LANG = {
       { kind: "error", label: "Red: ", text: "Stray chat reply on line one. Delete it." },
       { kind: "warn", label: "Blue: ", text: "Filler opener and hype noun ('game-changer'). Say what changed instead." },
     ],
-    trapVerdict: "Still fails: old buzzwords are gone, replaced by a 'Not X, but Y' AI slogan.",
+    trapVerdict: "Rejected: the buzzwords are gone, but a 'Not X, but Y' slogan took their place.",
     goodVerdict: "0 issues. Chat wrapper and stock phrasing removed.",
   },
 };
@@ -1088,7 +1140,7 @@ const CASES_BY_LANG = {
   zh: [
     {
       id: "doc",
-      kicker: "案例 01 · 发版简报（去套话 + 核对数字）",
+      kicker: "发版简报（去套话 + 核对数字）",
       title: "清掉寒暄、官话与口号，四个核心指标一个不丢",
       steps: [
         {
@@ -1120,7 +1172,7 @@ const CASES_BY_LANG = {
     },
     {
       id: "autopsy",
-      kicker: "案例 02 · 上一版首屏复盘（句式推销味）",
+      kicker: "上一版首屏复盘（句式推销味）",
       title: "检查报 0 处问题，但我们自己上一版首屏照样像 AI",
       steps: [
         {
@@ -1146,7 +1198,7 @@ const CASES_BY_LANG = {
     },
     {
       id: "ui",
-      kicker: "案例 03 · 网页与 PPT 模板味",
+      kicker: "网页与 PPT 模板味",
       title: "紫粉渐变 + 装饰徽章 + 点不动的空链接",
       steps: [
         {
@@ -1173,7 +1225,7 @@ const CASES_BY_LANG = {
   en: [
     {
       id: "doc",
-      kicker: "Case 01 · Release note (rewrite + number check)",
+      kicker: "Release note (rewrite + number check)",
       title: "Stripping chat wrappers and hype while keeping every metric exact",
       steps: [
         {
@@ -1205,7 +1257,7 @@ const CASES_BY_LANG = {
     },
     {
       id: "autopsy",
-      kicker: "Case 02 · Previous hero audit (pitch cadence)",
+      kicker: "Previous hero audit (pitch cadence)",
       title: "0 linter findings, yet our own previous hero still sounded like AI",
       steps: [
         {
@@ -1231,7 +1283,7 @@ const CASES_BY_LANG = {
     },
     {
       id: "ui",
-      kicker: "Case 03 · Web UI & slide templates",
+      kicker: "Web UI & slide templates",
       title: "Purple-pink gradient + prompt badge + dead href='#' button",
       steps: [
         {
@@ -1808,10 +1860,15 @@ function renderHeroProof() {
     fbEl.innerHTML = `<div class="hero-proof-verdict is-rejected">${escapeHtml(data.trapVerdict)}</div>`;
   }
 
+  const slipEl = document.getElementById("hero-proof-slip");
   document.querySelectorAll("[data-hero-state]").forEach((btn) => {
     const active = btn.getAttribute("data-hero-state") === heroProofState;
     btn.classList.toggle("is-active", active);
     btn.setAttribute("aria-selected", String(active));
+    btn.setAttribute("tabindex", active ? "0" : "-1");
+    if (active && slipEl && btn.id) {
+      slipEl.setAttribute("aria-labelledby", btn.id);
+    }
   });
   updateHeroAutoplayButton();
 }
@@ -2704,7 +2761,7 @@ function renderWorkbench() {
   const cards = [];
 
   for (const s of skipped) {
-    cards.push(`<div class="note-card">
+    cards.push(`<div class="note-card is-sev-skip">
       <div class="note-head"><span class="sev-tag sev-warning">${currentLang === "zh" ? "跳过未查" : "Skipped"}</span><span class="note-loc">${escapeHtml(s.file)}</span></div>
       <div class="note-why">${escapeHtml(localizeSkippedReasonForUi(s.reason, currentLang))}</div>
     </div>`);
@@ -2716,7 +2773,7 @@ function renderWorkbench() {
       currentLang === "zh"
         ? `PDF ${pList ? `第 ${pList} 页` : "部分页面"}包含字体或压缩内容，但离线未能提取出可选文字，请直接目视核对或改用可复制文本导出。`
         : cw.message;
-    cards.push(`<div class="note-card">
+    cards.push(`<div class="note-card is-sev-skip">
       <div class="note-head"><span class="sev-tag sev-warning">${currentLang === "zh" ? "覆盖提示" : "Coverage"}</span><span class="note-loc">${escapeHtml(cw.file || currentFilename || "PDF")}</span></div>
       <div class="note-why">${escapeHtml(covMsg)}</div>
     </div>`);
@@ -2758,18 +2815,19 @@ function renderWorkbench() {
     const excerpt = localizeFindingMatchForUi(f.match || "", currentLang);
     const focusedCls = idx === focusedFindingIdx ? " is-focused" : "";
     const dotCls = isErr ? "is-error" : "is-warn";
+    const sevCls = isErr ? "is-sev-error" : f.severity === "info" ? "is-sev-info" : "is-sev-warning";
 
     const actionButtons = [];
     if (!binaryAuditResult && f.span) {
       if (f.ruleId === "chatbot-artifact") {
         actionButtons.push(
-          `<button type="button" class="ctrl-btn ctrl-btn-sm" data-quick-strip="${idx}">${
+          `<button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-quick-strip="${idx}">${
             currentLang === "zh" ? "删掉这句寒暄" : "Strip wrapper"
           }</button>`
         );
       }
       actionButtons.push(
-        `<button type="button" class="ctrl-btn ctrl-btn-sm" data-jump-edit="${idx}">${
+        `<button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-jump-edit="${idx}">${
           currentLang === "zh" ? "定位修改" : "Edit span"
         }</button>`
       );
@@ -2789,7 +2847,7 @@ function renderWorkbench() {
       ? `<a href="#rule-${escapeHtml(f.ruleId)}">${escapeHtml(f.ruleId)}</a> · <a href="./rules/${escapeHtml(f.ruleId)}.md">.md</a>`
       : `<span>${currentLang === "zh" ? "扩展文风探针" : "Extended style probe"} · ${escapeHtml(f.ruleId)}</span>`;
 
-    cards.push(`<article class="note-card${focusedCls}" data-note-idx="${idx}">
+    cards.push(`<article class="note-card ${sevCls}${focusedCls}" data-note-idx="${idx}">
       <div class="note-head">
         <span style="display:inline-flex;align-items:center;gap:8px;font-weight:650;color:var(--ink);font-size:0.86rem;">
           <span class="hero-note-dot ${dotCls}"></span>${escapeHtml(plainTitle)}
@@ -2849,7 +2907,7 @@ function renderWorkbench() {
               currentLang === "zh" ? "登录用云端大模型深度审校（送 30 额度）" : "Sign in for deep Cloud Review (30 free)"
             }</button></div>`
           : "";
-      cards.push(`<article class="note-card note-card-ml">
+      cards.push(`<article class="note-card note-card-ml is-sev-warning">
         <div class="note-head">
           <span style="display:inline-flex;align-items:center;gap:8px;font-weight:650;color:var(--ink);font-size:0.86rem;">
             <span class="hero-note-dot is-warn"></span>${
@@ -3059,6 +3117,11 @@ function loadCaseIntoWorkbench(caseObj) {
   loadSpecimenById(caseObj.loadSpecimenId);
 }
 
+const CASE_STEP_TAGS = {
+  zh: { "is-bad": "没通过", "is-trap": "没通过", "is-good": "通过" },
+  en: { "is-bad": "rejected", "is-trap": "rejected", "is-good": "passed" },
+};
+
 function renderCases() {
   const grid = document.getElementById("cases-grid");
   if (!grid) return;
@@ -3068,20 +3131,23 @@ function renderCases() {
       const stepsHtml = c.steps
         .map((st) => {
           const body = st.html ? st.html : escapeHtml(st.text);
-          return `<div class="case-step ${escapeHtml(st.cls)}"><span class="case-step-label">${escapeHtml(st.label)}</span>${body}</div>`;
+          const tag = CASE_STEP_TAGS[currentLang]?.[st.cls] || "";
+          return `<div class="case-step ${escapeHtml(st.cls)}"><span class="case-step-label"><span>${escapeHtml(st.label)}</span>${
+            tag ? `<span class="case-step-tag">${escapeHtml(tag)}</span>` : ""
+          }</span>${body}</div>`;
         })
         .join("");
       const noteHtml = c.note ? `<p class="case-note">${escapeHtml(c.note)}</p>` : "";
       const primaryAction = c.loadSpecimenId
         ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="${escapeHtml(c.id)}">${escapeHtml(c.loadLabel)}</button>`
-        : `<a href="${escapeHtml(c.linkHref)}" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;">${escapeHtml(c.linkLabel)}</a>`;
+        : `<a href="${escapeHtml(c.linkHref)}" class="ctrl-btn ctrl-btn-sm">${escapeHtml(c.linkLabel)}</a>`;
       return `<article class="case-card">
         <span class="case-kicker">${escapeHtml(c.kicker)}</span>
         <h3 class="case-title">${escapeHtml(c.title)}</h3>
         <div class="case-body">${stepsHtml}${noteHtml}</div>
         <div class="case-actions">
           ${primaryAction}
-          <button type="button" class="ctrl-btn ctrl-btn-sm" data-share-case="${escapeHtml(c.id)}">${escapeHtml(c.shareLabel)}</button>
+          <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="${escapeHtml(c.id)}">${escapeHtml(c.shareLabel)}</button>
         </div>
       </article>`;
     })
@@ -3220,8 +3286,10 @@ function renderRulesTable() {
   const tbody = document.getElementById("rules-tbody");
   const countEl = document.getElementById("rules-count");
   const rows = [];
+  let totalBuiltInCount = 0;
   let visibleInLangCount = 0;
   let matchedCount = 0;
+  let crossLangMatchedCount = 0;
   const q = activeRuleSearch.trim().toLowerCase();
   const order = [
     "core",
@@ -3238,15 +3306,15 @@ function renderRulesTable() {
     const pack = PACKS_BY_ID[pid];
     if (!pack) continue;
     for (const r of pack.rules || []) {
+      totalBuiltInCount += 1;
       const meta = RULE_UI_META[r.id] || { lang: "both", title: { zh: r.id, en: r.id } };
       // Strict language purity: hide EN-only rules in ZH view and ZH-only rules in EN view
       // (unless specifically targeted via #rule-<id> hash link)
-      const hiddenByLang =
-        highlightedRuleId !== r.id &&
-        ((currentLang === "zh" && meta.lang === "en") || (currentLang === "en" && meta.lang === "zh"));
-      if (hiddenByLang) continue;
+      const isOtherLang = (currentLang === "zh" && meta.lang === "en") || (currentLang === "en" && meta.lang === "zh");
+      const isCrossLangPin = isOtherLang && highlightedRuleId === r.id;
+      if (isOtherLang && !isCrossLangPin) continue;
 
-      visibleInLangCount += 1;
+      if (!isCrossLangPin) visibleInLangCount += 1;
       if (activeRuleFilter !== "all" && activeRuleFilter !== pid) continue;
       if (activeModalityFilter !== "all" && !(r.modalities || []).includes(activeModalityFilter)) continue;
       if (activeSeverityFilter !== "all" && r.severity !== activeSeverityFilter) continue;
@@ -3264,8 +3332,9 @@ function renderRulesTable() {
         if (!hay.includes(q)) continue;
       }
 
-      matchedCount += 1;
-      const sevCls = r.severity === "error" ? "sev-error" : "sev-warning";
+      if (isCrossLangPin) crossLangMatchedCount += 1;
+      else matchedCount += 1;
+      const sevCls = r.severity === "error" ? "sev-error" : r.severity === "info" ? "sev-info" : "sev-warning";
       const sevLabel =
         currentLang === "zh"
           ? r.severity === "error"
@@ -3293,7 +3362,7 @@ function renderRulesTable() {
           <div class="rule-id-actions">
             ${
               canTry
-                ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="${escapeHtml(r.id)}">${
+                ? `<button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="${escapeHtml(r.id)}">${
                     currentLang === "zh" ? "试试 ↑" : "Try ↑"
                   }</button>`
                 : ""
@@ -3331,8 +3400,24 @@ function renderRulesTable() {
     tbody.innerHTML = rows.join("");
   }
 
-  countEl.textContent =
-    currentLang === "zh" ? `${matchedCount} / ${visibleInLangCount} 条规则` : `${matchedCount} / ${visibleInLangCount} rules`;
+  const hiddenLangCount = totalBuiltInCount - visibleInLangCount;
+  const pinNote =
+    crossLangMatchedCount > 0
+      ? currentLang === "zh"
+        ? `（含 ${crossLangMatchedCount} 条跨语种跳转规则）`
+        : ` (+${crossLangMatchedCount} linked rule)`
+      : "";
+  if (matchedCount === visibleInLangCount && hiddenLangCount > 0) {
+    countEl.textContent =
+      currentLang === "zh"
+        ? `当前展示 ${visibleInLangCount} 条中文与通用规则（共 ${totalBuiltInCount} 条，含 ${hiddenLangCount} 条纯英文规则）${pinNote}`
+        : `${visibleInLangCount} English & cross-language rules (${totalBuiltInCount} built-in, ${hiddenLangCount} Chinese-only hidden)${pinNote}`;
+  } else {
+    countEl.textContent =
+      currentLang === "zh"
+        ? `${matchedCount} / ${visibleInLangCount} 条当前语种规则（共 ${totalBuiltInCount} 条）${pinNote}`
+        : `${matchedCount} / ${visibleInLangCount} rules (${totalBuiltInCount} built-in)${pinNote}`;
+  }
 
   tbody.querySelectorAll("[data-try-rule]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -3710,6 +3795,12 @@ function applyI18n(isUserSwitch = false) {
   });
   const navGuidesLink = document.getElementById("nav-guides-link");
   if (navGuidesLink) navGuidesLink.href = currentLang === "en" ? "./en/guides/" : "./guides/";
+  const guidesBase = currentLang === "en" ? "./en/guides/" : "./guides/";
+  document.querySelectorAll("[data-guide-slug]").forEach((aEl) => {
+    aEl.setAttribute("href", `${guidesBase}${aEl.getAttribute("data-guide-slug")}/`);
+  });
+  const guidesHomeAll = document.getElementById("guides-home-all");
+  if (guidesHomeAll) guidesHomeAll.href = guidesBase;
   const footerGuidesLink = document.getElementById("footer-guides-link");
   if (footerGuidesLink) footerGuidesLink.href = currentLang === "en" ? "./en/guides/" : "./guides/";
   const footerRulesLink = document.getElementById("footer-rules-link");
@@ -3739,6 +3830,14 @@ function applyI18n(isUserSwitch = false) {
   const mainNavEl = document.querySelector("nav.nav-links");
   if (mainNavEl) {
     mainNavEl.setAttribute("aria-label", currentLang === "zh" ? "主导航" : "Main navigation");
+  }
+  const demoTablistEl = document.querySelector('#demos [role="tablist"]');
+  if (demoTablistEl) {
+    demoTablistEl.setAttribute("aria-label", currentLang === "zh" ? "选择演示场景" : "Choose a demo scene");
+  }
+  const langToggleBtn = document.getElementById("lang-toggle");
+  if (langToggleBtn) {
+    langToggleBtn.setAttribute("lang", currentLang === "zh" ? "en" : "zh-CN");
   }
   const tokEmailEl = document.getElementById("token-email-input");
   if (tokEmailEl) {
@@ -5961,6 +6060,58 @@ function applyTheme(theme) {
   updateThemeToggleLabel();
 }
 
+// ---------- Dark-room demo stage: one scene at a time (plain grid until this runs) ----------
+
+function initDemoStage() {
+  const stage = document.querySelector("[data-demo-stage]");
+  const rail = stage?.querySelector('[role="tablist"]');
+  const grid = stage?.querySelector(".demos-grid");
+  if (!stage || !rail || !grid) return;
+  const tabs = Array.from(rail.querySelectorAll("[data-demo-select]"));
+  if (!tabs.length) return;
+
+  function selectDemo(slug, moveFocus = false) {
+    tabs.forEach((tab) => {
+      const active = tab.getAttribute("data-demo-select") === slug;
+      tab.setAttribute("aria-selected", String(active));
+      tab.setAttribute("tabindex", active ? "0" : "-1");
+      if (active && moveFocus) tab.focus();
+    });
+    grid.querySelectorAll("[data-demo-card]").forEach((card) => {
+      card.classList.toggle("is-active-demo", card.getAttribute("data-demo-card") === slug);
+    });
+  }
+
+  tabs.forEach((tab) => {
+    const slug = tab.getAttribute("data-demo-select");
+    const card = grid.querySelector(`[data-demo-card="${slug}"]`);
+    if (card) {
+      card.setAttribute("role", "tabpanel");
+      card.setAttribute("aria-labelledby", tab.id);
+    }
+    tab.addEventListener("click", () => selectDemo(slug));
+  });
+
+  rail.addEventListener("keydown", (e) => {
+    const idx = tabs.indexOf(document.activeElement);
+    if (idx < 0) return;
+    let next = -1;
+    if (e.key === "ArrowRight") next = (idx + 1) % tabs.length;
+    else if (e.key === "ArrowLeft") next = (idx - 1 + tabs.length) % tabs.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = tabs.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    selectDemo(tabs[next].getAttribute("data-demo-select"), true);
+  });
+
+  rail.hidden = false;
+  stage.classList.add("is-stage-ready");
+  grid.classList.add("is-stage-ready");
+  const initial = tabs.find((t) => t.getAttribute("aria-selected") === "true") || tabs[0];
+  selectDemo(initial.getAttribute("data-demo-select"));
+}
+
 // ---------- Wire Events ----------
 
 function init() {
@@ -5979,13 +6130,31 @@ function init() {
     applyI18n(true);
   });
 
-  // Hero 3-state Proof Card tabs & autoplay toggle
-  document.querySelectorAll("[data-hero-state]").forEach((btn) => {
+  // Hero 3-state Proof Card tabs (roving tabindex + arrow keys) & autoplay toggle
+  const heroTabsRail = document.getElementById("hero-proof-tabs");
+  const heroTabs = heroTabsRail ? Array.from(heroTabsRail.querySelectorAll("[data-hero-state]")) : [];
+  heroTabs.forEach((btn) => {
     btn.addEventListener("click", () => {
       const next = btn.getAttribute("data-hero-state") || "bad";
       setHeroProofState(next, false);
     });
   });
+  if (heroTabsRail && heroTabs.length) {
+    heroTabsRail.addEventListener("keydown", (e) => {
+      const idx = heroTabs.indexOf(document.activeElement);
+      if (idx < 0) return;
+      let next = -1;
+      if (e.key === "ArrowRight") next = (idx + 1) % heroTabs.length;
+      else if (e.key === "ArrowLeft") next = (idx - 1 + heroTabs.length) % heroTabs.length;
+      else if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = heroTabs.length - 1;
+      if (next < 0) return;
+      e.preventDefault();
+      const targetTab = heroTabs[next];
+      setHeroProofState(targetTab.getAttribute("data-hero-state") || "bad", false);
+      targetTab.focus();
+    });
+  }
 
   document.getElementById("hp-autoplay-btn")?.addEventListener("click", () => {
     heroProofAutoplay = !heroProofAutoplay;
@@ -5997,16 +6166,20 @@ function init() {
     updateHeroAutoplayButton();
   });
 
-  // Demo cards: Pause/Play poster swap, Replay, and native <dialog> Lightbox
+  // Demo cards: Pause/Play poster swap (supports reduced-motion override), Replay, and Lightbox
   function setDemoCardPaused(slug, paused) {
     if (paused) pausedDemoSlugs.add(slug);
     else pausedDemoSlugs.delete(slug);
     const dict = I18N[currentLang] || I18N.zh;
     const card = document.querySelector(`[data-demo-card="${slug}"]`);
     if (!card) return;
+    const poster = card.querySelector(`source[data-demo-poster="${slug}"]`);
     const webp = card.querySelector(`source[data-demo-webp="${slug}"]`);
     const img = card.querySelector(`img[data-demo-gif="${slug}"]`);
     const btn = card.querySelector(`[data-demo-toggle="${slug}"]`);
+    if (poster) {
+      poster.media = paused ? "(prefers-reduced-motion: reduce)" : "not all";
+    }
     if (webp) {
       webp.srcset = paused
         ? `./assets/demos/${slug}-${currentLang}-v2-poster.png`
@@ -6024,8 +6197,11 @@ function init() {
   }
 
   document.querySelectorAll("[data-demo-toggle]").forEach((btn) => {
+    const slug = btn.getAttribute("data-demo-toggle");
+    if (prefersReducedMotion && slug) {
+      setDemoCardPaused(slug, true);
+    }
     btn.addEventListener("click", () => {
-      const slug = btn.getAttribute("data-demo-toggle");
       if (!slug) return;
       setDemoCardPaused(slug, !pausedDemoSlugs.has(slug));
     });
@@ -6037,9 +6213,11 @@ function init() {
       if (!slug) return;
       setDemoCardPaused(slug, false);
       const card = document.querySelector(`[data-demo-card="${slug}"]`);
+      const poster = card?.querySelector(`source[data-demo-poster="${slug}"]`);
       const webp = card?.querySelector(`source[data-demo-webp="${slug}"]`);
       const img = card?.querySelector(`img[data-demo-gif="${slug}"]`);
       const bust = `?r=${Date.now()}`;
+      if (poster) poster.media = "not all";
       if (webp) webp.srcset = `./assets/demos/${slug}-${currentLang}-v2.webp${bust}`;
       if (img) img.src = `./assets/demos/${slug}-${currentLang}-v2.gif${bust}`;
     });
@@ -6061,6 +6239,8 @@ function init() {
       if (typeof lightbox.showModal === "function") lightbox.showModal();
     });
   });
+  initDemoStage();
+
   document.getElementById("demo-lightbox-close")?.addEventListener("click", () => {
     lightbox?.close();
   });

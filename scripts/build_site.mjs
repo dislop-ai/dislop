@@ -16,6 +16,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  AWESOME_NAV_IDS,
   buildEnglishAwesomeHtml,
   buildEnglishHomeHtml,
   buildGuidesAndRulesPages,
@@ -23,7 +24,10 @@ import {
   loadKnowledgeBase,
   renderAwesomeJsonLd,
   renderAwesomeTriageHtml,
+  renderBrandLockup,
+  renderGithubCtrl,
   renderHomeJsonLd,
+  renderPrimaryNavLinks,
 } from "./lib/site_content.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -1024,6 +1028,8 @@ version: ${VERSION}
 | \`--raised\` | Controls & hover | \`#ECEEE9\` | \`#1D2127\` | \`L* = 12.6\` (> sheet) |
 | \`--inset\` | Code / input well | \`#F1F3F0\` | \`#0A0C0E\` | \`L* = 3.2\` (recessed) |
 | \`--control-border\` | Inputs, selects & buttons | \`#767C85\` | \`#6F7784\` | \`4.2:1\` light / \`3.9:1\` dark (WCAG >= 3:1) |
+| \`--control-border-quiet\` | Quiet tier-3 controls | \`#888E97\` | \`#636A76\` | \`3.3:1\` light / \`3.3:1\` dark (WCAG >= 3:1) |
+| \`--ink-stage\` | Charcoal stage: agent prompt, terminal, demo room | \`#14171A\` | \`#14171A\` | Text \`#ECEEF0\` \`15.5:1\`, muted \`#A6ACB5\` \`7.9:1\`, red text \`#FF7A6B\` \`7.1:1\` |
 | \`--ink\` | Primary ink | \`#14171A\` | \`#ECEEF0\` | \`18.0:1\` light / \`15.3:1\` dark |
 | \`--mark-error\` | Hard AI artifact (\`error\`) | \`#B42318\` | \`#FF7A6B\` | \`6.6:1\` / \`7.0:1\` (2px solid) |
 | \`--mark-warn\` | Cliché / template warning (\`warning\` / \`info\`) | \`#1B52B0\` | \`#85B4FF\` | \`7.3:1\` / \`8.5:1\` (1.5px dashed) |
@@ -1032,8 +1038,8 @@ version: ${VERSION}
 ## Structural Rules Enforced on \`site/\`
 
 - Zero external font CDNs, analytics, or third-party requests (\`CSP: connect-src 'self'\`; offline checks stay 0-upload by default).
-- Continuous \`1px\` structural rails (\`max-width: 1200px\`); \`0px\` shared cell radii, \`4px\` control radii; zero \`rounded-full\` badge soup.
-- Red (\`--mark-error\`) is reserved strictly for objective invariant defects.
+- Continuous \`1px\` structural rails (\`max-width: 1240px\`); \`0px\` shared cell radii, \`6px\` button radii (\`5px\` compact), \`4px\` input wells; zero \`rounded-full\` badge soup.
+- Red text and underlines (\`--mark-error\`) are reserved for objective invariant defects; the brand \`--pen\` only draws strokes of \`>= 2.5px\` (logo, hero dele stroke, current-selection bar).
 - Measure capped at \`65ch\` (Latin) / \`36\` Han chars; line height \`1.68\` EN / \`1.82\` ZH; \`tabular-nums\` on coordinates and metrics.
 `,
 });
@@ -2094,22 +2100,14 @@ ${renderAwesomeJsonLd({ lang: "zh", baseUrl: BASE_URL, entries: radarData.entrie
   <a class="skip-link" href="#main-content" data-i18n="nav.skip">跳至正文</a>
   <div class="rail-shell">
     <header class="topbar band-rule">
-      <a class="brand-lockup" href="../">
-        <img src="../assets/logo.svg" width="28" height="28" alt="dislop 标识">
-        <span class="brand-wordmark">dislop</span>
-      </a>
+      ${renderBrandLockup({ lang: "zh", depthPrefix: "../", homeHref: "../", version: VERSION, metaI18nKey: "nav.brandMeta" })}
 
-      <nav class="nav-links" aria-label="工具清单导航">
-        <a href="../" id="awesome-home-link" data-i18n="nav.workbench">返回首页</a>
-        <a href="../guides/" id="awesome-guides-link" data-i18n="nav.guides">指南</a>
-        <a href="./" aria-current="page" data-i18n="nav.awesome">工具清单</a>
-        <a href="../rules/" id="awesome-rules-link" data-i18n="nav.rules">规则</a>
-        <a href="./index.json" class="nav-agent-link">index.json</a>
-        <a href="./index.md" class="nav-agent-link">index.md</a>
-        <a href="https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md" target="_blank" rel="noopener" id="awesome-gh-nav">GitHub</a>
+      <nav class="nav-links" aria-label="主导航">
+${renderPrimaryNavLinks({ lang: "zh", depthPrefix: "../", activeNav: "awesome", ids: AWESOME_NAV_IDS, withI18n: true })}
       </nav>
 
       <div class="top-controls">
+        ${renderGithubCtrl({ i18nKey: "nav.github" })}
         <button type="button" id="lang-toggle" class="ctrl-btn" aria-label="Switch to English">EN</button>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
       </div>
@@ -2121,6 +2119,12 @@ ${renderAwesomeJsonLd({ lang: "zh", baseUrl: BASE_URL, entries: radarData.entrie
       <p class="section-desc" data-i18n="awesome.sub">
         一共整理了 ${radarData.entries.length} 个中英文工具、检查器、写作规范、网页设计指南和论文，包括 Vale、Impeccable 这类常用项目。可以按类别找，也可以只看能自动检查的工具。链接和 GitHub 状态核验于 ${SNAPSHOT_DATE}。
       </p>
+      <div class="page-export-strip">
+        <span data-i18n="awesome.exportLabel">给 Agent 或脚本读：</span>
+        <a href="./index.json">index.json</a>
+        <a href="./index.md">index.md</a>
+        <a href="https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md" target="_blank" rel="noopener" id="awesome-gh-nav">GitHub</a>
+      </div>
 
 ${renderAwesomeTriageHtml({ lang: "zh", depthPrefix: "../" })}
 
@@ -2594,7 +2598,7 @@ const preRenderedRules = allRules
     const actionLines = [];
     if (canTry) {
       actionLines.push(
-        `                  <button type="button" class="ctrl-btn ctrl-btn-sm" data-try-rule="${escapeHtml(r.id)}" aria-label="在工作台试试 ${escapeHtml(meta.title.zh)}">试试 ↑</button>`
+        `                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="${escapeHtml(r.id)}" aria-label="在工作台试试 ${escapeHtml(meta.title.zh)}">试试 ↑</button>`
       );
     }
     actionLines.push(
@@ -2703,11 +2707,25 @@ ${featuredPos
 
 indexHtml = replaceBuildBlock(indexHtml, "POSITIVE_REFS", posRefsHtml);
 
+// 3f. Masthead version label follows package.json (static markup, rewritten on every build)
+const brandVerRe = /<span class="brand-ver">v[^<]*<\/span>/;
+if (!brandVerRe.test(indexHtml)) {
+  throw new Error('Missing <span class="brand-ver"> masthead version label in site/index.html');
+}
+indexHtml = indexHtml.replace(brandVerRe, `<span class="brand-ver">v${VERSION}</span>`);
+
 fs.writeFileSync(path.join(SITE_DIR, "index.html"), indexHtml, "utf8");
 
 // ---------- 4. Build-Time Security, Budget & Link Assertions ----------
 
 const errors = [];
+
+// Every published guide must stay linked from the homepage guide index (copy lives in site/app.js I18N)
+for (const g of guides) {
+  if (!indexHtml.includes(`data-guide-slug="${g.slug}"`)) {
+    errors.push(`site/index.html #guides-home is missing guide ${g.slug}`);
+  }
+}
 
 const llmsBytes = Buffer.byteLength(llmsTxt, "utf8");
 if (llmsBytes > 2600) {

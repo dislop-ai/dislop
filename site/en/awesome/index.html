@@ -251,20 +251,22 @@
   <div class="rail-shell">
     <header class="topbar band-rule">
       <a class="brand-lockup" href="../">
-        <img src="../../assets/logo.svg" width="28" height="28" alt="dislop icon">
+        <img src="../../assets/logo.svg" width="30" height="30" alt="">
         <span class="brand-wordmark">dislop</span>
+        <span class="brand-meta"><span data-i18n="nav.brandMeta">AI slop linter</span> · <span class="brand-ver">v0.8.2</span></span>
       </a>
 
-      <nav class="nav-links" aria-label="Awesome Anti-Slop navigation">
-        <a href="../" id="awesome-home-link" data-i18n="nav.workbench">Back to dislop</a>
-        <a href="../guides/" id="awesome-guides-link" data-i18n="nav.guides">Guides</a>
-        <a href="./" aria-current="page" data-i18n="nav.awesome">Awesome list</a>
-        <a href="../rules/" id="awesome-rules-link" data-i18n="nav.rules">Rules</a>
-        <a href="../../awesome/index.json" class="nav-agent-link">index.json</a>
-        <a href="https://github.com/dislop-ai/dislop/tree/main/awesome" target="_blank" rel="noopener" id="awesome-gh-nav">GitHub</a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../?lang=en#workbench" id="awesome-home-link" data-i18n="nav.workbench">Workbench</a>
+        <a href="../../en/#surfaces" id="awesome-surfaces-link" data-i18n="nav.surfaces">Setup</a>
+        <a href="../../?lang=en#cases" id="awesome-cases-link" data-i18n="nav.cases">Cases</a>
+        <a href="../../en/guides/" id="awesome-guides-link" data-i18n="nav.guides">Guides</a>
+        <a href="../../en/rules/" id="awesome-rules-link" data-i18n="nav.rules">Rules</a>
+        <a href="../../en/awesome/" aria-current="page" data-i18n="nav.awesome">Directory</a>
       </nav>
 
       <div class="top-controls">
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label" data-i18n="nav.github">GitHub ★</span></a>
         <button type="button" id="lang-toggle" class="ctrl-btn" aria-label="切换为中文">中文</button>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
       </div>
@@ -276,20 +278,26 @@
       <p class="section-desc" data-i18n="awesome.sub">
         90 tools, linters, style guides, UI rules, and papers in English and Chinese, including established projects like Vale and Impeccable. Filter by topic or show only automated tools. Links and GitHub snapshots checked on 2026-11-21.
       </p>
+      <div class="page-export-strip">
+        <span data-i18n="awesome.exportLabel">For agents and scripts:</span>
+        <a href="../../awesome/index.json">index.json</a>
+        <a href="../../awesome/index.md">index.md</a>
+        <a href="https://github.com/dislop-ai/dislop/tree/main/awesome" target="_blank" rel="noopener" id="awesome-gh-nav">GitHub</a>
+      </div>
 
       <div class="awesome-triage-grid" aria-label="How to pick a tool">
         <div class="awesome-triage-cell">
-          <h2 data-i18n="triage.h1">Need automated CI or pre-send checks?</h2>
+          <h2 data-i18n="triage.h1">Catch hard bugs locally or in CI</h2>
           <p data-i18n="triage.p1">Start with deterministic linters (dislop, Vale, textlint) that flag exact lines with zero LLM calls.</p>
           <a href="../../en/guides/linter-vs-detector-vs-skill/" id="triage-link-1" data-i18n="triage.a1">Compare linters vs. skills →</a>
         </div>
         <div class="awesome-triage-cell">
-          <h2 data-i18n="triage.h2">Fixing prose habits before drafting?</h2>
+          <h2 data-i18n="triage.h2">Steer your agent before it drafts</h2>
           <p data-i18n="triage.p2">Load a Markdown Skill such as Humanizer or stop-slop into your agent, then verify the final draft locally.</p>
           <a href="../../en/guides/remove-ai-slop-writing/" id="triage-link-2" data-i18n="triage.a2">Read the writing guide →</a>
         </div>
         <div class="awesome-triage-cell">
-          <h2 data-i18n="triage.h3">Cleaning AI-built UI or slide decks?</h2>
+          <h2 data-i18n="triage.h3">Clean up template web UI and slides</h2>
           <p data-i18n="triage.p3">Pair frontend-design or Impeccable with dislop UI and PPTX rules to strip gradients, dead links, and word walls.</p>
           <a href="../../en/guides/fix-ai-slop-web-ui/" id="triage-link-3" data-i18n="triage.a3">Read the web UI guide →</a>
         </div>

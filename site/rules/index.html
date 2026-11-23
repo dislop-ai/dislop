@@ -65,20 +65,23 @@
   <div class="rail-shell">
     <header class="topbar band-rule">
       <a class="brand-lockup" href="../">
-        <img src="../assets/logo.svg" width="28" height="28" alt="dislop 图标">
+        <img src="../assets/logo.svg" width="30" height="30" alt="">
         <span class="brand-wordmark">dislop</span>
+        <span class="brand-meta"><span>AI 味检查</span> · <span class="brand-ver">v0.8.2</span></span>
       </a>
 
       <nav class="nav-links" aria-label="主导航">
-        <a href="../#workbench">在线试</a>
+        <a href="../#workbench">工作台</a>
+        <a href="../#surfaces">接入</a>
+        <a href="../#cases">案例</a>
         <a href="../guides/">指南</a>
-        <a href="../awesome/">工具清单</a>
         <a href="../rules/" aria-current="page">规则</a>
-        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+        <a href="../awesome/">工具清单</a>
       </nav>
 
       <div class="top-controls">
-        <a href="../en/rules/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="Switch to English">EN</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label">GitHub ★</span></a>
+        <a href="../en/rules/" class="ctrl-btn" aria-label="Switch to English">EN</a>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
       </div>
     </header>
@@ -104,25 +107,25 @@
             <tbody>
             <tr>
               <td><a href="./unfilled-placeholder/"><strong>忘了填的占位符</strong></a><div style="margin-top:2px;"><code>unfilled-placeholder</code></div></td>
-              <td><code>error</code></td>
+              <td><span class="sev-tag sev-error">硬伤</span></td>
               <td><code>markdown, text, html, jsx, svg, docx, pptx, pdf</code></td>
               <td>存在未替换的模板占位符或测试假文。</td>
             </tr>
             <tr>
               <td><a href="./chatbot-artifact/"><strong>留在正文里的 AI 寒暄</strong></a><div style="margin-top:2px;"><code>chatbot-artifact</code></div></td>
-              <td><code>error</code></td>
+              <td><span class="sev-tag sev-error">硬伤</span></td>
               <td><code>markdown, text, html, jsx, docx, pptx, pdf</code></td>
               <td>残留未清理的 AI 对话寒暄壳或检索引用内部标记。</td>
             </tr>
             <tr>
               <td><a href="./markdown-leak/"><strong>没渲染的 Markdown 符号</strong></a><div style="margin-top:2px;"><code>markdown-leak</code></div></td>
-              <td><code>error</code></td>
+              <td><span class="sev-tag sev-error">硬伤</span></td>
               <td><code>docx, pptx, pdf</code></td>
               <td>Word 或 PowerPoint 文本中残留未渲染的原始 Markdown 标记（如 <code>**加粗**</code> 或 <code>## 标题</code>）。</td>
             </tr>
             <tr>
               <td><a href="./ui-dead-control/"><strong>点不动的假按钮或空链接</strong></a><div style="margin-top:2px;"><code>ui-dead-control</code></div></td>
-              <td><code>error</code></td>
+              <td><span class="sev-tag sev-error">硬伤</span></td>
               <td><code>html, jsx</code></td>
               <td>AI 生成网页常见的空跳转链接（<code>href=&quot;#&quot;</code>）、空按钮或未说明原因的占位禁用按钮。</td>
             </tr>
@@ -141,115 +144,115 @@
             <tbody>
             <tr>
               <td><a href="./en-throat-clearing-opener/"><strong>英文铺垫开场白</strong></a><div style="margin-top:2px;"><code>en-throat-clearing-opener</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>英文铺垫式开场白拖延了核心事实。</td>
             </tr>
             <tr>
               <td><a href="./en-cliche-lexicon/"><strong>英文高频套词</strong></a><div style="margin-top:2px;"><code>en-cliche-lexicon</code></div></td>
-              <td><code>info</code></td>
+              <td><span class="sev-tag sev-info">轻提示</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>高频公关套语，建议替换为具体动作或实测指标。</td>
             </tr>
             <tr>
               <td><a href="./zh-bureaucratic-padding/"><strong>公文黑话与空泛词</strong></a><div style="margin-top:2px;"><code>zh-bureaucratic-padding</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>存在空泛汇报套词或铺垫口头禅，掩盖了具体动作、主体与结果。</td>
             </tr>
             <tr>
               <td><a href="./negation-pivot-frame/"><strong>“不是 A，而是 B”套句</strong></a><div style="margin-top:2px;"><code>negation-pivot-frame</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>二阶“不是 A，而是 B”对比修辞：先否定稻草人再拔高抽象概念，缺乏具体事实增量。</td>
             </tr>
             <tr>
               <td><a href="./staccato-slogan-run/"><strong>英文短句口号连发</strong></a><div style="margin-top:2px;"><code>staccato-slogan-run</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>连续三个及以上超短断句口号（第二代 AI 戏剧化腔调）。</td>
             </tr>
             <tr>
               <td><a href="./zh-four-char-triad/"><strong>四字排比串</strong></a><div style="margin-top:2px;"><code>zh-four-char-triad</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>连续三个及以上四字套语并列（如“精准高效、安全可靠、灵活易用”），信息密度低。</td>
             </tr>
             <tr>
               <td><a href="./unsourced-attribution/"><strong>没写明出处的“研究表明”</strong></a><div style="margin-top:2px;"><code>unsourced-attribution</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>出现“研究表明/数据显示/业内人士指出”等模糊权威背书，但句内无具体机构、年份、链接或引用标记。</td>
             </tr>
             <tr>
               <td><a href="./bold-lead-list-wall/"><strong>满屏“加粗词 + 冒号”清单</strong></a><div style="margin-top:2px;"><code>bold-lead-list-wall</code></div></td>
-              <td><code>info</code></td>
+              <td><span class="sev-tag sev-info">轻提示</span></td>
               <td><code>markdown, text</code></td>
               <td>连续 4 条及以上 <code>- **小标题**：说明</code> 列表墙，呈现典型大模型平铺罗列感。</td>
             </tr>
             <tr>
               <td><a href="./cooccurrence-slop-cluster/"><strong>低事实段落堆叠空泛动词</strong></a><div style="margin-top:2px;"><code>cooccurrence-slop-cluster</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>同一低事实段落内密集堆叠多个弱套词组合（如“有效推动/持续优化/显著提升”或“leverage/streamline/robust”），冲淡了具体改动。</td>
             </tr>
             <tr>
               <td><a href="./semicolon-tricolon/"><strong>三段对称分号推销句</strong></a><div style="margin-top:2px;"><code>semicolon-tricolon</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>单句内连续使用两个及以上分号构成三段对称排比，呈现典型 AI 推销腔。</td>
             </tr>
             <tr>
               <td><a href="./rhetorical-qa-cadence/"><strong>自问自答式营销设问</strong></a><div style="margin-top:2px;"><code>rhetorical-qa-cadence</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>自问自答式设问套路（“为什么……？因为……”“结果呢？”），带有明显生成式营销文节奏。</td>
             </tr>
             <tr>
               <td><a href="./comma-chain-runon/"><strong>五连逗号一逗到底长句</strong></a><div style="margin-top:2px;"><code>comma-chain-runon</code></div></td>
-              <td><code>info</code></td>
+              <td><span class="sev-tag sev-info">轻提示</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>单句内连续串接 5 个及以上逗号分句，节奏平铺拖沓。</td>
             </tr>
             <tr>
               <td><a href="./narrative-sandwich-frame/"><strong>趋势帽开场与展望帽收尾</strong></a><div style="margin-top:2px;"><code>narrative-sandwich-frame</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>出现宏大趋势开场（“随着……的飞速发展”）、展望式升华收尾（“展望未来……”）或连接词堆叠（“此外/与此同时/不仅如此”），呈现典型 AI 三明治叙事壳。</td>
             </tr>
             <tr>
               <td><a href="./template-skeleton-echo/"><strong>连续三段同构句首填表腔</strong></a><div style="margin-top:2px;"><code>template-skeleton-echo</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>连续 3 个及以上段落或句子复用同一句首骨架（如“在……方面，”“首先/其次/再次/最后”“By …ing,”），结构像套模板填词。</td>
             </tr>
             <tr>
               <td><a href="./low-burstiness-vapor/"><strong>句长齐平且缺具体事实</strong></a><div style="margin-top:2px;"><code>low-burstiness-vapor</code></div></td>
-              <td><code>info</code></td>
+              <td><span class="sev-tag sev-info">轻提示</span></td>
               <td><code>markdown, text</code></td>
               <td>多句段落同时出现句长高度齐平（突发性变异系数 CV &lt; 0.24）且几乎没有具体锚点（数字、时间、文件名或可核查动作），空泛同质感强。</td>
             </tr>
             <tr>
               <td><a href="./zh-dev-jargon/"><strong>中文研发与产品自嗨黑话</strong></a><div style="margin-top:2px;"><code>zh-dev-jargon</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>单段集中出现 AI 爱写的空洞自嗨黑话（如“全闭环/深度赋能/范式跃迁/零失误/体系化”），而非具体工程或业务机制；偶发行业实词会自动豁免。</td>
             </tr>
             <tr>
               <td><a href="./zh-exclamation/"><strong>中文正文鸡血感叹号</strong></a><div style="margin-top:2px;"><code>zh-exclamation</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>中文正文段出现鸡血营销感叹号（2 处及以上或搭配“太棒了/重磅/彻底告别/震撼”等煽动词），破坏冷静客观的叙述语气。</td>
             </tr>
             <tr>
               <td><a href="./zh-mega-sentence/"><strong>中文超长一逗到底单句</strong></a><div style="margin-top:2px;"><code>zh-mega-sentence</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>中文单句一逗到底超过 180 个汉字（或 &gt;= 120 汉字且总长超 180 字），阅读负担重，呈大模型长从句生成特征。</td>
             </tr>
             <tr>
               <td><a href="./unsourced-statistic/"><strong>无基线/出处的百分比宣称</strong></a><div style="margin-top:2px;"><code>unsourced-statistic</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>宣传式百分比数字宣称（如“提升 40%”“高达 80%”“up to 50%”）附近缺少测试基线、样本数、指标口径或引用来源。</td>
             </tr>
@@ -268,19 +271,19 @@
             <tbody>
             <tr>
               <td><a href="./eng-pr-diff-parrot/"><strong>空泛的 AI 提交摘要壳</strong></a><div style="margin-top:2px;"><code>eng-pr-diff-parrot</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text</code></td>
               <td>空泛的 AI 提交摘要只重复“通过优化提升可维护性”，未说明具体修掉的缺陷、边界条件或单号。</td>
             </tr>
             <tr>
               <td><a href="./eng-shallow-root-cause/"><strong>复盘止步于“人为失误”</strong></a><div style="margin-top:2px;"><code>eng-shallow-root-cause</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, docx</code></td>
               <td>故障复盘停在“人为失误/操作不当”，没有追查缺失的系统校验或防呆机制。</td>
             </tr>
             <tr>
               <td><a href="./eng-vague-action-item/"><strong>无指标无负责人的改进项</strong></a><div style="margin-top:2px;"><code>eng-vague-action-item</code></div></td>
-              <td><code>info</code></td>
+              <td><span class="sev-tag sev-info">轻提示</span></td>
               <td><code>markdown, text, docx</code></td>
               <td>许愿式改进项（如“加强监控”“提高警惕”）缺少具体模块、阈值、负责人或截止时间，无法验收。</td>
             </tr>
@@ -299,13 +302,13 @@
             <tbody>
             <tr>
               <td><a href="./reg-unsubstantiated-superlative/"><strong>绝对化承诺与极限合规词</strong></a><div style="margin-top:2px;"><code>reg-unsubstantiated-superlative</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>出现绝对化承诺或极限排他用语（如“绝对安全”“零风险保障”“全网第一”），存在合规与履约风险。</td>
             </tr>
             <tr>
               <td><a href="./reg-unanchored-multiplier/"><strong>无基线的悬空倍数宣称</strong></a><div style="margin-top:2px;"><code>reg-unanchored-multiplier</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx, pptx</code></td>
               <td>出现悬空的倍数宣称（如“10x faster”“效率提升数倍”），句内未给出改动前后的具体基线数值。</td>
             </tr>
@@ -324,49 +327,49 @@
             <tbody>
             <tr>
               <td><a href="./zh-essay-moralizing-ending/"><strong>段尾说教式升华</strong></a><div style="margin-top:2px;"><code>zh-essay-moralizing-ending</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>段尾出现说教升华套句，冲淡了前文的具体细节。</td>
             </tr>
             <tr>
               <td><a href="./en-essay-moralizing-ending/"><strong>英文段尾升华</strong></a><div style="margin-top:2px;"><code>en-essay-moralizing-ending</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>英文感伤升华结语直接替读者总结情绪，削弱了叙事余味。</td>
             </tr>
             <tr>
               <td><a href="./literary-negation-pivot/"><strong>金句腔“不是……而是……”</strong></a><div style="margin-top:2px;"><code>literary-negation-pivot</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>套路化“不是 A，而是 B”金句打断叙事质感。</td>
             </tr>
             <tr>
               <td><a href="./excessive-em-dash-density/"><strong>破折号太密</strong></a><div style="margin-top:2px;"><code>excessive-em-dash-density</code></div></td>
-              <td><code>info</code></td>
+              <td><span class="sev-tag sev-info">轻提示</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>破折号（<code>—</code> / <code>——</code>）密度过高，形成典型生成式插话腔。</td>
             </tr>
             <tr>
               <td><a href="./zh-halfwidth-punctuation/"><strong>中文里混了半角标点</strong></a><div style="margin-top:2px;"><code>zh-halfwidth-punctuation</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>汉字之间混入半角西文标点（<code>,;:!?</code>），违反中文排版规范（W3C CLREQ）。</td>
             </tr>
             <tr>
               <td><a href="./literary-semicolon-tricolon/"><strong>散文三段分号排比腔</strong></a><div style="margin-top:2px;"><code>literary-semicolon-tricolon</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>单句连续用两个及以上分号排比景物或情绪，带有明显的生成式散文腔。</td>
             </tr>
             <tr>
               <td><a href="./literary-rhetorical-qa/"><strong>随笔自问自答抒情腔</strong></a><div style="margin-top:2px;"><code>literary-rhetorical-qa</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>散文里出现自问自答式设问（“为什么……？因为……”），像主持词而非真实叙述。</td>
             </tr>
             <tr>
               <td><a href="./literary-narrative-frame/"><strong>随笔时代大帽子与升华尾</strong></a><div style="margin-top:2px;"><code>literary-narrative-frame</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, text, html, docx</code></td>
               <td>以宏大时代背景起笔（“在快节奏的都市生活中……”）或未来式鸡汤收尾，给随笔套上了模板外壳。</td>
             </tr>
@@ -385,91 +388,91 @@
             <tbody>
             <tr>
               <td><a href="./slide-word-wall/"><strong>单页 PPT 字太多</strong></a><div style="margin-top:2px;"><code>slide-word-wall</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>pptx, pdf</code></td>
               <td>单页幻灯片可见文字超载（英文 &gt; 120 词或中文 &gt; 280 字），变成文档搬家。</td>
             </tr>
             <tr>
               <td><a href="./slide-bullet-overload/"><strong>单页要点超过 6 条</strong></a><div style="margin-top:2px;"><code>slide-bullet-overload</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>pptx</code></td>
               <td>单页幻灯片项目符号超过 6 条（<code>maxSlideBullets</code>），视觉层级碎裂。</td>
             </tr>
             <tr>
               <td><a href="./slide-autofit-shrink/"><strong>PPT 文字被硬缩太小</strong></a><div style="margin-top:2px;"><code>slide-autofit-shrink</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>pptx</code></td>
               <td>文本框触发 PowerPoint 自动缩排（<code>fontScale &lt; 80%</code>），表明文案超出容器容量。</td>
             </tr>
             <tr>
               <td><a href="./slide-weak-topic-title/"><strong>幻灯片标题太泛</strong></a><div style="margin-top:2px;"><code>slide-weak-topic-title</code></div></td>
-              <td><code>info</code></td>
+              <td><span class="sev-tag sev-info">轻提示</span></td>
               <td><code>pptx</code></td>
               <td>正文密集的幻灯片使用“背景/概述/总结”等空泛名词做标题，未直接亮出本页结论。</td>
             </tr>
             <tr>
               <td><a href="./ui-ai-gradient/"><strong>默认紫粉霓虹渐变</strong></a><div style="margin-top:2px;"><code>ui-ai-gradient</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>html, css, jsx, svg, pdf</code></td>
               <td>使用默认紫粉/蓝紫高饱和渐变或渐变裁切艺术字标题（典型生成式模板特征）。</td>
             </tr>
             <tr>
               <td><a href="./ui-pill-soup/"><strong>满屏胶囊小标签</strong></a><div style="margin-top:2px;"><code>ui-pill-soup</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>html, jsx</code></td>
               <td>单视图堆砌超过 6 个胶囊圆角文字标签（<code>rounded-full</code> / <code>999px</code>），导致视觉噪音泛滥。</td>
             </tr>
             <tr>
               <td><a href="./ui-box-in-box/"><strong>框套框套框（三层套盒）</strong></a><div style="margin-top:2px;"><code>ui-box-in-box</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>html, jsx</code></td>
               <td>连续三层及以上带边框与圆角的容器层层套盒，挤压有效内容空间。</td>
             </tr>
             <tr>
               <td><a href="./ui-prompt-echo-badge/"><strong>把提示词印成了界面徽章</strong></a><div style="margin-top:2px;"><code>ui-prompt-echo-badge</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>html, jsx, svg</code></td>
               <td>界面标签直接回显提示词营销口号（如<code>AI 强力驱动</code><code>零幻觉保证</code>），未说明具体功能。</td>
             </tr>
             <tr>
               <td><a href="./ui-glow-blob-chrome/"><strong>霓虹光晕球与闪烁圆点</strong></a><div style="margin-top:2px;"><code>ui-glow-blob-chrome</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>html, css, jsx, svg</code></td>
               <td>堆砌装饰性环境光晕球（<code>blur-3xl</code>）、霓虹色阴影、闪烁 <code>animate-ping</code> 小圆点或重度 SVG 发光滤镜。</td>
             </tr>
             <tr>
               <td><a href="./ui-emoji-icon-chrome/"><strong>界面标题堆砌通用 Emoji</strong></a><div style="margin-top:2px;"><code>ui-emoji-icon-chrome</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>html, jsx, svg</code></td>
               <td>在界面标题、按钮或卡片里堆砌 3 处及以上通用 Emoji（如 <code>🚀</code>、<code>✨</code>、<code>⚡</code>、<code>🛡️</code>）充当图标。</td>
             </tr>
             <tr>
               <td><a href="./ui-template-card-grid/"><strong>彩色图标方块与假窗口三点</strong></a><div style="margin-top:2px;"><code>ui-template-card-grid</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>html, jsx</code></td>
               <td>命中生成式界面三大件：彩色圆角方块图标卡（&gt;= 3 组）、假 macOS 三色窗口圆点或 <code>01</code>/<code>02</code>/<code>03</code> 编号眉题。</td>
             </tr>
             <tr>
               <td><a href="./svg-layout-slop/"><strong>SVG 缺 viewBox 或文字重叠</strong></a><div style="margin-top:2px;"><code>svg-layout-slop</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>svg</code></td>
               <td>SVG 平面图形存在生成式结构缺陷：大画布缺失 <code>viewBox</code>、文字坐标重叠或 <code>&lt;defs&gt;</code> 中残留 2 处及以上孤立未用定义。</td>
             </tr>
             <tr>
               <td><a href="./image-ai-workflow-residue/"><strong>图片残留生成参数或来源标识</strong></a><div style="margin-top:2px;"><code>image-ai-workflow-residue</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>image</code></td>
               <td>图片文件内嵌了未清理的生成提示词/工作流参数（提醒），或带有显式 AI 生成来源标识（提示：合规场景请保留法定标识，重点复核成图质感）。</td>
             </tr>
             <tr>
               <td><a href="./image-ai-palette-slop/"><strong>PNG 霓虹紫粉或高饱和塑料质感</strong></a><div style="margin-top:2px;"><code>image-ai-palette-slop</code></div></td>
-              <td><code>info</code></td>
+              <td><span class="sev-tag sev-info">轻提示</span></td>
               <td><code>image</code></td>
               <td>PNG 像素分布呈现典型生成式视觉套路：高占比蓝紫霓虹主色，或大面积高饱和光滑“塑料感”涂抹。</td>
             </tr>
             <tr>
               <td><a href="./pdf-visual-layout-slop/"><strong>PDF 纯图幻灯片或字阶扁平</strong></a><div style="margin-top:2px;"><code>pdf-visual-layout-slop</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>pdf</code></td>
               <td>PDF 演示页或海报存在排版缺陷：多页全图无可选文字、横版页字阶扁平或正文缩至 &lt; 9.5pt，或连续 4 页及以上同骨架纯字横版页。</td>
             </tr>
@@ -488,13 +491,13 @@
             <tbody>
             <tr>
               <td><a href="./slide-process-not-finding-title/"><strong>汇报标题只写“关于……的分析”</strong></a><div style="margin-top:2px;"><code>slide-process-not-finding-title</code></div></td>
-              <td><code>warning</code></td>
+              <td><span class="sev-tag sev-warning">提醒</span></td>
               <td><code>markdown, pptx</code></td>
               <td>标题只写了“关于……的分析/汇报”这类过程标签，没有直接亮出本页结论。</td>
             </tr>
             <tr>
               <td><a href="./pptx-layout-monotony/"><strong>连续 4 页纯文字同版式 PPT</strong></a><div style="margin-top:2px;"><code>pptx-layout-monotony</code></div></td>
-              <td><code>info</code></td>
+              <td><span class="sev-tag sev-info">轻提示</span></td>
               <td><code>pptx</code></td>
               <td>连续 4 页及以上幻灯片重复完全相同的纯文字要点骨架（无表格、图表或版式变化），容易引发审阅疲劳。</td>
             </tr>
@@ -505,18 +508,34 @@
     </main>
 
     <footer class="colophon">
-      <div>
-        <span>这个页面自己也跑过 dislop check site/，0 处问题。给 Agent 读的话，从 <a href="../llms.txt">/llms.txt</a> 开始。</span>
+      <div class="colophon-note">
+        <a class="colophon-brand" href="../"><img src="../assets/logo.svg" width="20" height="20" alt="">dislop</a>
+        <span>这个页面自己也跑过 dislop check site/，0 处问题。</span>
+        <span>给 Agent 读的话，从 <a href="../llms.txt">/llms.txt</a> 开始。</span>
       </div>
-      <div class="colophon-links">
-        <a href="../guides/">实用指南</a>
-        <a href="../awesome/">工具清单</a>
-        <a href="../rules/">全部规则</a>
-        <a href="../privacy.md">隐私说明</a>
-        <a href="../llms.txt">llms.txt</a>
-        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
-        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
-      </div>
+      <nav class="colophon-groups" aria-label="页脚导航">
+        <div class="colophon-group">
+          <span class="colophon-group-title">资料</span>
+          <a href="../guides/">实用指南</a>
+          <a href="../rules/">全部规则</a>
+          <a href="../awesome/">工具清单</a>
+          <a href="../llms.txt">llms.txt</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">项目</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener">路线图</a>
+          <a href="../methodology/brand-and-voice.md">文案基准</a>
+          <a href="../methodology/design-system.md">视觉规范</a>
+          <a href="../privacy.md">隐私与数据边界</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">外部链接</span>
+          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+          <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
+          <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
+          <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+        </div>
+      </nav>
     </footer>
   </div>
   <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">

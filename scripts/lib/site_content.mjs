@@ -10,12 +10,80 @@ const DEMOS_MANIFEST_PATH = path.resolve(
   "demos.manifest.json"
 );
 
+const PACKAGE_VERSION = (() => {
+  try {
+    const pkgPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "package.json");
+    return JSON.parse(fs.readFileSync(pkgPath, "utf8")).version || "";
+  } catch {
+    return "";
+  }
+})();
+
+export const GITHUB_MARK_SVG =
+  '<svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>';
+
+// Masthead pieces shared by every static page (home, /en/, guides, rules, /awesome/)
+export function renderBrandLockup({ lang, depthPrefix, homeHref, version = PACKAGE_VERSION, metaI18nKey = "" }) {
+  const isEn = lang === "en";
+  const metaLabel = isEn ? "AI slop linter" : "AI 味检查";
+  const i18nAttr = metaI18nKey ? ` data-i18n="${escapeHtml(metaI18nKey)}"` : "";
+  return `<a class="brand-lockup" href="${escapeHtml(homeHref)}">
+        <img src="${depthPrefix}assets/logo.svg" width="30" height="30" alt="">
+        <span class="brand-wordmark">dislop</span>
+        <span class="brand-meta"><span${i18nAttr}>${metaLabel}</span> · <span class="brand-ver">v${escapeHtml(version)}</span></span>
+      </a>`;
+}
+
+export function renderGithubCtrl({ i18nKey = "" } = {}) {
+  const i18nAttr = i18nKey ? ` data-i18n="${escapeHtml(i18nKey)}"` : "";
+  return `<a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl">${GITHUB_MARK_SVG}<span class="gh-ctrl-label"${i18nAttr}>GitHub ★</span></a>`;
+}
+
+// The six primary links, identical in order and wording on every page
+export function renderPrimaryNavLinks({ lang, depthPrefix, activeNav = "", ids = {}, withI18n = false }) {
+  const isEn = lang === "en";
+  const idAttr = (key) => (ids[key] ? ` id="${escapeHtml(ids[key])}"` : "");
+  const cur = (key) => (activeNav === key ? ' aria-current="page"' : "");
+  const items = isEn
+    ? [
+        ["workbench", `${depthPrefix}?lang=en#workbench`, "Workbench"],
+        ["surfaces", `${depthPrefix}en/#surfaces`, "Setup"],
+        ["cases", `${depthPrefix}?lang=en#cases`, "Cases"],
+        ["guides", `${depthPrefix}en/guides/`, "Guides"],
+        ["rules", `${depthPrefix}en/rules/`, "Rules"],
+        ["awesome", `${depthPrefix}en/awesome/`, "Directory"],
+      ]
+    : [
+        ["workbench", `${depthPrefix}#workbench`, "工作台"],
+        ["surfaces", `${depthPrefix}#surfaces`, "接入"],
+        ["cases", `${depthPrefix}#cases`, "案例"],
+        ["guides", `${depthPrefix}guides/`, "指南"],
+        ["rules", `${depthPrefix}rules/`, "规则"],
+        ["awesome", `${depthPrefix}awesome/`, "工具清单"],
+      ];
+  return items
+    .map(([key, href, label]) => {
+      const i18nAttr = withI18n ? ` data-i18n="nav.${key}"` : "";
+      return `        <a href="${escapeHtml(href)}"${idAttr(key)}${cur(key)}${i18nAttr}>${label}</a>`;
+    })
+    .join("\n");
+}
+
 export function loadDemosManifest() {
   if (!fs.existsSync(DEMOS_MANIFEST_PATH)) return { version: "v2", scenes: [] };
   return JSON.parse(fs.readFileSync(DEMOS_MANIFEST_PATH, "utf8"));
 }
 
-export function renderDemoFigureHtml({ scene, lang, depthPrefix = "./", cardClass = "demo-card", altOverride = "" }) {
+export function renderDemoFigureHtml({
+  scene,
+  lang,
+  depthPrefix = "./",
+  cardClass = "demo-card",
+  altOverride = "",
+  withReplay = false,
+  withId = false,
+  stripIndex = false,
+}) {
   const manifest = loadDemosManifest();
   const version = manifest.version || "v2";
   const isEn = lang === "en";
@@ -27,7 +95,11 @@ export function renderDemoFigureHtml({ scene, lang, depthPrefix = "./", cardClas
   const gifSrc = `${depthPrefix}assets/demos/${slug}-${lang}-${version}.gif`;
   const pauseTxt = isEn ? "Pause" : "定格";
   const zoomTxt = isEn ? "Zoom" : "放大看";
-  return `<figure class="${escapeHtml(cardClass)}" data-demo-card="${escapeHtml(slug)}" data-demo-prefix="${escapeHtml(depthPrefix)}" data-demo-lang="${escapeHtml(lang)}" data-demo-ver="${escapeHtml(version)}">
+  const replayTxt = isEn ? "Replay" : "重播";
+  const rawTitle = meta.title || slug;
+  const title = stripIndex ? rawTitle.replace(/^\d+\.\s+/, "") : rawTitle;
+  const idAttr = withId ? ` id="demo-card-${escapeHtml(slug)}"` : "";
+  return `<figure class="${escapeHtml(cardClass)}"${idAttr} data-demo-card="${escapeHtml(slug)}" data-demo-prefix="${escapeHtml(depthPrefix)}" data-demo-lang="${escapeHtml(lang)}" data-demo-ver="${escapeHtml(version)}">
           <div class="demo-media">
             <picture>
               <source media="(prefers-reduced-motion: reduce)" srcset="${escapeHtml(posterSrc)}" data-demo-poster="${escapeHtml(slug)}">
@@ -37,13 +109,13 @@ export function renderDemoFigureHtml({ scene, lang, depthPrefix = "./", cardClas
           </div>
           <figcaption class="demo-caption">
             <div class="demo-cap-head">
-              <strong class="demo-cap-title">${escapeHtml(meta.title || slug)}</strong>
+              <strong class="demo-cap-title">${escapeHtml(title)}</strong>
               ${meta.badge ? `<span class="demo-cap-badge">${escapeHtml(meta.badge)}</span>` : ""}
             </div>
             ${meta.desc ? `<span class="demo-cap-desc">${escapeHtml(meta.desc)}</span>` : ""}
             <div class="demo-card-actions">
               <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="${escapeHtml(slug)}" aria-pressed="false">${pauseTxt}</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="${escapeHtml(slug)}">${zoomTxt}</button>
+              ${withReplay ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="${escapeHtml(slug)}">${replayTxt}</button>\n              ` : ""}<button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="${escapeHtml(slug)}">${zoomTxt}</button>
             </div>
           </figcaption>
         </figure>`;
@@ -604,17 +676,17 @@ export function renderAwesomeTriageHtml({ lang, depthPrefix }) {
   if (lang === "en") {
     return `      <div class="awesome-triage-grid" aria-label="How to pick a tool">
         <div class="awesome-triage-cell">
-          <h2 data-i18n="triage.h1">Need automated CI or pre-send checks?</h2>
+          <h2 data-i18n="triage.h1">Catch hard bugs locally or in CI</h2>
           <p data-i18n="triage.p1">Start with deterministic linters (dislop, Vale, textlint) that flag exact lines with zero LLM calls.</p>
           <a href="${depthPrefix}en/guides/linter-vs-detector-vs-skill/" id="triage-link-1" data-i18n="triage.a1">Compare linters vs. skills →</a>
         </div>
         <div class="awesome-triage-cell">
-          <h2 data-i18n="triage.h2">Fixing prose habits before drafting?</h2>
+          <h2 data-i18n="triage.h2">Steer your agent before it drafts</h2>
           <p data-i18n="triage.p2">Load a Markdown Skill such as Humanizer or stop-slop into your agent, then verify the final draft locally.</p>
           <a href="${depthPrefix}en/guides/remove-ai-slop-writing/" id="triage-link-2" data-i18n="triage.a2">Read the writing guide →</a>
         </div>
         <div class="awesome-triage-cell">
-          <h2 data-i18n="triage.h3">Cleaning AI-built UI or slide decks?</h2>
+          <h2 data-i18n="triage.h3">Clean up template web UI and slides</h2>
           <p data-i18n="triage.p3">Pair frontend-design or Impeccable with dislop UI and PPTX rules to strip gradients, dead links, and word walls.</p>
           <a href="${depthPrefix}en/guides/fix-ai-slop-web-ui/" id="triage-link-3" data-i18n="triage.a3">Read the web UI guide →</a>
         </div>
@@ -637,6 +709,44 @@ export function renderAwesomeTriageHtml({ lang, depthPrefix }) {
           <a href="${depthPrefix}guides/fix-ai-slop-web-ui/" id="triage-link-3" data-i18n="triage.a3">看前端与 PPT 排查教程 →</a>
         </div>
       </div>`;
+}
+
+export function renderColophon({ lang, depthPrefix, homeHref, guidesHref, rulesHref, awesomeHref, ids = {} }) {
+  const isEn = lang === "en";
+  const idAttr = (key) => (ids[key] ? ` id="${escapeHtml(ids[key])}"` : "");
+  const roadmapHref = isEn
+    ? "https://github.com/dislop-ai/dislop/blob/main/ROADMAP.md"
+    : "https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md";
+  return `    <footer class="colophon">
+      <div class="colophon-note">
+        <a class="colophon-brand" href="${escapeHtml(homeHref)}"${idAttr("home")}><img src="${depthPrefix}assets/logo.svg" width="20" height="20" alt="">dislop</a>
+        <span>${isEn ? "This site passes dislop check site/ with 0 issues." : "这个页面自己也跑过 dislop check site/，0 处问题。"}</span>
+        <span>${isEn ? `For agents, start at <a href="${depthPrefix}llms.txt">/llms.txt</a>.` : `给 Agent 读的话，从 <a href="${depthPrefix}llms.txt">/llms.txt</a> 开始。`}</span>
+      </div>
+      <nav class="colophon-groups" aria-label="${isEn ? "Footer" : "页脚导航"}">
+        <div class="colophon-group">
+          <span class="colophon-group-title">${isEn ? "Resources" : "资料"}</span>
+          <a href="${escapeHtml(guidesHref)}">${isEn ? "Guides" : "实用指南"}</a>
+          <a href="${escapeHtml(rulesHref)}">${isEn ? "All rules" : "全部规则"}</a>
+          <a href="${escapeHtml(awesomeHref)}">${isEn ? "Awesome list" : "工具清单"}</a>
+          <a href="${depthPrefix}llms.txt">llms.txt</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">${isEn ? "Project" : "项目"}</span>
+          <a href="${roadmapHref}" target="_blank" rel="noopener">${isEn ? "Roadmap" : "路线图"}</a>
+          <a href="${depthPrefix}methodology/brand-and-voice.md">${isEn ? "Voice guide" : "文案基准"}</a>
+          <a href="${depthPrefix}methodology/design-system.md">${isEn ? "Design tokens" : "视觉规范"}</a>
+          <a href="${depthPrefix}privacy.md">${isEn ? "Privacy" : "隐私与数据边界"}</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">${isEn ? "Elsewhere" : "外部链接"}</span>
+          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener"${idAttr("github")}>GitHub (Apache-2.0)</a>
+          <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
+          <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
+          <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+        </div>
+      </nav>
+    </footer>`;
 }
 
 function renderStaticShell({
@@ -709,21 +819,15 @@ ${jsonLdScript}
   <a class="skip-link" href="#main-content">${isEn ? "Skip to main content" : "跳至正文"}</a>
   <div class="rail-shell">
     <header class="topbar band-rule">
-      <a class="brand-lockup" href="${homeHref}">
-        <img src="${depthPrefix}assets/logo.svg" width="28" height="28" alt="${isEn ? "dislop icon" : "dislop 图标"}">
-        <span class="brand-wordmark">dislop</span>
-      </a>
+      ${renderBrandLockup({ lang, depthPrefix, homeHref })}
 
       <nav class="nav-links" aria-label="${isEn ? "Main navigation" : "主导航"}">
-        <a href="${depthPrefix}${isEn ? "?lang=en#workbench" : "#workbench"}">${isEn ? "Workbench" : "在线试"}</a>
-        <a href="${guidesHref}"${activeNav === "guides" ? ' aria-current="page"' : ""}>${isEn ? "Guides" : "指南"}</a>
-        <a href="${awesomeHref}"${activeNav === "awesome" ? ' aria-current="page"' : ""}>${isEn ? "Directory" : "工具清单"}</a>
-        <a href="${rulesHref}"${activeNav === "rules" ? ' aria-current="page"' : ""}>${isEn ? "Rules" : "规则"}</a>
-        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub ★</a>
+${renderPrimaryNavLinks({ lang, depthPrefix, activeNav })}
       </nav>
 
       <div class="top-controls">
-        <a href="${escapeHtml(effectiveSwitchHref)}" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" aria-label="${isEn ? "切换为中文" : "Switch to English"}">${isEn ? "中文" : "EN"}</a>
+        ${renderGithubCtrl()}
+        <a href="${escapeHtml(effectiveSwitchHref)}" class="ctrl-btn" aria-label="${isEn ? "切换为中文" : "Switch to English"}">${isEn ? "中文" : "EN"}</a>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="${isEn ? "Toggle color theme" : "切换浅深色主题"}">${isEn ? "Dark" : "深色"}</button>
       </div>
     </header>
@@ -732,20 +836,7 @@ ${jsonLdScript}
 ${mainHtml}
     </main>
 
-    <footer class="colophon">
-      <div>
-        <span>${isEn ? `This site passes dislop check site/ with 0 issues. For agents, start at <a href="${depthPrefix}llms.txt">/llms.txt</a>.` : `这个页面自己也跑过 dislop check site/，0 处问题。给 Agent 读的话，从 <a href="${depthPrefix}llms.txt">/llms.txt</a> 开始。`}</span>
-      </div>
-      <div class="colophon-links">
-        <a href="${guidesHref}">${isEn ? "Guides" : "实用指南"}</a>
-        <a href="${awesomeHref}">${isEn ? "Awesome list" : "工具清单"}</a>
-        <a href="${rulesHref}">${isEn ? "All rules" : "全部规则"}</a>
-        <a href="${depthPrefix}privacy.md">${isEn ? "Privacy" : "隐私说明"}</a>
-        <a href="${depthPrefix}llms.txt">llms.txt</a>
-        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
-        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
-      </div>
-    </footer>
+${renderColophon({ lang, depthPrefix, homeHref, guidesHref, rulesHref, awesomeHref })}
   </div>
   <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
     <div class="demo-lightbox-head">
@@ -763,22 +854,47 @@ ${extraScripts.map((s) => `  <script type="module" src="${s}"></script>`).join("
 `;
 }
 
+const HERO_PEN_PATH = "M4 26H314C321.9 26 327.5 20.6 327.5 13.6C327.5 8.4 323.9 5 319.4 5C314.6 5 311.4 8.75 311.4 14.15C311.4 22.85 318.1 31.6 328.3 35.8";
+const AGENT_MARK_PATH = "M2.2 14H12.3C16.7 14 19.8 10.9 19.8 7C19.8 4.1 17.8 2.2 15.3 2.2C12.6 2.2 10.8 4.3 10.8 7.3C10.8 12.2 14.6 17.1 20.3 19.4";
+const EN_DEMO_TAB_LABELS = {
+  "proof-cycle": "3-state proof",
+  "cli-check": "CLI gate",
+  "workbench-live": "Workbench",
+  "ui-slop": "Web UI",
+  "deck-office": "PPTX & DOCX",
+  "agent-workflow": "Agent + CI",
+};
+
+export function renderHeroPenSvg() {
+  return `<svg class="hero-pen-svg" viewBox="0 0 340 40" preserveAspectRatio="none" focusable="false">
+                <path class="hero-pen-path" d="${HERO_PEN_PATH}"/>
+              </svg>`;
+}
+
 export function buildEnglishHomeHtml({ baseUrl, version, snapshotDate, packsById, allRules, radarData, guides }) {
   const detCount = radarData.entries.filter((e) => e.hasDeterministicCheck).length;
   const packOrder = ["core", "business-brief", "engineering-spec", "regulated-comms", "literary-essay", "deck-and-ui", "executive-deck"];
-  const demoManifest = loadDemosManifest();
-  const demoCardsHtml = (demoManifest.scenes || [])
-    .map((scene) => renderDemoFigureHtml({ scene, lang: "en", depthPrefix: "../", cardClass: "demo-card" }))
+  const scenes = loadDemosManifest().scenes || [];
+  const demoTabsHtml = scenes
+    .map((scene, idx) => {
+      const slug = escapeHtml(scene.slug);
+      const label = escapeHtml(EN_DEMO_TAB_LABELS[scene.slug] || scene.slug);
+      return `          <button type="button" class="demo-tab" role="tab" id="demo-tab-${slug}" aria-selected="${idx === 0 ? "true" : "false"}" aria-controls="demo-card-${slug}"${idx === 0 ? "" : ' tabindex="-1"'} data-demo-select="${slug}">${label}</button>`;
+    })
+    .join("\n");
+  const demoCardsHtml = scenes
+    .map((scene) =>
+      renderDemoFigureHtml({ scene, lang: "en", depthPrefix: "../", cardClass: "demo-card", withReplay: true, withId: true, stripIndex: true })
+    )
     .join("\n\n");
-  const guideCardsHtml = guides
+  const guideItemsHtml = guides
     .map(({ en }) => {
       const m = en.meta;
-      return `          <article class="guide-card">
-            <div class="guide-card-cat">${escapeHtml(m.category)} · ${escapeHtml(String(m.readingMinutes || 5))} min</div>
-            <h3><a href="./guides/${escapeHtml(m.slug)}/">${escapeHtml(m.title)}</a></h3>
-            <p>${escapeHtml(m.description)}</p>
-            <div class="guide-card-foot"><a href="./guides/${escapeHtml(m.slug)}/">Read guide →</a><span>Updated ${escapeHtml(m.updated)}</span></div>
-          </article>`;
+      return `        <a class="guide-index-item" href="./guides/${escapeHtml(m.slug)}/" data-guide-slug="${escapeHtml(m.slug)}">
+          <span class="guide-index-cat">${escapeHtml(m.category)} · ${escapeHtml(String(m.readingMinutes || 5))} min</span>
+          <strong class="guide-index-title">${escapeHtml(m.title)}</strong>
+          <span class="guide-index-desc">${escapeHtml(m.description)}</span>
+        </a>`;
     })
     .join("\n");
 
@@ -796,68 +912,138 @@ export function buildEnglishHomeHtml({ baseUrl, version, snapshotDate, packsById
     })
     .join("\n");
 
-  const mainHtml = `    <section class="band-rule">
+  const promptText =
+    "Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.";
+
+  const mainHtml = `    <section id="top" class="band-rule">
       <div class="lead-band band-rule">
         <div class="lead-copy">
           <div>
             <!-- dislop-quote-start -->
             <div class="hero-strike-wrap" aria-hidden="true">
               <del class="hero-strike">Certainly! Here is your polished draft.</del>
-              <svg class="hero-pen-svg" viewBox="0 0 320 18" preserveAspectRatio="none" focusable="false">
-                <path class="hero-pen-path" d="M3 10 C86 6 196 13 317 8"/>
-              </svg>
+              ${renderHeroPenSvg()}
             </div>
             <!-- dislop-quote-end -->
             <h1 class="lead-heading">Cutting AI slop is real productivity.</h1>
-            <p class="lead-sub">
-              A dedicated linter for AI slop. Catches AI leftovers, cliché phrasing, and stock template layouts in docs, web pages, and slides before you ship. Connects to Claude Code, Codex, Cursor, and office agents in one command, locally offline or via Cloud MCP.
-            </p>
+            <p class="lead-sub">A dedicated linter for AI slop. Flags leftover chat greetings, filler phrases, 'Not X, but Y' slogans, and stock template UI across docs, web pages, Word, and PowerPoint before you ship. Connects in one command and runs offline by default.</p>
           </div>
 
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div class="hero-cta-row">
-              <a href="../?lang=en#workbench" class="btn-primary" style="min-height:36px;padding:7px 16px;font-size:0.86rem;">Open Interactive Workbench →</a>
-              <a href="./guides/agent-cli-mcp-tutorial/" class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Install Skill / CLI (Offline)</a>
+          <div class="hero-cta-row">
+            <a href="../?lang=en#workbench" class="btn-primary">Try it in the workbench →</a>
+            <a href="#surfaces" class="ctrl-btn">Add to your agent or editor</a>
+          </div>
+
+          <div class="hero-cli-inline hero-agent-card ink-stage">
+            <div class="hero-agent-head">
+              <svg class="hero-agent-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${AGENT_MARK_PATH}"/></svg>
+              <span class="hero-cli-label">Agent prompt · auto-setup</span>
             </div>
-            <p class="hero-reassure">CLI v${escapeHtml(version)} and local plugins run completely offline with zero uploads; optional Cloud MCP adds multi-model genre review.</p>
-          </div>
-
-          <div class="hero-cli-inline">
-            <span class="hero-cli-label">Send this one-line prompt to your Agent to evaluate, install, and run a first check</span>
             <div class="cmd-box is-prompt">
-              <code id="en-hero-prompt">Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.</code>
-              <button type="button" class="ctrl-btn" style="min-height:32px;padding:5px 12px;font-size:0.8rem;flex-shrink:0;" data-copy-target="en-hero-prompt">Copy for Agent</button>
+              <code id="en-hero-prompt">${escapeHtml(promptText)}</code>
+              <button type="button" class="ctrl-btn is-ink-primary" data-copy-target="en-hero-prompt">Copy for agent</button>
             </div>
           </div>
         </div>
 
-        <!-- dislop-quote-start -->
         <div class="hero-proof" aria-label="Three-state editing example">
-          <div class="hero-proof-stage">
-            <p style="margin:0 0 8px;"><strong>Original draft:</strong> <span class="mark-span mark-error">Certainly! Here is the launch note.</span> <span class="mark-span mark-warn">It's worth noting that</span> CSV exports are a <span class="mark-span mark-warn">game-changer</span>, finishing in up to 12 minutes for 500,000 rows.</p>
-            <p style="margin:0 0 8px;"><strong>Second-order fallback:</strong> CSV exports finish in up to 12 minutes for 500,000 rows. <span class="mark-span mark-warn">This isn't just an upgrade — it's a new standard.</span></p>
-            <p style="margin:0;"><strong>Clean result (0 issues):</strong> CSV exports finish in up to 12 minutes for workspaces above 500,000 rows.</p>
+          <div class="hero-proof-head">
+            <div class="mode-tabs" role="tablist" aria-label="Switch example version" data-en-hero-tabs hidden>
+              <button type="button" role="tab" id="en-hero-tab-bad" class="ctrl-btn is-active" aria-selected="true" aria-controls="en-hero-panel-bad" data-en-hero-state="bad">Original</button>
+              <button type="button" role="tab" id="en-hero-tab-trap" class="ctrl-btn" aria-selected="false" aria-controls="en-hero-panel-trap" tabindex="-1" data-en-hero-state="trap">Still sounds like AI</button>
+              <button type="button" role="tab" id="en-hero-tab-good" class="ctrl-btn" aria-selected="false" aria-controls="en-hero-panel-good" tabindex="-1" data-en-hero-state="good">Cleaned up</button>
+            </div>
+          </div>
+          <div class="hero-slip">
+            <div class="hero-slip-head" aria-hidden="true"><span>launch-note.md</span><span>business-brief</span></div>
+            <!-- dislop-quote-start -->
+            <div class="hero-proof-panel" id="en-hero-panel-bad" role="tabpanel" aria-labelledby="en-hero-tab-bad" data-en-hero-panel="bad">
+              <p class="hero-panel-label">Original</p>
+              <div class="hero-proof-stage"><span class="mark-span mark-error">Certainly! Here is</span> the launch note. <span class="mark-span mark-warn">It's worth noting that</span> CSV exports are a <span class="mark-span mark-warn">game-changer</span>, finishing in up to 12 minutes for workspaces above 500,000 rows.</div>
+              <ul class="hero-proof-notes">
+                <li><span class="hero-note-dot is-error"></span><span><strong>Red: </strong>Stray chat reply on line one. Delete it.</span></li>
+                <li><span class="hero-note-dot is-warn"></span><span><strong>Blue: </strong>Filler opener and hype noun ('game-changer'). Say what changed instead.</span></li>
+              </ul>
+            </div>
+            <div class="hero-proof-panel" id="en-hero-panel-trap" role="tabpanel" aria-labelledby="en-hero-tab-trap" data-en-hero-panel="trap">
+              <p class="hero-panel-label">Still sounds like AI</p>
+              <div class="hero-proof-stage">CSV exports finish in up to 12 minutes for workspaces above 500,000 rows. <span class="mark-span mark-warn">This isn't just an upgrade — it's a new standard</span>.</div>
+              <div class="hero-proof-verdict is-rejected">Rejected: the buzzwords are gone, but a 'Not X, but Y' slogan took their place.</div>
+            </div>
+            <div class="hero-proof-panel" id="en-hero-panel-good" role="tabpanel" aria-labelledby="en-hero-tab-good" data-en-hero-panel="good">
+              <p class="hero-panel-label">Cleaned up</p>
+              <div class="hero-proof-stage">CSV exports finish in up to 12 minutes for workspaces above 500,000 rows.</div>
+              <div class="hero-proof-verdict">0 issues. Chat wrapper and stock phrasing removed.</div>
+            </div>
+            <!-- dislop-quote-end -->
           </div>
           <div class="hero-proof-foot">
-            <span>Checked by the same rule engine in browser &amp; CLI</span>
+            <span>Same rule engine in the browser and the CLI</span>
             <a href="../?lang=en#workbench">Test your own draft →</a>
           </div>
         </div>
-        <!-- dislop-quote-end -->
       </div>
 
       <div class="marks-strip" aria-label="Core capabilities">
         <div class="mark-pillar">
-          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Curated community rules and tools</h2></div>
-          <p class="mark-pillar-desc">Combines ${allRules.length} built-in rules across 7 packs, 65 structured patterns, and ${radarData.entries.length} verified anti-slop tools in one repository.</p>
+          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Community rules and tools in one place</h2></div>
+          <p class="mark-pillar-desc">Bundles ${allRules.length} rules, 12 extended pattern checks, and ${radarData.entries.length} curated anti-slop tools for docs, web UI, Word, and PowerPoint.</p>
         </div>
         <div class="mark-pillar">
-          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Fits coding and office workflows</h2></div>
-          <p class="mark-pillar-desc">Use the pure-Markdown Skill before drafting, run the zero-dep CLI in pre-commit or GitHub Actions, or connect Cloud MCP at https://dislop.com/mcp.</p>
+          <div class="mark-pillar-head"><h2 class="mark-pillar-title">One command into agents and editors</h2></div>
+          <p class="mark-pillar-desc">Works with Codex, Claude Code, Cursor, WorkBuddy, and GitHub Actions, in the terminal, the editor, or CI.</p>
         </div>
         <div class="mark-pillar">
-          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Local and offline by default</h2></div>
-          <p class="mark-pillar-desc">Private codebases, specs, and Word/PowerPoint decks stay on your machine during local checks with zero outbound requests.</p>
+          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Drafts stay on your machine</h2></div>
+          <p class="mark-pillar-desc">The Skill and CLI run offline with zero uploads. Switch the workbench or remote MCP to cloud mode when you want multi-model review.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="surfaces" class="section-block band-rule" aria-labelledby="en-surfaces-heading">
+      <div class="surfaces-split">
+        <div class="surfaces-intro">
+          <h2 class="section-title" id="en-surfaces-heading">Three ways to run dislop: Skill, local CLI, and Cloud MCP</h2>
+          <p class="section-desc">Pick the one that matches your tools. Each comes with a copy-ready config.</p>
+          <ol class="setup-ledger">
+            <li>
+              <h3>Markdown-only Agent Skill</h3>
+              <p>Writing and UI reference cards by genre, with no bundled scripts. Install it in Claude Code, Codex, Cursor, or Antigravity so the agent reads it before drafting and runs the local CLI afterward.</p>
+            </li>
+            <li>
+              <h3>Open-source local CLI and plugins</h3>
+              <p>Zero dependencies, under 250 KB, with all 7 scenario packs built in. Checks docs, Word, PowerPoint, and Git diffs offline in terminals, editors, and CI. You can also plug in your own model key.</p>
+            </li>
+            <li>
+              <h3>Official Cloud MCP &amp; web workbench</h3>
+              <p>Connect from Claude Cowork, WorkBuddy, Qwen, or your editor. Sign in for 30 free credits a month and get multi-model review by genre with concrete edits.</p>
+              <span class="setup-ledger-url">https://dislop.com/mcp</span>
+            </li>
+            <li class="is-agent-note">
+              <h3>Let your agent set it up</h3>
+              <p>Send dislop.com/llms.txt to your agent. It picks the Skill, CLI, or remote MCP, installs it, and runs a first check on your files.</p>
+            </li>
+          </ol>
+          <a href="./guides/agent-cli-mcp-tutorial/" class="surfaces-more">Full setup tutorial →</a>
+        </div>
+
+        <div class="code-panel ink-stage" id="cli-mcp">
+          <div class="code-panel-head">
+            <span class="terminal-title">quick-start.sh</span>
+            <a href="../tools/index.md" class="terminal-link">tools/index.md</a>
+          </div>
+<pre class="terminal-plain"><span class="term-comment"># Markdown-only Agent Skill (no scripts)</span>
+npx skills add dislop-ai/dislop
+
+<span class="term-comment"># Offline CLI, Node or Python, all 7 packs, zero network</span>
+npx --yes dislop check .
+uvx dislop check .
+
+<span class="term-comment"># Pull request gate on changed lines only</span>
+npx --yes dislop check --changed origin/main --format github
+
+<span class="term-comment"># Official Cloud MCP endpoint</span>
+https://dislop.com/mcp</pre>
         </div>
       </div>
     </section>
@@ -865,38 +1051,43 @@ export function buildEnglishHomeHtml({ baseUrl, version, snapshotDate, packsById
     <section id="demos" class="section-block band-rule" aria-labelledby="en-demos-heading">
       <div class="section-header">
         <div>
-          <h2 class="section-title" id="en-demos-heading">Six 6-second loops: prose, CLI, web UI, PPTX &amp; agent gate</h2>
-          <p class="section-desc">Every clip is rendered offline from the real engine and browser workbench, delivered as lossless animated WebP with GIF and reduced-motion poster fallbacks.</p>
+          <h2 class="section-title" id="en-demos-heading">Six short clips: prose, CLI, workbench, web UI, decks, and agent CI</h2>
+          <p class="section-desc">Each clip runs about 7 seconds and is recorded offline from the real rules. Pick a scene, then pause, replay, or zoom in.</p>
         </div>
         <a href="https://github.com/dislop-ai/dislop/blob/main/docs/gif-production-guide.md" target="_blank" rel="noopener">Animation &amp; GIF guide →</a>
       </div>
-      <div class="demos-grid">
+      <div class="demo-stage" data-demo-stage>
+        <div class="demo-stage-rail" role="tablist" aria-label="Choose a demo scene" hidden>
+${demoTabsHtml}
+        </div>
+        <div class="demos-grid">
 ${demoCardsHtml}
+        </div>
       </div>
     </section>
 
-    <section class="section-block band-rule">
+    <section id="guides-home" class="section-block band-rule" aria-labelledby="en-guides-heading">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Practical anti-slop guides</h2>
-          <p class="section-desc">Step-by-step field guides grounded in Wikipedia Signs of AI Writing, stylometric benchmarks, and real repository checks.</p>
+          <h2 class="section-title" id="en-guides-heading">Six field guides: writing, web UI, decks, and setup</h2>
+          <p class="section-desc">Each guide comes with copy-ready commands and before/after examples, grounded in public sources and real repository checks.</p>
         </div>
-        <a href="./guides/">All ${guides.length} guides →</a>
+        <a href="./guides/">All guides →</a>
       </div>
-      <div class="guide-grid">
-${guideCardsHtml}
+      <div class="guides-index">
+${guideItemsHtml}
       </div>
     </section>
 
-    <section class="section-block band-rule">
+    <section id="rules" class="section-block band-rule" aria-labelledby="en-rules-heading">
       <div class="section-header">
         <div>
-          <h2 class="section-title">${allRules.length} built-in rules across 7 scenario packs</h2>
-          <p class="section-desc">Each rule pairs a deterministic probe with a check question and Before / Fallback / Clean examples.</p>
+          <h2 class="section-title" id="en-rules-heading">${allRules.length} built-in rules across 7 scenario packs</h2>
+          <p class="section-desc">Each rule pairs a deterministic probe with a check question and before / still-AI / clean examples.</p>
         </div>
-        <a href="./rules/">Browse all ${allRules.length} rule pages →</a>
+        <a href="./rules/">Browse English &amp; shared rules →</a>
       </div>
-      <div class="table-scroll" tabindex="0">
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Scenario packs">
         <table class="matrix-table">
           <thead>
             <tr><th>Pack ID</th><th>Name</th><th>What it catches</th><th>Rules</th></tr>
@@ -908,18 +1099,18 @@ ${packRowsHtml}
       </div>
     </section>
 
-    <section class="section-block band-rule">
+    <section id="awesome" class="section-block band-rule" aria-labelledby="en-awesome-heading">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Awesome Anti-Slop (${radarData.entries.length} verified entries)</h2>
-          <p class="section-desc">Curated linters, writing skills, UI rules, PR policies, and papers checked on ${escapeHtml(snapshotDate)} (${detCount} automated tools).</p>
+          <h2 class="section-title" id="en-awesome-heading">Awesome Anti-Slop: checked tools, guides, and papers</h2>
+          <p class="section-desc">${radarData.entries.length} linters, writing skills, UI rules, PR policies, and papers, checked on ${escapeHtml(snapshotDate)}. ${detCount} of them run automated checks.</p>
         </div>
-        <a href="./awesome/">Filter all ${radarData.entries.length} entries →</a>
+        <a href="./awesome/">Open the filterable list →</a>
       </div>
     </section>
 
-    <section class="section-block">
-      <h2 class="section-title">Frequently asked questions</h2>
+    <section id="faq" class="section-block" aria-labelledby="en-faq-heading">
+      <h2 class="section-title" id="en-faq-heading">Common questions</h2>
       <div class="faq-list">
         <div class="faq-item">
           <h3>Does dislop upload my drafts when checking locally?</h3>
@@ -959,6 +1150,15 @@ ${packRowsHtml}
     mainHtml,
   });
 }
+
+// Stable IDs on the /awesome/ masthead so site/awesome/awesome.js can retarget links on a language switch
+export const AWESOME_NAV_IDS = {
+  workbench: "awesome-home-link",
+  surfaces: "awesome-surfaces-link",
+  cases: "awesome-cases-link",
+  guides: "awesome-guides-link",
+  rules: "awesome-rules-link",
+};
 
 export function buildEnglishAwesomeHtml({ baseUrl, snapshotDate, radarData, githubSectionMeta }) {
   const sectionOptions = [
@@ -1028,21 +1228,14 @@ ${renderAwesomeJsonLd({ lang: "en", baseUrl, entries: radarData.entries })}
   <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
   <div class="rail-shell">
     <header class="topbar band-rule">
-      <a class="brand-lockup" href="../">
-        <img src="../../assets/logo.svg" width="28" height="28" alt="dislop icon">
-        <span class="brand-wordmark">dislop</span>
-      </a>
+      ${renderBrandLockup({ lang: "en", depthPrefix: "../../", homeHref: "../", metaI18nKey: "nav.brandMeta" })}
 
-      <nav class="nav-links" aria-label="Awesome Anti-Slop navigation">
-        <a href="../" id="awesome-home-link" data-i18n="nav.workbench">Back to dislop</a>
-        <a href="../guides/" id="awesome-guides-link" data-i18n="nav.guides">Guides</a>
-        <a href="./" aria-current="page" data-i18n="nav.awesome">Awesome list</a>
-        <a href="../rules/" id="awesome-rules-link" data-i18n="nav.rules">Rules</a>
-        <a href="../../awesome/index.json" class="nav-agent-link">index.json</a>
-        <a href="https://github.com/dislop-ai/dislop/tree/main/awesome" target="_blank" rel="noopener" id="awesome-gh-nav">GitHub</a>
+      <nav class="nav-links" aria-label="Main navigation">
+${renderPrimaryNavLinks({ lang: "en", depthPrefix: "../../", activeNav: "awesome", ids: AWESOME_NAV_IDS, withI18n: true })}
       </nav>
 
       <div class="top-controls">
+        ${renderGithubCtrl({ i18nKey: "nav.github" })}
         <button type="button" id="lang-toggle" class="ctrl-btn" aria-label="切换为中文">中文</button>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
       </div>
@@ -1054,6 +1247,12 @@ ${renderAwesomeJsonLd({ lang: "en", baseUrl, entries: radarData.entries })}
       <p class="section-desc" data-i18n="awesome.sub">
         ${radarData.entries.length} tools, linters, style guides, UI rules, and papers in English and Chinese, including established projects like Vale and Impeccable. Filter by topic or show only automated tools. Links and GitHub snapshots checked on ${snapshotDate}.
       </p>
+      <div class="page-export-strip">
+        <span data-i18n="awesome.exportLabel">For agents and scripts:</span>
+        <a href="../../awesome/index.json">index.json</a>
+        <a href="../../awesome/index.md">index.md</a>
+        <a href="https://github.com/dislop-ai/dislop/tree/main/awesome" target="_blank" rel="noopener" id="awesome-gh-nav">GitHub</a>
+      </div>
 
 ${triageHtml}
 
@@ -1431,9 +1630,13 @@ ${tocHtml}
             const uiMeta = ruleUiMeta[r.id];
             const rTitle = isEn ? (uiMeta?.title?.en || r.id) : (uiMeta?.title?.zh || r.id);
             const rMsg = isEn ? sanitizeEnglishRuleProse(r.message.en) : (r.message.zh || r.message.en);
+            const sevCls = r.severity === "error" ? "sev-error" : r.severity === "info" ? "sev-info" : "sev-warning";
+            const sevLabel = isEn
+              ? (r.severity === "error" ? "hard bug" : r.severity === "warning" ? "warning" : "info")
+              : (r.severity === "error" ? "硬伤" : r.severity === "warning" ? "提醒" : "轻提示");
             return `            <tr>
               <td><a href="./${escapeHtml(r.id)}/"><strong>${escapeHtml(rTitle)}</strong></a><div style="margin-top:2px;"><code>${escapeHtml(r.id)}</code></div></td>
-              <td><code>${escapeHtml(r.severity)}</code></td>
+              <td><span class="sev-tag ${sevCls}">${sevLabel}</span></td>
               <td><code>${escapeHtml((r.modalities || []).join(", "))}</code></td>
               <td>${formatRuleProseHtml(rMsg)}</td>
             </tr>`;
@@ -1589,6 +1792,10 @@ ${ex.trap ? `          <div class="rule-contrast-cell is-trap">
       });
 
       const mdCardHref = `${depthPrefix}rules/${escapeHtml(r.id)}.md`;
+      const sevCls = r.severity === "error" ? "sev-error" : r.severity === "info" ? "sev-info" : "sev-warning";
+      const sevLabel = isEn
+        ? (r.severity === "error" ? "hard bug" : r.severity === "warning" ? "warning" : "info")
+        : (r.severity === "error" ? "硬伤" : r.severity === "warning" ? "提醒" : "轻提示");
       const mainHtml = `    <section class="section-block">
       <nav class="breadcrumbs" aria-label="${isEn ? "Breadcrumb" : "面包屑导航"}">
         <a href="${depthPrefix}${isEn ? "en/" : ""}">dislop</a> / <a href="../">${isEn ? "Rules" : "规则百科"}</a> / <span aria-current="page"><code>${escapeHtml(r.id)}</code></span>
@@ -1600,12 +1807,12 @@ ${ex.trap ? `          <div class="rule-contrast-cell is-trap">
           <div class="article-meta">
             <span><code>${escapeHtml(r.id)}</code></span>
             <span>${escapeHtml(packName)} (<code>${escapeHtml(packId)}</code>)</span>
-            <span>${escapeHtml(r.severity)}</span>
+            <span class="sev-tag ${sevCls}">${sevLabel}</span>
             <span><code>${escapeHtml((r.modalities || []).join(", "))}</code></span>
-            <a href="${mdCardHref}">Markdown card</a>
+            <a href="${mdCardHref}">${isEn ? "Markdown card" : "Markdown 规则卡"}</a>
           </div>
           <div class="answer-box">
-            <div class="answer-box-label">${isEn ? "HOW TO JUDGE" : "判断方法"}</div>
+            <div class="answer-box-label">${isEn ? "How to judge" : "判断方法"}</div>
             <p>${formatRuleProseHtml(delTest)}</p>
           </div>
         </header>

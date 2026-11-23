@@ -328,13 +328,13 @@
         "core",
         "deck-and-ui"
       ],
-      "bytes": 1907,
-      "approxTokens": 477,
+      "bytes": 2348,
+      "approxTokens": 587,
       "relatedTools": [
         "browser-workbench",
         "cli"
       ],
-      "sha256": "c81c94ce148ccbf80c3a2a3876e737f8184900a9f84089e554010817b9f26927"
+      "sha256": "9d3bc3c6fd954529f63174444903a8ba690de90c9a4bb244aaf08420e0b447d7"
     },
     {
       "id": "cases-index",

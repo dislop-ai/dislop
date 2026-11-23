@@ -18,10 +18,15 @@ const I18N = {
   zh: {
     "page.title": `去 AI 味工具清单 · Awesome Anti-Slop（${TOTAL_COUNT} 条）— dislop`,
     "nav.skip": "跳至正文",
-    "nav.workbench": "返回首页",
+    "nav.brandMeta": "AI 味检查",
+    "nav.workbench": "工作台",
+    "nav.surfaces": "接入",
+    "nav.cases": "案例",
     "nav.guides": "指南",
     "nav.awesome": "工具清单",
     "nav.rules": "规则",
+    "nav.github": "GitHub ★",
+    "awesome.exportLabel": "给 Agent 或脚本读：",
     "triage.h1": "想在本地或 CI 里自动拦截硬伤",
     "triage.p1": "优先用确定性检查工具（dislop、Vale、textlint），按规则直出精确行号，不花模型额度。",
     "triage.a1": "看检查器与检测器对比 →",
@@ -53,17 +58,22 @@ const I18N = {
   en: {
     "page.title": `Awesome Anti-Slop (${TOTAL_COUNT} Entries) — dislop`,
     "nav.skip": "Skip to main content",
-    "nav.workbench": "Back to dislop",
+    "nav.brandMeta": "AI slop linter",
+    "nav.workbench": "Workbench",
+    "nav.surfaces": "Setup",
+    "nav.cases": "Cases",
     "nav.guides": "Guides",
-    "nav.awesome": "Awesome list",
+    "nav.awesome": "Directory",
     "nav.rules": "Rules",
-    "triage.h1": "Need automated CI or pre-send checks?",
+    "nav.github": "GitHub ★",
+    "awesome.exportLabel": "For agents and scripts:",
+    "triage.h1": "Catch hard bugs locally or in CI",
     "triage.p1": "Start with deterministic linters (dislop, Vale, textlint) that flag exact lines with zero LLM calls.",
     "triage.a1": "Compare linters vs. skills →",
-    "triage.h2": "Fixing prose habits before drafting?",
+    "triage.h2": "Steer your agent before it drafts",
     "triage.p2": "Load a Markdown Skill such as Humanizer or stop-slop into your agent, then verify the final draft locally.",
     "triage.a2": "Read the writing guide →",
-    "triage.h3": "Cleaning AI-built UI or slide decks?",
+    "triage.h3": "Clean up template web UI and slides",
     "triage.p3": "Pair frontend-design or Impeccable with dislop UI and PPTX rules to strip gradients, dead links, and word walls.",
     "triage.a3": "Read the web UI guide →",
     "awesome.heading": "Awesome Anti-Slop",
@@ -317,11 +327,21 @@ function applyLanguage(lang, isUserSwitch = false) {
   const rootPrefix = isEnStaticPage ? "../../" : "../";
   const langPrefix = lang === "en" ? `${rootPrefix}en/` : rootPrefix;
   const homeNav = document.getElementById("awesome-home-link");
+  const surfacesNav = document.getElementById("awesome-surfaces-link");
+  const casesNav = document.getElementById("awesome-cases-link");
   const guidesNav = document.getElementById("awesome-guides-link");
   const rulesNav = document.getElementById("awesome-rules-link");
   const footHome = document.getElementById("awesome-foot-home");
-  if (homeNav) homeNav.href = langPrefix;
+  // The live workbench and cases sit on the root page (?lang=en switches it); /en/ carries the static setup section
+  const rootQuery = lang === "en" ? `${rootPrefix}?lang=en` : rootPrefix;
+  if (homeNav) homeNav.href = `${rootQuery}#workbench`;
+  if (surfacesNav) surfacesNav.href = `${langPrefix}#surfaces`;
+  if (casesNav) casesNav.href = `${rootQuery}#cases`;
   if (footHome) footHome.href = langPrefix;
+  const mainNavEl = document.querySelector("nav.nav-links");
+  if (mainNavEl) mainNavEl.setAttribute("aria-label", lang === "zh" ? "主导航" : "Main navigation");
+  const langToggleBtn = document.getElementById("lang-toggle");
+  if (langToggleBtn) langToggleBtn.setAttribute("lang", lang === "zh" ? "en" : "zh-CN");
   if (guidesNav) guidesNav.href = `${langPrefix}guides/`;
   if (rulesNav) rulesNav.href = `${langPrefix}rules/`;
   const t1 = document.getElementById("triage-link-1");
