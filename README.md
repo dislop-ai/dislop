@@ -150,7 +150,7 @@ Beyond the CLI, this repository compiles into a full reference library at `dislo
 | Surface | One-liner or 1-click install | What you get |
 |---|---|---|
 | **Any AI chat** | Paste: `Read https://dislop.com/llms.txt and apply its anti-slop rules and checks before delivering my next draft.` | Zero install; reads the `~2.4 KB` index, task guides (`/tasks/*.md`), or atomic rule cards (`/rules/<id>.md`) |
-| **Agent Skill (75+ hosts)** | `npx skills add dislop-ai/dislop` | Installs pure-Markdown [skills/dislop/SKILL.md](./skills/dislop/SKILL.md) + 4 local reference cards (`0` bundled scripts, `0` network calls); guides local CLI checks when a shell exists |
+| **Agent Skill (75+ hosts)** | `npx skills add dislop-ai/dislop` | Installs pure-Markdown [skills/dislop/SKILL.md](./skills/dislop/SKILL.md) (`+` 4 task-focused skills: [deslop-docs](./skills/deslop-docs/SKILL.md), [deslop-slides-docx](./skills/deslop-slides-docx/SKILL.md), [deslop-web-ui](./skills/deslop-web-ui/SKILL.md), [deslop-verify](./skills/deslop-verify/SKILL.md); `0` scripts, `0` network calls) |
 | **Claude Code Plugin** | `/plugin marketplace add dislop-ai/dislop` then `/plugin install dislop@dislop-ai` | Bundles pure-doc Skill + Official Cloud MCP connection (`~130` always-on tokens) |
 | **OpenAI Codex Plugin** | `codex plugin marketplace add dislop-ai/dislop` then `codex plugin add dislop@dislop-ai` | Ships native UI card metadata ([openai.yaml](./skills/dislop/agents/openai.yaml)) and `$dislop` trigger |
 | **Gemini CLI Extension** | `gemini extensions install https://github.com/dislop-ai/dislop` | Connects Official Cloud MCP `https://dislop.com/mcp` via [gemini-extension.json](./gemini-extension.json) |

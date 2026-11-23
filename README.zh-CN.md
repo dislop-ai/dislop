@@ -147,7 +147,7 @@ Node.js 版（`bin/dislop.mjs`）和 Python 版（`src/dislop/`）都零外部�
 | 接入环境 | 一行命令或一键唤起 | 说明 |
 |---|---|---|
 | **任意联网 AI 对话** | 发一句：`先读 https://dislop.com/llms.txt，按里面的规矩和检查方法把接下来这份稿子过一遍。` | 免安装，直接读约 `2.4 KB` 索引、任务卡（`/tasks/*.md`）或单条规则页（`/rules/<id>.md`） |
-| **跨宿主 Agent Skill** | `npx skills add dislop-ai/dislop` | 安装纯 Markdown 的 [skills/dislop/SKILL.md](./skills/dislop/SKILL.md) 与 4 张本地参考卡（不含脚本，全程 `0` 联网），动笔前避坑并在有 Shell 时调用 CLI 自检 |
+| **跨宿主 Agent Skill** | `npx skills add dislop-ai/dislop` | 安装纯 Markdown 主技能 [skills/dislop/SKILL.md](./skills/dislop/SKILL.md) 及 4 项场景子技能（[deslop-docs](./skills/deslop-docs/SKILL.md)、[deslop-slides-docx](./skills/deslop-slides-docx/SKILL.md)、[deslop-web-ui](./skills/deslop-web-ui/SKILL.md)、[deslop-verify](./skills/deslop-verify/SKILL.md)，无脚本、零联网） |
 | **Claude Code 插件** | `/plugin marketplace add dislop-ai/dislop` 后执行 `/plugin install dislop@dislop-ai` | 一键装好纯文档 Skill 与官方远程 MCP 连接（常驻上下文仅约 `130` tokens） |
 | **OpenAI Codex 插件** | `codex plugin marketplace add dislop-ai/dislop` 后执行 `codex plugin add dislop@dislop-ai` | 附带 [openai.yaml](./skills/dislop/agents/openai.yaml) 原生应用卡片与 `$dislop` 快捷指令 |
 | **Gemini CLI 扩展** | `gemini extensions install https://github.com/dislop-ai/dislop` | 基于根目录 [gemini-extension.json](./gemini-extension.json) 直连官方远程 MCP `https://dislop.com/mcp` |

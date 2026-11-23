@@ -4,6 +4,11 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.2] - 2026-11-23
+
+### Added
+- **Focused `skills.sh` sub-skills under `skills/`**: Added four task-scoped, pure-Markdown skills alongside `skills/dislop/SKILL.md` (`deslop-docs`, `deslop-slides-docx`, `deslop-web-ui`, and `deslop-verify`) so `npx skills add dislop-ai/dislop` exposes both the full reference skill and standalone document, slide/OOXML, web UI, and rewrite-verification skills without bundled scripts or network calls.
+
 ## [0.8.1] - 2026-11-23
 
 ### Fixed
