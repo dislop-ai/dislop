@@ -40,4 +40,4 @@ Run the full preflight check from the repository root before opening a PR (takes
 npm run release:check
 ```
 
-Under the hood, `release:check` runs manifest lockstep checks (`scripts/sync_manifests.mjs --check`), open-source secret/path hygiene scans, `scripts/build_site.mjs`, and `tests/test_site.mjs`. It also runs Node and Python `pack-test`, all 26 Python `unittest` conformance suites, repo self-dogfooding (`dislop check . --fail-on warning`), and archive build smoke checks. For maintainer version bumps and multi-platform publishing rules, see [docs/releasing.md](./docs/releasing.md) ([Chinese](./docs/releasing.zh-CN.md)).
+Under the hood, `release:check` runs manifest lockstep checks (`scripts/sync_manifests.mjs --check`), open-source secret/path hygiene scans, `scripts/build_site.mjs`, and `tests/test_site.mjs`. It also runs Node and Python `pack-test`, all 4 Python unittest suites (34 tests), repo self-dogfooding (`dislop check . --fail-on warning`), and archive build smoke checks. For maintainer version bumps and multi-platform publishing rules, see [docs/releasing.md](./docs/releasing.md) ([Chinese](./docs/releasing.zh-CN.md)).

@@ -664,11 +664,45 @@ assert.equal(appSource.includes("/api/v1/auth/register"), false, "site/app.js mu
 // 15. Verify SEO/GEO foundation: KB sources, 6 bilingual guides, rule wiki HTML, Atom feeds, JSON-LD, hreflang & link integrity
 const kbPath = path.join(ROOT, "docs", "research", "content-kb", "sources.json");
 assert.ok(fs.existsSync(kbPath), "Missing docs/research/content-kb/sources.json");
-const kbData = JSON.parse(fs.readFileSync(kbPath, "utf8"));
+const kbRaw = fs.readFileSync(kbPath, "utf8");
+assert.ok(Buffer.byteLength(kbRaw, "utf8") <= 80 * 1024, "sources.json exceeds 80 KB anti-bloat cap");
+const kbData = JSON.parse(kbRaw);
 assert.equal(kbData.schema, "dislop.kb/1", "Unexpected KB schema");
-assert.ok(Array.isArray(kbData.sources) && kbData.sources.length >= 40, "Expected >= 40 verified KB sources");
+assert.ok(Array.isArray(kbData.categories) && kbData.categories.length >= 6, "Expected >= 6 KB categories");
+assert.ok(Array.isArray(kbData.sources) && kbData.sources.length >= 40 && kbData.sources.length <= 120, "Expected 40..120 verified KB sources");
+const kbCatSet = new Set(kbData.categories);
+const kbIds = new Set();
+const kbUrls = new Set();
 for (const srcEntry of kbData.sources) {
+  assert.ok(srcEntry.id && !kbIds.has(srcEntry.id), `Duplicate or missing KB id: ${srcEntry.id}`);
+  kbIds.add(srcEntry.id);
+  assert.ok(kbCatSet.has(srcEntry.category), `Unknown KB category ${srcEntry.category} on ${srcEntry.id}`);
+  assert.match(String(srcEntry.verifiedAt || ""), /^\d{4}-\d{2}-\d{2}$/, `Invalid verifiedAt on ${srcEntry.id}`);
   assert.match(srcEntry.url, /^https:\/\//i, `Non-HTTPS KB source URL on ${srcEntry.id}`);
+  const parsedUrl = new URL(srcEntry.url);
+  const normUrl = `${parsedUrl.hostname.toLowerCase()}${parsedUrl.pathname.replace(/\/+$/, "")}${parsedUrl.search}`;
+  assert.equal(kbUrls.has(normUrl), false, `Duplicate normalized URL in sources.json: ${srcEntry.url}`);
+  kbUrls.add(normUrl);
+}
+
+const guidesDir = path.join(ROOT, "content", "guides");
+for (const gf of fs.readdirSync(guidesDir).filter((f) => f.endsWith(".md"))) {
+  const gText = fs.readFileSync(path.join(guidesDir, gf), "utf8");
+  const m = gText.match(/^sources:\s*(\[[^\n]+\])/m);
+  assert.ok(m, `Missing sources array in content/guides/${gf}`);
+  for (const sid of JSON.parse(m[1])) {
+    assert.ok(kbIds.has(sid), `Guide ${gf} references unknown KB id: ${sid}`);
+  }
+}
+
+const pkgManifest = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
+const pyprojectText = fs.readFileSync(path.join(ROOT, "pyproject.toml"), "utf8");
+assert.equal((pkgManifest.files || []).some((p) => p.includes("content/guides") || p.includes("content-kb")), false, "package.json must exclude KB/guides");
+assert.equal(pyprojectText.includes("content/guides") || pyprojectText.includes("content-kb"), false, "pyproject.toml must exclude KB/guides");
+
+const robotsText = fs.readFileSync(path.join(SITE_DIR, "robots.txt"), "utf8");
+for (const bot of ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot", "Disallow: /api/", "Disallow: /mcp"]) {
+  assert.ok(robotsText.includes(bot), `site/robots.txt missing ${bot}`);
 }
 
 assert.ok(Buffer.byteLength(llmsTxt, "utf8") <= 2600, `site/llms.txt exceeds 2600-byte budget`);

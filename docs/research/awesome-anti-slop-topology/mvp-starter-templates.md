@@ -1,6 +1,8 @@
 # `awesome-anti-slop` MVP 工程启动模板与治理边界草案
 
 > 配套主报告：[awesome-anti-slop-topology-design.zh-CN.md](../awesome-anti-slop-topology-design.zh-CN.md) · 数据契约：[radar-v3-contract.json](./radar-v3-contract.json)
+>
+> **状态说明（2026-11-23）**：本文为达阈值拆仓（条目 `>= 150` 或月均有效外部 PR `>= 20`）时启用的备用启动模板；当前冷启动阶段清单继续随主仓构建至 `https://dislop.com/awesome/` 与 `/en/awesome/`（锁定 `CSP: connect-src 'self'`）。
 
 本草案收敛 `dislop-ai/awesome-anti-slop` 建仓首日所需的四组最小可执行规范：中立治理宪章骨架、自动化 CI 流水线分工、投稿入口模板，以及与 `dislop` 主仓静态站同步的离线边界。
 

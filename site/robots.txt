@@ -3,4 +3,40 @@ Allow: /
 Disallow: /api/
 Disallow: /mcp
 
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: Claude-User
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+# Agent index: https://dislop.com/llms.txt
 Sitemap: https://dislop.com/sitemap.xml

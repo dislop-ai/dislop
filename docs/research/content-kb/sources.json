@@ -635,6 +635,42 @@
       "keyFact": "Developers now cross-check last commit date, issue response latency, and real README examples alongside star counts.",
       "verifiedAt": "2026-11-23",
       "usedIn": ["open-source-star-growth-strategy-2026"]
+    },
+    {
+      "id": "posthog-growth-handbook",
+      "title": "PostHog Public Handbook — Growth, Content & Developer-Led Marketing",
+      "url": "https://posthog.com/handbook",
+      "category": "oss-growth",
+      "locale": "en",
+      "year": 2026,
+      "sourceType": "official-docs",
+      "keyFact": "Documents PostHog's developer-led content rule ('if any other company could write it, don't run it'), radical transparency, docs-as-product onboarding, and anti-corporate writing style.",
+      "verifiedAt": "2026-11-23",
+      "usedIn": ["seo-geo-content-report"]
+    },
+    {
+      "id": "github-community-health-files",
+      "title": "GitHub Docs — Creating Community Health Files (CONTRIBUTING & SECURITY)",
+      "url": "https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file",
+      "category": "oss-growth",
+      "locale": "en",
+      "year": 2026,
+      "sourceType": "official-docs",
+      "keyFact": "Defines repository and org-level Community Health Files (README, LICENSE, CONTRIBUTING.md, SECURITY.md, issue/PR templates) surfaced by GitHub Community Standards.",
+      "verifiedAt": "2026-11-23",
+      "usedIn": ["seo-geo-content-report", "open-source-star-growth-strategy-2026"]
+    },
+    {
+      "id": "supabase-open-source-repo",
+      "title": "Supabase Open-Source Docs-as-Product & Launch Playbook Reference",
+      "url": "https://github.com/supabase/supabase",
+      "category": "oss-growth",
+      "locale": "en",
+      "year": 2026,
+      "sourceType": "open-source-tool",
+      "keyFact": "Reference open-core architecture combining self-hostable developer ergonomics, actionable docs with runnable snippets, and coordinated public launch weeks.",
+      "verifiedAt": "2026-11-23",
+      "usedIn": ["seo-geo-content-report", "open-source-star-growth-strategy-2026"]
     }
   ]
 }

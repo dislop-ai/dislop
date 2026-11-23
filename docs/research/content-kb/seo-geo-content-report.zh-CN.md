@@ -1,8 +1,8 @@
 # dislop 内容战略与 SEO / GEO 分析研报
 
-> 整理日期：2026-11-23 · 资料库索引：[sources.json](./sources.json)（`dislop.kb/1`，52 条已核验一手出处）
+> 整理日期：2026-11-23 · 资料库索引：[sources.json](./sources.json)（`dislop.kb/1`，55 条已核验一手出处，覆盖 7 个主题域）
 
-从 `site/` 的当前结构看，`dislop.com` 只有两个 HTML 页面（首页与 `/awesome/`），缺少独立英文静态 HTML，且没有结构化数据标记，导致搜索引擎和 AI 回答引擎很难按场景引用 `dislop`。这份研报先拆清现有网站的 5 个技术短板，再结合 6 个行业知识域的实证依据，给出「教程指南 + 规则百科 + 工具清单」的零负担内容布局与日常维护边界。
+从 `site/` 的结构演变看，`dislop.com` 此前只有首页与 `/awesome/` 两个 HTML 页面，缺少独立英文静态 HTML 与结构化数据标记，导致搜索引擎和 AI 回答引擎很难按场景引用 `dislop`。这份研报基于 [PRODUCT.md](../../../PRODUCT.md) 的产品定义，先梳理 5 个技术短板、7 个主题域的一手资料与反证，再对齐「三层受众 × 三种产品形态」的内容与运营转换链路、轻量基础架构约束与日常运维边界。
 
 ---
 
@@ -12,7 +12,7 @@
 
 | 维度 | 现状（改动前） | 带来的实际损失 | 本轮改法 |
 |---|---|---|---|
-| **HTML 入口密度** | 全站只有 `site/index.html` 和 `site/awesome/index.html` 两个 HTML 页面 | 53 条规则与 6 大核心场景没有独立人类可读着陆页，长尾检索词无页可承接 | 新增 6 组双语实用指南 HTML + 106 个双语规则百科 HTML + 指南/规则聚合目录页 |
+| **HTML 入口密度** | 全站只有 `site/index.html` 和 `site/awesome/index.html` 两个 HTML 页面 | 53 条规则与 6 大核心场景没有独立人类可读着陆页，长尾检索词无页可承接 | 新增 6 组双语实用指南 HTML + 99 个双语规则百科 HTML（53 中文 + 46 英文，7 条中文专用规则不生成英文页）+ 指南/规则聚合目录页（全站共 119 个静态 HTML） |
 | **英文版可抓取性** | 英文内容靠 `app.js` 在浏览器端动态替换，`hreflang="en"` 指向 `/?lang=en` | 爬虫抓取 `/` 看到的是中文 DOM，`/?lang=en` 与自指 `canonical: /` 冲突，英文词几乎不参与索引 | 生成纯英文静态 `/en/`、`/en/awesome/`、`/en/guides/`、`/en/rules/`，实现双向对等 `hreflang` |
 | **社交卡片与语种纯度** | `site/index.html` 和 `site/awesome/index.html` 默认用英文 `og-card.png`，且 `twitter:*` 写了英文 | 中文页面在社交媒体与检索摘要里中英混排 | 中文页统一使用 `og-card-zh.png` 与纯中文 meta；英文页使用 `og-card.png` 与纯英文 meta |
 | **结构化实体（JSON-LD）** | 全站零 `<script type="application/ld+json">` | 搜索引擎与问答引擎无法直接解析 `SoftwareApplication`、`TechArticle`、`FAQPage`、`CollectionPage` 与 `BreadcrumbList` | 编译期自动注入并校验每类页面的 JSON-LD `@graph` |
@@ -20,9 +20,9 @@
 
 ---
 
-## 2. 行业知识资料库综述（6 个领域的核心结论）
+## 2. 行业知识资料库综述（7 个主题域与反证校准）
 
-资料库 [sources.json](./sources.json) 归档了 42 条经过核验的一手出处，直接支撑后续指南写作与产品定位表达：
+资料库 [sources.json](./sources.json) 归档了 55 条经过核验的一手出处，直接支撑指南写作、产品定位与运营节奏：
 
 1. **学术计量学与去味边界（10 条）**：
    - Kobak 等人在 *Science Advances*（[arXiv:2406.07016](https://arxiv.org/abs/2406.07016)，2025）统计了 1,500 万篇 PubMed 摘要的超额用词，估算 2024 年至少 13.5% 的生物医学摘要（n=1,500 万篇）经过大模型处理；Holzwarth、González-Márquez 与 Kobak（[arXiv:2608.10715](https://arxiv.org/abs/2608.10715)，2026）在 PubMed Central 全文的后续追踪显示，讨论（Discussion）部分的机器痕迹明显高于方法（Methods）部分。
@@ -36,42 +36,43 @@
 4. **界面设计与演示文档规范（7 条）**：
    - Coding Agent 批量生成的网页普遍出现紫粉霓虹渐变、胶囊标签堆叠、三层套盒和 `href="#"` 死按钮；`frontend-design`、`Impeccable` 与 `ui-ux-pro-max-skill` 已累计收获几十万星标。
    - `Norm (Zurich)`、`Stiftung Buchkunst`、`Fonts In Use` 与中文排印站点 `The Type` 提供了可落地的版心比例、字阶梯度和标点挤压基准。
-5. **搜索与 AI 检索可见性（6 条）**：
+5. **搜索、爬虫分离与 AI 检索可见性（6 条，含反证）**：
    - Aggarwal 等人（ACM KDD 2024 *GEO*）的实验证明，在正文中加入可核验统计数字、一手引文和直答摘要能显著提升回答引擎引用率，而堆砌关键词会适得其反。
-   - Google 国际化规范要求 `hreflang` 必须在所有语言对偶页之间形成双向互指，且 `x-default` 指向独立可抓取 URL；OpenAI 将检索爬虫 `OAI-SearchBot` 与训练爬虫 `GPTBot` 分开控制，网站 `robots.txt` 放行检索爬虫即可参与实时引用。
+   - Google 国际化规范要求 `hreflang` 必须在所有语言对偶页之间形成双向互指，且 `x-default` 指向独立可抓取 URL；OpenAI 将 `GPTBot`（训练）与 `OAI-SearchBot` / `ChatGPT-User`（检索）分离，Anthropic 同样区分为 `ClaudeBot` 与 `Claude-SearchBot` / `Claude-User`。因此 `site/robots.txt` 显式放行主流检索爬虫并屏蔽 `/api/` 与 `/mcp`。
+   - **反证校准**：2025–2026 年多项第三方百万域名级 SEO 扫描（SE Ranking、ESEOspace 等统计）显示，在根目录放置 `llms.txt` 的站点仅占少数，且多项回归分析未观察到单靠 `llms.txt` 直接提升 AI 引用率。因此本方案不把 `llms.txt` 当排名杠杆，只把它保留为 `<= 2,600 B` 的低成本 Agent 路由地图，把真正的 SEO/GEO 押在可抓取的语义 HTML、JSON-LD `@graph`、双向 `hreflang` 与一手出处上。
 6. **中文去 AI 味生态（5 条）**：
-   - 中文高频需求集中在拆解“抓手 / 赋能 / 闭环”公文黑话（如 `op7418/Humanizer-zh` 23,450 星、`MrGeDiao/shuorenhua` 2,726 星）与排查半角标点、破折号过密和道德升华结尾（依据 `GB/T 15834—2011`）。
+   - 中文高频需求集中在拆解“抓手 / 赋能 / 闭环”公文黑话（如 `op7418/Humanizer-zh` 23,558 星、`MrGeDiao/shuorenhua` 2,726 星）与排查半角标点、破折号过密和道德升华结尾（依据 `GB/T 15834—2011`）。
+7. **开源内容转化与 Star 冷启动（13 条）**：
+   - 整合 PostHog 公开手册（「只写别人写不出来的具体实证，不发泛泛行话」）、Supabase 文档驱动增长、GitHub 社区标准文件（`CONTRIBUTING.md` + `SECURITY.md`），以及 Coreyhaines31（`marketing-skills` 15K★）、Nevo David（`Postiz` 25K★ / `Novu` 20K★）、Eddie Jaoude 等一手实证，明确以「单一事实源仓库 + 交互工作台」协同转化 GitHub Stars 与安装留存。
 
 ---
 
-## 3. 内容战略：三层受众、搜索意图与页面分工
+## 3. 内容战略：对齐 `PRODUCT.md` 的受众推进与三种产品形态
 
-对照 [PRODUCT.md](../../../PRODUCT.md) 确定的用户推进顺序，不写泛泛而谈的行业新闻博客，而是把有限写作精力集中在三类长青内容资产上：
+严格对照 [PRODUCT.md](../../../PRODUCT.md) 确定的用户推进顺序与三种产品形态（纯文档 Skill、本地零依赖 CLI 与插件、官方远程 MCP 与网页工作台），不写泛泛而谈的新闻资讯流，而是把写作精力集中在可验证的长青页面与产品内置传播回路上：
 
-| 受众阶段 | 典型中文搜索 / AI 提问意图 | 典型英文搜索 / AI 提问意图 | 承接页面 | 目标动作 |
+| 受众阶段 | 典型中文搜索 / AI 提问意图 | 典型英文搜索 / AI 提问意图 | 承接内容 | 对应产品形态与目标动作 |
 |---|---|---|---|---|
-| **1. Coding Agent 用户** | `Claude Code 去 AI 味`、`Vibe Coding 紫粉渐变`、`PR 去水`、`AI 代码文档检查` | `how to stop claude code writing ai slop`, `fix ai slop web ui`, `ci linter for ai slop` | 指南 `fix-ai-slop-web-ui` + `agent-cli-mcp-tutorial` + 规则页 `ui-*` / `eng-*` | 安装纯文档 Skill 或跑 `npx dislop check .` |
-| **2. 办公 Agent 用户** | `AI 生成 PPT 排版问题`、`Word 残留星号清理`、`汇报标题怎么写` | `clean up ai generated powerpoint`, `remove markdown asterisks from docx`, `deslop executive deck` | 指南 `deslop-pptx-docx` + 规则页 `slide-*` / `markdown-leak` | 打开 `/#workbench` 拖入 DOCX/PPTX 或连远程 MCP |
-| **3. 所有用 AI 交付的人** | `中文写作怎么去 AI 味`、`AI 检测器准吗`、`去 AI 味工具推荐` | `what is ai slop`, `remove ai slop from writing`, `ai slop linter vs detector` | 指南 `what-is-ai-slop` + `remove-ai-slop-writing` + `linter-vs-detector-vs-skill` + `/awesome/` | 使用本地工作台检查，或从 `/awesome/` 选配套工具 |
+| **1. Coding Agent 用户** | `Claude Code 去 AI 味`、`Vibe Coding 紫粉渐变`、`PR 去水`、`AI 代码文档检查` | `how to stop claude code writing ai slop`, `fix ai slop web ui`, `ci linter for ai slop` | 指南 `fix-ai-slop-web-ui` + `agent-cli-mcp-tutorial` + 规则页 `ui-*` / `eng-*` | 第 1/2 形态：装纯文档 Skill、跑 `npx dislop check .`、配置 PR `--format github` / SARIF 规则直链 |
+| **2. 办公 Agent 用户** | `AI 生成 PPT 排版问题`、`Word 残留星号清理`、`汇报标题怎么写` | `clean up ai generated powerpoint`, `remove markdown asterisks from docx`, `deslop executive deck` | 指南 `deslop-pptx-docx` + 规则页 `slide-*` / `markdown-leak` | 第 2/3 形态：拖入离线工作台试用、或登录连 `https://dislop.com/mcp` 做保留排版处理（月免费 30 额度） |
+| **3. 所有用 AI 交付的人** | `中文写作怎么去 AI 味`、`AI 检测器准吗`、`去 AI 味工具推荐` | `what is ai slop`, `remove ai slop from writing`, `ai slop linter vs detector` | 指南 `what-is-ai-slop` + `remove-ai-slop-writing` + `linter-vs-detector-vs-skill` + `/awesome/` | 第 2/3 形态：规则页点 `#try=` 进工作台、生成 `#share=v1.*` 零上传分享链接或复制单行 PR/群聊引文 |
 
-### 为什么不做传统新闻流博客，而做「6 组指南 + 53 组规则页 + 90 条清单」
+### 为什么坚持「双语分治 + 单源编译 + 不做泛博客流」
 
-1. **零重复维护**：53 组双语规则 HTML 直接从 `packs/*/pack.json` 编译生成，规则正文、正反例与判断方法本身就是精确匹配长尾问题的问答页（如搜 `slide-autofit-shrink`、`ui-ai-gradient`、`negation-pivot-frame`）。
-2. **中英彻底分治**：中文 6 篇和英文 6 篇分别针对中文公文腔/半角标点与英文 `delve`/RLHF 模式崩溃独立写作，避免生硬翻译腔，严格遵守中英文不混排原则。
-3. **人机同源**：每篇指南同时输出语义 HTML（给人与搜索引擎）与纯净 `index.md`（给 Agent 与 `/llms.txt`），同一份 Markdown 源文件一处修改、两处同步。
+1. **零重复维护与防过度设计**：99 个规则百科 HTML（53 中文 + 46 英文）直接从 `packs/*/pack.json` 编译生成；12 篇指南复用统一的布局、JSON-LD 与 `.share-action-bar`，每份 Markdown 源文件同时生成语义 HTML 与 `index.md`。
+2. **严格遵守中英文独立原则**：中文 6 篇与英文 6 篇分别面向中文公文腔/全角标点与英文 `delve`/句式趋同独立成文，7 条中文专用规则只出中文规则页，编译期门禁保证 `/en/**` 零汉字泄漏。
+3. **坚持 PostHog 式反套话写作准入**：不在官网发空洞新闻稿；每篇指南必须先写直答摘要、给出可直接运行或对照的实证例句，并明确标出规则误报与能力边界。
 
 ---
 
-## 4. 零负担运维边界（避免成为主干开发累赘）
+## 4. 轻量架构底座与零负担运维边界
 
-为了保证内容库长期可控、不拖慢功能迭代和发包节奏：
+在不引入重型 CMS、前端框架或第三方追踪的前提下，仅通过四项确定性工程底座把内容与资料库稳住：
 
-1. **物理隔离进发包白名单外**：`content/guides/` 和 `docs/research/content-kb/` 不在 `package.json` 的 `files` 与 `pyproject.toml` 的打包列表中，npm 与 PyPI 包体积增加 **0 KB**。
-2. **不改双端检查内核**：本轮和后续新增内容都不碰 `src/`、`bin/`、`packs/`、`patterns/` 或 `skills/`，日常更新走发版指南的第 1 档流程（改文案 → `npm run build:site` → `npm test` → `npm run dogfood` → 同步 `site/`）。
-3. **准入与淘汰两条硬标准**：
-   - 新增一篇指南前，必须能写出它对应哪一类具体搜索/提问意图，以及至少 3 条已在 `sources.json` 核验的一手出处；不写没有具体操作步骤或对照例子的空泛随想。
-   - 每季度核验一次 `sources.json` 与 `content/guides/` 的时效字段；规则或命令有变动时只原地更新对应章节，不靠堆新文章刷数量。
-4. **强制自检门禁**：所有指南、资料库与编译出的 HTML 必须通过 `dislop check . --fail-on warning` 与 `dislop check site/ --fail-on info` 零命中，杜绝在反 AI 味站点里出现 AI 套话。
+1. **物理隔离进发包白名单外（自动化锁死 `0 KB` 增量）**：`content/guides/` 和 `docs/research/content-kb/` 不在 `package.json` 的 `files` 与 `pyproject.toml` 的打包规则里，`tests/test_site.mjs` 自动断言排除关系，保证 npm 与 PyPI 安装包体积不膨胀。
+2. **资料库防膨胀与引用一致校验**：`tests/test_site.mjs` 在每次测试校验 `sources.json` 条目唯一 ID、规范化 HTTPS URL 去重、分类与 `verifiedAt` 日期格式、`<= 120 条` / `<= 80 KB` 容量硬顶，以及 12 篇 `content/guides/*.md` 引用的每条出处 ID 均真实存在。
+3. **不改双端检查内核、仓库语言判定不受静态页拖累**：`.gitattributes` 将生成 HTML/引擎产物标为 `linguist-generated=true` 保住 JS/Python 主语言；日常内容或清单微调只走第 1 档发版流程（改文案 → `npm run build:site` → `npm test` → `npm run dogfood` → 同步静态目录）。
+4. **全量自检门禁与季度审校**：每季度核验一次 `sources.json` 时效并只就地修订旧章节；所有文档与静态页须通过 Node/Python `dislop check` 零命中自审，绝不在反 AI 味工具站点里留存 AI 套话。
 
 ---
 

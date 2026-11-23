@@ -2334,11 +2334,28 @@ const catalogJsonStr = JSON.stringify(catalogObj, null, 2) + "\n";
 fs.writeFileSync(path.join(SITE_DIR, "catalog.json"), catalogJsonStr, "utf8");
 
 // 2l. Search & Crawlability files (/robots.txt & /sitemap.xml)
-const robotsTxt = `User-agent: *
+const searchBots = [
+  "*",
+  "Googlebot",
+  "Bingbot",
+  "OAI-SearchBot",
+  "ChatGPT-User",
+  "Claude-SearchBot",
+  "Claude-User",
+  "PerplexityBot",
+];
+const robotsTxt =
+  searchBots
+    .map(
+      (ua) => `User-agent: ${ua}
 Allow: /
 Disallow: /api/
-Disallow: /mcp
+Disallow: /mcp`
+    )
+    .join("\n\n") +
+  `
 
+# Agent index: ${BASE_URL}/llms.txt
 Sitemap: ${BASE_URL}/sitemap.xml
 `;
 fs.writeFileSync(path.join(SITE_DIR, "robots.txt"), robotsTxt, "utf8");

@@ -251,8 +251,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 5116,
-      "approxTokens": 1279,
+      "bytes": 5165,
+      "approxTokens": 1291,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -260,7 +260,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "bab812cf2519f6683ea541d323cd69676158aca0c68deb1113cfe88571042b4f"
+      "sha256": "bda3085d6ba42a44e5b3a3dba0e94b45b2f4fb3fac3a70af9846dabf7a258d18"
     },
     {
       "id": "methodology-brand-voice",
