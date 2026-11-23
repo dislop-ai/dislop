@@ -344,7 +344,7 @@ def build_review_prompt(
             "Do NOT output a full rewrite of the document.",
             lang_directive,
             "Return ONLY valid JSON matching this exact schema (no markdown fences):",
-            '{"aiFlavorLevel":"low|medium|high","summary":"1-2 sentence plain summary","issues":[{"category":"framing|cliche|structure|evidence|rhythm","severity":"warning|info","quote":"exact verbatim substring from the draft","why":"specific defect explanation","fix":"concrete edit suggestion preserving facts"}]}',
+            '{"aiFlavorLevel":"low|medium|high","summary":"1-2 sentence plain summary","issues":[{"category":"framing|cliche|structure|evidence|rhythm","severity":"warning|info","quote":"exact verbatim substring from the draft","why":"specific defect explanation","fix":"concrete edit suggestion preserving facts","replacement":"optional literal replacement in the original language; empty string for intentional deletion; omit when advice requires judgment"}]}',
         ]
     )
     user_prompt = "\n".join(
@@ -540,8 +540,15 @@ def validate_and_normalize_review_response(
         del_obj = {"en": fix, "zh": fix} if fix else {"en": why, "zh": why}
         fp = f"{rule_id}:{fnv1a_hex(f'{rule_id}|{clip_match.lower()}|{line}:{col}')}"
 
+        index = chunk_text.find(quote)
+        after = item.get("replacement")
+        edit = None
+        if (isinstance(after, str) and index >= 0 and index == chunk_text.rfind(quote)
+                and safe_quote == quote and scrub_secrets(after, redact_secrets) == after):
+            edit = dict(start=chunk_start_offset + index, before=quote, after=after)
         findings.append(
             {
+                **({"edit": edit} if edit else {}),
                 "fingerprint": fp,
                 "ruleId": rule_id,
                 "tier": "taste",

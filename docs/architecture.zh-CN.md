@@ -43,6 +43,12 @@
 | 官网静态编译器与内容层 | `scripts/build_site.mjs`, `scripts/lib/site_content.mjs`, `content/guides/*.md` | 零依赖编译器，将 `src/core.mjs`、`packs/`、`skills/`、`content/guides/`、`docs/research/content-kb/sources.json`、`docs/brand*`、`ROADMAP*.md` 与 `anti-slop-radar-index.json` 同源编译为 119 个静态 HTML 页面（`/`、`/en/`、`/guides/`、`/en/guides/`、`/rules/`、`/en/rules/`、`/awesome/`、`/en/awesome/`）、Atom 订阅（`/feed.xml`、`/en/feed.xml`）、JSON-LD `@graph`、双向 `hreflang`、显式放行 AI 检索爬虫的 `robots.txt` 及 `awesome/README*.md` |
 | 专题研究、知识库与语言识别隔离 | `docs/research/`, `docs/research/content-kb/sources.json`, `.gitattributes` | 90 条核验 Awesome Anti-Slop 数据源（`dislop.radar/2`）、55 条资料库索引（`dislop.kb/1`，经 `tests/test_site.mjs` 锁死不进 npm/PyPI 发包）、开源增长策略，以及 `.gitattributes`（`linguist-generated=true`）保证仓库主语言识别为 JavaScript / Python |
 
+### 将审校建议写回原文
+
+审校支持的文本文件时，JSON 报告用 `sourceSha256` 记录原文件 UTF-8 字节的摘要。可直接采用的建议包含 `edit`，其中 `id` 是该建议在报告中的序号（从 1 开始），`start` 是按 Unicode 码点计数的起始位置（从 0 开始），`before` 是原文，`after` 是替换文本。空字符串表示删除。模型给出了明确的替换文本，且引文在本次审校片段中可唯一定位时，才会生成可执行修改。标准输入和从 Office 文件提取的文字不生成写回信息。
+
+Node 和 Python 命令可互读审校报告。两端共用 Vim 临时缓冲区展示建议，将用户选中的编号交回命令行。`review --interactive-apply` 与 `apply --review-file … --source-file …` 都先核对文件摘要、原文和选区重叠，再以原子替换写回文件。
+
 ## 3. 覆盖率诚实原则与退出码
 
 未经检查的内容绝不伪装成“0 问题”：

@@ -96,6 +96,18 @@ pip install dislop && dislop check .
   <img src="./assets/demos/cli-check-en-v2.gif" alt="dislop CLI offline check failing with exit code 1 on draft and passing with exit code 0 after cleanup" width="840">
 </p>
 
+### Apply review suggestions
+
+Open the Vim picker for a local draft, or save a JSON review and apply selected edits later.
+
+```sh
+dislop review draft.md --offline --interactive-apply
+dislop review draft.md --offline --json > review.json
+dislop apply --review-file review.json --source-file draft.md --include 2,5
+```
+
+Use the `edit.id` values in your report. To apply every available edit except one, use `--all --exclude 3`. In Vim, move with `j`/`k` or the arrow keys, accept with `y`, reject with `n`, and press Enter to write your choices. Press `q` to discard them. Items that need a source or a writer’s judgment appear as advice. Batch apply runs without Vim. Both commands apply edits to supported UTF-8 text files, including Markdown and HTML. If the file has changed since review, generate a fresh report.
+
 ## AI artifacts vs. style warnings
 
 Auto-rewriters often trade one AI cliché for another or flatten your voice into a generic template. Flat banned-word lists also cause false alarms on ordinary nouns (`Delve` debugger, `wool tapestry`).
