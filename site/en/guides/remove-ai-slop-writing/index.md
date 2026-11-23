@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: en
 updated: 2026-11-23
-version: 0.7.1
+version: 0.8.0
 ---
 
 # How to Remove AI Slop From Writing Without Triggering Second-Order Clichés

@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: zh
 updated: 2026-11-23
-version: 0.7.1
+version: 0.8.0
 ---
 
 # 去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比

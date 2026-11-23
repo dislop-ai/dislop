@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: zh
 updated: 2026-11-23
-version: 0.7.1
+version: 0.8.0
 ---
 
 # 中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话

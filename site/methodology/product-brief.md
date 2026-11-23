@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 0.7.1
+version: 0.8.0
 ---
 
 # dislop 产品定义（Product Brief）
