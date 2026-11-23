@@ -17,6 +17,17 @@ Pick the single card below matching the **language of the text you are writing o
 | Word (`.docx`) & PowerPoint (`.pptx`) files | `./references/office.md` | `./references/office.zh-CN.md` |
 | Web pages, HTML/CSS/JSX & browser UI copy | `./references/web-ui.md` | `./references/web-ui.zh-CN.md` |
 
+Match cleanup strategy to the writing scenario (`--register`):
+
+| Scenario (`--pack` / `--register`) | Cut | Protect (never alter) | Avoid drift into |
+|---|---|---|---|
+| `engineering-spec` / `technical` | Marketing adjectives, diff parroting, ownerless action items | Uniform lists, passive voice, code identifiers, thresholds | Rewriting technical clauses into casual chatter |
+| `regulated-comms` / `official` | Superlatives, unanchored multipliers, AI greetings | Formal phrasing, numbered clauses, scope qualifiers | Casual slang or unverified compliance claims |
+| `business-brief` / `argumentative` | Macro openers, buzzword clusters, 3-part balanced pitches | Upfront takeaways, concrete metrics, named sources | Trading slogans for aphorisms or macro sign-offs |
+| `literary-essay` / `narrative` | Moralizing endings, stock metaphors, mechanical Q&A | Sensory detail, dialogue, deliberate rhythm contrast | Flattening prose into bullets or inventing scenes |
+| C2C / IM / `casual` | Scripted influencer clichés, chatbot wrappers, corporate jargon | First-person spoken wording, fixed shop/shipping policy lines | Stiff bookish prose or synonym cycling on policy lines |
+| `deck-and-ui` / `deck-ui` | Topic-label slide titles, dead `#` links, gradient/pill soup | Action-takeaway headlines, tight UI slot lengths | Expanding microcopy past slot bounds or decorative AI badges |
+
 ## 2. Drafting New Text
 
 1. Open on a concrete fact, file, metric, or action from the notes; let sentence length follow the thought naturally.
@@ -34,8 +45,8 @@ Pick the single card below matching the **language of the text you are writing o
 ## 4. Check & Finish
 
 Run a check only if a callable tool or shell exists in this session:
-1. Only if `dislop_*` tools appear in your active tool list: call `dislop_check` first, then `dislop_review` if needed, and verify edits with `dislop_verify` (setup: `https://dislop.com/tools/mcp-sdk-api.md`).
-2. Only if you have a shell tool: run `dislop check <path> --pack auto --deep` (or `npx --yes dislop check <path> --pack auto --deep`), run `dislop review` with user config (`~/.config/dislop/config.json` / `voice.json`) when deep review is needed, and finish with `dislop verify --git HEAD <path>` (or `dislop verify <before> <after>`) to check facts and anti-degradation guards.
+1. Only if `dislop_*` tools appear in your active tool list: call `dislop_check` first, then `dislop_review` if needed, and verify edits with `dislop_verify` (pass `register` to match scenario strategy; setup: `https://dislop.com/tools/mcp-sdk-api.md`).
+2. Only if you have a shell tool: run `dislop check <path> --pack auto --register <scenario> --deep` (or `npx --yes dislop check ...`), run `dislop review` with user config (`~/.config/dislop/config.json` / `voice.json`) when deep review is needed, and finish with `dislop verify --git HEAD <path> --register <scenario>` (or `dislop verify <before> <after> --register <scenario>`) to check facts and anti-degradation guards.
 3. Otherwise, review your draft against Sections 2–3 and the loaded card checklist.
 
 Always return the finished document or copy itself—never reply with only a tool name, shell command, or file path.

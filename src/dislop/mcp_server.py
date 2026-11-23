@@ -11,20 +11,26 @@ import math
 import zipfile
 from .engine import (
     ENGINE_VERSION,
+    VALID_REGISTERS,
     analyze_text_profile,
+    apply_register_override,
     audit_text,
     build_catalog,
+    build_finding_revision,
     build_zones,
+    compute_finding_confidence,
     compute_ruleset_hash,
     derive_fix_strategy,
     detect_modality,
     extract_voice_profile_offline,
+    fnv1a_hex,
     load_all_packs,
     load_config,
     load_pattern_library,
     pick_pack_for_file,
     query_catalog,
     resolve_config_for_file,
+    resolve_register,
     verify_revision_bundle,
 )
 from .local_model import build_model_status_report
@@ -145,6 +151,18 @@ def _format_rule_for_explain(rule: dict[str, Any], pack_id: str, lang: Any) -> d
     return out
 
 
+def _localize_revision(rev: Any, clean_lang: str | None) -> Any:
+    if not rev:
+        return None
+    if not clean_lang:
+        return rev
+    return {
+        **rev,
+        "instruction": _localize_obj(rev.get("instruction"), clean_lang),
+        "avoid": _localize_obj(rev.get("avoid"), clean_lang),
+    }
+
+
 def _format_findings_for_mcp(findings: list[dict[str, Any]], verbosity: str, lang: Any) -> list[dict[str, Any]]:
     clean_lang = lang if lang in {"en", "zh"} else None
     if verbosity == "full":
@@ -155,6 +173,7 @@ def _format_findings_for_mcp(findings: list[dict[str, Any]], verbosity: str, lan
                 **f,
                 "message": _localize_obj(f.get("message"), clean_lang),
                 "deletionTest": _localize_obj(f.get("deletionTest"), clean_lang),
+                "revision": _localize_revision(f.get("revision"), clean_lang),
             }
             for f in findings
         ]
@@ -164,6 +183,7 @@ def _format_findings_for_mcp(findings: list[dict[str, Any]], verbosity: str, lan
             "ruleId": f.get("ruleId"),
             "tier": f.get("tier") if f.get("tier") is not None else "taste",
             "severity": f.get("severity"),
+            "confidence": f.get("confidence") or "medium",
             "fixStrategy": f.get("fixStrategy") or derive_fix_strategy({"id": f.get("ruleId"), "family": f.get("family")}),
             "family": f.get("family") if f.get("family") is not None else (f"{f['dimension']}/{f['ruleId']}" if f.get("dimension") else None),
             "file": f.get("file"),
@@ -174,6 +194,7 @@ def _format_findings_for_mcp(findings: list[dict[str, Any]], verbosity: str, lan
             "match": f.get("match"),
             "message": _localize_obj(f.get("message"), clean_lang),
             "deletionTest": _localize_obj(f.get("deletionTest"), clean_lang) if f.get("deletionTest") else None,
+            "revision": _localize_revision(f.get("revision"), clean_lang),
         }
         for f in findings
     ]
@@ -192,6 +213,7 @@ TOOLS = [
                 "text": {"type": "string", "description": "Draft text to inspect in memory"},
                 "path": {"type": "string", "description": "Workspace-relative file path (.md, .html, .css, .jsx, .svg, .png, .jpg, .jpeg, .webp, .docx, .pptx, .pdf)"},
                 "pack": {"type": "string", "description": "Style pack ID (auto, business-brief, engineering-spec, regulated-comms, literary-essay, deck-and-ui, executive-deck)"},
+                "register": {"type": "string", "enum": ["auto", *VALID_REGISTERS], "description": "Optional writing register override (auto, unspecified, official, casual, argumentative, technical, marketing, narrative)"},
                 "filename": {"type": "string", "description": "Virtual filename hint when inspecting `text`"},
                 "profile": {"type": "boolean", "description": "Include 5-axis rhythm & concreteness telemetry on text/markdown (default true)"},
                 "deep": {"type": "boolean", "description": "Enable thorough inspection (Pocket ML + extended 6-dimension pattern bank)"},
@@ -217,6 +239,7 @@ TOOLS = [
                 "gitRef": {"type": "string", "description": "Git ref baseline when `path` is given (default HEAD)"},
                 "filename": {"type": "string", "description": "Optional virtual filename hint when passing `before`/`after`"},
                 "pack": {"type": "string", "description": "Optional pack ID or 'auto' to also verify findingsDelta"},
+                "register": {"type": "string", "enum": ["auto", *VALID_REGISTERS], "description": "Optional writing register override (auto, unspecified, official, casual, argumentative, technical, marketing, narrative)"},
                 "keep": {"type": "array", "items": {"type": "string"}, "description": "Protected terms/concepts that must stay intact in the revision"},
                 "allowAdded": {"type": "boolean", "description": "Allow new numbers not present in original (default false)"},
                 "strict": {"type": "boolean", "description": "Fail `ok` on any anti-degradation warning in addition to hard fact/error checks"},
@@ -461,6 +484,27 @@ def run_mcp_stdio() -> None:
                         continue
                     mod = detect_modality(fn) or "markdown"
                     file_cfg = resolve_config_for_file(fn, live_config)
+                    arg_register: str | None = None
+                    if args.get("register") is not None:
+                        if not isinstance(args.get("register"), str):
+                            joined = ", ".join(VALID_REGISTERS)
+                            _tool_result(
+                                req_id,
+                                {"error": f"Invalid register (expected string: auto, {joined})"},
+                                True,
+                            )
+                            continue
+                        raw_reg = args["register"]
+                        norm_reg = raw_reg.strip().lower()
+                        if not norm_reg or (norm_reg != "auto" and norm_reg not in VALID_REGISTERS):
+                            joined = ", ".join(VALID_REGISTERS)
+                            _tool_result(
+                                req_id,
+                                {"error": f"Invalid register '{raw_reg}' (expected auto, {joined})"},
+                                True,
+                            )
+                            continue
+                        arg_register = norm_reg
                     pack_obj, eff_pack, pack_source = _resolve_text_pack_and_source(
                         after_text, fn, mod, args.get("pack") or "auto", file_cfg, packs
                     )
@@ -478,6 +522,7 @@ def run_mcp_stdio() -> None:
                         modality=mod,
                         pack=pack_obj,
                         config=file_cfg,
+                        register=arg_register,
                         keep_terms=keep_terms,
                         allow_added=bool(args.get("allowAdded")),
                         strict=bool(args.get("strict")),
@@ -589,6 +634,28 @@ def run_mcp_stdio() -> None:
                     want_profile = args.get("profile") is not False
                     banks = load_pattern_banks() if include_patterns else None
 
+                    arg_register: str | None = None
+                    if args.get("register") is not None:
+                        if not isinstance(args.get("register"), str):
+                            joined = ", ".join(VALID_REGISTERS)
+                            _tool_result(
+                                req_id,
+                                {"error": f"Invalid register (expected string: auto, {joined})"},
+                                True,
+                            )
+                            continue
+                        raw_reg = args["register"]
+                        norm_reg = raw_reg.strip().lower()
+                        if not norm_reg or (norm_reg != "auto" and norm_reg not in VALID_REGISTERS):
+                            joined = ", ".join(VALID_REGISTERS)
+                            _tool_result(
+                                req_id,
+                                {"error": f"Invalid register '{raw_reg}' (expected auto, {joined})"},
+                                True,
+                            )
+                            continue
+                        arg_register = norm_reg
+
                     if has_text:
                         fn = args.get("filename") or "draft.md"
                         mod = detect_modality(fn) or "markdown"
@@ -596,11 +663,19 @@ def run_mcp_stdio() -> None:
                         pack, eff_pack, pack_source = _resolve_text_pack_and_source(
                             args["text"], fn, mod, args.get("pack"), file_cfg, packs
                         )
-                        res = audit_text(args["text"], filename=fn, modality=mod, pack=pack, config=file_cfg)
+                        reg_info = resolve_register(args["text"], filename=fn, flag_register=arg_register, config=file_cfg)
+                        res = audit_text(args["text"], filename=fn, modality=mod, pack=pack, config=file_cfg, register=arg_register)
                         findings = list(res["findings"])
                         if include_patterns:
                             pat_res = audit_patterns(args["text"], filename=fn, modality=mod, banks=banks, config=file_cfg)
-                            findings = _merge_pattern_bank_findings(findings, pat_res["findings"])
+                            findings = _merge_pattern_bank_findings(
+                                findings,
+                                pat_res["findings"],
+                                packs=packs,
+                                pack=pack,
+                                register=reg_info["register"],
+                                config=file_cfg,
+                            )
                         needs_coverage_profile = len(args["text"]) >= 2000 or mod == "html"
                         profile = (
                             analyze_text_profile(args["text"], modality=mod, config=file_cfg)
@@ -613,7 +688,14 @@ def run_mcp_stdio() -> None:
                                 if mod in {"html", "svg"}
                                 else args["text"]
                             )
-                            _, ml_extras = _build_pocket_ml_findings(ml_src, fn, findings, profile=profile, modality=mod)
+                            _, ml_extras = _build_pocket_ml_findings(
+                                ml_src,
+                                fn,
+                                findings,
+                                profile=profile,
+                                modality=mod,
+                                register=reg_info["register"],
+                            )
                             findings.extend(ml_extras)
                         formatted = _format_findings_for_mcp(findings, verbosity, args.get("lang"))
                         payload: dict[str, Any] = {
@@ -621,6 +703,7 @@ def run_mcp_stdio() -> None:
                             "packSource": pack_source,
                             "rulesetHash": compute_ruleset_hash(pack),
                             "modality": mod,
+                            "context": {"register": reg_info["register"], "registerSource": reg_info["registerSource"]},
                             "checked": True,
                             "skipped": [],
                             "coverageWarnings": _collect_text_coverage_warnings(args["text"], mod, fn, profile),
@@ -659,6 +742,7 @@ def run_mcp_stdio() -> None:
                         include_patterns=include_patterns,
                         include_profile=want_profile,
                         banks=banks,
+                        register=arg_register,
                     )
                     profile = res["profileItem"]["profile"] if res.get("profileItem") else None
                     formatted = _format_findings_for_mcp(res["findings"], verbosity, args.get("lang"))
@@ -667,6 +751,7 @@ def run_mcp_stdio() -> None:
                         "packSource": res.get("packSource"),
                         "rulesetHash": res.get("rulesetHash"),
                         "modality": mod,
+                        "context": {"register": res.get("register") or "unspecified", "registerSource": res.get("registerSource") or "default"},
                         "checked": res["checked"],
                         "skipped": res["skipped"],
                         "coverageWarnings": res.get("coverageWarnings") or [],

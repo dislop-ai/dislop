@@ -86,7 +86,9 @@
       "patterns": [
         "(?:^|\\n)\\s*(?:Certainly|Sure|Absolutely|Of course|Happy to help|Glad to help)[!,.]?\\s+(?:[Hh]ere(?:'s| is| are)|[Bb]elow is)\\b",
         "(?:^|\\n)\\s*Here\\s+(?:is|are)\\s+the\\s+(?:revised|updated|polished)\\s+",
-        "\\bAs an AI(?: language model| assistant)?\\b",
+        "(?:^|\\n|[.!?]\\s+)\\s*As an AI(?:\\s+(?:language model|assistant))?(?:\\s*,|\\s+(?:I|we|my|here)\\b|\\s*$)",
+        "\\bAs an AI (?:language model|assistant)\\b",
+        "\\bAs an AI\\s*,\\s*(?:I|we|my)\\b",
         "\\bI hope this helps[!.]?",
         "\\bFeel free to (?:reach out|let me know|ask) if you (?:need|have) (?:anything|any (?:other |further )?questions)[!.]?",
         "(?:^|\\n)\\s*(?:好的|当然可以|没问题)[，,！!]?\\s*(?:以下|下面)是",
@@ -134,7 +136,8 @@
           "Q2 churn dropped from 4.1% to 3.4%.",
           "会议纪要：周三上线。",
           "以下是本周进展：接口延迟降到 120ms。",
-          "The daemon monitors queue depth every 5 seconds."
+          "The daemon monitors queue depth every 5 seconds.",
+          "The reviewer flagged the subtitle as an AI microcopy tic in the prototype."
         ]
       }
     },

@@ -16,7 +16,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-import { auditText, extractProtectedFacts, verifyRevision } from "./core.mjs";
+import { auditText, extractProtectedFacts, getScenarioStrategy, verifyRevision } from "./core.mjs";
 import { loadPocketModelBundle, scorePocketSpan } from "./pocket-model.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -730,8 +730,16 @@ export function verifyFactsWithUnits(beforeText, afterText, { modality = "markdo
   };
 }
 
-function buildParagraphDeslopPrompt(paragraph, findings, pocketScore, protectedFacts, repairFeedback = null) {
+function buildParagraphDeslopPrompt(
+  paragraph,
+  findings,
+  pocketScore,
+  protectedFacts,
+  repairFeedback = null,
+  { packId = "business-brief", register = "unspecified" } = {}
+) {
   const isZh = /[\u4e00-\u9fff]/.test(paragraph);
+  const strategy = getScenarioStrategy({ packId, register });
   const lockedTokens = protectedFacts.map((f) => f.raw);
   const ruleNotes = findings.map((f) => `- ${f.ruleId}: ${(isZh ? f.message?.zh : f.message?.en) || f.ruleId}`);
   const mlNotes = (pocketScore.topDrivers || []).map(
@@ -740,9 +748,14 @@ function buildParagraphDeslopPrompt(paragraph, findings, pocketScore, protectedF
   const diag = [...ruleNotes, ...mlNotes].slice(0, 5).join("\n");
 
   if (isZh) {
-    const sys =
-      "你是朴实、直接的技术与商业文字编辑。只输出改写后的纯正文段落，不加解释、不加引号、不加开头寒暄，严禁编造原句没有的数字，严禁篡改单位，严禁写成『不是……而是……』或三段分号排比。";
-    let usr = `请去掉下面段落里的空洞套话和模板腔，保留全部事实含义：\n\n【原段】\n${paragraph}\n`;
+    const sys = [
+      `你是贴合当前写作场景（${strategy.label.zh}）的审改编辑。`,
+      `重点清除：${strategy.cut.zh}`,
+      `必须保留：${strategy.protect.zh}`,
+      `严禁改偏：${strategy.avoid.zh}`,
+      "只输出改写后的纯正文段落，不加解释、不加引号、不加开头寒暄，严禁编造原句没有的数字，严禁篡改单位，严禁写成『不是……而是……』或三段分号排比。",
+    ].join("\n");
+    let usr = `请按「${strategy.label.zh}」场景要求改净下面段落，保留全部事实含义：\n\n【原段】\n${paragraph}\n`;
     if (diag) usr += `\n【检测到的问题】\n${diag}\n`;
     if (lockedTokens.length > 0) {
       usr += `\n【必须原样保留的数字、单位、限定词、代码与链接】\n${lockedTokens.join(" 、 ")}\n`;
@@ -753,9 +766,14 @@ function buildParagraphDeslopPrompt(paragraph, findings, pocketScore, protectedF
     return { systemPrompt: sys, userPrompt: usr };
   }
 
-  const sys =
-    "You are a plain, direct technical editor. Output ONLY the rewritten paragraph text—no preamble, no quotes, no invented numbers, no altered units, no semicolon tricolons, and no 'Not X, but Y' slogans.";
-  let usr = `Cut filler and corporate padding from this paragraph while preserving every fact:\n\n[Original]\n${paragraph}\n`;
+  const sys = [
+    `You are an editor tuned for ${strategy.label.en} (${strategy.id}).`,
+    `Cut: ${strategy.cut.en}`,
+    `Protect: ${strategy.protect.en}`,
+    `Avoid: ${strategy.avoid.en}`,
+    "Output ONLY the rewritten paragraph text—no preamble, no quotes, no invented numbers, no altered units, no semicolon tricolons, and no 'Not X, but Y' slogans.",
+  ].join("\n");
+  let usr = `Clean AI slop from this ${strategy.label.en} paragraph while preserving every fact:\n\n[Original]\n${paragraph}\n`;
   if (diag) usr += `\n[Detected issues]\n${diag}\n`;
   if (lockedTokens.length > 0) {
     usr += `\n[Must preserve verbatim (numbers, units, qualifiers, inline code, URLs)]\n${lockedTokens.join(" | ")}\n`;
@@ -813,6 +831,7 @@ export async function runLocalDeslop({
   text,
   pack,
   modality = "markdown",
+  register = null,
   endpoint = null,
   runnerKind = null,
   model = null,
@@ -870,7 +889,7 @@ export async function runLocalDeslop({
       continue;
     }
 
-    const beforeAudit = auditText(seg, { filename: "draft.md", modality, pack });
+    const beforeAudit = auditText(seg, { filename: "draft.md", modality, pack, register });
     const beforePocket = scorePocketSpan(seg);
     const needsRewrite = beforeAudit.findings.length > 0 || (beforePocket.eligible && beforePocket.slopProbability >= 0.65);
 
@@ -890,7 +909,8 @@ export async function runLocalDeslop({
         beforeAudit.findings,
         beforePocket,
         protectedFacts,
-        repairFeedback
+        repairFeedback,
+        { packId: pack?.id || "business-brief", register: register || "unspecified" }
       );
       const candidate = await callLocalChatCompletion({
         endpoint: resolvedEndpoint,
@@ -907,7 +927,7 @@ export async function runLocalDeslop({
       }
 
       const factCheck = verifyFactsWithUnits(seg, candidate, { modality });
-      const afterAudit = auditText(candidate, { filename: "draft.md", modality, pack });
+      const afterAudit = auditText(candidate, { filename: "draft.md", modality, pack, register });
       const hardErrorsAfter = afterAudit.findings.filter((f) => f.severity === "error" || f.severity === "warning");
       const hardErrorsBefore = beforeAudit.findings.filter((f) => f.severity === "error" || f.severity === "warning");
 

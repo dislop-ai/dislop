@@ -5,6 +5,7 @@ from __future__ import annotations
 import bisect
 import colorsys
 import fnmatch
+import functools
 import json
 import math
 import os
@@ -25,6 +26,339 @@ SEVERITY_RANK = {
     "error": 3,
     "never": 99,
 }
+
+VALID_REGISTERS: tuple[str, ...] = (
+    "unspecified",
+    "official",
+    "casual",
+    "argumentative",
+    "technical",
+    "marketing",
+    "narrative",
+)
+_VALID_REGISTER_SET = set(VALID_REGISTERS)
+
+
+def _expand_braces(pattern: str) -> list[str]:
+    m = re.search(r"\{([^{}]+)\}", str(pattern or ""))
+    if not m:
+        return [str(pattern or "")]
+    prefix = str(pattern or "")[: m.start()]
+    suffix = str(pattern or "")[m.end() :]
+    out: list[str] = []
+    for part in m.group(1).split(","):
+        out.extend(_expand_braces(prefix + part.strip() + suffix))
+    return out
+
+
+def _glob_to_regex(glob: str) -> re.Pattern[str]:
+    norm = str(glob or "").replace("\\", "/").lstrip("./")
+    rx = "^"
+    i = 0
+    while i < len(norm):
+        ch = norm[i]
+        if ch == "*" and i + 1 < len(norm) and norm[i + 1] == "*":
+            if i + 2 < len(norm) and norm[i + 2] == "/":
+                rx += "(?:.+/)?"
+                i += 2
+            else:
+                rx += ".*"
+                i += 1
+        elif ch == "*":
+            rx += "[^/]*"
+        elif ch == "?":
+            rx += "[^/]"
+        elif ch in "+.^$|()[]{}":
+            rx += "\\" + ch
+        else:
+            rx += ch
+        i += 1
+    rx += "$"
+    return re.compile(rx)
+
+
+def matches_any_glob(rel_posix: str, globs: list[str] | None = None) -> bool:
+    clean = str(rel_posix or "").replace("\\", "/").lstrip("./")
+    for raw_g in globs or []:
+        for expanded in _expand_braces(raw_g):
+            if _glob_to_regex(expanded).match(clean):
+                return True
+    return False
+
+
+def validate_config(config: Any) -> Any:
+    if config is None:
+        return config
+    if not isinstance(config, dict):
+        raise ValueError("Invalid config: expected JSON object")
+    if config.get("failOn") is not None:
+        fail_on = config.get("failOn")
+        if not isinstance(fail_on, str) or fail_on not in SEVERITY_RANK:
+            raise ValueError("Invalid config 'failOn': expected error, warning, info, or never")
+    if config.get("register") is not None:
+        reg = config.get("register")
+        if not isinstance(reg, str):
+            raise ValueError("Invalid config 'register': expected string")
+        norm = reg.strip().lower()
+        if norm != "" and norm not in _VALID_REGISTER_SET:
+            joined = ", ".join(VALID_REGISTERS)
+            raise ValueError(f"Invalid config register '{reg}' (expected {joined})")
+    if config.get("overrides") is not None:
+        overrides = config.get("overrides")
+        if not isinstance(overrides, list):
+            raise ValueError("Invalid config 'overrides': expected array")
+        for ov in overrides:
+            if not isinstance(ov, dict):
+                raise ValueError("Invalid config 'overrides' item: expected object")
+            if ov.get("register") is not None:
+                ov_reg = ov.get("register")
+                if not isinstance(ov_reg, str):
+                    raise ValueError("Invalid config override 'register': expected string")
+                ov_norm = ov_reg.strip().lower()
+                if ov_norm != "" and ov_norm not in _VALID_REGISTER_SET:
+                    joined = ", ".join(VALID_REGISTERS)
+                    raise ValueError(f"Invalid config override register '{ov_reg}' (expected {joined})")
+    return config
+
+
+def parse_front_matter_register(text: str) -> str | None:
+    if not isinstance(text, str) or not text:
+        return None
+    stripped = text[1:] if text.startswith("\ufeff") else text
+    fm = re.match(r"^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?=\r?\n|$)", stripped)
+    if not fm:
+        return None
+    generic_reg: str | None = None
+    for raw_line in re.split(r"\r?\n", fm.group(1)):
+        m = re.match(r"^(dislop_register|register):[ \t]*(.*?)[ \t]*(?:#.*)?$", raw_line)
+        if not m:
+            continue
+        key = m.group(1).lower()
+        raw_val = (m.group(2) or "").strip()
+        if len(raw_val) >= 2 and (
+            (raw_val.startswith('"') and raw_val.endswith('"'))
+            or (raw_val.startswith("'") and raw_val.endswith("'"))
+        ):
+            raw_val = raw_val[1:-1].strip()
+        val = raw_val.lower()
+        if key == "dislop_register":
+            if not val or val not in _VALID_REGISTER_SET:
+                joined = ", ".join(VALID_REGISTERS)
+                raise ValueError(f"Invalid dislop_register '{raw_val}' in frontmatter (expected {joined})")
+            return val
+        if generic_reg is None and val in _VALID_REGISTER_SET:
+            generic_reg = val
+    return generic_reg
+
+
+def resolve_register(
+    text: str = "",
+    *,
+    filename: str = "<memory>",
+    flag_register: str | None = None,
+    config: dict[str, Any] | None = None,
+) -> dict[str, str]:
+    cfg = config or {}
+    validate_config(cfg)
+    joined = ", ".join(VALID_REGISTERS)
+    if flag_register is not None:
+        if not isinstance(flag_register, str):
+            raise ValueError(f"Invalid --register (expected string: auto, {joined})")
+        if flag_register.strip() != "":
+            norm = flag_register.strip().lower()
+            if norm != "auto":
+                if norm not in _VALID_REGISTER_SET:
+                    raise ValueError(f"Invalid --register '{flag_register}' (expected auto, {joined})")
+                return {"register": norm, "registerSource": "flag"}
+
+    mod = detect_modality(filename)
+    if mod is None or mod in {"markdown", "text"}:
+        fm_reg = parse_front_matter_register(text)
+        if fm_reg:
+            return {"register": fm_reg, "registerSource": "frontmatter"}
+
+    rel = str(filename or "").replace("\\", "/").lstrip("./")
+    for ov in cfg.get("overrides") or []:
+        if not isinstance(ov, dict) or not ov.get("register"):
+            continue
+        ov_reg = str(ov["register"]).strip().lower()
+        if not ov_reg:
+            continue
+        raw_files = ov.get("files")
+        patterns = raw_files if isinstance(raw_files, list) else ([raw_files] if raw_files else [])
+        if patterns and matches_any_glob(rel, patterns):
+            return {"register": ov_reg, "registerSource": "config"}
+
+    cfg_reg = cfg.get("register")
+    if isinstance(cfg_reg, str) and cfg_reg.strip() != "":
+        return {"register": cfg_reg.strip().lower(), "registerSource": "config"}
+
+    return {"register": "unspecified", "registerSource": "default"}
+
+
+def apply_register_override(
+    rule: dict[str, Any],
+    register: str = "unspecified",
+    config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if not register or register == "unspecified" or rule.get("tier") == "invariant":
+        return {"skip": False, "rule": rule, "registerAdjusted": False}
+    user_override = (config or {}).get("rules", {}).get(rule["id"]) if isinstance((config or {}).get("rules"), dict) else None
+    if isinstance(user_override, str) and user_override in SEVERITY_RANK:
+        return {"skip": False, "rule": rule, "registerAdjusted": False}
+    ov = (rule.get("registerOverrides") or {}).get(register)
+    if not ov:
+        return {"skip": False, "rule": rule, "registerAdjusted": False}
+    if ov.get("action") == "skip":
+        return {"skip": True, "rule": None, "registerAdjusted": True}
+    eff = {**rule}
+    if ov.get("severity") and ov["severity"] in SEVERITY_RANK:
+        eff["severity"] = ov["severity"]
+    if ov.get("message"):
+        eff["message"] = ov["message"]
+    if ov.get("deletionTest"):
+        eff["deletionTest"] = ov["deletionTest"]
+    if ov.get("revisionKind"):
+        eff["revisionKind"] = ov["revisionKind"]
+    if ov.get("revisionScope"):
+        eff["revisionScope"] = ov["revisionScope"]
+    if ov.get("revisionAvoid"):
+        eff["revisionAvoid"] = ov["revisionAvoid"]
+    return {"skip": False, "rule": eff, "registerAdjusted": True}
+
+
+SCENARIO_STRATEGIES: dict[str, dict[str, Any]] = {
+    "technical": {
+        "id": "technical",
+        "label": {"en": "Engineering Spec & RFC", "zh": "研发文档与复盘"},
+        "cut": {
+            "en": "Remove marketing hype, code-diff parroting, hollow 'not human error' excuses, and ownerless action items.",
+            "zh": "删掉营销形容词、纯复述 Diff 的句子、“并非单纯人为失误”套话和无责任人的待办项。",
+        },
+        "protect": {
+            "en": "Keep uniform constraint lists, semicolon preconditions, CLI/code identifiers, exact thresholds, and parameter tables intact.",
+            "zh": "保留等长的约束条款、分号并列前置条件、代码/命令标识、阈值数字与参数表，不强求文学长短句起伏。",
+        },
+        "avoid": {
+            "en": "Do not alter code identifiers, weaken numeric bounds, or add casual chatter.",
+            "zh": "绝不改写代码标识、放宽数值边界，也不要为了所谓人味掺入随口聊天腔。",
+        },
+    },
+    "official": {
+        "id": "official",
+        "label": {"en": "Official & Regulated Notice", "zh": "公文、合规与正式通告"},
+        "cut": {
+            "en": "Strip unsubstantiated superlatives, unanchored multipliers, AI chat greetings, and empty slogans lacking a referent.",
+            "zh": "删掉无证据绝对化承诺、悬空倍数、AI 寒暄壳，以及没有具体指代的空洞口号。",
+        },
+        "protect": {
+            "en": "Preserve formal institutional phrasing, numbered clauses, legal disclaimers, and scope qualifiers ('only if', 'unless').",
+            "zh": "保留规范书面措辞、条款编号、责任边界、法律免责与限定条件（如“仅限”“除非”）。",
+        },
+        "avoid": {
+            "en": "Do not rewrite formal clauses into casual slang or invent unverified compliance guarantees.",
+            "zh": "不要把正式条款改成轻浮口语，也绝不补写未核实的合规承诺。",
+        },
+    },
+    "argumentative": {
+        "id": "argumentative",
+        "label": {"en": "Business Brief & Essay-Argument", "zh": "工作简报与观点长文"},
+        "cut": {
+            "en": "Cut macro-trend openers, buzzword clusters, 3-part balanced semicolon pitches, 'Not X, but Y' slogans, and unsourced claims.",
+            "zh": "切掉宏观趋势开场、热词共现、三段对称分号推销句、“不是 A 而是 B”金句和无出处背书。",
+        },
+        "protect": {
+            "en": "Keep upfront conclusions, concrete metrics, genuine trade-off contrasts, and named internal data sources.",
+            "zh": "保留前置结论与关键数字、带真实动作的取舍对比，以及具名后台/实测数据来源。",
+        },
+        "avoid": {
+            "en": "Do not trade one slogan for another aphorism or add macro sign-offs ('Looking ahead').",
+            "zh": "不要把一种套话换成另一句金句，更别在结尾补写“展望未来”式拔高。",
+        },
+    },
+    "narrative": {
+        "id": "narrative",
+        "label": {"en": "Literary Essay & Column", "zh": "随笔、专栏与叙事非虚构"},
+        "cut": {
+            "en": "Strip moralizing endings, stock AI metaphors, stiff translationese, mechanical Q&A transitions, and halfwidth CJK punctuation.",
+            "zh": "删掉结尾强行升华、陈旧 AI 意象、生硬欧化翻译腔、机械设问过渡与中文里的半角标点。",
+        },
+        "protect": {
+            "en": "Preserve sensory details, dialogue, author rhythm contrast, deliberate short dramatic beats, and natural flowing sentences.",
+            "zh": "保留现场细节、人物原话、个人节奏起伏、有意的短句停顿和通顺的流水长句。",
+        },
+        "avoid": {
+            "en": "Do not flatten personal prose into technical bullet points or invent scenes missing from the notes.",
+            "zh": "不要把个人叙述改呆板成工程条目，也绝不外编素材里没有的细节。",
+        },
+    },
+    "casual": {
+        "id": "casual",
+        "label": {"en": "Conversational & Personal Post", "zh": "口语帖、闲置转卖与社区分享"},
+        "cut": {
+            "en": "Remove scripted influencer clichés, customer-service filler wrappers, chatbot openings, and injected corporate jargon.",
+            "zh": "去掉网红脚本腔、刻意客服套话、AI 开场白和硬塞进去的企业黑话。",
+        },
+        "protect": {
+            "en": "Preserve first-person spoken phrasing, conversational cadence, and recurring shop or shipping policy lines verbatim.",
+            "zh": "保留第一人称口语词、日常停顿节奏，以及固定交易/发货规则短句。",
+        },
+        "avoid": {
+            "en": "Do not inflate spoken wording into stiff bookish prose or cycle synonyms on recurring policy lines.",
+            "zh": "绝不为了规避重复把口语改成生硬书面腔（如把“自己收的”改成“仅出/略有/旨在”），也无需同义词轮换。",
+        },
+    },
+    "marketing": {
+        "id": "marketing",
+        "label": {"en": "Product & Launch Copy", "zh": "产品介绍与发布文案"},
+        "cut": {
+            "en": "Remove generic AI SaaS hype ('unleash', 'supercharge', 'new era'), empty triads, and unverified speed/quality claims.",
+            "zh": "删掉千篇一律的 AI 营销大词（赋能/颠覆/新纪元）、空洞三段排比和无基准夸大宣称。",
+        },
+        "protect": {
+            "en": "Keep concrete product mechanisms, intentional punchy benefit lines, and verified user counts or benchmarks.",
+            "zh": "保留具体产品机制、有实质信息的短促利益点，以及实测或真实用户数字。",
+        },
+        "avoid": {
+            "en": "Do not invent customer metrics or pad short benefits into abstract manifesto paragraphs.",
+            "zh": "不编造用户数据，不把短促清楚的功能点抻成长段虚词。",
+        },
+    },
+    "deck-ui": {
+        "id": "deck-ui",
+        "label": {"en": "Slides, PDF & Web UI", "zh": "PPT、海报与网页界面"},
+        "cut": {
+            "en": "Cut vague topic slide titles, >120-word slide walls, dead '#' links, purple-pink gradients, pill soup, and nested boxes.",
+            "zh": "去掉空泛主题式标题、整屏文字墙、空 '#' 链接、紫粉霓虹渐变、胶囊标签墙和多层套盒。",
+        },
+        "protect": {
+            "en": "Keep action-takeaway titles, concise UI slot copy, real interactive routes, and single-screen hierarchy.",
+            "zh": "保留直接说结论的标题、简短清晰的界面词条、真实跳转路径与单屏层级结构。",
+        },
+        "avoid": {
+            "en": "Never expand microcopy past its container slot or add decorative 'AI-Powered' badges.",
+            "zh": "界面短文案改写长度不得超过原位置容量，不加装饰性 AI 标签。",
+        },
+    },
+}
+
+_PACK_DEFAULT_STRATEGY: dict[str, str] = {
+    "engineering-spec": "technical",
+    "regulated-comms": "official",
+    "literary-essay": "narrative",
+    "deck-and-ui": "deck-ui",
+    "executive-deck": "deck-ui",
+    "business-brief": "argumentative",
+    "core": "argumentative",
+}
+
+
+def get_scenario_strategy(*, pack_id: str = "business-brief", register: str = "unspecified") -> dict[str, Any]:
+    reg_norm = str(register or "").strip().lower()
+    if reg_norm and reg_norm not in {"unspecified", "auto"} and reg_norm in SCENARIO_STRATEGIES:
+        return SCENARIO_STRATEGIES[reg_norm]
+    key = _PACK_DEFAULT_STRATEGY.get(pack_id, "argumentative")
+    return SCENARIO_STRATEGIES.get(key, SCENARIO_STRATEGIES["argumentative"])
 
 EXT_TO_MODALITY = {
     ".md": "markdown",
@@ -135,33 +469,49 @@ def _merge_config_layers(base: dict[str, Any], layer: dict[str, Any]) -> dict[st
     return merged
 
 
+def _read_config_json(path: Path) -> dict[str, Any] | None:
+    try:
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid JSON in config {path}: {exc.msg}") from exc
+    if not isinstance(loaded, dict):
+        raise ValueError(f"Invalid config in {path}: expected JSON object")
+    return loaded
+
+
 def load_config(cwd: Path | None = None, explicit_path: str | None = None) -> dict[str, Any]:
     root = cwd or Path.cwd()
     base: dict[str, Any] = {}
     if not _should_skip_user_config(root, explicit_path):
         user_cfg = get_user_config_dir() / "config.json"
         if user_cfg.is_file():
-            loaded_u = json.loads(user_cfg.read_text(encoding="utf-8"))
-            if isinstance(loaded_u, dict):
+            loaded_u = _read_config_json(user_cfg)
+            if loaded_u is not None:
                 base = _merge_config_layers(base, loaded_u)
 
-    candidates = (
-        [root / explicit_path]
-        if explicit_path
-        else [root / ".dislop.json", root / "dislop.json", root / ".disloprc.json"]
-    )
-    for cand in candidates:
-        if cand.is_file():
-            loaded = json.loads(cand.read_text(encoding="utf-8"))
-            if isinstance(loaded, dict):
-                base = _merge_config_layers(base, loaded)
-            break
+    if explicit_path:
+        cand = Path(explicit_path)
+        if not cand.is_absolute():
+            cand = root / cand
+        if not cand.is_file():
+            raise ValueError(f"Config file not found: {cand}")
+        loaded = _read_config_json(cand)
+        if loaded is not None:
+            base = _merge_config_layers(base, loaded)
+    else:
+        for cand in [root / ".dislop.json", root / "dislop.json", root / ".disloprc.json"]:
+            if cand.is_file():
+                loaded = _read_config_json(cand)
+                if loaded is not None:
+                    base = _merge_config_layers(base, loaded)
+                break
 
     local_path = root / ".dislop.local.json"
     if local_path.is_file():
-        local_cfg = json.loads(local_path.read_text(encoding="utf-8"))
-        if isinstance(local_cfg, dict):
+        local_cfg = _read_config_json(local_path)
+        if local_cfg is not None:
             base = _merge_config_layers(base, local_cfg)
+    validate_config(base)
     return base
 
 
@@ -497,6 +847,28 @@ def enclosing_sentence(text: str, start: int, end: int, break_indices: list[int]
     return re.sub(r"^[\s\ufeff]+|[\s\ufeff]+$", "", text[left:right])[:240]
 
 
+def enclosing_sentence_unclipped(text: str, start: int, end: int) -> str:
+    prev_nl = text.rfind("\n", 0, max(0, start))
+    line_start = 0 if prev_nl == -1 else prev_nl + 1
+    next_nl = text.find("\n", end)
+    line_end = len(text) if next_nl == -1 else next_nl
+    line_text = text[line_start:line_end]
+    code_ranges = [(line_start + cm.start(), line_start + cm.end()) for cm in re.finditer(r"`[^`\n]+`", line_text)]
+
+    def in_backticks(idx: int) -> bool:
+        return any(s <= idx < e for s, e in code_ranges)
+
+    left = start
+    while left > line_start and (in_backticks(left - 1) or not is_sentence_break_at(text, left - 1)):
+        left -= 1
+    right = end
+    while right < line_end and (in_backticks(right) or not is_sentence_break_at(text, right)):
+        right += 1
+    if right < line_end and not in_backticks(right) and text[right] in ".!?。！？":
+        right += 1
+    return re.sub(r"^[\s\ufeff]+|[\s\ufeff]+$", "", text[left:right])
+
+
 def parse_suppressions(text: str) -> tuple[dict[int, list[dict[str, Any]]], list[dict[str, Any]]]:
     lines = _split_lf(text)
     by_target: dict[int, list[dict[str, Any]]] = {}
@@ -767,6 +1139,178 @@ def derive_fix_strategy(rule: dict[str, Any] | None) -> str:
     return "rephrase"
 
 
+_HIGH_CONF_PROBES = {
+    "office-markdown-leak",
+    "ui-dead-control",
+    "slide-word-wall",
+    "slide-bullet-overload",
+    "slide-autofit-shrink",
+    "zh-halfwidth-punctuation",
+}
+_HIGH_CONF_RULES = {"unfilled-placeholder", "chatbot-artifact", "local-custom-forbid"}
+_LOW_CONF_RULES = {"pocket-stealth-vapor", "low-burstiness-vapor"}
+_DELETE_KIND_RULES = {
+    "en-throat-clearing-opener",
+    "zh-bureaucratic-padding",
+    "zh-essay-moralizing-ending",
+    "en-essay-moralizing-ending",
+    "chatbot-artifact",
+}
+_RESTRUCTURE_PROBES = {
+    "staccato-run",
+    "bold-lead-list-wall",
+    "semicolon-tricolon",
+    "rhetorical-qa-cadence",
+    "comma-chain-runon",
+    "narrative-sandwich-frame",
+    "template-skeleton-echo",
+    "low-burstiness-vapor",
+    "slide-word-wall",
+    "slide-bullet-overload",
+    "slide-autofit-shrink",
+    "pptx-layout-monotony",
+    "ui-box-in-box",
+    "ui-pill-soup",
+    "ui-dead-control",
+}
+_DOCUMENT_SCOPE_PROBES = {"template-skeleton-echo", "low-burstiness-vapor", "em-dash-density"}
+_DOCUMENT_SCOPE_RULES = {
+    "pptx-layout-monotony",
+    "low-burstiness-vapor",
+    "template-skeleton-echo",
+    "excessive-em-dash-density",
+}
+_PARAGRAPH_SCOPE_PROBES = {"bold-lead-list-wall", "narrative-sandwich-frame", "staccato-run"}
+_SPAN_SCOPE_RULES = {
+    "unfilled-placeholder",
+    "local-custom-forbid",
+    "zh-halfwidth-punctuation",
+    "en-cliche-lexicon",
+    "reg-unsubstantiated-superlative",
+}
+
+
+def compute_finding_confidence(
+    *,
+    rule_id: str,
+    tier: str = "taste",
+    severity: str = "warning",
+    probe: str = "",
+    register_adjusted: bool = False,
+) -> str:
+    if tier == "invariant" or probe in _HIGH_CONF_PROBES or rule_id in _HIGH_CONF_RULES:
+        return "high"
+    if severity == "info" or rule_id in _LOW_CONF_RULES or register_adjusted:
+        return "low"
+    return "medium"
+
+
+def build_finding_revision(
+    *,
+    rule_id: str = "",
+    tier: str = "taste",
+    family: str = "",
+    probe: str = "",
+    modality: str = "markdown",
+    message: dict[str, Any] | None = None,
+    deletion_test: dict[str, Any] | None = None,
+    sentence: str = "",
+    revision_kind: str | None = None,
+    revision_scope: str | None = None,
+    revision_avoid: dict[str, Any] | None = None,
+    fix_strategy: str | None = None,
+) -> dict[str, Any]:
+    kind = revision_kind or "rewrite"
+    if not revision_kind:
+        if rule_id in _DELETE_KIND_RULES:
+            kind = "delete"
+        elif (
+            probe in _RESTRUCTURE_PROBES
+            or rule_id == "pocket-stealth-vapor"
+            or str(family).startswith(("layout/", "ui/", "statistics/"))
+        ):
+            kind = "restructure"
+
+    scope = revision_scope or "sentence"
+    if not revision_scope:
+        if probe in _DOCUMENT_SCOPE_PROBES or rule_id in _DOCUMENT_SCOPE_RULES:
+            scope = "document"
+        elif modality in {"html", "jsx", "css", "svg", "pptx", "docx"} and (
+            str(probe).startswith(("ui-", "slide-"))
+            or probe in {"office-markdown-leak", "pptx-layout-monotony"}
+            or rule_id in {"ui-prompt-echo-badge", "markdown-leak"}
+        ):
+            scope = "element"
+        elif rule_id == "pocket-stealth-vapor" or probe in _PARAGRAPH_SCOPE_PROBES:
+            scope = "paragraph"
+        elif rule_id in _SPAN_SCOPE_RULES:
+            scope = "span"
+
+    eff_strategy = fix_strategy or derive_fix_strategy({"id": rule_id, "family": family})
+    repair_tier = "guarded-fix"
+    if eff_strategy == "need-source" or kind == "ask" or probe in _DOCUMENT_SCOPE_PROBES or rule_id in _DOCUMENT_SCOPE_RULES:
+        repair_tier = "diagnostic-only"
+    elif tier == "invariant" and (eff_strategy == "delete" or rule_id == "markdown-leak"):
+        repair_tier = "safe-fix"
+    do_not_auto_edit = repair_tier == "diagnostic-only"
+
+    instr_src = deletion_test or message or {}
+    msg = message or {}
+    instruction = {
+        "en": str(instr_src.get("en") or msg.get("en") or ""),
+        "zh": str(instr_src.get("zh") or msg.get("zh") or instr_src.get("en") or msg.get("en") or ""),
+    }
+
+    keep: list[str] = []
+    if sentence and modality != "css":
+        seen: set[str] = set()
+        for fact in extract_protected_facts(sentence, modality=modality, keep_mode=True):
+            r = str(fact.get("raw") or "").strip()
+            if not r or r in seen:
+                continue
+            seen.add(r)
+            keep.append(r)
+            if len(keep) >= 20:
+                break
+
+    if revision_avoid and (revision_avoid.get("en") or revision_avoid.get("zh")):
+        avoid = {
+            "en": str(revision_avoid.get("en") or revision_avoid.get("zh") or ""),
+            "zh": str(revision_avoid.get("zh") or revision_avoid.get("en") or ""),
+        }
+    elif probe == "negation-pivot" or "negation-pivot" in str(rule_id):
+        avoid = {
+            "en": "Do not trade one 'Not X, but Y' slogan for a shorter aphorism or staccato tagline.",
+            "zh": "不要把“不是 A，而是 B”的套话置换成另一句短金句或断句口号。",
+        }
+    elif kind == "delete":
+        avoid = {
+            "en": "Do not rephrase the filler wrapper; delete it while keeping every concrete number, date, and name in the sentence.",
+            "zh": "不要把废话外壳换个说法留着，直接删掉并完整保留句中的数字、时间和实体名。",
+        }
+    elif kind == "restructure":
+        avoid = {
+            "en": "Do not compress away concrete facts or invent new numbers while fixing cadence or layout.",
+            "zh": "调整结构与节奏时不要删掉具体事实，也不要凭空编造原文没有的数字。",
+        }
+    else:
+        avoid = {
+            "en": "Do not invent unstated numbers, alter inequality bounds, or swap in another cliche phrase.",
+            "zh": "改写时不要编造未给出的指标、更改数值边界，或换成另一种高频套话。",
+        }
+
+    return {
+        "kind": kind,
+        "scope": scope,
+        "repairTier": repair_tier,
+        "doNotAutoEdit": do_not_auto_edit,
+        "instruction": instruction,
+        "keep": keep,
+        "mustPreserve": keep,
+        "avoid": avoid,
+    }
+
+
 def make_finding(
     *,
     rule: dict[str, Any],
@@ -778,17 +1322,46 @@ def make_finding(
     span: dict[str, int] | None = None,
     match: str,
     sentence: str = "",
+    keep_sentence: str | None = None,
+    register_adjusted: bool = False,
 ) -> dict[str, Any]:
     norm_match = re.sub(r"^[\s\ufeff]+|[\s\ufeff]+$", "", match.lower())
     norm_sent = re.sub(r"[\s\ufeff]+", " ", (sentence or norm_match).lower()).strip()
     fp = rule['id'] + ':' + fnv1a_hex(f"{rule['id']}|{norm_match}|{norm_sent}")
+    tier = rule.get("tier", "taste")
+    severity = rule.get("severity", "warning")
+    family = rule.get("family", "general")
+    probe = rule.get("probe", "")
+    fix_strategy = derive_fix_strategy(rule)
+    confidence = compute_finding_confidence(
+        rule_id=rule["id"],
+        tier=tier,
+        severity=severity,
+        probe=probe,
+        register_adjusted=register_adjusted,
+    )
+    revision = build_finding_revision(
+        rule_id=rule["id"],
+        tier=tier,
+        family=family,
+        probe=probe,
+        modality=modality,
+        message=rule["message"],
+        deletion_test=rule.get("deletionTest"),
+        sentence=keep_sentence if keep_sentence is not None else sentence,
+        revision_kind=rule.get("revisionKind"),
+        revision_scope=rule.get("revisionScope"),
+        revision_avoid=rule.get("revisionAvoid"),
+        fix_strategy=fix_strategy,
+    )
     return {
         "fingerprint": fp,
         "ruleId": rule["id"],
-        "tier": rule.get("tier", "taste"),
-        "severity": rule.get("severity", "warning"),
-        "fixStrategy": derive_fix_strategy(rule),
-        "family": rule.get("family", "general"),
+        "tier": tier,
+        "severity": severity,
+        "confidence": confidence,
+        "fixStrategy": fix_strategy,
+        "family": family,
         "file": filename,
         "modality": modality,
         "location": location,
@@ -798,6 +1371,7 @@ def make_finding(
         "match": match,
         "message": rule["message"],
         "deletionTest": rule.get("deletionTest"),
+        "revision": revision,
         "exemplar": rule.get("exemplar"),
     }
 
@@ -968,7 +1542,16 @@ def _probe_unsourced_attribution(prose_text: str, raw_text: str) -> list[dict[st
             or re.search(r"《[^》\n]{2,30}》", win)
             or re.search(r"(?:见|参见|详见)\s*\[", win)
         )
-        if not has_source:
+        has_internal_ref = bool(
+            re.search(r"^(?:研究|数据)", m.group(0))
+            and re.search(
+                r"(?:后台|明细|监控|日志|统计|系统|看板|报表|实测|压测|采样|实验|账单|订单|运营|客服|审计|财务|清单|台账|埋点|数据库|线上|本地|本次|本季度|本期|近\d+[天周月年]|Q[1-4]|20\d{2})\S{0,8}(?:研究|数据)$",
+                prose_text[max(0, m.start() - 28) : m.start() + 2],
+                re.I,
+            )
+            and re.search(r"\d", prose_text[m.start() : min(len(prose_text), m.start() + 80)])
+        )
+        if not has_source and not has_internal_ref:
             hits.append({"index": m.start(), "length": m.end() - m.start()})
     return hits
 
@@ -1355,6 +1938,8 @@ def _probe_semicolon_tricolon(prose_text: str, raw_text: str) -> list[dict[str, 
             variance = sum((x - mean) ** 2 for x in lens) / len(lens)
             cv = math.sqrt(variance) / mean if mean > 0 else 1.0
             iso = _has_isomorphic_clause_head(clauses)
+            if not iso and re.search(r"(?:依赖|共用|失联|期间|否则|除非|仅在|禁止|不新写|不写入|不触发|幂等|持久化)", s["text"]):
+                continue
             if cv < 0.28 or (cv < 0.40 and iso):
                 hits.append({"index": s["start"], "length": min(140, len(s["text"]))})
     return hits
@@ -2575,7 +3160,7 @@ def _is_meta_mention_hit(
 
     has_meta_cue = bool(
         re.search(
-            r"(?:禁用|禁词|忌用|黑词|黑话|套话|套词|违禁|回避|勿用|避免(?:使用)?|替换为|改为|改成|改写|反例|原句|例句|示例|forbidden|banned|avoid|do\s+not\s+use|replace\s+with|instead\s+of|anti-pattern|clich[eé]|slop|buzzwords?|jargon|filler)",
+            r"(?:禁用|禁词|忌用|黑词|黑话|套话|套词|违禁|回避|勿用|避免(?:使用)?|最好别用|少用|慎用|别用|这类词|等词|字眼|话术|替换为|改为|改成|改写|反例|原句|例句|示例|forbidden|banned|avoid|do\s+not\s+use|replace\s+with|instead\s+of|anti-pattern|clich[eé]|slop|buzzwords?|jargon|filler|phrases\s+like|words\s+like)",
             clause,
             re.I | re.ASCII,
         )
@@ -2617,6 +3202,11 @@ def _clean_match_excerpt(matched_raw: str, modality: str, primary_zone_name: str
     return out[:140]
 
 
+@functools.lru_cache(maxsize=256)
+def _compile_rule_regex(pattern: str) -> re.Pattern[str]:
+    return re.compile(pattern, re.I | re.M)
+
+
 def audit_text(
     text: str,
     *,
@@ -2624,6 +3214,7 @@ def audit_text(
     modality: str | None = None,
     pack: dict[str, Any],
     config: dict[str, Any] | None = None,
+    register: str | None = None,
     allow_synthetic_fixtures: bool = False,
 ) -> dict[str, Any]:
     cfg = config or {}
@@ -2634,6 +3225,7 @@ def audit_text(
     allow_list = [str(a).lower() for a in (cfg.get("allow") or [])]
     text_breaks = _build_sentence_break_indices(text)
     prose_breaks = _build_sentence_break_indices(zones["prose"]) if zones.get("prose") else text_breaks
+    reg_info = resolve_register(text, filename=filename, flag_register=register, config=cfg)
     allow_html_rules_in_mixed_md = mod == "markdown" and has_embedded_ui_markup(text)
     md_ui_zone = (
         re.sub(r"`[^`\n]+`", lambda m: " " * len(m.group(0)), _mask_markdown_fences(text, set()))
@@ -2643,12 +3235,21 @@ def audit_text(
     findings: list[dict[str, Any]] = []
     thresholds = pack.get("thresholds") or {}
 
-    for rule in (pack.get("rules") or []):
-        rule_mods = rule.get("modalities")
+    for base_rule in (pack.get("rules") or []):
+        rule_mods = base_rule.get("modalities")
         direct_mod_match = not rule_mods or mod in rule_mods
         mixed_ui_rule = (not direct_mod_match) and allow_html_rules_in_mixed_md and ("html" in (rule_mods or []))
         if not direct_mod_match and not mixed_ui_rule:
             continue
+
+        reg_applied = apply_register_override(base_rule, reg_info["register"], cfg)
+        if reg_applied["skip"]:
+            for d in directives:
+                if not d["used"] and base_rule["id"] in d["ruleIds"]:
+                    d["used"] = True
+            continue
+        rule = reg_applied["rule"]
+        reg_adjusted = bool(reg_applied["registerAdjusted"])
 
         if allow_synthetic_fixtures and text.startswith(("DOCX_", "PPTX_", "IMG_", "PDF_")):
             for sh in _eval_synthetic_binary_fixture(text, rule, thresholds):
@@ -2662,6 +3263,7 @@ def audit_text(
                         match=sh["match"],
                         sentence=text,
                         span={"start": 0, "end": len(text)},
+                        register_adjusted=reg_adjusted,
                     )
                 )
             continue
@@ -2675,7 +3277,8 @@ def audit_text(
 
         if probe == "regex":
             for pattern in rule.get("patterns", []):
-                for m in re.finditer(pattern, zone_text, re.I | re.M | re.ASCII):
+                rx = _compile_rule_regex(pattern)
+                for m in rx.finditer(zone_text):
                     if m.end() > m.start():
                         idx = m.start()
                         length = m.end() - m.start()
@@ -2806,6 +3409,8 @@ def audit_text(
                     span={"start": start, "end": end},
                     match=matched_display,
                     sentence=enclosing_sentence(text, start, end, text_breaks),
+                    keep_sentence=enclosing_sentence_unclipped(text, start, end),
+                    register_adjusted=reg_adjusted,
                 )
             )
 
@@ -2858,6 +3463,7 @@ def audit_ooxml_entries(
     modality: str,
     pack: dict[str, Any],
     config: dict[str, Any] | None = None,
+    register: str | None = None,
 ) -> dict[str, Any]:
     findings: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
@@ -2881,7 +3487,7 @@ def audit_ooxml_entries(
                 findings.append(
                     make_finding(rule=md_leak_rule, filename=filename, modality=modality, location=f"para {para_idx}", line=para_idx, match=para_text[:100])
                 )
-            sub = audit_text(para_text, filename=filename, modality="markdown", pack=pack, config=config)
+            sub = audit_text(para_text, filename=filename, modality="markdown", pack=pack, config=config, register=register)
             for f in sub["findings"]:
                 if f["ruleId"] == "markdown-leak":
                     continue
@@ -3053,7 +3659,7 @@ def audit_ooxml_entries(
                             )
                         )
 
-            sub = audit_text(full_text, filename=filename, modality="markdown", pack=pack, config=config)
+            sub = audit_text(full_text, filename=filename, modality="markdown", pack=pack, config=config, register=register)
             for f in sub["findings"]:
                 if is_hidden and f.get("severity") != "error":
                     continue
@@ -4792,6 +5398,7 @@ def audit_pdf_document(
     filename: str,
     pack: dict[str, Any],
     config: dict[str, Any] | None = None,
+    register: str | None = None,
 ) -> dict[str, Any]:
     findings: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
@@ -4917,7 +5524,7 @@ def audit_pdf_document(
                     )
 
         if text.strip():
-            sub = audit_text(text, filename=filename, modality="markdown", pack=pack, config=config)
+            sub = audit_text(text, filename=filename, modality="markdown", pack=pack, config=config, register=register)
             for f in sub["findings"]:
                 if f["ruleId"] == "markdown-leak":
                     continue
@@ -4962,6 +5569,7 @@ def inspect_file(
     packs_by_id: dict[str, dict[str, Any]],
     explicit_pack: str | None = None,
     config: dict[str, Any] | None = None,
+    register: str | None = None,
 ) -> dict[str, Any]:
     cfg = config or {}
     modality = detect_modality(abs_path.name)
@@ -4986,6 +5594,7 @@ def inspect_file(
     pack = resolve_effective_pack(pack_id, packs_by_id, file_cfg)
 
     if modality in {"docx", "pptx"}:
+        reg_info = resolve_register("", filename=rel_posix, flag_register=register, config=file_cfg)
         try:
             entries: dict[str, str] = {}
             total_bytes = 0
@@ -4999,9 +5608,17 @@ def inspect_file(
                         if total_bytes > 120 * 1024 * 1024:
                             raise ValueError("OOXML uncompressed XML exceeds 120 MB safety ceiling")
                         entries[info.filename] = zf.read(info.filename).decode("utf-8", errors="replace")
-            res = audit_ooxml_entries(entries, filename=rel_posix, modality=modality, pack=pack, config=file_cfg)
+            res = audit_ooxml_entries(entries, filename=rel_posix, modality=modality, pack=pack, config=file_cfg, register=register)
             missing_core = any(s["file"] == rel_posix for s in res["skipped"])
-            return {"checked": not missing_core, "findings": res["findings"], "unusedSuppressions": [], "coverageWarnings": [], "skipped": res["skipped"]}
+            return {
+                "checked": not missing_core,
+                "findings": res["findings"],
+                "unusedSuppressions": [],
+                "coverageWarnings": [],
+                "skipped": res["skipped"],
+                "register": reg_info["register"],
+                "registerSource": reg_info["registerSource"],
+            }
         except Exception as exc:
             return {
                 "checked": False,
@@ -5012,10 +5629,19 @@ def inspect_file(
             }
 
     if modality == "image":
+        reg_info = resolve_register("", filename=rel_posix, flag_register=register, config=file_cfg)
         try:
             parsed = parse_image_bytes(abs_path.read_bytes())
             res = audit_image_document(parsed, filename=rel_posix, pack=pack, config=file_cfg)
-            return {"checked": True, "findings": res["findings"], "unusedSuppressions": [], "coverageWarnings": [], "skipped": res["skipped"]}
+            return {
+                "checked": True,
+                "findings": res["findings"],
+                "unusedSuppressions": [],
+                "coverageWarnings": [],
+                "skipped": res["skipped"],
+                "register": reg_info["register"],
+                "registerSource": reg_info["registerSource"],
+            }
         except Exception as exc:
             return {
                 "checked": False,
@@ -5026,9 +5652,10 @@ def inspect_file(
             }
 
     if modality == "pdf":
+        reg_info = resolve_register("", filename=rel_posix, flag_register=register, config=file_cfg)
         try:
             parsed = parse_pdf_bytes(abs_path.read_bytes())
-            res = audit_pdf_document(parsed, filename=rel_posix, pack=pack, config=file_cfg)
+            res = audit_pdf_document(parsed, filename=rel_posix, pack=pack, config=file_cfg, register=register)
             uninspectable = any(s["file"] == rel_posix for s in res["skipped"])
             return {
                 "checked": not uninspectable,
@@ -5036,6 +5663,8 @@ def inspect_file(
                 "unusedSuppressions": [],
                 "coverageWarnings": res.get("coverageWarnings", []),
                 "skipped": res["skipped"],
+                "register": reg_info["register"],
+                "registerSource": reg_info["registerSource"],
             }
         except Exception as exc:
             return {
@@ -5057,8 +5686,17 @@ def inspect_file(
             "skipped": [{"file": rel_posix, "reason": "Non-UTF-8 text encoding; convert to UTF-8 to inspect"}],
         }
 
-    res = audit_text(text, filename=rel_posix, modality=modality, pack=pack, config=file_cfg)
-    return {"checked": True, "findings": res["findings"], "unusedSuppressions": res["unusedSuppressions"], "coverageWarnings": [], "skipped": []}
+    reg_info = resolve_register(text, filename=rel_posix, flag_register=register, config=file_cfg)
+    res = audit_text(text, filename=rel_posix, modality=modality, pack=pack, config=file_cfg, register=register)
+    return {
+        "checked": True,
+        "findings": res["findings"],
+        "unusedSuppressions": res["unusedSuppressions"],
+        "coverageWarnings": [],
+        "skipped": [],
+        "register": reg_info["register"],
+        "registerSource": reg_info["registerSource"],
+    }
 
 
 def collect_target_files(
@@ -5458,7 +6096,7 @@ def _blank_markup_for_fact_scan(raw: str, modality: str) -> str:
     return s
 
 
-def extract_protected_facts(text: str, *, modality: str = "markdown") -> list[dict[str, Any]]:
+def extract_protected_facts(text: str, *, modality: str = "markdown", keep_mode: bool = False) -> list[dict[str, Any]]:
     raw = str(text or "")
     if not raw.strip() or modality == "css":
         return []
@@ -5591,7 +6229,12 @@ def extract_protected_facts(text: str, *, modality: str = "markdown") -> list[di
         if initial_qual:
             return initial_qual, span_end
         suffix_w = scan_text[span_end : min(len(scan_text), span_end + 6)]
-        for s_group, s_re in _FACT_SUFFIX_QUALIFIERS:
+        suffix_list = (
+            [("max_inc", re.compile(r"^\s*(?:以内|内|以下|上限)", re.ASCII))] + _FACT_SUFFIX_QUALIFIERS[1:]
+            if keep_mode
+            else _FACT_SUFFIX_QUALIFIERS
+        )
+        for s_group, s_re in suffix_list:
             sm = s_re.match(suffix_w)
             if sm:
                 return s_group, span_end + len(sm.group(0))
@@ -5606,6 +6249,27 @@ def extract_protected_facts(text: str, *, modality: str = "markdown") -> list[di
             for i in range(s, min(e, len(chars))):
                 chars[i] = " "
         return "".join(chars)
+
+    if keep_mode:
+        clean_keep_dates = _mask_occupied()
+        keep_date_patterns = [
+            re.compile(r"\b\d{4}-\d{1,2}-\d{1,2}(?:[T ]\d{1,2}:\d{2}(?::\d{2})?Z?)?\b", re.ASCII),
+            re.compile(
+                r"\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:,\s*\d{4})?\b",
+                re.I | re.ASCII,
+            ),
+            re.compile(r"\d{4}\s*年(?:\s*\d{1,2}\s*月(?:\s*\d{1,2}\s*[日号])?)?", re.ASCII),
+        ]
+        for dp in keep_date_patterns:
+            for dm in dp.finditer(clean_keep_dates):
+                cleaned_d = raw[dm.start() : dm.end()].strip()
+                claim({
+                    "kind": "date",
+                    "raw": cleaned_d,
+                    "canonical": cleaned_d,
+                    "qualifier": None,
+                    "span": {"start": dm.start(), "end": dm.end()},
+                })
 
     # 3a. Context slash ratios, dates (`2026-11-23.`, `05/06/2024`, `11/20`), and colon times/ratios
     clean_scan = _mask_occupied()
@@ -5697,15 +6361,20 @@ def extract_protected_facts(text: str, *, modality: str = "markdown") -> list[di
     # 3c. Arabic numbers, units, versions, and bounding qualifiers
     clean_scan = _mask_occupied()
     _comma_num = r"(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)"
-    _unit_tail = r"(?:\s?(?:%|(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|个月|倍|秒|分钟|小时|天|年|万|亿|元|美元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?"
+    if keep_mode:
+        _dollar_tail = r"(?:\s?[kKmMbB](?![A-Za-z0-9_])|万元|亿元|万|亿)?"
+        _unit_tail = r"(?:(?:x|×)(?![A-Za-z0-9_])|\s?(?:%|requests?/s|req/s|(?:milliseconds?|ms|microseconds?|us|µs|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|weeks?|months?|years?|KB|MB|GB|TB|PB|QPS|TPS|RPS|fps|px|rows?|items?|files?)(?![A-Za-z0-9_])|毫秒|微秒|秒钟|分钟|小时|个月|万元|亿元|万美元|美元|欧元|日元|千瓦时|倍|秒|天|年|万|亿|元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?"
+    else:
+        _dollar_tail = r"(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?"
+        _unit_tail = r"(?:\s?(?:%|(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|个月|倍|秒|分钟|小时|天|年|万|亿|元|美元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?"
     num_re = re.compile(
         r"(?<![A-Za-z0-9_])(?:"
         r"v[0-9]+(?:\.[0-9]+){1,3}(?![A-Za-z0-9_.])"
         r"|[0-9]+(?:\.[0-9]+){2,3}(?![A-Za-z0-9_.])"
         r"|Q[1-4](?![A-Za-z0-9_])"
         r"|P(?:50|90|95|99)(?![A-Za-z0-9_])"
-        rf"|(?<![A-Za-z0-9_.-])[+-][$€¥£]\s?{_comma_num}(?:\.[0-9]+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?"
-        rf"|[$€¥£]\s?{_comma_num}(?:\.[0-9]+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?"
+        rf"|(?<![A-Za-z0-9_.-])[+-][$€¥£]\s?{_comma_num}(?:\.[0-9]+)?{_dollar_tail}"
+        rf"|[$€¥£]\s?{_comma_num}(?:\.[0-9]+)?{_dollar_tail}"
         rf"|(?<![A-Za-z0-9_.-])[+-]{_comma_num}(?:\.[0-9]+)?{_unit_tail}"
         rf"|{_comma_num}(?:\.[0-9]+)?{_unit_tail}"
         r")",
@@ -5844,6 +6513,7 @@ def verify_revision_bundle(
     modality: str | None = None,
     pack: dict[str, Any] | None = None,
     config: dict[str, Any] | None = None,
+    register: str | None = None,
     keep_terms: list[str] | None = None,
     allow_added: bool = False,
     strict: bool = False,
@@ -5852,6 +6522,8 @@ def verify_revision_bundle(
     aft = str(after_text or "")
     mod = modality or detect_modality(filename) or "markdown"
     cfg = config or {}
+    reg_info = resolve_register(bef, filename=filename, flag_register=register, config=cfg)
+    eff_register = reg_info["register"]
     fact_ledger = verify_revision(bef, aft, allow_added=allow_added)
 
     requested: list[str] = []
@@ -5876,8 +6548,8 @@ def verify_revision_bundle(
 
     findings_delta: dict[str, Any] | None = None
     if pack is not None:
-        before_res = audit_text(bef, filename=filename, modality=mod, pack=pack, config=cfg)
-        after_res = audit_text(aft, filename=filename, modality=mod, pack=pack, config=cfg)
+        before_res = audit_text(bef, filename=filename, modality=mod, pack=pack, config=cfg, register=eff_register)
+        after_res = audit_text(aft, filename=filename, modality=mod, pack=pack, config=cfg, register=eff_register)
         before_counts: Counter[str] = Counter()
         after_counts: Counter[str] = Counter()
         for f in before_res["findings"]:
@@ -5949,7 +6621,8 @@ def verify_revision_bundle(
         })
 
     if (
-        before_prof["sentenceCount"] >= 4
+        eff_register not in {"technical", "official"}
+        and before_prof["sentenceCount"] >= 4
         and after_prof["sentenceCount"] >= 4
         and before_prof["burstiness"]["cv"] >= 0.32
         and after_prof["burstiness"]["cv"] < 0.22
@@ -5961,6 +6634,32 @@ def verify_revision_bundle(
             "message": {
                 "en": "Sentence rhythm was flattened into uniform cadence, losing the original phrasing variation.",
                 "zh": "原文错落的句长节奏被压平变呆板，丢失了自然的表达起伏。",
+            },
+        })
+
+    casual_marker_re = re.compile(r"(?:自己收|只出|咱们|大伙|顺手|包邮|私聊|闲置|\b(?:folks|gonna|wanna|my own)\b)", re.I)
+    stiff_bookish_re = re.compile(r"(?:旨在|谨此|兹有|切勿|务必|仅出|略有|偶见|赋能|抓手|闭环|\b(?:thereof|herein|pursuant to|endeavor to|facilitate)\b)", re.I)
+    slang_drift_re = re.compile(r"(?:家人们|绝绝子|咱就是说|尊嘟假嘟|\b(?:no cap|frfr|lowkey)\b)", re.I)
+    bef_casual_hits = len(casual_marker_re.findall(bef))
+    bef_stiff_set = {x.lower() for x in stiff_bookish_re.findall(bef)}
+    aft_new_stiff = [x for x in stiff_bookish_re.findall(aft) if x.lower() not in bef_stiff_set]
+    is_casual_register = eff_register == "casual" or (bef_casual_hits >= 2 and not bef_stiff_set)
+    if is_casual_register and len(aft_new_stiff) >= 2:
+        deg_warnings.append({
+            "code": "register-drift",
+            "severity": "warning",
+            "message": {
+                "en": "Conversational wording drifted into stiff bookish/bureaucratic prose instead of keeping the original casual voice.",
+                "zh": "口语/个人表达被改写成生硬书面或公文腔，丢掉了原本的自然口吻。",
+            },
+        })
+    elif (eff_register in {"official", "technical"} or (pack and pack.get("id") in {"regulated-comms", "engineering-spec"})) and not slang_drift_re.search(bef) and slang_drift_re.search(aft):
+        deg_warnings.append({
+            "code": "register-drift",
+            "severity": "warning",
+            "message": {
+                "en": "Formal/technical draft drifted into fake-casual internet slang.",
+                "zh": "正式或技术文本中混入了轻浮网络口水词，与当前写作场景不符。",
             },
         })
 

@@ -117,6 +117,19 @@
         "en": "Replace the abstract contrast with what the person actually did, said, or noticed.",
         "zh": "删掉抽象对比金句，改写人物实际做出的动作或看到的细节。"
       },
+      "registerOverrides": {
+        "argumentative": {
+          "severity": "info",
+          "message": {
+            "en": "Dialectic 'Not X, but Y' contrast is a valid rhetorical move in argumentative writing; keep it if Y carries a real premise or bound, not an empty slogan.",
+            "zh": "议论文中“不是 A，而是 B”常用于立论辨析；只要 B 给出真实前提、界定或论据即可保留，仅删空洞口号式对仗。"
+          },
+          "deletionTest": {
+            "en": "Check whether clause B states an explicit premise, boundary, or piece of evidence rather than a vague slogan.",
+            "zh": "确认“而是 B”是否给出了明确前提、概念边界或事实论据，而非拔高口号。"
+          }
+        }
+      },
       "exemplar": {
         "bad": "老周留下的那把旧刨子不是工具，而是手艺人的尊严。",
         "trap": "一把旧刨子。半生木工活。满手老茧。",
@@ -136,6 +149,13 @@
         "clean": [
           "那班绿皮车停靠的不是三号站台，而是最北边的五号货运站台。",
           "He ordered tea, not coffee, and waited by the window."
+        ],
+        "register": [
+          {
+            "register": "argumentative",
+            "text": "那盏台灯不是照明器具，而是深夜里的陪伴。",
+            "expect": "info"
+          }
         ]
       }
     },

@@ -3,11 +3,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import {
   ENGINE_VERSION,
   SEVERITY_RANK,
+  VALID_REGISTERS,
   fnv1aHex,
   codePointLength,
   detectModality,
@@ -16,6 +17,12 @@ import {
   hasEmbeddedUiMarkup,
   deriveFixStrategy,
   computeRulesetHash,
+  validateConfig,
+  resolveRegister,
+  applyRegisterOverride,
+  getScenarioStrategy,
+  computeFindingConfidence,
+  buildFindingRevision,
   resolveEffectivePack,
   buildZones,
   auditText,
@@ -44,6 +51,18 @@ import {
   runLocalDeslop,
 } from "../src/local-model.mjs";
 import { parseImageBuffer, parsePdfBuffer, readZipXmlEntries } from "../src/binary-node.mjs";
+import {
+  resolveProviderConfig,
+  inspectByokEnvStatus,
+  extractOoxmlReviewText,
+  chunkTextByParagraphs,
+  buildReviewPrompt,
+  runReviewRequest,
+  validateAndNormalizeReviewResponse,
+  assertLoopbackEndpoint,
+  scrubSecrets,
+  pingEndpointHealth,
+} from "../src/review-client.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
@@ -122,36 +141,90 @@ function mergeConfigLayers(base, layer) {
   };
 }
 
+class ConfigError extends Error {}
+
+function readConfigJson(filePath) {
+  let raw;
+  try {
+    raw = fs.readFileSync(filePath, "utf8");
+  } catch (err) {
+    throw new ConfigError(`cannot read config '${filePath}': ${err.message}`);
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new ConfigError(`invalid config '${filePath}': ${err.message}`);
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new ConfigError(`invalid config '${filePath}': expected a JSON object`);
+  }
+  return parsed;
+}
+
 function loadConfig(cwd = process.cwd(), explicitConfigPath = null) {
   let base = {};
   if (!shouldSkipUserConfig(cwd, explicitConfigPath)) {
     const userCfgPath = path.join(getUserConfigDir(), "config.json");
     if (fs.existsSync(userCfgPath)) {
-      const uCfg = JSON.parse(fs.readFileSync(userCfgPath, "utf8"));
-      base = mergeConfigLayers(base, uCfg);
+      base = mergeConfigLayers(base, readConfigJson(userCfgPath));
     }
   }
-  const candidates = explicitConfigPath
-    ? [path.resolve(cwd, explicitConfigPath)]
-    : [
-        path.join(cwd, ".dislop.json"),
-        path.join(cwd, "dislop.json"),
-        path.join(cwd, ".disloprc.json"),
-      ];
-
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
-      base = mergeConfigLayers(base, JSON.parse(fs.readFileSync(candidate, "utf8")));
-      break;
+  if (explicitConfigPath) {
+    const resolved = path.resolve(cwd, explicitConfigPath);
+    if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) {
+      throw new ConfigError(`config file not found: ${explicitConfigPath}`);
+    }
+    base = mergeConfigLayers(base, readConfigJson(resolved));
+  } else {
+    const candidates = [
+      path.join(cwd, ".dislop.json"),
+      path.join(cwd, "dislop.json"),
+      path.join(cwd, ".disloprc.json"),
+    ];
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        base = mergeConfigLayers(base, readConfigJson(candidate));
+        break;
+      }
     }
   }
 
   const localPath = path.join(cwd, ".dislop.local.json");
   if (fs.existsSync(localPath)) {
-    const localCfg = JSON.parse(fs.readFileSync(localPath, "utf8"));
-    base = mergeConfigLayers(base, localCfg);
+    base = mergeConfigLayers(base, readConfigJson(localPath));
   }
-  return base;
+  try {
+    return validateConfig(base);
+  } catch (err) {
+    throw new ConfigError(err.message);
+  }
+}
+
+function loadConfigOrExit(cwd = process.cwd(), explicitConfigPath = null) {
+  try {
+    return loadConfig(cwd, explicitConfigPath);
+  } catch (err) {
+    console.error(`dislop: ${err.message}`);
+    process.exit(2);
+  }
+}
+
+function summarizeReportContext(regPairs = [], flagRegister = null) {
+  if (flagRegister && String(flagRegister).trim().toLowerCase() !== "auto") {
+    return { register: String(flagRegister).trim().toLowerCase(), registerSource: "flag" };
+  }
+  if (!regPairs || regPairs.length === 0) {
+    return { register: "unspecified", registerSource: "default" };
+  }
+  const regs = new Set(regPairs.map((r) => r.register));
+  const srcs = new Set(regPairs.map((r) => r.registerSource));
+  if (regs.size === 1) {
+    const register = regPairs[0].register;
+    const registerSource = srcs.size === 1 ? regPairs[0].registerSource : "mixed";
+    return { register, registerSource };
+  }
+  return { register: "mixed", registerSource: "mixed" };
 }
 
 function discoverVoiceCard(cwd = process.cwd()) {
@@ -455,9 +528,13 @@ function filterDriversWithProfile(drivers, profile) {
   });
 }
 
-function buildPocketMlFindings(text, filename, existingFindings, threshold = null, { profile = null, modality = null } = {}) {
+function buildPocketMlFindings(text, filename, existingFindings, threshold = null, { profile = null, modality = null, register = "unspecified" } = {}) {
+  if (register === "technical") {
+    return { doc: { documentProbability: 0, paragraphs: [], flaggedCount: 0 }, findings: [] };
+  }
   const doc = analyzeDocumentWithPocketModels(text, { threshold });
   const extras = [];
+  const textLines = String(text || "").split(/\r?\n/);
   for (const p of doc.paragraphs) {
     if (!p.flagged) continue;
     const overlapsExisting = existingFindings.some(
@@ -470,17 +547,28 @@ function buildPocketMlFindings(text, filename, existingFindings, threshold = nul
     const drvZh = activeDrivers.map((d) => d.reason.zh).join("、") || "句式与用词高度均质";
     const loc = String(p.startLine);
     const cleanExcerpt = String(p.excerpt || "");
+    const fullPara = textLines.slice(Math.max(0, p.startLine - 1), p.endLine).join("\n") || cleanExcerpt;
     const fp = `pocket-stealth-vapor:${fnv1aHex(`pocket-stealth-vapor|${cleanExcerpt.toLowerCase()}|${loc}`)}`;
+    const msgObj = {
+      en: `Paragraph reads as predictable low-concreteness AI filler (${pct}% pocket-ML score: ${drvEn}).`,
+      zh: `段落呈高度可预测、低事实密度的温吞水套话（内置模型评分 ${pct}%：${drvZh}）。`,
+    };
+    const delObj = {
+      en: "Cut this paragraph or replace abstract cushion wrappers with one concrete event, number, file path, or direct action.",
+      zh: "删掉整段空泛铺垫，或把抽象缓冲外壳直接换成具体事件、数字、文件路径或明确动作。",
+    };
+    const effMod = modality || detectModality(filename) || "markdown";
     extras.push({
       fingerprint: fp,
       ruleId: "pocket-stealth-vapor",
       packId: "pocket-model",
       severity: "warning",
+      confidence: computeFindingConfidence({ ruleId: "pocket-stealth-vapor", tier: "taste", severity: "warning" }),
       tier: "taste",
       fixStrategy: "rephrase",
       family: "rhythm/pocket-stealth-vapor",
       category: "statistical-vapor",
-      modality: modality || detectModality(filename) || "markdown",
+      modality: effMod,
       file: filename,
       location: loc,
       line: p.startLine,
@@ -489,14 +577,18 @@ function buildPocketMlFindings(text, filename, existingFindings, threshold = nul
       match: cleanExcerpt,
       excerpt: cleanExcerpt,
       mlProbability: p.slopProbability,
-      message: {
-        en: `Paragraph reads as predictable low-concreteness AI filler (${pct}% pocket-ML score: ${drvEn}).`,
-        zh: `段落呈高度可预测、低事实密度的温吞水套话（内置模型评分 ${pct}%：${drvZh}）。`,
-      },
-      deletionTest: {
-        en: "Cut this paragraph or replace abstract cushion wrappers with one concrete event, number, file path, or direct action.",
-        zh: "删掉整段空泛铺垫，或把抽象缓冲外壳直接换成具体事件、数字、文件路径或明确动作。",
-      },
+      message: msgObj,
+      deletionTest: delObj,
+      revision: buildFindingRevision({
+        ruleId: "pocket-stealth-vapor",
+        tier: "taste",
+        family: "rhythm/pocket-stealth-vapor",
+        modality: effMod,
+        message: msgObj,
+        deletionTest: delObj,
+        sentence: fullPara,
+        fixStrategy: "rephrase",
+      }),
     });
   }
   return { doc, findings: extras };
@@ -512,14 +604,67 @@ function summarizePocketForProfile(text) {
   };
 }
 
-function mergePatternBankFindings(existingFindings, patFindings) {
-  const seen = new Set(existingFindings.map((f) => `${f.ruleId}:${f.line}:${f.col || 1}`));
+function lookupRuleAcrossPacks(packs, pack, ruleId) {
+  const inPack = (pack?.rules || []).find((r) => r.id === ruleId);
+  if (inPack) return inPack;
+  for (const p of Object.values(packs || {})) {
+    const found = (p?.rules || []).find((r) => r.id === ruleId);
+    if (found) return found;
+  }
+  return null;
+}
+
+function mergePatternBankFindings(existingFindings, patFindings, { packs = null, pack = null, register = "unspecified", config = {} } = {}) {
+  const seen = new Set(existingFindings.map((f) => `${f.ruleId}:${f.line}`));
   const out = [...existingFindings];
   for (const pf of patFindings || []) {
-    const key = `${pf.ruleId}:${pf.line}:${pf.col || 1}`;
+    const key = `${pf.ruleId}:${pf.line}`;
     if (seen.has(key)) continue;
+    const ruleRef = lookupRuleAcrossPacks(packs, pack, pf.ruleId);
+    let registerAdjusted = false;
+    let effSev = pf.severity || "info";
+    let effMsg = pf.message;
+    let effDel = pf.deletionTest || ruleRef?.deletionTest || null;
+    if (ruleRef) {
+      const regApplied = applyRegisterOverride(ruleRef, register, config);
+      if (regApplied.skip) continue;
+      if (regApplied.registerAdjusted) {
+        registerAdjusted = true;
+        effSev = regApplied.rule.severity || effSev;
+        if (regApplied.rule.message) effMsg = regApplied.rule.message;
+        if (regApplied.rule.deletionTest) effDel = regApplied.rule.deletionTest;
+      }
+    }
     seen.add(key);
-    out.push(pf);
+    const fam = pf.family || (pf.dimension ? `${pf.dimension}/${pf.ruleId}` : "pattern-bank");
+    const mod = pf.modality || "markdown";
+    const revScope =
+      ruleRef?.revisionScope ||
+      (pf.ruleId === "low-burstiness-vapor" ? "paragraph" : null);
+    const fixStrat = pf.fixStrategy || deriveFixStrategy({ id: pf.ruleId, family: fam });
+    out.push({
+      ...pf,
+      severity: effSev,
+      fixStrategy: fixStrat,
+      message: effMsg,
+      ...(effDel ? { deletionTest: effDel } : {}),
+      confidence: pf.confidence || computeFindingConfidence({ ruleId: pf.ruleId, tier: pf.tier || "taste", severity: effSev, registerAdjusted }),
+      revision:
+        pf.revision ||
+        buildFindingRevision({
+          ruleId: pf.ruleId,
+          tier: pf.tier || "taste",
+          family: fam,
+          modality: mod,
+          message: effMsg,
+          deletionTest: effDel,
+          sentence: String(pf.match || ""),
+          revisionKind: ruleRef?.revisionKind || null,
+          revisionScope: revScope,
+          revisionAvoid: ruleRef?.revisionAvoid || null,
+          fixStrategy: fixStrat,
+        }),
+    });
   }
   return out;
 }
@@ -625,7 +770,7 @@ function resolveTextPackAndSource(text, rel, modality, explicitPack, fileConfig,
   return { pack, effectivePack, packSource };
 }
 
-function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, config, { includeMl = false, includePatterns = false, includeProfile = false, banks = null } = {}) {
+function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, config, { includeMl = false, includePatterns = false, includeProfile = false, banks = null, register = null } = {}) {
   const stat = fs.statSync(absPath);
   if (stat.size > 25 * 1024 * 1024) {
     return {
@@ -644,14 +789,15 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
     const packId = pickPackForFile(rel, modality, explicitPack, fileConfig);
     const pack = resolveEffectivePack(packId, packs, fileConfig);
     const packSource = explicitPack && explicitPack !== "auto" ? "cli-flag" : explicitPack === "auto" ? "auto-modality" : fileConfig.pack ? "config" : "default-modality";
+    const regInfo = resolveRegister("", { filename: rel, flagRegister: register, config: fileConfig });
     try {
       const entries = readZipXmlEntries(buf);
-      const res = auditOoxmlEntries(entries, { filename: rel, modality, pack, config: fileConfig });
+      const res = auditOoxmlEntries(entries, { filename: rel, modality, pack, config: fileConfig, register });
       const missingCorePart = res.skipped.some((s) => s.file === rel);
       let findings = res.findings;
       if (includePatterns && !missingCorePart) {
         const patRes = auditPatterns("", { filename: rel, modality, banks: banks || loadPatternBanks(), ooxml: entries, config: fileConfig });
-        findings = mergePatternBankFindings(findings, patRes.findings);
+        findings = mergePatternBankFindings(findings, patRes.findings, { packs, pack, register: regInfo.register, config: fileConfig });
       }
       return {
         checked: !missingCorePart,
@@ -662,6 +808,8 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
         effectivePack: packId,
         packSource,
         rulesetHash: computeRulesetHash(pack),
+        register: regInfo.register,
+        registerSource: regInfo.registerSource,
       };
     } catch (err) {
       return {
@@ -678,6 +826,7 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
     const packId = pickPackForFile(rel, modality, explicitPack, fileConfig);
     const pack = resolveEffectivePack(packId, packs, fileConfig);
     const packSource = explicitPack && explicitPack !== "auto" ? "cli-flag" : explicitPack === "auto" ? "auto-modality" : fileConfig.pack ? "config" : "default-modality";
+    const regInfo = resolveRegister("", { filename: rel, flagRegister: register, config: fileConfig });
     try {
       const parsed = parseImageBuffer(buf);
       const res = auditImageDocument(parsed, { filename: rel, pack, config: fileConfig });
@@ -690,6 +839,8 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
         effectivePack: packId,
         packSource,
         rulesetHash: computeRulesetHash(pack),
+        register: regInfo.register,
+        registerSource: regInfo.registerSource,
       };
     } catch (err) {
       return {
@@ -703,6 +854,7 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
   }
 
   if (modality === "pdf") {
+    const regInfo = resolveRegister("", { filename: rel, flagRegister: register, config: fileConfig });
     try {
       const parsed = parsePdfBuffer(buf);
       let pack;
@@ -734,7 +886,7 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
         effectivePack = packId;
         packSource = fileConfig.pack ? "config" : "default-modality";
       }
-      const res = auditPdfDocument(parsed, { filename: rel, pack, config: fileConfig });
+      const res = auditPdfDocument(parsed, { filename: rel, pack, config: fileConfig, register });
       const uninspectable = res.skipped.some((s) => s.file === rel);
       return {
         checked: !uninspectable,
@@ -745,6 +897,8 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
         effectivePack,
         packSource,
         rulesetHash: computeRulesetHash(pack),
+        register: regInfo.register,
+        registerSource: regInfo.registerSource,
       };
     } catch (err) {
       return {
@@ -771,12 +925,13 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
   }
 
   const { pack, effectivePack, packSource } = resolveTextPackAndSource(text, rel, modality, explicitPack, fileConfig, packs);
+  const regInfo = resolveRegister(text, { filename: rel, flagRegister: register, config: fileConfig });
 
-  const res = auditText(text, { filename: rel, modality, pack, config: fileConfig });
+  const res = auditText(text, { filename: rel, modality, pack, config: fileConfig, register });
   let findings = res.findings;
   if (includePatterns) {
     const patRes = auditPatterns(text, { filename: rel, modality, banks: banks || loadPatternBanks(), config: fileConfig });
-    findings = mergePatternBankFindings(findings, patRes.findings);
+    findings = mergePatternBankFindings(findings, patRes.findings, { packs, pack, register: regInfo.register, config: fileConfig });
   }
 
   let profileObj = null;
@@ -785,7 +940,7 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
     profileObj = analyzeTextProfile(text, { modality, config: fileConfig });
     if (includeMl) {
       mlInput = modality === "html" || modality === "svg" ? buildZones(text, modality, fileConfig).prose : text;
-      const mlRes = buildPocketMlFindings(mlInput, rel, findings, null, { profile: profileObj, modality });
+      const mlRes = buildPocketMlFindings(mlInput, rel, findings, null, { profile: profileObj, modality, register: regInfo.register });
       findings = [...findings, ...mlRes.findings];
     }
   }
@@ -810,6 +965,8 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
     effectivePack,
     packSource,
     rulesetHash: computeRulesetHash(pack),
+    register: regInfo.register,
+    registerSource: regInfo.registerSource,
     profileItem,
     _cpLineStarts: buildCodepointLineStarts(text),
   };
@@ -817,94 +974,429 @@ function inspectSingleFile({ absPath, rel, modality }, packs, explicitPack, conf
 
 // ---------- Subcommands ----------
 
-function parseFlags(args) {
+const COMMAND_SPECS = {
+  check: {
+    bools: ["json", "staged", "report-unused", "profile", "ml", "patterns", "deep", "compact", "quiet", "help", "version"],
+    strings: ["pack", "register", "config", "fail-on", "format", "changed", "stdin-filename", "lang", "rule"],
+    optionalStrings: ["changed"],
+    shortBools: { q: "quiet", h: "help", v: "version" },
+    shortStrings: {},
+    usage:
+      "dislop check [paths... | -] [--pack <id|auto>] [--register <id|auto>] [--deep] [--compact] [--profile] [--ml] [--patterns]\n" +
+      "             [--fail-on error|warning|info|never] [--format text|json|agent|sarif|github|md]\n" +
+      "             [--changed [ref] | --staged] [--rule <id,...>] [--stdin-filename <name>]\n" +
+      "             [--report-unused] [--config <path>] [-q|--quiet] [--lang en|zh]",
+    summary: "Audit files, directories, or stdin for AI artifacts, clichés, and template layouts (0 network calls).",
+    examples: [
+      "dislop check .",
+      "dislop check draft.md --deep --lang zh",
+      "dislop check draft.md --register argumentative --format agent",
+      "dislop check --changed=origin/main --format github",
+    ],
+  },
+  verify: {
+    bools: ["allow-added", "strict", "staged", "json", "help", "version"],
+    strings: ["pack", "register", "git", "keep", "format", "lang", "stdin-filename", "config"],
+    optionalStrings: ["git"],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage: "dislop verify (<before> <after> | --git [ref] <file>) [--keep a,b] [--pack <id|auto>] [--register <name>] [--allow-added] [--strict] [--lang en|zh] [--json]",
+    summary: "Verify a revised draft retains numbers, qualifiers, keep terms, and introduces zero new AI slop.",
+    examples: [
+      "dislop verify --git HEAD draft.md",
+      "dislop verify before.md after.md --keep latency,SLA --strict --json",
+    ],
+  },
+  explain: {
+    bools: ["json", "help", "version"],
+    strings: ["lang", "format"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage: "dislop explain <rule-id> [--lang en|zh] [--format text|json] [--json]",
+    summary: "Show rationale, deletion test, and bad/trap/good examples for a rule or pattern ID.",
+    examples: ["dislop explain negation-pivot-frame --lang zh", "dislop explain chatbot-artifact --json"],
+  },
+  packs: {
+    bools: ["json", "help", "version"],
+    strings: ["format"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage: "dislop packs [--format text|json] [--json]",
+    summary: "List bundled rule packs and supported file types.",
+    examples: ["dislop packs", "dislop packs --json"],
+  },
+  catalog: {
+    bools: ["json", "no-exemplars", "help", "version"],
+    strings: ["query", "pack", "category", "dimension", "family", "modality", "severity", "tier", "lang", "format", "limit"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage:
+      "dislop catalog [query] [--pack <id>] [--category <cat>] [--dimension <dim>] [--family <prefix>]\n" +
+      "               [--modality <mod>] [--severity <sev>] [--tier invariant|taste] [--limit <n>]\n" +
+      "               [--no-exemplars] [--format text|json|md] [--lang en|zh]",
+    summary: "Search and filter dislop's 53-rule AI-slop catalog.",
+    examples: ["dislop catalog negation --lang zh", "dislop catalog --pack deck-and-ui --format md"],
+  },
+  patterns: {
+    bools: ["json", "help", "version"],
+    strings: ["stdin-filename", "angle", "lang", "format"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage: "dislop patterns [file | -] [--stdin-filename <name>] [--angle <a,b>] [--lang en|zh] [--json]",
+    summary: "Run multi-angle extended pattern-bank scan and profile.",
+    examples: ["dislop patterns draft.md --lang zh", "cat draft.md | dislop patterns - --json"],
+  },
+  voice: {
+    bools: ["json", "help", "version"],
+    strings: ["output", "lang", "format"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: { o: "output" },
+    usage: "dislop voice [paths... | -] [--output|-o <voice.json>] [--lang auto|en|zh] [--json]",
+    summary: "Extract an offline deterministic dislop.voice/1 writing profile (0 network calls).",
+    examples: ["dislop voice notes/*.md -o voice.json", "dislop voice essays.md --lang zh --json"],
+  },
+  model: {
+    bools: ["force", "dry-run", "yes", "no-copy", "allow-lan", "no-loopback", "json", "help", "version"],
+    strings: ["tier", "provider", "sha256", "cache-dir", "threshold", "stdin-filename", "pack", "config", "endpoint", "model", "output", "format", "lang"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: { o: "output" },
+    usage: "dislop model [status|score|install|import|remove|deslop] [target] [--tier <t>] [--lang en|zh] [--json]",
+    summary: "Inspect bundled 14.6 KB Pocket ML, hardware fit, and manage optional local models.",
+    examples: ["dislop model status --lang zh", "dislop model score draft.md --json"],
+  },
+  setup: {
+    bools: ["force", "dry-run", "yes", "json", "help", "version"],
+    strings: ["tier", "provider", "cache-dir", "format", "lang"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage: "dislop setup [--tier auto|none|fast|balanced|quality] [--dry-run] [--force] [--lang en|zh]",
+    summary: "Interactive or flag-driven optional local GGUF model setup.",
+    examples: ["dislop setup --dry-run", "dislop setup --tier fast --yes"],
+  },
+  deslop: {
+    bools: ["local", "allow-lan", "json", "help", "version"],
+    strings: ["pack", "register", "config", "stdin-filename", "endpoint", "model", "output", "format", "lang"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: { o: "output" },
+    usage: "dislop deslop [file | -] --local [--pack <id|auto>] [--register <name>] [--endpoint <url>] [--model <id>] [--output|-o <file>] [--json]",
+    summary: "Fact-locked paragraph cleanup using a local loopback model (--local).",
+    examples: ["dislop deslop draft.md --local -o clean.md"],
+  },
+  resources: {
+    bools: ["json", "help", "version"],
+    strings: ["format"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage: "dislop resources [--format text|json] [--json]",
+    summary: "Show bundled offline packs, static agent links, and Official Cloud MCP details.",
+    examples: ["dislop resources", "dislop resources --json"],
+  },
+  "pack-test": {
+    bools: ["help", "version"],
+    strings: [],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage: "dislop pack-test",
+    summary: "Validate Pack Schema v2 manifests and embedded hit/clean fixture assertions.",
+    examples: ["dislop pack-test"],
+  },
+  init: {
+    bools: ["help", "version"],
+    strings: [],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage: "dislop init",
+    summary: "Create starter .dislop.json config and ensure .dislop.local.json is gitignored.",
+    examples: ["dislop init"],
+  },
+  review: {
+    bools: ["offline", "compact", "dry-run", "print-prompt", "yes", "include-notes", "include-hidden", "json", "help", "version"],
+    strings: ["endpoint", "api-key-env", "provider", "model", "base-url", "pack", "register", "format", "lang", "fail-on", "timeout", "max-chunks", "stdin-filename", "config"],
+    optionalStrings: [],
+    shortBools: { y: "yes", h: "help", v: "version" },
+    shortStrings: {},
+    usage:
+      "dislop review [file | -] [--offline | --endpoint <url> | --provider openai|gemini|openrouter|compatible|local]\n" +
+      "             [--model <id>] [--base-url <url>] [--pack <id|auto>] [--register <id|auto>]\n" +
+      "             [--dry-run] [--print-prompt] [--yes] [--format text|json|agent] [--lang en|zh]",
+    summary: "Multi-layer editorial review (offline rubric preflight or explicit opt-in BYOK LLM review).",
+    examples: [
+      "dislop review draft.md --offline --lang zh",
+      "dislop review draft.md --provider openai --dry-run",
+      "dislop review draft.md --provider gemini --model gemini-3.1-flash-lite-preview --yes",
+    ],
+  },
+  doctor: {
+    bools: ["online", "no-loopback", "json", "help", "version"],
+    strings: ["cache-dir", "format", "lang"],
+    optionalStrings: [],
+    shortBools: { h: "help", v: "version" },
+    shortStrings: {},
+    usage: "dislop doctor [--online] [--no-loopback] [--lang en|zh] [--json]",
+    summary: "Check 3-layer readiness (Skill, Local CLI + Pocket ML + local runners, BYOK review env, and optional --online Cloud MCP ping).",
+    examples: ["dislop doctor", "dislop doctor --lang zh --json", "dislop doctor --online"],
+  },
+};
+COMMAND_SPECS.search = COMMAND_SPECS.catalog;
+
+function levenshtein(a, b) {
+  const m = a.length;
+  const n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i += 1) dp[i][0] = i;
+  for (let j = 0; j <= n; j += 1) dp[0][j] = j;
+  for (let i = 1; i <= m; i += 1) {
+    for (let j = 1; j <= n; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+    }
+  }
+  return dp[m][n];
+}
+
+function closestFlagSuggestion(unknown, knownFlags) {
+  let best = null;
+  let bestDist = 4;
+  for (const cand of knownFlags) {
+    const d = levenshtein(unknown, cand);
+    if (d < bestDist) {
+      bestDist = d;
+      best = cand;
+    }
+  }
+  return best ? ` Did you mean '--${best}'?` : "";
+}
+
+function printSubcommandHelp(cmdName) {
+  const spec = COMMAND_SPECS[cmdName];
+  if (!spec) {
+    printHelp();
+    return;
+  }
+  console.log(`dislop ${cmdName} — ${spec.summary}\n`);
+  console.log(`Usage:\n  ${spec.usage}`);
+  if (spec.examples?.length) {
+    console.log(`\nExamples:\n${spec.examples.map((ex) => `  ${ex}`).join("\n")}`);
+  }
+}
+
+function shouldUseColor() {
+  if (process.env.FORCE_COLOR && process.env.FORCE_COLOR !== "0") return true;
+  if (process.env.NO_COLOR !== undefined && process.env.NO_COLOR !== "") return false;
+  return Boolean(process.stdout.isTTY);
+}
+
+function colorizeTextReport(text, useColor) {
+  if (!useColor || !text) return text;
+  const RESET = "\x1b[0m";
+  const RED = "\x1b[31m";
+  const YELLOW = "\x1b[33m";
+  const CYAN = "\x1b[36m";
+  const DIM = "\x1b[2m";
+  const GREEN = "\x1b[32m";
+  return text
+    .split("\n")
+    .map((line) => {
+      if (line.startsWith("  [ERROR]") || line.startsWith("  [硬伤]")) {
+        return line.replace(/^(\s*\[(?:ERROR|硬伤)\])/, `${RED}$1${RESET}`);
+      }
+      if (line.startsWith("  [WARNING]") || line.startsWith("  [提醒]")) {
+        return line.replace(/^(\s*\[(?:WARNING|提醒)\])/, `${YELLOW}$1${RESET}`);
+      }
+      if (line.startsWith("  [INFO]") || line.startsWith("  [提示]")) {
+        return line.replace(/^(\s*\[(?:INFO|提示)\])/, `${CYAN}$1${RESET}`);
+      }
+      if (
+        line.startsWith("  [SKIP]") ||
+        line.startsWith("  [跳过]") ||
+        line.startsWith("  [UNUSED]") ||
+        line.startsWith("  [失效豁免]") ||
+        line.startsWith("  [COVERAGE]") ||
+        line.startsWith("  [覆盖提示]")
+      ) {
+        return `${DIM}${line}${RESET}`;
+      }
+      if (line.startsWith("dislop: no known patterns found") || line.startsWith("dislop: 未发现已知模式")) {
+        return `${GREEN}${line}${RESET}`;
+      }
+      return line;
+    })
+    .join("\n");
+}
+
+function parseFlags(args, cmdName = null) {
+  const spec = cmdName ? COMMAND_SPECS[cmdName] : null;
+  const boolSet = new Set(spec ? spec.bools : [
+    "json", "staged", "report-unused", "no-loopback", "help", "version", "mcp",
+    "no-exemplars", "profile", "ml", "patterns", "deep", "compact", "quiet", "force",
+    "dry-run", "yes", "no-copy", "local", "allow-lan", "offline", "allow-added", "strict",
+  ]);
+  const stringSet = spec ? new Set(spec.strings) : null;
+  const optionalSet = new Set(spec ? spec.optionalStrings : ["changed", "git"]);
+  const shortBools = spec ? spec.shortBools : { h: "help", v: "version", q: "quiet" };
+  const shortStrings = spec ? spec.shortStrings : { o: "output" };
+  const allKnown = spec ? [...spec.bools, ...spec.strings] : [];
+
+  for (const a of args) {
+    if (a === "--") break;
+    if (a === "-h" || a === "--help") {
+      return { flags: { help: true }, positional: [] };
+    }
+  }
+
   const flags = {};
   const positional = [];
-  const boolKeys = new Set([
-    "json",
-    "staged",
-    "report-unused",
-    "no-loopback",
-    "help",
-    "version",
-    "mcp",
-    "no-exemplars",
-    "profile",
-    "ml",
-    "patterns",
-    "deep",
-    "compact",
-    "allow-added",
-    "strict",
-    "offline",
-    "force",
-    "dry-run",
-    "yes",
-    "no-copy",
-    "local",
-    "allow-lan",
-  ]);
+  let endOfFlags = false;
+  const cwd = process.cwd();
+
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
+    if (endOfFlags) {
+      positional.push(arg);
+      continue;
+    }
+    if (arg === "--") {
+      endOfFlags = true;
+      continue;
+    }
     if (arg === "-") {
       positional.push("-");
-    } else if (arg === "-h") {
-      flags.help = true;
-    } else if (arg === "-v") {
-      flags.version = true;
-    } else if (arg === "-o") {
-      if (i + 1 < args.length) {
-        flags.output = args[i + 1];
-        i += 1;
-      } else {
-        console.error("dislop: flag '-o' requires a file path");
+      continue;
+    }
+    if (arg.startsWith("--")) {
+      const eq = arg.indexOf("=");
+      const key = eq !== -1 ? arg.slice(2, eq) : arg.slice(2);
+      if (spec && !boolSet.has(key) && !stringSet.has(key)) {
+        const hint = closestFlagSuggestion(key, allKnown);
+        console.error(`dislop ${cmdName}: unknown flag '--${key}'.${hint} Run 'dislop ${cmdName} --help'.`);
         process.exit(2);
       }
-    } else if (arg.startsWith("-o=")) {
-      flags.output = arg.slice(3);
-    } else if (arg === "--") {
-      positional.push(...args.slice(i + 1));
-      break;
-    } else if (arg.startsWith("--")) {
-      const eq = arg.indexOf("=");
       if (eq !== -1) {
-        const key = arg.slice(2, eq);
         const val = arg.slice(eq + 1);
-        if (boolKeys.has(key)) {
+        if (boolSet.has(key)) {
           const low = val.trim().toLowerCase();
-          if (low === "true" || low === "1" || low === "yes") {
-            flags[key] = true;
-          } else if (low === "false" || low === "0" || low === "no") {
-            flags[key] = false;
-          } else {
+          if (low === "true" || low === "1" || low === "yes") flags[key] = true;
+          else if (low === "false" || low === "0" || low === "no") flags[key] = false;
+          else {
             console.error(`dislop: flag '--${key}' does not accept value '${val}'`);
             process.exit(2);
           }
-        } else {
-          flags[key] = key === "changed" && val === "" ? "HEAD" : val;
-        }
-      } else {
-        const key = arg.slice(2);
-        if (boolKeys.has(key)) {
-          flags[key] = true;
-        } else if ((key === "changed" || key === "git") && (i + 1 >= args.length || args[i + 1].startsWith("-"))) {
+        } else if (optionalSet.has(key) && val === "") {
           flags[key] = "HEAD";
+        } else {
+          flags[key] = val;
+        }
+      } else if (boolSet.has(key)) {
+        flags[key] = true;
+      } else if (optionalSet.has(key)) {
+        const next = args[i + 1];
+        if (i + 1 >= args.length || next === "-" || next.startsWith("-")) {
+          flags[key] = "HEAD";
+        } else if ((key === "changed" || key === "git") && fs.existsSync(path.resolve(cwd, next))) {
+          flags[key] = "HEAD";
+        } else {
+          flags[key] = next;
+          i += 1;
+        }
+      } else if (i + 1 < args.length) {
+        const next = args[i + 1];
+        if (next.length > 1 && next.startsWith("-")) {
+          console.error(`dislop: flag '--${key}' requires a value (got '${next}')`);
+          process.exit(2);
+        }
+        flags[key] = next;
+        i += 1;
+      } else {
+        console.error(`dislop: flag '--${key}' requires a value`);
+        process.exit(2);
+      }
+    } else if (arg.startsWith("-") && arg.length > 1) {
+      const eq = arg.indexOf("=");
+      const shortKey = eq !== -1 ? arg.slice(1, eq) : arg.slice(1);
+      if (shortBools[shortKey] && eq === -1) {
+        flags[shortBools[shortKey]] = true;
+      } else if (shortStrings[shortKey]) {
+        if (eq !== -1) {
+          flags[shortStrings[shortKey]] = arg.slice(eq + 1);
         } else if (i + 1 < args.length) {
-          flags[key] = args[i + 1];
+          const next = args[i + 1];
+          if (next.length > 1 && next.startsWith("-")) {
+            console.error(`dislop: flag '-${shortKey}' requires a value (got '${next}')`);
+            process.exit(2);
+          }
+          flags[shortStrings[shortKey]] = next;
           i += 1;
         } else {
-          flags[key] = true;
+          console.error(`dislop: flag '-${shortKey}' requires a value`);
+          process.exit(2);
         }
+      } else if (shortKey.length > 1 && eq === -1 && [...shortKey].every((ch) => shortBools[ch])) {
+        for (const ch of shortKey) flags[shortBools[ch]] = true;
+      } else {
+        console.error(`dislop${cmdName ? ` ${cmdName}` : ""}: unknown flag '${arg}'. Run 'dislop${cmdName ? ` ${cmdName}` : ""} --help'.`);
+        process.exit(2);
       }
     } else {
       positional.push(arg);
     }
   }
-  if (flags.help) {
+  if (!spec && flags.help) {
     printHelp();
     process.exit(0);
   }
   return { flags, positional };
+}
+
+function readStdinTextChecked(cmdLabel = "check") {
+  const buf = fs.readFileSync(0);
+  if (buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b && buf[2] === 0x03 && buf[3] === 0x04) {
+    console.error(`dislop ${cmdLabel}: stdin looks like binary ZIP/OOXML (.docx/.pptx); pass the file path instead (e.g., 'dislop ${cmdLabel} deck.pptx').`);
+    process.exit(2);
+  }
+  try {
+    return decodeUtf8Strict(buf);
+  } catch {
+    console.error(`dislop ${cmdLabel}: stdin is not valid UTF-8 text; convert to UTF-8 or pass a supported file path.`);
+    process.exit(2);
+  }
+}
+
+function detectStdinFilename(rawText, explicitName) {
+  if (explicitName) return explicitName;
+  const head = String(rawText || "").replace(/^\ufeff/, "").trimStart().slice(0, 128).toLowerCase();
+  if (head.startsWith("<!doctype html") || head.startsWith("<html")) {
+    return "stdin.html";
+  }
+  return "stdin.md";
+}
+
+function collectKnownRuleIds(packs, banks = null) {
+  const known = new Set(["pocket-stealth-vapor"]);
+  for (const p of Object.values(packs || {})) {
+    for (const r of p.rules || []) {
+      if (r.id) known.add(r.id);
+    }
+  }
+  const loadedBanks = banks || loadPatternBanks();
+  for (const bank of Object.values(loadedBanks || {})) {
+    for (const pat of bank.patterns || []) {
+      if (pat.ruleId) known.add(pat.ruleId);
+    }
+  }
+  const patLib = loadPatternLibrary();
+  for (const rid of Object.keys(patLib)) known.add(rid);
+  return known;
 }
 
 function assertTextOrJsonFormat(format) {
@@ -952,22 +1444,32 @@ function applyCompactReport(report) {
 }
 
 function runCheck(args, packs) {
-  const { flags, positional } = parseFlags(args);
+  const { flags, positional } = parseFlags(args, "check");
+  if (flags.help) {
+    printSubcommandHelp("check");
+    return;
+  }
   const cwd = process.cwd();
-  const config = loadConfig(cwd, flags.config || null);
+  const config = loadConfigOrExit(cwd, flags.config || null);
   const format = flags.json ? "json" : flags.format || "text";
   const failOn = flags["fail-on"] || config.failOn || "error";
   const lang = flags.lang || "en";
+  if (!["en", "zh"].includes(lang)) {
+    console.error(`dislop: invalid --lang '${lang}' (expected en or zh)`);
+    process.exit(2);
+  }
   const reportUnused = Boolean(flags["report-unused"]);
-  const includeProfile = Boolean(flags.profile);
+  const quiet = Boolean(flags.quiet);
+  const useColor = format === "text" && shouldUseColor();
+  const includeProfile = Boolean(flags.profile || flags.deep);
   const includeMl = Boolean(flags.ml || flags.deep);
   const includePatterns = Boolean(flags.patterns || flags.deep);
   const compactJson = Boolean(flags.compact && format === "json");
   const banks = includePatterns ? loadPatternBanks() : null;
 
-  const validFormats = new Set(["text", "json", "sarif", "github", "md"]);
+  const validFormats = new Set(["text", "json", "agent", "sarif", "github", "md"]);
   if (!validFormats.has(format)) {
-    console.error(`dislop: invalid --format '${format}' (expected text, json, sarif, github, or md)`);
+    console.error(`dislop: invalid --format '${format}' (expected text, json, agent, sarif, github, or md)`);
     process.exit(2);
   }
   if (!SEVERITY_RANK[failOn]) {
@@ -975,25 +1477,66 @@ function runCheck(args, packs) {
     process.exit(2);
   }
 
+  let flagRegister = null;
+  if (flags.register !== undefined) {
+    const norm = String(flags.register).trim().toLowerCase();
+    if (!norm || (norm !== "auto" && !VALID_REGISTERS.includes(norm))) {
+      console.error(`dislop: invalid --register '${flags.register}' (expected auto, ${VALID_REGISTERS.join(", ")})`);
+      process.exit(2);
+    }
+    flagRegister = norm;
+  }
+
+  let ruleFilter = null;
+  if (flags.rule !== undefined) {
+    const requested = String(flags.rule)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (requested.length === 0) {
+      console.error("dislop check: '--rule' requires at least one rule ID");
+      process.exit(2);
+    }
+    const known = collectKnownRuleIds(packs, banks);
+    const unknown = requested.filter((r) => !known.has(r));
+    if (unknown.length > 0) {
+      console.error(`dislop check: unknown rule ID(s): ${unknown.join(", ")}. Run 'dislop catalog' to list valid rule IDs.`);
+      process.exit(2);
+    }
+    ruleFilter = new Set(requested);
+  }
+
+  if (flags.pack && flags.pack !== "auto" && !packs[flags.pack]) {
+    console.error(`dislop: unknown pack '${flags.pack}' (available: auto, ${Object.keys(packs).join(", ")})`);
+    process.exit(2);
+  }
+
   // Stdin mode
   if (positional.includes("-")) {
-    const stdinText = fs.readFileSync(0, "utf8");
-    const filename = flags["stdin-filename"] || "stdin.md";
+    const stdinText = readStdinTextChecked("check");
+    const filename = detectStdinFilename(stdinText, flags["stdin-filename"]);
     const modality = detectModality(filename) || "markdown";
     const fileConfig = resolveConfigForFile(filename, config);
     let resolved;
+    let regInfo;
     try {
       resolved = resolveTextPackAndSource(stdinText, filename, modality, flags.pack || null, fileConfig, packs);
+      regInfo = resolveRegister(stdinText, { filename, flagRegister, config: fileConfig });
     } catch (err) {
       console.error(`dislop: ${err.message}`);
       process.exit(2);
     }
     const { pack, effectivePack, packSource } = resolved;
-    const res = auditText(stdinText, { filename, modality, pack, config: fileConfig });
+    const res = auditText(stdinText, { filename, modality, pack, config: fileConfig, register: flagRegister });
     let findings = res.findings;
     if (includePatterns) {
       const patRes = auditPatterns(stdinText, { filename, modality, banks, config: fileConfig });
-      findings = mergePatternBankFindings(findings, patRes.findings);
+      findings = mergePatternBankFindings(findings, patRes.findings, {
+        packs,
+        pack,
+        register: regInfo.register,
+        config: fileConfig,
+      });
     }
     let profileObj = null;
     let mlInput = null;
@@ -1001,15 +1544,32 @@ function runCheck(args, packs) {
       profileObj = analyzeTextProfile(stdinText, { modality, config: fileConfig });
       if (includeMl) {
         mlInput = modality === "html" || modality === "svg" ? buildZones(stdinText, modality, fileConfig).prose : stdinText;
-        findings = [...findings, ...buildPocketMlFindings(mlInput, filename, findings, null, { profile: profileObj, modality }).findings];
+        findings = [
+          ...findings,
+          ...buildPocketMlFindings(mlInput, filename, findings, null, {
+            profile: profileObj,
+            modality,
+            register: regInfo.register,
+          }).findings,
+        ];
       }
     }
+    if (ruleFilter) {
+      findings = findings.filter((f) => ruleFilter.has(f.ruleId));
+    }
+    const triggered =
+      findings.some((f) => SEVERITY_RANK[f.severity] >= SEVERITY_RANK[failOn]) ||
+      (reportUnused && res.unusedSuppressions.length > 0);
+    const outFindings = quiet
+      ? findings.filter((f) => (SEVERITY_RANK[f.severity] || 1) >= SEVERITY_RANK[failOn])
+      : findings;
     const coverageWarnings = collectTextCoverageWarnings(stdinText, modality, filename, profileObj);
     const pocketSrc = includeProfile && PROSE_ML_MODALITIES.has(modality)
       ? mlInput ?? (modality === "html" || modality === "svg" ? buildZones(stdinText, modality, fileConfig).prose : stdinText)
       : null;
     const report = {
       version: ENGINE_VERSION,
+      context: { register: regInfo.register, registerSource: regInfo.registerSource },
       rulesetHash: computeRulesetHash(pack),
       effectivePack,
       packSource,
@@ -1018,7 +1578,7 @@ function runCheck(args, packs) {
       checkedCount: 1,
       skipped: [],
       coverageWarnings,
-      findings,
+      findings: outFindings,
       unusedSuppressions: reportUnused ? res.unusedSuppressions : [],
       ...(includeProfile && PROSE_ML_MODALITIES.has(modality)
         ? {
@@ -1033,10 +1593,11 @@ function runCheck(args, packs) {
         : {}),
     };
     const outReport = compactJson ? applyCompactReport(report) : report;
-    console.log(formatReport(outReport, format, lang));
-    const triggered =
-      findings.some((f) => SEVERITY_RANK[f.severity] >= SEVERITY_RANK[failOn]) ||
-      (reportUnused && res.unusedSuppressions.length > 0);
+    const rendered = colorizeTextReport(formatReport(outReport, format, lang, { quiet, failOn }), useColor);
+    if (rendered) console.log(rendered);
+    if (useColor && !quiet && format === "text" && findings.length === 0 && (!reportUnused || res.unusedSuppressions.length === 0) && !includeMl && !includePatterns) {
+      console.log(lang === "zh" ? "  提示: 可加 --deep 启用统计画像与内置隐蔽套话模型。" : "  hint: run with --deep to enable rhythm telemetry and Pocket ML scoring.");
+    }
     process.exitCode = triggered ? 1 : 0;
     return;
   }
@@ -1069,6 +1630,7 @@ function runCheck(args, packs) {
   const seenHashes = new Set();
   const seenPacks = new Set();
   const seenSources = new Set();
+  const regPairs = [];
   let checkedCount = 0;
   let explicitUninspectable = collected.skipped.length > 0;
 
@@ -1076,13 +1638,20 @@ function runCheck(args, packs) {
     if (changedMap && !changedMap.has(item.rel)) continue;
     let res;
     try {
-      res = inspectSingleFile(item, packs, flags.pack || null, config, { includeMl, includePatterns, includeProfile, banks });
+      res = inspectSingleFile(item, packs, flags.pack || null, config, {
+        includeMl,
+        includePatterns,
+        includeProfile,
+        banks,
+        register: flagRegister,
+      });
     } catch (err) {
       console.error(`dislop: ${err.message}`);
       process.exit(2);
     }
     if (res.checked) {
       checkedCount += 1;
+      if (res.register) regPairs.push({ register: res.register, registerSource: res.registerSource || "default" });
       if (res.effectivePack) seenPacks.add(res.effectivePack);
       if (res.packSource) seenSources.add(res.packSource);
       if (res.rulesetHash) seenHashes.add(res.rulesetHash);
@@ -1116,6 +1685,9 @@ function runCheck(args, packs) {
         });
       }
     }
+    if (ruleFilter) {
+      fileFindings = fileFindings.filter((f) => ruleFilter.has(f.ruleId));
+    }
     allFindings.push(...fileFindings);
     allSkipped.push(...res.skipped);
     if (res.coverageWarnings && res.coverageWarnings.length > 0) {
@@ -1126,8 +1698,16 @@ function runCheck(args, packs) {
     }
   }
 
+  const shouldFail =
+    allFindings.some((f) => SEVERITY_RANK[f.severity] >= SEVERITY_RANK[failOn]) ||
+    (reportUnused && allUnused.length > 0);
+  const outFindings = quiet
+    ? allFindings.filter((f) => (SEVERITY_RANK[f.severity] || 1) >= SEVERITY_RANK[failOn])
+    : allFindings;
+
   const report = {
     version: ENGINE_VERSION,
+    context: summarizeReportContext(regPairs, flagRegister),
     rulesetHash: seenHashes.size === 1 ? Array.from(seenHashes)[0] : seenHashes.size > 1 ? fnv1aHex(Array.from(seenHashes).sort().join("|")) : null,
     effectivePack: seenPacks.size === 1 ? Array.from(seenPacks)[0] : seenPacks.size > 1 ? "mixed" : flags.pack || null,
     packSource: seenSources.size === 1 ? Array.from(seenSources)[0] : seenSources.size > 1 ? "mixed" : null,
@@ -1136,22 +1716,22 @@ function runCheck(args, packs) {
     checkedCount,
     skipped: allSkipped,
     coverageWarnings: allCoverageWarnings,
-    findings: allFindings,
+    findings: outFindings,
     unusedSuppressions: allUnused,
     ...(allProfiles.length > 0 ? { profiles: allProfiles } : {}),
   };
 
   const outReport = compactJson ? applyCompactReport(report) : report;
-  const rendered = formatReport(outReport, format, lang);
+  const rendered = colorizeTextReport(formatReport(outReport, format, lang, { quiet, failOn }), useColor);
   if (rendered) console.log(rendered);
+  if (useColor && !quiet && format === "text" && allFindings.length === 0 && allUnused.length === 0 && !includeMl && !includePatterns && checkedCount > 0) {
+    console.log(lang === "zh" ? "  提示: 可加 --deep 启用统计画像与内置隐蔽套话模型。" : "  hint: run with --deep to enable rhythm telemetry and Pocket ML scoring.");
+  }
 
   if (explicitUninspectable || (checkedCount === 0 && allSkipped.length > 0)) {
     process.exitCode = 2;
     return;
   }
-  const shouldFail =
-    allFindings.some((f) => SEVERITY_RANK[f.severity] >= SEVERITY_RANK[failOn]) ||
-    (reportUnused && allUnused.length > 0);
   process.exitCode = shouldFail ? 1 : 0;
 }
 
@@ -1181,7 +1761,11 @@ const POCKET_STEALTH_VAPOR_RULE = {
 };
 
 function runExplain(args, packs, patternByRuleId) {
-  const { flags, positional } = parseFlags(args);
+  const { flags, positional } = parseFlags(args, "explain");
+  if (flags.help) {
+    printSubcommandHelp("explain");
+    return;
+  }
   const format = flags.json ? "json" : flags.format || "text";
   assertTextOrJsonFormat(format);
   const ruleId = positional[0];
@@ -1270,7 +1854,11 @@ function runExplain(args, packs, patternByRuleId) {
 }
 
 function runPacks(args, packs) {
-  const { flags } = parseFlags(args);
+  const { flags } = parseFlags(args, "packs");
+  if (flags.help) {
+    printSubcommandHelp("packs");
+    return;
+  }
   const format = flags.json ? "json" : flags.format || "text";
   assertTextOrJsonFormat(format);
   const list = Object.values(packs).map((p) => ({
@@ -1298,7 +1886,11 @@ const VALID_SEVERITIES = new Set(["error", "warning", "info"]);
 const VALID_TIERS = new Set(["invariant", "taste"]);
 
 function runCatalog(args, packs, patternByRuleId) {
-  const { flags, positional } = parseFlags(args);
+  const { flags, positional } = parseFlags(args, "catalog");
+  if (flags.help) {
+    printSubcommandHelp("catalog");
+    return;
+  }
   const format = flags.json ? "json" : flags.format || "text";
   const lang = flags.lang || "en";
   if (!["text", "json", "md"].includes(format)) {
@@ -1358,7 +1950,12 @@ function runCatalog(args, packs, patternByRuleId) {
   }
 }
 
-function runPackTest(packs) {
+function runPackTest(args, packs) {
+  const { flags } = parseFlags(args, "pack-test");
+  if (flags.help) {
+    printSubcommandHelp("pack-test");
+    return;
+  }
   const errors = [];
   let assertions = 0;
 
@@ -1400,6 +1997,41 @@ function runPackTest(packs) {
           errors.push(`${pack.id}/${rule.id}: unbounded '.*' forbidden in portable pack regex: ${pat}`);
         }
       }
+      // Validate registerOverrides + fixtures.register
+      if (rule.registerOverrides) {
+        if (rule.tier === "invariant") {
+          errors.push(`${pack.id}/${rule.id}: invariant rules cannot define registerOverrides`);
+        }
+        const ovEntries = Object.entries(rule.registerOverrides);
+        for (const [rk, rov] of ovEntries) {
+          if (!VALID_REGISTERS.includes(rk) || rk === "unspecified") {
+            errors.push(`${pack.id}/${rule.id}: invalid registerOverrides key '${rk}'`);
+          }
+          if (rov?.severity && SEVERITY_RANK[rov.severity] > SEVERITY_RANK[rule.severity]) {
+            errors.push(`${pack.id}/${rule.id}: registerOverrides['${rk}'] cannot raise severity above '${rule.severity}'`);
+          }
+        }
+        const regFixtures = rule.fixtures?.register || [];
+        if (regFixtures.length === 0) {
+          errors.push(`${pack.id}/${rule.id}: registerOverrides requires at least 1 fixtures.register assertion`);
+        }
+        for (const rf of regFixtures) {
+          assertions += 1;
+          const res = auditText(rf.text, {
+            filename: `fixture.${sampleMod}`,
+            modality: sampleMod,
+            pack: effective,
+            allowSyntheticFixtures: true,
+            register: rf.register,
+          });
+          const hit = res.findings.find((f) => f.ruleId === rule.id);
+          if (rf.expect === "skip") {
+            if (hit) errors.push(`${pack.id}/${rule.id}: expected register '${rf.register}' to skip`);
+          } else if (!hit || hit.severity !== rf.expect) {
+            errors.push(`${pack.id}/${rule.id}: register '${rf.register}' expected '${rf.expect}', got '${hit?.severity || "none"}'`);
+          }
+        }
+      }
     }
   }
 
@@ -1411,7 +2043,12 @@ function runPackTest(packs) {
   console.log(`dislop pack-test: ok (${Object.keys(packs).length} packs, ${assertions} fixture assertions passed)`);
 }
 
-function runInit() {
+function runInit(args = []) {
+  const { flags } = parseFlags(args, "init");
+  if (flags.help) {
+    printSubcommandHelp("init");
+    return;
+  }
   const cwd = process.cwd();
   const cfgPath = path.join(cwd, ".dislop.json");
   if (!fs.existsSync(cfgPath)) {
@@ -1436,6 +2073,9 @@ function runInit() {
       fs.writeFileSync(giPath, cur.replace(/\s*$/, "\n") + localEntry + "\n", "utf8");
       console.log(`Added ${localEntry} to .gitignore`);
     }
+  } else if (fs.existsSync(path.join(cwd, ".git"))) {
+    fs.writeFileSync(giPath, localEntry + "\n", "utf8");
+    console.log(`Created .gitignore with ${localEntry}`);
   }
 }
 
@@ -1443,7 +2083,6 @@ function runInit() {
 
 function runMcpServer(packs, patternByRuleId) {
   const cwd = process.cwd();
-  const config = loadConfig(cwd);
   const catalogEntries = buildCatalog(packs, patternByRuleId);
   const rl = readline.createInterface({ input: process.stdin, terminal: false });
 
@@ -1496,12 +2135,22 @@ function runMcpServer(packs, patternByRuleId) {
       if (!obj || typeof obj !== "object" || !cleanLang) return obj;
       return { [cleanLang]: obj[cleanLang] || obj.en || "" };
     };
+    const localizeRevision = (rev) => {
+      if (!rev || typeof rev !== "object") return null;
+      if (!cleanLang) return rev;
+      return {
+        ...rev,
+        instruction: localizeObj(rev.instruction),
+        avoid: localizeObj(rev.avoid),
+      };
+    };
     if (verbosity === "full") {
       if (!cleanLang) return findings;
       return findings.map((f) => ({
         ...f,
         message: localizeObj(f.message),
         deletionTest: localizeObj(f.deletionTest),
+        revision: localizeRevision(f.revision),
       }));
     }
     return findings.map((f) => ({
@@ -1509,6 +2158,7 @@ function runMcpServer(packs, patternByRuleId) {
       ruleId: f.ruleId,
       tier: f.tier ?? "taste",
       severity: f.severity,
+      confidence: f.confidence || "medium",
       fixStrategy: f.fixStrategy || deriveFixStrategy({ id: f.ruleId, family: f.family }),
       family: f.family ?? (f.dimension ? `${f.dimension}/${f.ruleId}` : null),
       file: f.file,
@@ -1519,6 +2169,7 @@ function runMcpServer(packs, patternByRuleId) {
       match: f.match,
       message: localizeObj(f.message),
       deletionTest: f.deletionTest ? localizeObj(f.deletionTest) : null,
+      revision: localizeRevision(f.revision),
     }));
   }
 
@@ -1533,6 +2184,7 @@ function runMcpServer(packs, patternByRuleId) {
           text: { type: "string", description: "Draft text to inspect in memory" },
           path: { type: "string", description: "Workspace-relative file path (.md, .html, .css, .jsx, .svg, .png, .jpg, .jpeg, .webp, .docx, .pptx, .pdf)" },
           pack: { type: "string", description: "Style pack ID (auto, business-brief, engineering-spec, regulated-comms, literary-essay, deck-and-ui, executive-deck)" },
+          register: { type: "string", enum: ["auto", ...VALID_REGISTERS], description: "Optional writing register override (auto, unspecified, official, casual, argumentative, technical, marketing, narrative)" },
           filename: { type: "string", description: "Virtual filename hint when inspecting `text`" },
           profile: { type: "boolean", description: "Include 5-axis rhythm & concreteness telemetry on text/markdown (default true)" },
           deep: { type: "boolean", description: "Enable thorough inspection (Pocket ML + extended 6-dimension pattern bank)" },
@@ -1556,6 +2208,7 @@ function runMcpServer(packs, patternByRuleId) {
           gitRef: { type: "string", description: "Git ref baseline when `path` is given (default HEAD)" },
           filename: { type: "string", description: "Optional virtual filename hint when passing `before`/`after`" },
           pack: { type: "string", description: "Optional pack ID or 'auto' to also verify findingsDelta" },
+          register: { type: "string", enum: ["auto", ...VALID_REGISTERS], description: "Optional writing register override (auto, unspecified, official, casual, argumentative, technical, marketing, narrative)" },
           keep: { type: "array", items: { type: "string" }, description: "Protected terms/concepts that must stay intact in the revision" },
           allowAdded: { type: "boolean", description: "Allow new numbers not present in original (default false)" },
           strict: { type: "boolean", description: "Fail `ok` on any anti-degradation warning in addition to hard fact/error checks" },
@@ -1811,6 +2464,19 @@ function runMcpServer(packs, patternByRuleId) {
           }
           const mod = detectModality(fn) || "markdown";
           const fileCfg = resolveConfigForFile(fn, liveConfig);
+          let argRegister = null;
+          if (args.register !== undefined) {
+            if (typeof args.register !== "string") {
+              toolResult(id, { error: `Invalid register (expected string: auto, ${VALID_REGISTERS.join(", ")})` }, true);
+              return;
+            }
+            const normReg = args.register.trim().toLowerCase();
+            if (!normReg || (normReg !== "auto" && !VALID_REGISTERS.includes(normReg))) {
+              toolResult(id, { error: `Invalid register '${args.register}' (expected auto, ${VALID_REGISTERS.join(", ")})` }, true);
+              return;
+            }
+            argRegister = normReg;
+          }
           const packRes = resolveTextPackAndSource(afterText, fn, mod, args.pack || "auto", fileCfg, packs);
           const keepTerms = Array.isArray(args.keep)
             ? args.keep
@@ -1822,6 +2488,7 @@ function runMcpServer(packs, patternByRuleId) {
             modality: mod,
             pack: packRes.pack,
             config: fileCfg,
+            register: argRegister,
             keepTerms,
             allowAdded: Boolean(args.allowAdded),
             strict: Boolean(args.strict),
@@ -1918,16 +2585,43 @@ function runMcpServer(packs, patternByRuleId) {
           const includePatterns = Boolean(args.patterns || args.deep);
           const wantProfile = args.profile !== false;
           const banks = includePatterns ? loadPatternBanks() : null;
+          let argRegister = null;
+          if (args.register !== undefined && args.register !== null) {
+            if (typeof args.register !== "string") {
+              toolResult(
+                id,
+                { error: `Invalid register (expected string: auto, ${VALID_REGISTERS.join(", ")})` },
+                true
+              );
+              return;
+            }
+            const rawReg = args.register;
+            const normReg = rawReg.trim().toLowerCase();
+            if (!normReg || (normReg !== "auto" && !VALID_REGISTERS.includes(normReg))) {
+              toolResult(
+                id,
+                { error: `Invalid register '${rawReg}' (expected auto, ${VALID_REGISTERS.join(", ")})` },
+                true
+              );
+              return;
+            }
+            argRegister = normReg;
+          }
 
           if (hasText) {
             const fn = args.filename || "draft.md";
             const mod = detectModality(fn) || "markdown";
             const fileCfg = resolveConfigForFile(fn, liveConfig);
             const { pack, effectivePack, packSource } = resolveTextPackAndSource(args.text, fn, mod, args.pack || null, fileCfg, packs);
-            const res = auditText(args.text, { filename: fn, modality: mod, pack, config: fileCfg });
+            const regInfo = resolveRegister(args.text, { filename: fn, flagRegister: argRegister, config: fileCfg });
+            const res = auditText(args.text, { filename: fn, modality: mod, pack, config: fileCfg, register: argRegister });
             let findings = res.findings;
             if (includePatterns) {
-              findings = mergePatternBankFindings(findings, auditPatterns(args.text, { filename: fn, modality: mod, banks, config: fileCfg }).findings);
+              findings = mergePatternBankFindings(
+                findings,
+                auditPatterns(args.text, { filename: fn, modality: mod, banks, config: fileCfg }).findings,
+                { packs, pack, register: regInfo.register, config: fileCfg }
+              );
             }
             const needsCoverageProfile = codePointLength(args.text) >= 2000 || mod === "html";
             const profile = PROSE_ML_MODALITIES.has(mod) && (wantProfile || includeMl || needsCoverageProfile)
@@ -1935,7 +2629,14 @@ function runMcpServer(packs, patternByRuleId) {
               : null;
             if (includeMl && PROSE_ML_MODALITIES.has(mod)) {
               const mlSrc = mod === "html" || mod === "svg" ? buildZones(args.text, mod, fileCfg).prose : args.text;
-              findings = [...findings, ...buildPocketMlFindings(mlSrc, fn, findings, null, { profile, modality: mod }).findings];
+              findings = [
+                ...findings,
+                ...buildPocketMlFindings(mlSrc, fn, findings, null, {
+                  profile,
+                  modality: mod,
+                  register: regInfo.register,
+                }).findings,
+              ];
             }
             const formatted = formatFindingsForMcp(findings, verbosity, args.lang);
             toolResult(id, {
@@ -1943,6 +2644,7 @@ function runMcpServer(packs, patternByRuleId) {
               packSource,
               rulesetHash: computeRulesetHash(pack),
               modality: mod,
+              context: { register: regInfo.register, registerSource: regInfo.registerSource },
               checked: true,
               skipped: [],
               coverageWarnings: collectTextCoverageWarnings(args.text, mod, fn, profile),
@@ -1996,7 +2698,7 @@ function runMcpServer(packs, patternByRuleId) {
             packs,
             args.pack || null,
             liveConfig,
-            { includeMl, includePatterns, includeProfile: wantProfile, banks }
+            { includeMl, includePatterns, includeProfile: wantProfile, banks, register: argRegister }
           );
           const profile = res.profileItem ? res.profileItem.profile : null;
           const formatted = formatFindingsForMcp(res.findings, verbosity, args.lang);
@@ -2005,6 +2707,7 @@ function runMcpServer(packs, patternByRuleId) {
             packSource: res.packSource || null,
             rulesetHash: res.rulesetHash || null,
             modality: mod,
+            context: { register: res.register || "unspecified", registerSource: res.registerSource || "default" },
             checked: res.checked,
             skipped: res.skipped,
             coverageWarnings: res.coverageWarnings || [],
@@ -2082,7 +2785,11 @@ function runMcpServer(packs, patternByRuleId) {
 }
 
 function runResources(rest, packs) {
-  const { flags } = parseFlags(rest);
+  const { flags } = parseFlags(rest, "resources");
+  if (flags.help) {
+    printSubcommandHelp("resources");
+    return;
+  }
   const format = flags.json ? "json" : flags.format || "text";
   assertTextOrJsonFormat(format);
   const asJson = format === "json";
@@ -2155,7 +2862,11 @@ function loadPatternBanks(customPatternsDir = PATTERNS_DIR) {
 }
 
 function runPatterns(args) {
-  const { flags, positional } = parseFlags(args);
+  const { flags, positional } = parseFlags(args, "patterns");
+  if (flags.help) {
+    printSubcommandHelp("patterns");
+    return;
+  }
   const format = flags.json ? "json" : flags.format || "text";
   assertTextOrJsonFormat(format);
   const lang = flags.lang || "en";
@@ -2218,7 +2929,11 @@ function runPatterns(args) {
 }
 
 function runVoice(args) {
-  const { flags, positional } = parseFlags(args);
+  const { flags, positional } = parseFlags(args, "voice");
+  if (flags.help) {
+    printSubcommandHelp("voice");
+    return;
+  }
   const format = flags.json ? "json" : flags.format || "text";
   assertTextOrJsonFormat(format);
   const lang = flags.lang || "auto";
@@ -2293,6 +3008,17 @@ async function runLocalDeslopCli(target, flags, packs) {
   }
   const modality = detectModality(filename) || "markdown";
   const config = loadConfig(process.cwd(), flags.config || null);
+  let flagRegister = null;
+  if (flags.register !== undefined) {
+    const norm = String(flags.register).trim().toLowerCase();
+    if (!norm || (norm !== "auto" && !VALID_REGISTERS.includes(norm))) {
+      console.error(`dislop: invalid --register '${flags.register}' (expected auto, ${VALID_REGISTERS.join(", ")})`);
+      process.exit(2);
+    }
+    flagRegister = norm;
+  }
+  const fileCfg = resolveConfigForFile(filename, config);
+  const regInfo = resolveRegister(rawText, { filename, flagRegister, config: fileCfg });
   const explicitPack =
     flags.pack === "auto"
       ? predictPackWithPocketRouter(rawText).recommendedPack
@@ -2306,6 +3032,7 @@ async function runLocalDeslopCli(target, flags, packs) {
       text: rawText,
       pack,
       modality,
+      register: regInfo.register,
       endpoint: flags.endpoint || null,
       model: flags.model || null,
       allowLan: Boolean(flags["allow-lan"]),
@@ -2348,8 +3075,12 @@ async function runLocalDeslopCli(target, flags, packs) {
   }
 }
 
-async function runModel(args, packs) {
-  const { flags, positional } = parseFlags(args);
+async function runModel(args, packs, cmdAlias = "model") {
+  const { flags, positional } = parseFlags(args, cmdAlias);
+  if (flags.help) {
+    printSubcommandHelp(cmdAlias);
+    return;
+  }
   const action = positional[0] || "status";
   const validActions = new Set(["status", "recommend", "score", "install", "setup", "import", "remove", "rm", "deslop"]);
   if (!validActions.has(action)) {
@@ -2604,16 +3335,33 @@ function readGitBaselineForFile(absFile, gitRef = "HEAD") {
 }
 
 function runVerify(args, packs) {
-  const { flags, positional } = parseFlags(args);
+  const { flags, positional } = parseFlags(args, "verify");
+  if (flags.help) {
+    printSubcommandHelp("verify");
+    return;
+  }
   const cwd = process.cwd();
   const format = flags.json ? "json" : flags.format || "text";
   assertTextOrJsonFormat(format);
   const lang = flags.lang || "en";
+  if (!["en", "zh"].includes(lang)) {
+    console.error(`dislop: invalid --lang '${lang}' (expected en or zh)`);
+    process.exit(2);
+  }
   const allowAdded = Boolean(flags["allow-added"]);
   const strict = Boolean(flags.strict);
+  let flagRegister = null;
+  if (flags.register !== undefined) {
+    const norm = String(flags.register).trim().toLowerCase();
+    if (!norm || (norm !== "auto" && !VALID_REGISTERS.includes(norm))) {
+      console.error(`dislop: invalid --register '${flags.register}' (expected auto, ${VALID_REGISTERS.join(", ")})`);
+      process.exit(2);
+    }
+    flagRegister = norm;
+  }
   const keepRaw = typeof flags.keep === "string" ? flags.keep : "";
   const keepTerms = keepRaw ? keepRaw.split(",").map((s) => s.trim()).filter(Boolean) : [];
-  const config = loadConfig(cwd, flags.config || null);
+  const config = loadConfigOrExit(cwd, flags.config || null);
 
   let beforeText;
   let afterText;
@@ -2678,6 +3426,7 @@ function runVerify(args, packs) {
     modality: mod,
     pack: resolvedPack.pack,
     config: fileCfg,
+    register: flagRegister,
     keepTerms,
     allowAdded,
     strict,
@@ -2912,13 +3661,12 @@ function buildRubricPromptDigest(rubric, lang = "en") {
     .join("\n");
 }
 
-async function runReview(args, packs) {
-  const { flags, positional } = parseFlags(args);
+async function runRubricReview(flags, positional, packs) {
   const cwd = process.cwd();
   const format = flags.json ? "json" : flags.format || "text";
   assertTextOrJsonFormat(format);
   const lang = flags.lang || "en";
-  const config = loadConfig(cwd, flags.config || null);
+  const config = loadConfigOrExit(cwd, flags.config || null);
   const voiceInfo = discoverVoiceCard(cwd);
   const rubric = loadAiTicRubric();
   const target = positional[0] || "-";
@@ -2926,8 +3674,8 @@ async function runReview(args, packs) {
   let text;
   let label;
   if (target === "-") {
-    text = fs.readFileSync(0, "utf8");
-    label = flags["stdin-filename"] || "stdin.md";
+    text = readStdinTextChecked("review");
+    label = detectStdinFilename(text, flags["stdin-filename"]);
   } else {
     const abs = path.resolve(cwd, target);
     if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
@@ -2940,8 +3688,19 @@ async function runReview(args, packs) {
 
   const mod = detectModality(label) || "markdown";
   const fileCfg = resolveConfigForFile(label, config);
+  let flagRegister = null;
+  if (flags.register !== undefined) {
+    const norm = String(flags.register).trim().toLowerCase();
+    if (!norm || (norm !== "auto" && !VALID_REGISTERS.includes(norm))) {
+      console.error(`dislop: invalid --register '${flags.register}' (expected auto, ${VALID_REGISTERS.join(", ")})`);
+      process.exit(2);
+    }
+    flagRegister = norm;
+  }
+  const regInfo = resolveRegister(text, { filename: label, flagRegister, config: fileCfg });
   const packRes = resolveTextPackAndSource(text, label, mod, flags.pack || "auto", fileCfg, packs);
-  const auditRes = auditText(text, { filename: label, modality: mod, pack: packRes.pack, config: fileCfg });
+  const strategy = getScenarioStrategy({ packId: packRes.effectivePack, register: regInfo.register });
+  const auditRes = auditText(text, { filename: label, modality: mod, pack: packRes.pack, config: fileCfg, register: regInfo.register });
   const ruleFindings = auditRes.findings;
   const patRes = auditPatterns(text, { filename: label, modality: mod, banks: loadPatternBanks(), config: fileCfg });
   const patternFindings = patRes.findings;
@@ -3000,13 +3759,15 @@ async function runReview(args, packs) {
     }
     const chatUrl = endpoint.endsWith("/chat/completions") ? endpoint : `${endpoint.replace(/\/+$/, "")}/chat/completions`;
     const modelId = String(flags.model || process.env.DISLOP_REVIEW_MODEL || "gpt-4o-mini");
+    const stratTag = lang === "zh" ? "zh" : "en";
     const sysPrompt =
       lang === "zh"
-        ? "你是 dislop 审校助手，请结合五层 AI 口癖准则交叉核对确定性预检与统计信号。只输出 JSON：{\"summary\":\"...\",\"issues\":[{\"quote\":\"原文原样片段\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"原因\",\"replacement\":\"仅edit填\",\"instruction\":\"仅rewrite填\",\"question\":\"仅ask填\"}]}。硬规则：1) 保留作者原有视角、自然句长起伏、个性化表达与带事实锚点的行业术语，禁止改写成死板说教、廉价“装人味”口水词（家人们/其实吧/绝绝子）或删减干货；2) quote 必须一字不差从原文复制；3) 禁止引入全闭环/闭环/赋能/抓手/不是A而是B等新套词；4) 绝不改丢数字或范围限定词（预计/仅在/除非/待确认）。"
-        : "You are dislop's multi-layer AI-tic reviewer. Cross-check deterministic findings and telemetry against the 5-layer rubric. Output strict JSON only: {\"summary\":\"...\",\"issues\":[{\"quote\":\"exact verbatim substring\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"reason\",\"replacement\":\"for edit\",\"instruction\":\"for rewrite\",\"question\":\"for ask\"}]}. Rules: 1) preserve author voice, perspective, rhythm contrast, vivid phrasing, grounded domain terms, and modality qualifiers; never suggest cheesy fake-human slang; 2) quote MUST match verbatim; 3) never introduce filler slogans; 4) keep every number and unit intact.";
+        ? `你是 dislop 审校助手，请结合五层 AI 口癖准则与当前写作场景（${strategy.label.zh}）交叉核对确定性预检与统计信号。本场景清理重点：${strategy.cut.zh}；必须保留：${strategy.protect.zh}；严禁改偏：${strategy.avoid.zh}。只输出 JSON：{"summary":"...","issues":[{"quote":"原文原样片段","ticLayer":"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact","action":"edit|rewrite|ask","severity":"error|warning|info","why":"原因","replacement":"仅edit填","instruction":"仅rewrite填","question":"仅ask填"}]}。硬规则：1) 保留作者原有视角、自然句长起伏、个性化表达与带事实锚点的行业术语，禁止改写成死板说教、廉价“装人味”口水词（家人们/其实吧/绝绝子）或删减干货；2) quote 必须一字不差从原文复制；3) 禁止引入全闭环/闭环/赋能/抓手/不是A而是B等新套词；4) 绝不改丢数字或范围限定词（预计/仅在/除非/待确认）。`
+        : `You are dislop's multi-layer AI-tic reviewer tuned for ${strategy.label.en} (${strategy.id}). Cut: ${strategy.cut.en} Protect: ${strategy.protect.en} Avoid: ${strategy.avoid.en} Cross-check deterministic findings and telemetry against the 5-layer rubric. Output strict JSON only: {"summary":"...","issues":[{"quote":"exact verbatim substring","ticLayer":"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact","action":"edit|rewrite|ask","severity":"error|warning|info","why":"reason","replacement":"for edit","instruction":"for rewrite","question":"for ask"}]}. Rules: 1) preserve author voice, perspective, rhythm contrast, vivid phrasing, grounded domain terms, and modality qualifiers; never suggest cheesy fake-human slang; 2) quote MUST match verbatim; 3) never introduce filler slogans; 4) keep every number and unit intact.`;
     const rubricDigest = buildRubricPromptDigest(rubric, lang);
     const userPrompt = [
-      `Modality: ${mod} | Pack: ${packRes.effectivePack}`,
+      `Modality: ${mod} | Pack: ${packRes.effectivePack} | Register: ${regInfo.register} | Scenario: ${strategy.id}`,
+      `Scenario Strategy (${strategy.label[stratTag]}): cut=[${strategy.cut[stratTag]}] protect=[${strategy.protect[stratTag]}] avoid=[${strategy.avoid[stratTag]}]`,
       ...(rubricDigest ? [`5-Layer AI-Tic Rubric:\n${rubricDigest}`] : []),
       `Local Cross-Check Signals: ${JSON.stringify(crossCheck)}`,
       ...(voiceInfo.found && voiceInfo.card?.profile ? [`Author style card (${voiceInfo.scope}): ${JSON.stringify(voiceInfo.card.profile)}`] : []),
@@ -3061,6 +3822,8 @@ async function runReview(args, packs) {
     modality: mod,
     effectivePack: packRes.effectivePack,
     packSource: packRes.packSource,
+    register: regInfo.register,
+    scenarioStrategy: strategy.id,
     crossCheck,
     rubricLayers: (rubric.layers || []).map((l) => l.id),
     voiceCard: { found: voiceInfo.found, scope: voiceInfo.scope },
@@ -3108,35 +3871,612 @@ async function runReview(args, packs) {
   }
 }
 
+async function runProviderReview(flags, positional, packs) {
+  if (positional.length > 1) {
+    console.error("dislop review: inspect one file or '-' stdin per invocation.");
+    process.exit(2);
+  }
+  const target = positional[0] || "-";
+  const cwd = process.cwd();
+  const config = loadConfigOrExit(cwd, flags.config || null);
+  const lang = flags.lang || "en";
+  if (!["en", "zh"].includes(lang)) {
+    console.error(`dislop: invalid --lang '${lang}' (expected en or zh)`);
+    process.exit(2);
+  }
+  const format = flags.json ? "json" : flags.format || "text";
+  if (!["text", "json", "agent"].includes(format)) {
+    console.error(`dislop review: invalid --format '${format}' (expected text, json, or agent)`);
+    process.exit(2);
+  }
+  const failOn = flags["fail-on"] || "warning";
+  if (!SEVERITY_RANK[failOn]) {
+    console.error(`dislop review: invalid --fail-on '${failOn}' (expected error, warning, info, or never)`);
+    process.exit(2);
+  }
+  let timeoutMs = 30000;
+  if (flags.timeout !== undefined) {
+    const rawT = String(flags.timeout).trim();
+    if (!/^\d+$/.test(rawT)) {
+      console.error("dislop review: --timeout must be an integer between 1000 and 120000 ms");
+      process.exit(2);
+    }
+    timeoutMs = Number(rawT);
+    if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 120000) {
+      console.error("dislop review: --timeout must be between 1000 and 120000 ms");
+      process.exit(2);
+    }
+  }
+  let maxChunks = 20;
+  if (flags["max-chunks"] !== undefined) {
+    const rawC = String(flags["max-chunks"]).trim();
+    if (!/^\d+$/.test(rawC)) {
+      console.error("dislop review: --max-chunks must be an integer between 1 and 100");
+      process.exit(2);
+    }
+    maxChunks = Number(rawC);
+    if (!Number.isSafeInteger(maxChunks) || maxChunks < 1 || maxChunks > 100) {
+      console.error("dislop review: --max-chunks must be between 1 and 100");
+      process.exit(2);
+    }
+  }
+
+  let rawText = "";
+  let filename = "stdin.md";
+  let modality = "markdown";
+  if (target === "-") {
+    rawText = readStdinTextChecked("review");
+    filename = detectStdinFilename(rawText, flags["stdin-filename"]);
+    modality = detectModality(filename) || "markdown";
+    if (flags["stdin-filename"] && (modality === "docx" || modality === "pptx" || modality === "pdf")) {
+      console.error(`dislop review: '--stdin-filename' cannot treat stdin as binary '${modality}'; pass the file path directly.`);
+      process.exit(2);
+    }
+  } else {
+    const absPath = path.resolve(cwd, target);
+    if (!fs.existsSync(absPath) || !fs.statSync(absPath).isFile()) {
+      console.error(`dislop review: file not found: ${target}`);
+      process.exit(2);
+    }
+    const rel = path.relative(cwd, absPath);
+    filename =
+      rel && !rel.startsWith("..") && !path.isAbsolute(rel)
+        ? rel.split(path.sep).join("/")
+        : path.basename(absPath);
+    modality = detectModality(absPath);
+    if (!modality) {
+      console.error(`dislop review: unsupported file type '${path.extname(absPath) || "(none)"}'`);
+      process.exit(2);
+    }
+    const buf = fs.readFileSync(absPath);
+    if (modality === "docx" || modality === "pptx") {
+      try {
+        const entries = readZipXmlEntries(buf);
+        rawText = extractOoxmlReviewText(entries, modality, {
+          includeNotes: Boolean(flags["include-notes"]),
+          includeHidden: Boolean(flags["include-hidden"]),
+        });
+      } catch (err) {
+        console.error(`dislop review: ${err.message}`);
+        process.exit(2);
+      }
+    } else {
+      try {
+        rawText = decodeUtf8Strict(buf);
+      } catch {
+        console.error(`dislop review: '${target}' is not valid UTF-8 text`);
+        process.exit(2);
+      }
+    }
+  }
+  filename = String(filename).replace(/[\r\n]+/g, " ").trim() || "draft.md";
+
+  if (!rawText.trim()) {
+    console.error("dislop review: extracted draft text is empty");
+    process.exit(2);
+  }
+
+  const flagRegister = flags.register !== undefined ? String(flags.register).trim().toLowerCase() : null;
+  let regInfo;
+  try {
+    regInfo = resolveRegister(rawText, {
+      filename,
+      flagRegister,
+      config,
+    });
+  } catch (err) {
+    console.error(`dislop review: ${err.message}`);
+    process.exit(2);
+  }
+
+  const packFlag = flags.pack === "auto" && (modality === "markdown" || modality === "text")
+    ? predictPackWithPocketRouter(rawText).recommendedPack
+    : flags.pack === "auto"
+      ? null
+      : flags.pack || null;
+  const packId = pickPackForFile(filename, modality, packFlag, config);
+  if (!packs[packId]) {
+    console.error(`dislop review: unknown pack '${packId}'`);
+    process.exit(2);
+  }
+
+  let prov;
+  const isDryRun = Boolean(flags["dry-run"]);
+  const isPrintPrompt = Boolean(flags["print-prompt"]);
+  try {
+    prov = resolveProviderConfig({
+      provider: flags.provider || process.env.DISLOP_REVIEW_PROVIDER || "openai",
+      model: flags.model || null,
+      baseUrl: flags["base-url"] || null,
+      allowMissingKey: isDryRun || isPrintPrompt,
+      env: process.env,
+    });
+  } catch (err) {
+    console.error(`dislop review: ${err.message}`);
+    process.exit(2);
+  }
+
+  let chunks;
+  try {
+    chunks = chunkTextByParagraphs(rawText, 10000, { maxChunks });
+  } catch (err) {
+    console.error(`dislop review: ${err.message}`);
+    process.exit(2);
+  }
+
+  const firstPrompt = buildReviewPrompt({
+    chunkText: chunks[0].text,
+    filename,
+    modality,
+    packId,
+    register: regInfo.register,
+    lang,
+  });
+  const totalBytes = Buffer.byteLength(rawText, "utf8");
+  const consentMode = prov.isLocal
+    ? "local-loopback"
+    : flags.yes
+      ? "--yes"
+      : process.env.DISLOP_ALLOW_REMOTE === "1"
+        ? "DISLOP_ALLOW_REMOTE=1"
+        : "required";
+
+  if (isPrintPrompt) {
+    if (format === "json") {
+      console.log(
+        JSON.stringify(
+          {
+            schema: "dislop.review-prompt/1",
+            provider: prov.provider,
+            host: prov.host,
+            model: prov.model,
+            chunks: chunks.length,
+            bytes: totalBytes,
+            delimiter: firstPrompt.delimiter,
+            systemPrompt: firstPrompt.systemPrompt,
+            userPrompt: firstPrompt.userPrompt,
+          },
+          null,
+          2
+        )
+      );
+    } else {
+      console.log(`=== SYSTEM PROMPT ===\n${firstPrompt.systemPrompt}\n\n=== USER PROMPT (chunk 1/${chunks.length}) ===\n${firstPrompt.userPrompt}`);
+    }
+    return;
+  }
+
+  if (isDryRun) {
+    const dryPayload = {
+      schema: "dislop.review-dry-run/1",
+      provider: prov.provider,
+      host: prov.host,
+      endpointUrl: prov.safeUrl,
+      model: prov.model,
+      consent: consentMode,
+      keyPresent: Boolean(prov.apiKey),
+      keySource: prov.keySource,
+      headers: {
+        "content-type": "application/json",
+        ...(prov.apiKey ? { authorization: "Bearer <REDACTED>" } : {}),
+      },
+      file: filename,
+      modality,
+      pack: packId,
+      context: regInfo,
+      chunks: chunks.length,
+      bytes: totalBytes,
+      requestBody: {
+        model: prov.model,
+        temperature: 0,
+        messages: [
+          { role: "system", content: firstPrompt.systemPrompt },
+          { role: "user", content: firstPrompt.userPrompt },
+        ],
+      },
+    };
+    if (format === "json") {
+      console.log(JSON.stringify(dryPayload, null, 2));
+    } else if (lang === "zh") {
+      console.log(`dislop review 演练（0 次网络请求）`);
+      console.log(`  目标接口 : ${prov.safeUrl} (provider=${prov.provider}, model=${prov.model}, consent=${consentMode})`);
+      console.log(`  鉴权来源 : ${prov.apiKey ? `环境变量 ${prov.keySource}（已脱敏）` : "未设置 / 本地免密钥"}`);
+      console.log(`  待审文稿 : ${filename}（${totalBytes} 字节，${chunks.length} 段，语域=${regInfo.register}）`);
+      console.log(`  分隔标记 : ${firstPrompt.delimiter}`);
+    } else {
+      console.log(`dislop review dry-run: 0 network calls made`);
+      console.log(`  destination : ${prov.safeUrl} (provider=${prov.provider}, model=${prov.model}, consent=${consentMode})`);
+      console.log(`  auth        : ${prov.apiKey ? `env ${prov.keySource} (redacted)` : "none/unset"}`);
+      console.log(`  draft       : ${filename} (${totalBytes} bytes, ${chunks.length} chunk(s), register=${regInfo.register})`);
+      console.log(`  delimiter   : ${firstPrompt.delimiter}`);
+    }
+    return;
+  }
+
+  if (!prov.isLocal && Array.isArray(config?.forbid) && config.forbid.length > 0) {
+    const hitLocs = [];
+    for (const pat of config.forbid) {
+      let re;
+      try {
+        re = new RegExp(pat, "gimu");
+      } catch (err) {
+        console.error(`dislop review: invalid .dislop.local.json forbid regex: ${err.message}`);
+        process.exit(2);
+      }
+      if (re.test(filename)) {
+        hitLocs.push("filename");
+      }
+      re.lastIndex = 0;
+      let m;
+      while ((m = re.exec(rawText)) !== null) {
+        const lineNum = rawText.slice(0, m.index).split("\n").length;
+        hitLocs.push(String(lineNum));
+        if (hitLocs.length >= 20) break;
+        if (m[0].length === 0) {
+          if (re.lastIndex >= rawText.length) break;
+          const cp = rawText.codePointAt(m.index);
+          re.lastIndex = m.index + (cp !== undefined && cp > 0xffff ? 2 : 1);
+        }
+      }
+    }
+    if (hitLocs.length > 0) {
+      const uniqueLocs = Array.from(new Set(hitLocs)).slice(0, 5).join(", ");
+      console.error(
+        `dislop review: refusing remote upload — matched ${hitLocs.length} local '.dislop.local.json' forbid policy hit(s) (${uniqueLocs}).`
+      );
+      process.exit(2);
+    }
+  }
+
+  if (prov.isLocal) {
+    try {
+      await assertLoopbackEndpoint(prov.hostname);
+    } catch (err) {
+      console.error(`dislop review: ${scrubSecrets(err.message, prov.apiKey ? [prov.apiKey] : [])}`);
+      process.exit(2);
+    }
+  } else if (!flags.yes && process.env.DISLOP_ALLOW_REMOTE !== "1") {
+    console.error(
+      `dislop review: refusing remote upload without explicit confirmation (--yes or DISLOP_ALLOW_REMOTE=1).\n` +
+        `  target: host=${prov.host} provider=${prov.provider} model=${prov.model} file=${filename} bytes=${totalBytes} chunks=${chunks.length}`
+    );
+    process.exit(2);
+  }
+
+  console.error(
+    `dislop review: sending to host=${prov.host} provider=${prov.provider} model=${prov.model} file=${filename} bytes=${totalBytes} chunks=${chunks.length} register=${regInfo.register}`
+  );
+
+  const allFindings = [];
+  const seenFingerprints = new Set();
+  const rejected = { ungroundedQuote: 0, inventedFact: 0, malformed: 0 };
+  const summaries = [];
+  const levels = [];
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let totalTokens = 0;
+  let hasUsage = false;
+  const redactList = prov.apiKey ? [prov.apiKey] : [];
+
+  for (const ch of chunks) {
+    const prompt = ch.index === 0
+      ? firstPrompt
+      : buildReviewPrompt({
+          chunkText: ch.text,
+          filename,
+          modality,
+          packId,
+          register: regInfo.register,
+          lang,
+        });
+    try {
+      const apiRes = await runReviewRequest({
+        endpointUrl: prov.endpointUrl,
+        isLocal: prov.isLocal,
+        hostname: prov.hostname,
+        model: prov.model,
+        apiKey: prov.apiKey,
+        systemPrompt: prompt.systemPrompt,
+        userPrompt: prompt.userPrompt,
+        timeoutMs,
+      });
+      if (apiRes.usage && typeof apiRes.usage === "object" && !Array.isArray(apiRes.usage)) {
+        try {
+          const MAX_TOK = 1_000_000_000;
+          const safeCount = (v) => {
+            if (typeof v === "number") {
+              return Number.isSafeInteger(v) && v >= 0 && v <= MAX_TOK ? v : 0;
+            }
+            if (typeof v === "string") {
+              const s = v.trim();
+              if (/^\d{1,10}$/.test(s)) {
+                const n = Number(s);
+                return Number.isSafeInteger(n) && n <= MAX_TOK ? n : 0;
+              }
+            }
+            return 0;
+          };
+          const pt = safeCount(apiRes.usage.prompt_tokens);
+          const ct = safeCount(apiRes.usage.completion_tokens);
+          const tt = safeCount(apiRes.usage.total_tokens);
+          hasUsage = true;
+          promptTokens += pt;
+          completionTokens += ct;
+          totalTokens += tt;
+        } catch {}
+      }
+      const norm = validateAndNormalizeReviewResponse({
+        rawContent: apiRes.content,
+        chunkText: ch.text,
+        fullText: rawText,
+        chunkStartOffset: ch.startOffset,
+        filename,
+        modality,
+        lang,
+        redactSecrets: redactList,
+      });
+      for (const f of norm.findings) {
+        if (!seenFingerprints.has(f.fingerprint)) {
+          seenFingerprints.add(f.fingerprint);
+          allFindings.push(f);
+        }
+      }
+      rejected.ungroundedQuote += norm.rejected.ungroundedQuote;
+      rejected.inventedFact += norm.rejected.inventedFact;
+      rejected.malformed += norm.rejected.malformed;
+      if (norm.summary) summaries.push(norm.summary);
+      levels.push(norm.aiFlavorLevel);
+    } catch (err) {
+      console.error(`dislop review: chunk ${ch.index + 1}/${chunks.length} failed — ${scrubSecrets(err.message, redactList)}`);
+      process.exit(2);
+    }
+  }
+
+  const overallLevel = levels.includes("high") ? "high" : levels.includes("medium") ? "medium" : "low";
+  const levelLabel = lang === "zh" ? ({ high: "高", medium: "中", low: "低" }[overallLevel] || overallLevel) : overallLevel;
+  const summaryText = summaries.join(" ").trim();
+  const usageSummary = hasUsage
+    ? { promptTokens, completionTokens, totalTokens }
+    : null;
+  const report = {
+    schema: "dislop.review/1",
+    version: ENGINE_VERSION,
+    provider: prov.provider,
+    host: prov.host,
+    model: prov.model,
+    file: filename,
+    pack: packId,
+    lang,
+    chunks: chunks.length,
+    bytes: totalBytes,
+    aiFlavorLevel: overallLevel,
+    summary: summaryText,
+    context: { register: regInfo.register, registerSource: regInfo.registerSource },
+    checkedCount: 1,
+    skipped: [],
+    findings: allFindings,
+    unusedSuppressions: [],
+    rejected,
+    usage: usageSummary,
+  };
+
+  if (format === "json") {
+    console.log(JSON.stringify(report, null, 2));
+  } else {
+    const out = formatReport(report, format, lang, { failOn });
+    console.log(out);
+    if (format === "text" && summaryText) {
+      console.log(lang === "zh" ? `  [综述 · ${levelLabel}] ${summaryText}` : `  [summary · ${overallLevel}] ${summaryText}`);
+    }
+    const rejTotal = rejected.ungroundedQuote + rejected.inventedFact + rejected.malformed;
+    if (format === "text" && rejTotal > 0) {
+      console.log(
+        lang === "zh"
+          ? `  [校验过滤] 已丢弃 ${rejTotal} 条未通过核验的建议（无原文引用=${rejected.ungroundedQuote}，编造事实=${rejected.inventedFact}，格式异常=${rejected.malformed}）`
+          : `  [guard] filtered ${rejTotal} unverified suggestion(s) (ungrounded=${rejected.ungroundedQuote}, inventedFact=${rejected.inventedFact}, malformed=${rejected.malformed})`
+      );
+    }
+  }
+  const triggered = allFindings.some((f) => (SEVERITY_RANK[f.severity] || 1) >= SEVERITY_RANK[failOn]);
+  process.exitCode = triggered ? 1 : 0;
+}
+
+async function runReview(args, packs) {
+  for (const tok of args) {
+    if (tok === "--api-key" || tok.startsWith("--api-key=") || tok === "--token" || tok.startsWith("--token=")) {
+      console.error(
+        "dislop review: passing --api-key or --token as CLI arguments is forbidden (exposed via process list); set DISLOP_REVIEW_API_KEY or the provider env var instead."
+      );
+      process.exit(2);
+    }
+  }
+  const { flags, positional } = parseFlags(args, "review");
+  if (flags.help) {
+    printSubcommandHelp("review");
+    return;
+  }
+  if (flags.offline || flags.endpoint || flags["api-key-env"]) {
+    return await runRubricReview(flags, positional, packs);
+  }
+  return await runProviderReview(flags, positional, packs);
+}
+
+async function runDoctor(args, packs) {
+  const { flags, positional } = parseFlags(args, "doctor");
+  if (flags.help) {
+    printSubcommandHelp("doctor");
+    return;
+  }
+  if (positional.length > 0) {
+    console.error(`dislop doctor: unexpected positional argument '${positional[0]}'.`);
+    process.exit(2);
+  }
+  const lang = flags.lang || "en";
+  if (!["en", "zh"].includes(lang)) {
+    console.error(`dislop: invalid --lang '${lang}' (expected en or zh)`);
+    process.exit(2);
+  }
+  const format = flags.json ? "json" : flags.format || "text";
+  if (!["text", "json"].includes(format)) {
+    console.error(`dislop doctor: invalid --format '${format}' (expected text or json)`);
+    process.exit(2);
+  }
+  const cwd = process.cwd();
+  let rulesCount = 0;
+  for (const p of Object.values(packs)) rulesCount += (p.rules || []).length;
+  const baseStatus = await buildModelStatusReport({
+    packsCount: Object.keys(packs).length,
+    rulesCount,
+    probeLoopback: !flags["no-loopback"],
+    cacheDir: flags["cache-dir"] || null,
+  });
+
+  const skillRel = "skills/dislop/SKILL.md";
+  const workspaceReady = fs.existsSync(path.join(cwd, skillRel));
+  const bundledReady = fs.existsSync(path.join(REPO_ROOT, skillRel));
+  const skillReady = workspaceReady || bundledReady;
+  const byokEnv = inspectByokEnvStatus(process.env);
+  const cfgPathFound = [".dislop.json", "dislop.json", ".disloprc.json", ".dislop.local.json"].some((n) =>
+    fs.existsSync(path.join(cwd, n))
+  );
+  let cfgValid = true;
+  let cfgError = null;
+  try {
+    loadConfig(cwd, null);
+  } catch (err) {
+    cfgValid = false;
+    cfgError = scrubSecrets(err.message);
+  }
+
+  let gitignoreLocalConfig = null;
+  try {
+    const g = spawnSync("git", ["check-ignore", "-q", ".dislop.local.json"], { cwd, encoding: "utf8", timeout: 2000 });
+    if (g.status === 0) gitignoreLocalConfig = true;
+    else if (g.status === 1) gitignoreLocalConfig = false;
+  } catch {}
+
+  const ping = flags.online
+    ? await pingEndpointHealth("https://dislop.com/api/health")
+    : { checked: false, ok: null, status: null, error: null };
+
+  const report = {
+    ...baseStatus,
+    schema: "dislop.doctor/1",
+    layers: {
+      skill: { ready: skillReady, workspaceReady, bundledReady, path: skillRel },
+      localCli: {
+        ready: true,
+        version: ENGINE_VERSION,
+        packs: Object.keys(packs).length,
+        rules: rulesCount,
+        pocketMlReady: true,
+        localRunnersCount: baseStatus.localRunners.length,
+      },
+      byokReview: byokEnv,
+      officialCloudMcp: {
+        url: "https://dislop.com/mcp",
+        freeCreditsPerMonth: 30,
+        ping,
+      },
+      config: {
+        found: cfgPathFound,
+        valid: cfgValid,
+        error: cfgError,
+        gitignoreLocalConfig,
+      },
+    },
+  };
+
+  if (format === "json") {
+    console.log(JSON.stringify(report, null, 2));
+    if (!cfgValid) process.exitCode = 2;
+    return;
+  }
+
+  const configuredNames = Object.entries(byokEnv.providers)
+    .filter(([, v]) => v.keyPresent)
+    .map(([k, v]) => `${k}(${v.keySource})`);
+  const hw = report.hardware;
+  const rec = report.recommendation;
+  if (lang === "zh") {
+    const skillLabel = workspaceReady ? "已就绪（当前工作区）" : bundledReady ? "已就绪（安装包内置）" : "未找到";
+    const pingLabel = ping.checked
+      ? (ping.ok ? `在线连通 HTTP ${ping.status}` : `连通失败：${ping.error || `HTTP ${ping.status}`}`)
+      : (ping.error ? `已拦截（${ping.error}）` : "未联网检测，可加 --online");
+    console.log(`dislop doctor v${ENGINE_VERSION}（三层体检 · 默认 0 联网）`);
+    console.log(`  1. 纯文档 Skill   : ${skillLabel} (${skillRel})`);
+    console.log(`  2. 本地 CLI 引擎  : 已就绪（${Object.keys(packs).length} 套规则包 / ${rulesCount} 条规则 · 14.6 KB Pocket ML · ${baseStatus.localRunners.length} 个本地推理端）`);
+    console.log(`     硬件与选装推荐 : ${hw.platform}/${hw.arch} · ${hw.totalMemoryGb} GB 内存 -> ${rec.tier}${rec.modelId ? ` (${rec.modelId})` : "（内置模型即可）"}`);
+    console.log(`     BYOK 深度审校  : ${configuredNames.length > 0 ? `已配置 ${configuredNames.join("、")}` : "未配置密钥环境变量（仅按需 --yes 启用）"}`);
+    console.log(`  3. 官方云端 MCP   : https://dislop.com/mcp（免费额度 30 次/月 · ${pingLabel}）`);
+    console.log(`  配置与隐私边界    : 配置=${cfgPathFound ? (cfgValid ? "有效" : `异常：${cfgError}`) : "使用默认"} | .dislop.local.json 忽略=${gitignoreLocalConfig === true ? "已忽略" : gitignoreLocalConfig === false ? "未加入 .gitignore" : "非 git 仓库"}`);
+  } else {
+    const skillLabel = workspaceReady ? "ready (workspace)" : bundledReady ? "ready (bundled)" : "not found";
+    const pingLabel = ping.checked
+      ? (ping.ok ? `reachable HTTP ${ping.status}` : `unreachable: ${ping.error || `HTTP ${ping.status}`}`)
+      : (ping.error ? `blocked (${ping.error})` : "offline (pass --online to ping)");
+    console.log(`dislop doctor v${ENGINE_VERSION} (3-layer readiness · offline by default)`);
+    console.log(`  1. Pure-doc Skill : ${skillLabel} (${skillRel})`);
+    console.log(`  2. Local CLI/ML   : ready (${Object.keys(packs).length} packs / ${rulesCount} rules · 14.6 KB Pocket ML · ${baseStatus.localRunners.length} local runner(s))`);
+    console.log(`     Hardware fit   : ${hw.platform}/${hw.arch} · ${hw.totalMemoryGb} GB RAM -> ${rec.tier}${rec.modelId ? ` (${rec.modelId})` : " (bundled only)"}`);
+    console.log(`     BYOK review    : ${configuredNames.length > 0 ? `configured: ${configuredNames.join(", ")}` : "no API key env set (explicit opt-in only)"}`);
+    console.log(`  3. Cloud MCP      : https://dislop.com/mcp (30 free/mo · ${pingLabel})`);
+    console.log(`  Config & hygiene  : config=${cfgPathFound ? (cfgValid ? "valid" : `invalid (${cfgError})`) : "defaults"} | .dislop.local.json gitignored=${gitignoreLocalConfig === null ? "n/a" : String(gitignoreLocalConfig)}`);
+  }
+  if (!cfgValid) process.exitCode = 2;
+}
+
 function printHelp() {
   console.log(`dislop v${ENGINE_VERSION} — Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI, and slides
 
-Usage:
-  Core Workflow:
-    dislop check [paths... | -] [--pack <id|auto>] [--deep] [--compact] [--fail-on error|warning|info|never]
-                 [--format text|json|sarif|github|md] [--json] [--profile] [--changed [ref] | --staged]
-                 [--stdin-filename <name>] [--report-unused] [--lang en|zh]
-    dislop review [file | -] [--pack <id|auto>] [--offline | --endpoint <url>] [--lang en|zh] [--json]
-    dislop verify <before> <after> | --git [ref] <file> [--keep a,b] [--pack <id|auto>] [--strict] [--json]
-    dislop voice [paths... | -] [--output|-o <voice.json>] [--lang auto|en|zh] [--json]
-    dislop init
+Usage: dislop <command> [options]
 
-Rule & MCP Tools:
-  dislop explain <rule-id> [--lang en|zh] [--json]
-  dislop packs [--json]
-  dislop catalog [query] [--pack <id>] [--dimension <dim>] [--format text|json|md] [--lang en|zh]
-  dislop --mcp
+Check & fix (local, 0 network calls):
+  check [paths... | -]      Audit files or stdin [--pack <id|auto>] [--register <id|auto>] [--deep] [-q|--quiet]
+                            [--fail-on error|warning|info|never] [--format text|json|agent|sarif|github|md]
+                            [--changed [ref] | --staged] [--rule <id,...>] [--lang en|zh]
+  verify <before> <after>   Verify edits retain numbers/qualifiers & --keep terms [--git [ref] <file>] [--strict]
+  explain <rule-id>         Show rationale, deletion test, and bad/trap/good examples
+  init                      Create starter .dislop.json and gitignore .dislop.local.json
 
-Optional / Diagnostics:
-  dislop check ... [--ml] [--patterns]
-  dislop patterns [file | -] [--stdin-filename <name>] [--angle <a,b>] [--lang en|zh] [--json]
-  dislop model [status|score|install|import|remove|deslop] [target] [--tier <t>] [--lang en|zh] [--json]
-  dislop setup [--tier auto|none|fast|balanced|quality] [--dry-run] [--force] [--lang en|zh]
-  dislop deslop [file | -] --local [--endpoint <url>] [--model <id>] [--output|-o <file>] [--json]
-  dislop resources [--json]
-  dislop pack-test
+Browse rules & style:
+  catalog [query]           Search the 53-rule AI-slop catalog (alias: search)
+  packs                     List bundled rule packs and supported formats
+  patterns [file | -]       Run multi-angle extended pattern-bank scan
+  voice [paths... | -]      Extract offline dislop.voice/1 writing profile
 
-Exit codes: 0 clean, 1 findings >= --fail-on, 2 invalid usage or unreadable input.`);
+Agent & review:
+  review [file | -]         Multi-layer review (--offline | --endpoint <url> | --provider openai|gemini|local)
+  --mcp                     Run local stdio MCP server (7 offline tools)
+  resources                 Show bundled packs, static agent links, and Official Cloud MCP
+
+Diagnostics & optional local models:
+  doctor [--online]         Check 3-layer readiness (Skill, Local CLI/ML, BYOK env, config, and optional Cloud ping)
+  model [action]            Manage/score Pocket ML & optional local models (status|score|install|import|remove|deslop)
+  pack-test                 Validate Pack Schema v2 manifests and embedded fixtures
+
+Exit codes: 0 clean | 1 findings >= --fail-on | 2 usage, config, or unreadable file error
+Example:    dislop check draft.md --deep --lang zh`);
 }
 
 async function main() {
@@ -3149,6 +4489,14 @@ async function main() {
     return;
   }
   if (argv.length === 0 || argv[0] === "-h" || argv[0] === "--help" || argv[0] === "help") {
+    if (argv[0] === "help" && argv[1]) {
+      if (COMMAND_SPECS[argv[1]]) {
+        printSubcommandHelp(argv[1]);
+        return;
+      }
+      console.error(`dislop: unknown command '${argv[1]}'. Run 'dislop --help' for usage.`);
+      process.exit(2);
+    }
     printHelp();
     return;
   }
@@ -3163,10 +4511,15 @@ async function main() {
   if (cmd === "verify") return runVerify(rest, packs);
   if (cmd === "review") return await runReview(rest, packs);
   if (cmd === "voice") return runVoice(rest);
-  if (cmd === "model" || cmd === "doctor") return await runModel(rest, packs);
-  if (cmd === "setup") return await runModel(["setup", ...rest], packs);
+  if (cmd === "doctor") return await runDoctor(rest, packs);
+  if (cmd === "model") return await runModel(rest, packs, "model");
+  if (cmd === "setup") return await runModel(["setup", ...rest], packs, "setup");
   if (cmd === "deslop") {
-    const { flags, positional } = parseFlags(rest);
+    const { flags, positional } = parseFlags(rest, "deslop");
+    if (flags.help) {
+      printSubcommandHelp("deslop");
+      return;
+    }
     if (!flags.local) {
       console.error("dislop deslop: pass --local to run with a loopback local small model (0 external upload).");
       process.exit(2);
@@ -3178,8 +4531,8 @@ async function main() {
   if (cmd === "patterns") return runPatterns(rest);
   if (cmd === "packs") return runPacks(rest, packs);
   if (cmd === "resources") return runResources(rest, packs);
-  if (cmd === "pack-test") return runPackTest(packs);
-  if (cmd === "init") return runInit();
+  if (cmd === "pack-test") return runPackTest(rest, packs);
+  if (cmd === "init") return runInit(rest);
 
   console.error(`dislop: unknown command '${cmd}'. Run 'dislop --help' for usage.`);
   process.exit(2);

@@ -12,6 +12,338 @@ export const SEVERITY_RANK = {
   never: 99,
 };
 
+export const VALID_REGISTERS = Object.freeze([
+  "unspecified",
+  "official",
+  "casual",
+  "argumentative",
+  "technical",
+  "marketing",
+  "narrative",
+]);
+
+const VALID_REGISTER_SET = new Set(VALID_REGISTERS);
+
+function expandBraces(pattern) {
+  const m = String(pattern || "").match(/\{([^{}]+)\}/);
+  if (!m) return [String(pattern || "")];
+  const prefix = pattern.slice(0, m.index);
+  const suffix = pattern.slice(m.index + m[0].length);
+  return m[1].split(",").flatMap((part) => expandBraces(prefix + part.trim() + suffix));
+}
+
+function globToRegExp(glob) {
+  const norm = String(glob || "").replace(/\\/g, "/").replace(/^\.\//, "");
+  let rx = "^";
+  for (let i = 0; i < norm.length; i += 1) {
+    const ch = norm[i];
+    if (ch === "*" && norm[i + 1] === "*") {
+      if (norm[i + 2] === "/") {
+        rx += "(?:.+/)?";
+        i += 2;
+      } else {
+        rx += ".*";
+        i += 1;
+      }
+    } else if (ch === "*") {
+      rx += "[^/]*";
+    } else if (ch === "?") {
+      rx += "[^/]";
+    } else if ("+.^$|()[]{}".includes(ch)) {
+      rx += "\\" + ch;
+    } else {
+      rx += ch;
+    }
+  }
+  rx += "$";
+  return new RegExp(rx);
+}
+
+export function matchesAnyGlob(relPosix, globs = []) {
+  const clean = String(relPosix || "").replace(/\\/g, "/").replace(/^\.\//, "");
+  return (globs || []).flatMap(expandBraces).some((g) => globToRegExp(g).test(clean));
+}
+
+export function validateConfig(config) {
+  if (config === null || config === undefined) return config;
+  if (typeof config !== "object" || Array.isArray(config)) {
+    throw new Error("Invalid config: expected JSON object");
+  }
+  if (config.failOn !== undefined && config.failOn !== null) {
+    if (typeof config.failOn !== "string" || !SEVERITY_RANK[config.failOn]) {
+      throw new Error("Invalid config 'failOn': expected error, warning, info, or never");
+    }
+  }
+  if (config.register !== undefined && config.register !== null) {
+    if (typeof config.register !== "string") {
+      throw new Error("Invalid config 'register': expected string");
+    }
+    const norm = config.register.trim().toLowerCase();
+    if (norm !== "" && !VALID_REGISTER_SET.has(norm)) {
+      throw new Error(`Invalid config register '${config.register}' (expected ${VALID_REGISTERS.join(", ")})`);
+    }
+  }
+  if (config.overrides !== undefined && config.overrides !== null) {
+    if (!Array.isArray(config.overrides)) {
+      throw new Error("Invalid config 'overrides': expected array");
+    }
+    for (const ov of config.overrides) {
+      if (!ov || typeof ov !== "object" || Array.isArray(ov)) {
+        throw new Error("Invalid config 'overrides' item: expected object");
+      }
+      if (ov.register !== undefined && ov.register !== null) {
+        if (typeof ov.register !== "string") {
+          throw new Error("Invalid config override 'register': expected string");
+        }
+        const ovNorm = ov.register.trim().toLowerCase();
+        if (ovNorm !== "" && !VALID_REGISTER_SET.has(ovNorm)) {
+          throw new Error(`Invalid config override register '${ov.register}' (expected ${VALID_REGISTERS.join(", ")})`);
+        }
+      }
+    }
+  }
+  return config;
+}
+
+export function parseFrontMatterRegister(text) {
+  if (typeof text !== "string" || text.length === 0) return null;
+  const stripped = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  const fm = stripped.match(/^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?=\r?\n|$)/);
+  if (!fm) return null;
+  let genericReg = null;
+  const lines = fm[1].split(/\r?\n/);
+  for (const rawLine of lines) {
+    // Only top-level unindented YAML keys (skips nested mappings and indented block scalars)
+    const m = rawLine.match(/^(dislop_register|register):[ \t]*(.*?)[ \t]*(?:#.*)?$/);
+    if (!m) continue;
+    const key = m[1].toLowerCase();
+    let rawVal = (m[2] || "").trim();
+    if (
+      (rawVal.startsWith('"') && rawVal.endsWith('"') && rawVal.length >= 2) ||
+      (rawVal.startsWith("'") && rawVal.endsWith("'") && rawVal.length >= 2)
+    ) {
+      rawVal = rawVal.slice(1, -1).trim();
+    }
+    const val = rawVal.toLowerCase();
+    if (key === "dislop_register") {
+      if (!val || !VALID_REGISTER_SET.has(val)) {
+        throw new Error(
+          `Invalid dislop_register '${rawVal}' in frontmatter (expected ${VALID_REGISTERS.join(", ")})`
+        );
+      }
+      return val;
+    }
+    if (genericReg === null && VALID_REGISTER_SET.has(val)) {
+      genericReg = val;
+    }
+  }
+  return genericReg;
+}
+
+export function resolveRegister(text = "", { filename = "<memory>", flagRegister = null, config = {} } = {}) {
+  validateConfig(config);
+  if (flagRegister !== null && flagRegister !== undefined) {
+    if (typeof flagRegister !== "string") {
+      throw new Error(`Invalid --register (expected string: auto, ${VALID_REGISTERS.join(", ")})`);
+    }
+    if (flagRegister.trim() !== "") {
+      const norm = flagRegister.trim().toLowerCase();
+      if (norm !== "auto") {
+        if (!VALID_REGISTER_SET.has(norm)) {
+          throw new Error(`Invalid --register '${flagRegister}' (expected auto, ${VALID_REGISTERS.join(", ")})`);
+        }
+        return { register: norm, registerSource: "flag" };
+      }
+    }
+  }
+
+  const mod = detectModality(filename);
+  if (mod === null || mod === "markdown" || mod === "text") {
+    const fmReg = parseFrontMatterRegister(text);
+    if (fmReg) {
+      return { register: fmReg, registerSource: "frontmatter" };
+    }
+  }
+
+  const rel = String(filename || "").replace(/\\/g, "/").replace(/^\.\//, "");
+  for (const ov of config?.overrides || []) {
+    if (!ov || !ov.register) continue;
+    const ovReg = ov.register.trim().toLowerCase();
+    if (!ovReg) continue;
+    const patterns = Array.isArray(ov.files) ? ov.files : ov.files ? [ov.files] : [];
+    if (patterns.length > 0 && matchesAnyGlob(rel, patterns)) {
+      return { register: ovReg, registerSource: "config" };
+    }
+  }
+
+  if (config?.register && config.register.trim() !== "") {
+    return { register: config.register.trim().toLowerCase(), registerSource: "config" };
+  }
+
+  return { register: "unspecified", registerSource: "default" };
+}
+
+export function applyRegisterOverride(rule, register = "unspecified", config = {}) {
+  if (!register || register === "unspecified" || rule.tier === "invariant") {
+    return { skip: false, rule, registerAdjusted: false };
+  }
+  const userRuleOverride = config?.rules?.[rule.id];
+  if (typeof userRuleOverride === "string" && SEVERITY_RANK[userRuleOverride]) {
+    return { skip: false, rule, registerAdjusted: false };
+  }
+  const ov = rule.registerOverrides?.[register];
+  if (!ov) {
+    return { skip: false, rule, registerAdjusted: false };
+  }
+  if (ov.action === "skip") {
+    return { skip: true, rule: null, registerAdjusted: true };
+  }
+  const effective = {
+    ...rule,
+    ...(ov.severity && SEVERITY_RANK[ov.severity] ? { severity: ov.severity } : {}),
+    ...(ov.message ? { message: ov.message } : {}),
+    ...(ov.deletionTest ? { deletionTest: ov.deletionTest } : {}),
+    ...(ov.revisionKind ? { revisionKind: ov.revisionKind } : {}),
+    ...(ov.revisionScope ? { revisionScope: ov.revisionScope } : {}),
+    ...(ov.revisionAvoid ? { revisionAvoid: ov.revisionAvoid } : {}),
+  };
+  return { skip: false, rule: effective, registerAdjusted: true };
+}
+
+export const SCENARIO_STRATEGIES = Object.freeze({
+  technical: {
+    id: "technical",
+    label: { en: "Engineering Spec & RFC", zh: "研发文档与复盘" },
+    cut: {
+      en: "Remove marketing hype, code-diff parroting, hollow 'not human error' excuses, and ownerless action items.",
+      zh: "删掉营销形容词、纯复述 Diff 的句子、“并非单纯人为失误”套话和无责任人的待办项。",
+    },
+    protect: {
+      en: "Keep uniform constraint lists, semicolon preconditions, CLI/code identifiers, exact thresholds, and parameter tables intact.",
+      zh: "保留等长的约束条款、分号并列前置条件、代码/命令标识、阈值数字与参数表，不强求文学长短句起伏。",
+    },
+    avoid: {
+      en: "Do not alter code identifiers, weaken numeric bounds, or add casual chatter.",
+      zh: "绝不改写代码标识、放宽数值边界，也不要为了所谓人味掺入随口聊天腔。",
+    },
+  },
+  official: {
+    id: "official",
+    label: { en: "Official & Regulated Notice", zh: "公文、合规与正式通告" },
+    cut: {
+      en: "Strip unsubstantiated superlatives, unanchored multipliers, AI chat greetings, and empty slogans lacking a referent.",
+      zh: "删掉无证据绝对化承诺、悬空倍数、AI 寒暄壳，以及没有具体指代的空洞口号。",
+    },
+    protect: {
+      en: "Preserve formal institutional phrasing, numbered clauses, legal disclaimers, and scope qualifiers ('only if', 'unless').",
+      zh: "保留规范书面措辞、条款编号、责任边界、法律免责与限定条件（如“仅限”“除非”）。",
+    },
+    avoid: {
+      en: "Do not rewrite formal clauses into casual slang or invent unverified compliance guarantees.",
+      zh: "不要把正式条款改成轻浮口语，也绝不补写未核实的合规承诺。",
+    },
+  },
+  argumentative: {
+    id: "argumentative",
+    label: { en: "Business Brief & Essay-Argument", zh: "工作简报与观点长文" },
+    cut: {
+      en: "Cut macro-trend openers, buzzword clusters, 3-part balanced semicolon pitches, 'Not X, but Y' slogans, and unsourced claims.",
+      zh: "切掉宏观趋势开场、热词共现、三段对称分号推销句、“不是 A 而是 B”金句和无出处背书。",
+    },
+    protect: {
+      en: "Keep upfront conclusions, concrete metrics, genuine trade-off contrasts, and named internal data sources.",
+      zh: "保留前置结论与关键数字、带真实动作的取舍对比，以及具名后台/实测数据来源。",
+    },
+    avoid: {
+      en: "Do not trade one slogan for another aphorism or add macro sign-offs ('Looking ahead').",
+      zh: "不要把一种套话换成另一句金句，更别在结尾补写“展望未来”式拔高。",
+    },
+  },
+  narrative: {
+    id: "narrative",
+    label: { en: "Literary Essay & Column", zh: "随笔、专栏与叙事非虚构" },
+    cut: {
+      en: "Strip moralizing endings, stock AI metaphors, stiff translationese, mechanical Q&A transitions, and halfwidth CJK punctuation.",
+      zh: "删掉结尾强行升华、陈旧 AI 意象、生硬欧化翻译腔、机械设问过渡与中文里的半角标点。",
+    },
+    protect: {
+      en: "Preserve sensory details, dialogue, author rhythm contrast, deliberate short dramatic beats, and natural flowing sentences.",
+      zh: "保留现场细节、人物原话、个人节奏起伏、有意的短句停顿和通顺的流水长句。",
+    },
+    avoid: {
+      en: "Do not flatten personal prose into technical bullet points or invent scenes missing from the notes.",
+      zh: "不要把个人叙述改呆板成工程条目，也绝不外编素材里没有的细节。",
+    },
+  },
+  casual: {
+    id: "casual",
+    label: { en: "Conversational & Personal Post", zh: "口语帖、闲置转卖与社区分享" },
+    cut: {
+      en: "Remove scripted influencer clichés, customer-service filler wrappers, chatbot openings, and injected corporate jargon.",
+      zh: "去掉网红脚本腔、刻意客服套话、AI 开场白和硬塞进去的企业黑话。",
+    },
+    protect: {
+      en: "Preserve first-person spoken phrasing, conversational cadence, and recurring shop or shipping policy lines verbatim.",
+      zh: "保留第一人称口语词、日常停顿节奏，以及固定交易/发货规则短句。",
+    },
+    avoid: {
+      en: "Do not inflate spoken wording into stiff bookish prose or cycle synonyms on recurring policy lines.",
+      zh: "绝不为了规避重复把口语改成生硬书面腔（如把“自己收的”改成“仅出/略有/旨在”），也无需同义词轮换。",
+    },
+  },
+  marketing: {
+    id: "marketing",
+    label: { en: "Product & Launch Copy", zh: "产品介绍与发布文案" },
+    cut: {
+      en: "Remove generic AI SaaS hype ('unleash', 'supercharge', 'new era'), empty triads, and unverified speed/quality claims.",
+      zh: "删掉千篇一律的 AI 营销大词（赋能/颠覆/新纪元）、空洞三段排比和无基准夸大宣称。",
+    },
+    protect: {
+      en: "Keep concrete product mechanisms, intentional punchy benefit lines, and verified user counts or benchmarks.",
+      zh: "保留具体产品机制、有实质信息的短促利益点，以及实测或真实用户数字。",
+    },
+    avoid: {
+      en: "Do not invent customer metrics or pad short benefits into abstract manifesto paragraphs.",
+      zh: "不编造用户数据，不把短促清楚的功能点抻成长段虚词。",
+    },
+  },
+  "deck-ui": {
+    id: "deck-ui",
+    label: { en: "Slides, PDF & Web UI", zh: "PPT、海报与网页界面" },
+    cut: {
+      en: "Cut vague topic slide titles, >120-word slide walls, dead '#' links, purple-pink gradients, pill soup, and nested boxes.",
+      zh: "去掉空泛主题式标题、整屏文字墙、空 '#' 链接、紫粉霓虹渐变、胶囊标签墙和多层套盒。",
+    },
+    protect: {
+      en: "Keep action-takeaway titles, concise UI slot copy, real interactive routes, and single-screen hierarchy.",
+      zh: "保留直接说结论的标题、简短清晰的界面词条、真实跳转路径与单屏层级结构。",
+    },
+    avoid: {
+      en: "Never expand microcopy past its container slot or add decorative 'AI-Powered' badges.",
+      zh: "界面短文案改写长度不得超过原位置容量，不加装饰性 AI 标签。",
+    },
+  },
+});
+
+const PACK_DEFAULT_STRATEGY = Object.freeze({
+  "engineering-spec": "technical",
+  "regulated-comms": "official",
+  "literary-essay": "narrative",
+  "deck-and-ui": "deck-ui",
+  "executive-deck": "deck-ui",
+  "business-brief": "argumentative",
+  core: "argumentative",
+});
+
+export function getScenarioStrategy({ packId = "business-brief", register = "unspecified" } = {}) {
+  const regNorm = String(register || "").trim().toLowerCase();
+  if (regNorm && regNorm !== "unspecified" && regNorm !== "auto" && SCENARIO_STRATEGIES[regNorm]) {
+    return SCENARIO_STRATEGIES[regNorm];
+  }
+  const key = PACK_DEFAULT_STRATEGY[packId] || "argumentative";
+  return SCENARIO_STRATEGIES[key] || SCENARIO_STRATEGIES.argumentative;
+}
+
 const EXT_TO_MODALITY = {
   ".md": "markdown",
   ".mdx": "markdown",
@@ -328,6 +660,32 @@ function enclosingSentence(text, start, end, breakIndices = null) {
     right += 1;
   }
   return sliceCodepoints(text.slice(left, right).trim(), 240);
+}
+
+function enclosingSentenceUnclipped(text, start, end) {
+  const lineStart = Math.max(0, text.lastIndexOf("\n", Math.max(0, start - 1)) + 1);
+  let lineEnd = text.indexOf("\n", end);
+  if (lineEnd === -1) lineEnd = text.length;
+  const lineText = text.slice(lineStart, lineEnd);
+  const codeRanges = [];
+  const codeRe = /`[^`\n]+`/g;
+  let cm;
+  while ((cm = codeRe.exec(lineText)) !== null) {
+    codeRanges.push([lineStart + cm.index, lineStart + cm.index + cm[0].length]);
+  }
+  const inBackticks = (idx) => codeRanges.some(([s, e]) => idx >= s && idx < e);
+  let left = start;
+  while (left > lineStart && (inBackticks(left - 1) || !isSentenceBreakAt(text, left - 1))) {
+    left -= 1;
+  }
+  let right = end;
+  while (right < lineEnd && (inBackticks(right) || !isSentenceBreakAt(text, right))) {
+    right += 1;
+  }
+  if (right < lineEnd && !inBackticks(right) && /[.!?。！？]/.test(text[right])) {
+    right += 1;
+  }
+  return text.slice(left, right).trim();
 }
 
 /**
@@ -737,6 +1095,19 @@ function probeUnsourcedAttribution(proseText, rawText) {
   const attrRegex = /\b(?:[Ss]tudies|[Rr]esearch|[Ii]ndustry\s+research|[Ee]xperts|[Dd]ata)\s+(?:shows?|suggests?|indicates?|proves?)\b|(?:研究|数据|专家|业内人士|行业报告)(?:表明|显示|指出|认为)[，,]?/gu;
   let m;
   while ((m = attrRegex.exec(proseText)) !== null) {
+    // Grounded internal operational data: e.g. "客服后台明细数据显示近7天平均响应时长为 98分12秒。"
+    if (m[0].startsWith("数据")) {
+      const preClause = proseText.slice(Math.max(0, m.index - 24), m.index);
+      const afterSlice = rawText.slice(m.index, Math.min(rawText.length, m.index + 80));
+      if (
+        /(?:客服|监控|日志|后台|明细|台账|实测|压测|统计|灰度|线上|本地|内部|本次|本期|本轮|订单|系统|埋点|审计|抽样)[\u4e00-\u9fffA-Za-z0-9_-]{0,12}$/.test(
+          preClause
+        ) &&
+        /\d/.test(afterSlice)
+      ) {
+        continue;
+      }
+    }
     // Inspect enclosing + lookahead window in rawText for citation markers, links, years, or《report》
     const winStart = Math.max(0, m.index - 30);
     const winEnd = Math.min(rawText.length, m.index + 180);
@@ -1180,6 +1551,12 @@ function probeSemicolonTricolon(proseText, rawText) {
       const variance = lens.reduce((a, b) => a + (b - mean) ** 2, 0) / lens.length;
       const cv = mean > 0 ? Math.sqrt(variance) / mean : 1.0;
       const iso = hasIsomorphicClauseHead(clauses);
+      if (
+        !iso &&
+        /(?:依赖|共用|失联|期间|否则|除非|仅在|禁止|不新写|不写入|不触发|幂等|持久化)/.test(s.text)
+      ) {
+        continue;
+      }
       if (cv < 0.28 || (cv < 0.40 && iso)) {
         hits.push({ index: s.start, length: Math.min(140, s.text.length) });
       }
@@ -2448,7 +2825,7 @@ function isMetaMentionHit(clauseSource, start, end, rule, breakIndices = null) {
   const clause = s.slice(left, right);
 
   const hasMetaCue =
-    /(?:禁用|禁词|忌用|黑词|黑话|套话|套词|违禁|回避|勿用|避免(?:使用)?|替换为|改为|改成|改写|反例|原句|例句|示例|forbidden|banned|avoid|do\s+not\s+use|replace\s+with|instead\s+of|anti-pattern|clich[eé]|slop|buzzwords?|jargon|filler)/i.test(
+    /(?:禁用|禁词|忌用|黑词|黑话|套话|套词|违禁|回避|勿用|避免(?:使用)?|替换为|改为|改成|改写|反例|原句|例句|示例|(?:这类|这种|这几个|等)(?:词|套话|套词|表达|说法)|(?:最好|尽量|切忌|千万)?(?:别用|不要用|少用|慎用|不用)|forbidden|banned|avoid|do\s+not\s+use|replace\s+with|instead\s+of|(?:phrases?|terms?|words?)\s+(?:like|such\s+as)|anti-pattern|clich[eé]|slop|buzzwords?|jargon|filler)/i.test(
       clause
     ) || /(?:^|\b)(?:FORBIDDEN|BANNED|DISALLOWED|BLOCKLIST|STOP_WORDS)\s*[:=]/i.test(clause);
   if (!hasMetaCue) return false;
@@ -2491,7 +2868,7 @@ function cleanMatchExcerpt(matchedRaw, modality, primaryZoneName) {
   return clipCodepoints(out, 140);
 }
 
-export function auditText(text, { filename = "<memory>", modality = null, pack, config = {}, allowSyntheticFixtures = false } = {}) {
+export function auditText(text, { filename = "<memory>", modality = null, pack, config = {}, allowSyntheticFixtures = false, register = null } = {}) {
   const mod = modality || detectModality(filename) || "markdown";
   const lineStarts = buildLineStarts(text);
   const zones = buildZones(text, mod, {
@@ -2503,14 +2880,27 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
   const cpPrefix = /[\uD800-\uDFFF]/.test(text) ? buildCodePointPrefix(text) : null;
   const textBreaks = buildSentenceBreakIndices(text);
   const rawProseMaskBreaks = zones.prose ? buildSentenceBreakIndices(zones.prose) : textBreaks;
+  const regInfo = resolveRegister(text, { filename, flagRegister: register, config });
   const allowHtmlRulesInMixedMd = mod === "markdown" && hasEmbeddedUiMarkup(text);
   const mdUiZone = allowHtmlRulesInMixedMd ? maskMarkdownFences(text, new Set()).replace(/`[^`\n]+`/g, (m) => " ".repeat(m.length)) : null;
   const findings = [];
 
-  for (const rule of pack.rules || []) {
-    const directModMatch = !rule.modalities || rule.modalities.includes(mod);
-    const mixedUiRule = !directModMatch && allowHtmlRulesInMixedMd && rule.modalities.includes("html");
+  for (const baseRule of pack.rules || []) {
+    const directModMatch = !baseRule.modalities || baseRule.modalities.includes(mod);
+    const mixedUiRule = !directModMatch && allowHtmlRulesInMixedMd && baseRule.modalities.includes("html");
     if (!directModMatch && !mixedUiRule) continue;
+
+    const regApplied = applyRegisterOverride(baseRule, regInfo.register, config);
+    if (regApplied.skip) {
+      for (const d of directives) {
+        if (!d.used && d.ruleIds.includes(baseRule.id)) {
+          d.used = true;
+        }
+      }
+      continue;
+    }
+    const rule = regApplied.rule;
+    const registerAdjusted = regApplied.registerAdjusted;
 
     // Synthetic Office/Image/PDF fixture tokens ONLY during `dislop pack-test`
     if (
@@ -2528,6 +2918,7 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
             match: h.match,
             sentence: text,
             span: { start: 0, end: text.length },
+            registerAdjusted,
           })
         );
       }
@@ -2667,6 +3058,7 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
       if (suppressed) continue;
 
       const sentence = enclosingSentence(text, start, end, textBreaks);
+      const keepSentence = enclosingSentenceUnclipped(text, start, end);
       const cpStart = cpPrefix ? cpPrefix[start] : start;
       const cpEnd = cpPrefix ? cpPrefix[end] : end;
       findings.push(
@@ -2680,6 +3072,8 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
           span: { start: cpStart, end: cpEnd },
           match: cleanMatchExcerpt(matchedRaw, mod, primaryZoneName),
           sentence,
+          keepSentence,
+          registerAdjusted,
         })
       );
     }
@@ -2802,17 +3196,218 @@ export function deriveFixStrategy(rule) {
   return "rephrase";
 }
 
-export function makeFinding({ rule, filename, modality, location, line = 1, col = 1, span = null, match, sentence = "" }) {
+const HIGH_CONF_PROBES = new Set([
+  "office-markdown-leak",
+  "ui-dead-control",
+  "slide-word-wall",
+  "slide-bullet-overload",
+  "slide-autofit-shrink",
+  "zh-halfwidth-punctuation",
+]);
+const HIGH_CONF_RULES = new Set(["unfilled-placeholder", "chatbot-artifact", "local-custom-forbid"]);
+const LOW_CONF_RULES = new Set(["pocket-stealth-vapor", "low-burstiness-vapor"]);
+const DELETE_KIND_RULES = new Set([
+  "en-throat-clearing-opener",
+  "zh-bureaucratic-padding",
+  "zh-essay-moralizing-ending",
+  "en-essay-moralizing-ending",
+  "chatbot-artifact",
+]);
+const RESTRUCTURE_PROBES = new Set([
+  "staccato-run",
+  "bold-lead-list-wall",
+  "semicolon-tricolon",
+  "rhetorical-qa-cadence",
+  "comma-chain-runon",
+  "narrative-sandwich-frame",
+  "template-skeleton-echo",
+  "low-burstiness-vapor",
+  "slide-word-wall",
+  "slide-bullet-overload",
+  "slide-autofit-shrink",
+  "pptx-layout-monotony",
+  "ui-box-in-box",
+  "ui-pill-soup",
+  "ui-dead-control",
+]);
+const DOCUMENT_SCOPE_PROBES = new Set(["template-skeleton-echo", "low-burstiness-vapor", "em-dash-density"]);
+const DOCUMENT_SCOPE_RULES = new Set([
+  "pptx-layout-monotony",
+  "low-burstiness-vapor",
+  "template-skeleton-echo",
+  "excessive-em-dash-density",
+]);
+const PARAGRAPH_SCOPE_PROBES = new Set(["bold-lead-list-wall", "narrative-sandwich-frame", "staccato-run"]);
+const SPAN_SCOPE_RULES = new Set([
+  "unfilled-placeholder",
+  "local-custom-forbid",
+  "zh-halfwidth-punctuation",
+  "en-cliche-lexicon",
+  "reg-unsubstantiated-superlative",
+]);
+
+export function computeFindingConfidence({ ruleId, tier = "taste", severity = "warning", probe = "", registerAdjusted = false }) {
+  if (tier === "invariant" || HIGH_CONF_PROBES.has(probe) || HIGH_CONF_RULES.has(ruleId)) {
+    return "high";
+  }
+  if (severity === "info" || LOW_CONF_RULES.has(ruleId) || registerAdjusted) {
+    return "low";
+  }
+  return "medium";
+}
+
+export function buildFindingRevision({
+  ruleId = "",
+  tier = "taste",
+  family = "",
+  probe = "",
+  modality = "markdown",
+  message = null,
+  deletionTest = null,
+  sentence = "",
+  revisionKind = null,
+  revisionScope = null,
+  revisionAvoid = null,
+  fixStrategy = null,
+}) {
+  let kind = revisionKind || "rewrite";
+  if (!revisionKind) {
+    if (DELETE_KIND_RULES.has(ruleId)) {
+      kind = "delete";
+    } else if (
+      RESTRUCTURE_PROBES.has(probe) ||
+      ruleId === "pocket-stealth-vapor" ||
+      String(family).startsWith("layout/") ||
+      String(family).startsWith("ui/") ||
+      String(family).startsWith("statistics/")
+    ) {
+      kind = "restructure";
+    }
+  }
+
+  let scope = revisionScope || "sentence";
+  if (!revisionScope) {
+    if (DOCUMENT_SCOPE_PROBES.has(probe) || DOCUMENT_SCOPE_RULES.has(ruleId)) {
+      scope = "document";
+    } else if (
+      (modality === "html" || modality === "jsx" || modality === "css" || modality === "svg" || modality === "pptx" || modality === "docx") &&
+      (String(probe).startsWith("ui-") ||
+        String(probe).startsWith("slide-") ||
+        probe === "office-markdown-leak" ||
+        probe === "pptx-layout-monotony" ||
+        ruleId === "ui-prompt-echo-badge" ||
+        ruleId === "markdown-leak")
+    ) {
+      scope = "element";
+    } else if (ruleId === "pocket-stealth-vapor" || PARAGRAPH_SCOPE_PROBES.has(probe)) {
+      scope = "paragraph";
+    } else if (SPAN_SCOPE_RULES.has(ruleId)) {
+      scope = "span";
+    }
+  }
+
+  const effStrategy = fixStrategy || deriveFixStrategy({ id: ruleId, family });
+  let repairTier = "guarded-fix";
+  if (effStrategy === "need-source" || kind === "ask" || DOCUMENT_SCOPE_PROBES.has(probe) || DOCUMENT_SCOPE_RULES.has(ruleId)) {
+    repairTier = "diagnostic-only";
+  } else if (tier === "invariant" && (effStrategy === "delete" || ruleId === "markdown-leak")) {
+    repairTier = "safe-fix";
+  }
+  const doNotAutoEdit = repairTier === "diagnostic-only";
+
+  const instrSrc = deletionTest || message || {};
+  const instruction = {
+    en: String(instrSrc.en || message?.en || ""),
+    zh: String(instrSrc.zh || message?.zh || instrSrc.en || message?.en || ""),
+  };
+
+  const keep = [];
+  if (sentence && modality !== "css") {
+    const seen = new Set();
+    for (const fact of extractProtectedFacts(sentence, { modality, keepMode: true })) {
+      const r = String(fact.raw || "").trim();
+      if (!r || seen.has(r)) continue;
+      seen.add(r);
+      keep.push(r);
+      if (keep.length >= 20) break;
+    }
+  }
+
+  let avoid;
+  if (revisionAvoid && (revisionAvoid.en || revisionAvoid.zh)) {
+    avoid = {
+      en: String(revisionAvoid.en || revisionAvoid.zh || ""),
+      zh: String(revisionAvoid.zh || revisionAvoid.en || ""),
+    };
+  } else if (probe === "negation-pivot" || String(ruleId).includes("negation-pivot")) {
+    avoid = {
+      en: "Do not trade one 'Not X, but Y' slogan for a shorter aphorism or staccato tagline.",
+      zh: "不要把“不是 A，而是 B”的套话置换成另一句短金句或断句口号。",
+    };
+  } else if (kind === "delete") {
+    avoid = {
+      en: "Do not rephrase the filler wrapper; delete it while keeping every concrete number, date, and name in the sentence.",
+      zh: "不要把废话外壳换个说法留着，直接删掉并完整保留句中的数字、时间和实体名。",
+    };
+  } else if (kind === "restructure") {
+    avoid = {
+      en: "Do not compress away concrete facts or invent new numbers while fixing cadence or layout.",
+      zh: "调整结构与节奏时不要删掉具体事实，也不要凭空编造原文没有的数字。",
+    };
+  } else {
+    avoid = {
+      en: "Do not invent unstated numbers, alter inequality bounds, or swap in another cliche phrase.",
+      zh: "改写时不要编造未给出的指标、更改数值边界，或换成另一种高频套话。",
+    };
+  }
+
+  return { kind, scope, repairTier, doNotAutoEdit, instruction, keep, mustPreserve: keep, avoid };
+}
+
+export function makeFinding({
+  rule,
+  filename,
+  modality,
+  location,
+  line = 1,
+  col = 1,
+  span = null,
+  match,
+  sentence = "",
+  keepSentence = null,
+  registerAdjusted = false,
+}) {
   const normMatch = String(match || "").toLowerCase().trim();
   const normSent = String(sentence || normMatch).toLowerCase().replace(/\s+/g, " ").trim();
   const fingerprint = `${rule.id}:${fnv1aHex(`${rule.id}|${normMatch}|${normSent}`)}`;
+  const tier = rule.tier || "taste";
+  const severity = rule.severity || "warning";
+  const family = rule.family || "general";
+  const probe = rule.probe || "";
+  const fixStrategy = deriveFixStrategy(rule);
+  const confidence = computeFindingConfidence({ ruleId: rule.id, tier, severity, probe, registerAdjusted });
+  const revision = buildFindingRevision({
+    ruleId: rule.id,
+    tier,
+    family,
+    probe,
+    modality,
+    message: rule.message,
+    deletionTest: rule.deletionTest || null,
+    sentence: keepSentence !== null && keepSentence !== undefined ? keepSentence : sentence,
+    revisionKind: rule.revisionKind || null,
+    revisionScope: rule.revisionScope || null,
+    revisionAvoid: rule.revisionAvoid || null,
+    fixStrategy,
+  });
   return {
     fingerprint,
     ruleId: rule.id,
-    tier: rule.tier || "taste",
-    severity: rule.severity || "warning",
-    fixStrategy: deriveFixStrategy(rule),
-    family: rule.family || "general",
+    tier,
+    severity,
+    confidence,
+    fixStrategy,
+    family,
     file: filename,
     modality,
     location,
@@ -2822,6 +3417,7 @@ export function makeFinding({ rule, filename, modality, location, line = 1, col 
     match,
     message: rule.message,
     deletionTest: rule.deletionTest || null,
+    revision,
     exemplar: rule.exemplar || null,
   };
 }
@@ -2850,7 +3446,7 @@ function decodeXmlEntities(str) {
  * Audit an already-extracted map of archive entries `{ [entryPath]: string }` for `.docx` or `.pptx`.
  * Shared between Node (`zlib.inflateRawSync`) and Browser (`DecompressionStream('deflate-raw')`).
  */
-export function auditOoxmlEntries(entries, { filename, modality, pack, config = {} }) {
+export function auditOoxmlEntries(entries, { filename, modality, pack, config = {}, register = null }) {
   const findings = [];
   const skipped = [];
   const rulesById = new Map((pack.rules || []).map((r) => [r.id, r]));
@@ -2882,7 +3478,7 @@ export function auditOoxmlEntries(entries, { filename, modality, pack, config = 
         findings.push(makeFinding({ rule: mdLeakRule, filename, modality, location: `para ${paraIndex}`, line: paraIndex, match: paraText.slice(0, 100) }));
       }
 
-      const sub = auditText(paraText, { filename, modality: "markdown", pack, config });
+      const sub = auditText(paraText, { filename, modality: "markdown", pack, config, register });
       for (const f of sub.findings) {
         if (f.ruleId === "markdown-leak") continue;
         findings.push({ ...f, modality: "docx", location: `para ${paraIndex}`, line: paraIndex });
@@ -3051,7 +3647,7 @@ export function auditOoxmlEntries(entries, { filename, modality, pack, config = 
       }
 
       // Run text/invariant rules on slide text (hidden slides keep only core error checks)
-      const sub = auditText(fullSlideText, { filename, modality: "markdown", pack, config });
+      const sub = auditText(fullSlideText, { filename, modality: "markdown", pack, config, register });
       for (const f of sub.findings) {
         if (isHidden && f.severity !== "error") continue;
         findings.push({ ...f, modality: "pptx", location: `slide ${slideNum}`, line: slideNum });
@@ -3158,7 +3754,7 @@ export function auditImageDocument(parsedImage, { filename, pack, config = {} } 
 /**
  * Audit parsed PDF visual layout, landscape slide density, RGB shading slop, and embedded text artifacts.
  */
-export function auditPdfDocument(parsedPdf, { filename, pack, config = {} } = {}) {
+export function auditPdfDocument(parsedPdf, { filename, pack, config = {}, register = null } = {}) {
   const findings = [];
   const skipped = [];
   if (!parsedPdf) {
@@ -3310,7 +3906,7 @@ export function auditPdfDocument(parsedPdf, { filename, pack, config = {} } = {}
     }
 
     if (text.trim()) {
-      const sub = auditText(text, { filename, modality: "markdown", pack, config });
+      const sub = auditText(text, { filename, modality: "markdown", pack, config, register });
       for (const f of sub.findings) {
         if (f.ruleId === "markdown-leak") continue;
         findings.push({ ...f, modality: "pdf", location: `page ${pageNum}`, line: pageNum });
@@ -3383,7 +3979,168 @@ export function ruleDocUrl(item, lang = "en") {
   return `${base}${ruleId}/`;
 }
 
-export function formatReport(report, format = "text", lang = "en") {
+function cleanAgentText(s, maxLen) {
+  return clipCodepoints(String(s || "").replace(/\s+/g, " ").trim(), maxLen);
+}
+
+function localizeSkipReason(reason, lang = "en") {
+  const r = String(reason || "");
+  if (lang !== "zh") return r;
+  const m = r.match(/^Unsupported file extension '(.*)'$/);
+  if (m) return `不支持的文件扩展名 '${m[1]}'`;
+  if (r === "File not found") return "文件不存在";
+  if (r.startsWith("Non-UTF-8 text encoding")) return "非 UTF-8 编码文本，请转换为 UTF-8 后检查";
+  if (r.startsWith("File exceeds 25 MB")) return "文件超过 25 MB 单文件检查上限";
+  if (r === "Missing word/document.xml inside DOCX archive") return "DOCX 归档缺少正文文件 word/document.xml";
+  if (r === "Missing ppt/slides/*.xml inside PPTX archive") return "PPTX 归档缺少幻灯片文件 ppt/slides/*.xml";
+  if (r.startsWith("Uninspectable ")) return `无法解析的文档归档：${r.replace(/^Uninspectable\s+/, "")}`;
+  return r;
+}
+
+export function formatAgentReport(report, lang = "en", options = {}) {
+  const { findings = [], checkedCount = 0, skipped = [], unusedSuppressions = [] } = report;
+  const quiet = Boolean(options?.quiet);
+  const failOn = options?.failOn || "error";
+  const minRank = SEVERITY_RANK[failOn] || SEVERITY_RANK.error;
+  const visible = quiet
+    ? findings.filter((f) => (SEVERITY_RANK[f.severity] || 1) >= minRank)
+    : findings;
+
+  if (quiet && visible.length === 0 && unusedSuppressions.length === 0 && skipped.length === 0) {
+    return "";
+  }
+
+  const out = [];
+  const ver = report.version || ENGINE_VERSION;
+  if (visible.length === 0 && unusedSuppressions.length === 0 && skipped.length > 0) {
+    out.push(
+      lang === "zh"
+        ? `dislop ${ver}: 未完成（已检 ${checkedCount} 项、跳过 ${skipped.length} 项）`
+        : `dislop ${ver}: skipped (checked=${checkedCount}, skipped=${skipped.length})`
+    );
+  } else if (visible.length === 0 && unusedSuppressions.length === 0) {
+    if (!quiet) {
+      out.push(
+        lang === "zh"
+          ? `dislop ${ver}: 通过（已检 ${checkedCount} 项、0 处命中）`
+          : `dislop ${ver}: ok (checked=${checkedCount}, findings=0)`
+      );
+    }
+  } else {
+    const errCount = visible.filter((f) => f.severity === "error").length;
+    const warnCount = visible.filter((f) => f.severity === "warning").length;
+    const infoCount = visible.filter((f) => f.severity === "info").length;
+    const reg = report.context?.register || "unspecified";
+    const regSource = report.context?.registerSource || "default";
+
+    if (lang === "zh") {
+      const regZhMap = {
+        unspecified: "未指定",
+        official: "公文",
+        casual: "随笔/口语",
+        argumentative: "议论",
+        technical: "技术文档",
+        marketing: "营销",
+        narrative: "叙事",
+        mixed: "混合",
+      };
+      const srcZhMap = { flag: "参数", frontmatter: "前言", config: "配置", default: "默认", mixed: "多来源" };
+      out.push(
+        `dislop ${ver}: 已检=${checkedCount} 问题=${visible.length}（硬伤=${errCount}、提醒=${warnCount}、提示=${infoCount}） 语体=${regZhMap[reg] || reg}·${srcZhMap[regSource] || regSource}`
+      );
+    } else {
+      out.push(
+        `dislop ${ver}: checked=${checkedCount} findings=${visible.length} (error=${errCount}, warning=${warnCount}, info=${infoCount}) register=${reg}(${regSource})`
+      );
+    }
+
+    const sorted = [...visible].sort((a, b) => {
+      const rDiff = (SEVERITY_RANK[b.severity] || 1) - (SEVERITY_RANK[a.severity] || 1);
+      if (rDiff !== 0) return rDiff;
+      const fa = String(a.file || "");
+      const fb = String(b.file || "");
+      if (fa !== fb) return fa < fb ? -1 : 1;
+      const lDiff = (a.line || 0) - (b.line || 0);
+      if (lDiff !== 0) return lDiff;
+      const cDiff = (a.col || 0) - (b.col || 0);
+      if (cDiff !== 0) return cDiff;
+      const ra = String(a.ruleId || "");
+      const rb = String(b.ruleId || "");
+      return ra === rb ? 0 : ra < rb ? -1 : 1;
+    });
+
+    const AGENT_MAX = 30;
+    const shown = sorted.slice(0, AGENT_MAX);
+    const sevZhMap = { error: "硬伤", warning: "提醒", info: "提示" };
+    const confZhMap = { high: "高", medium: "中", low: "低" };
+    const kindZhMap = { delete: "删减", rewrite: "改写", restructure: "重构" };
+    const scopeZhMap = { span: "片段", sentence: "句级", paragraph: "段级", document: "全文", element: "元素" };
+
+    for (const f of shown) {
+      const rev = f.revision || {};
+      const conf = f.confidence || "medium";
+      const kind = rev.kind || "rewrite";
+      const scope = rev.scope || "sentence";
+      const instrSrc =
+        rev.instruction?.[lang] ||
+        rev.instruction?.en ||
+        f.deletionTest?.[lang] ||
+        f.deletionTest?.en ||
+        f.message?.[lang] ||
+        f.message?.en ||
+        "";
+      const keepArr = Array.isArray(rev.keep) ? rev.keep : [];
+      if (lang === "zh") {
+        const keepPart = keepArr.length > 0 ? ` | 保留=${keepArr.join("、")}` : "";
+        out.push(
+          `[${sevZhMap[f.severity] || f.severity}] ${f.file}:${f.location} ${f.ruleId} 置信=${confZhMap[conf] || conf} ${kindZhMap[kind] || kind}/${scopeZhMap[scope] || scope} | 原文="${cleanAgentText(f.match, 90)}" | 改法="${cleanAgentText(instrSrc, 140)}"${keepPart}`
+        );
+      } else {
+        const keepPart = keepArr.length > 0 ? ` | keep=${keepArr.join(", ")}` : "";
+        out.push(
+          `[${f.severity}] ${f.file}:${f.location} ${f.ruleId} conf=${conf} ${kind}/${scope} | match="${cleanAgentText(f.match, 90)}" | fix="${cleanAgentText(instrSrc, 140)}"${keepPart}`
+        );
+      }
+    }
+
+    if (sorted.length > AGENT_MAX) {
+      const overflow = sorted.length - AGENT_MAX;
+      out.push(
+        lang === "zh"
+          ? `... 另有 ${overflow} 处命中（完整列表请加 --format json）`
+          : `... +${overflow} more findings (use --format json for full list)`
+      );
+    }
+
+    for (const u of unusedSuppressions) {
+      out.push(
+        lang === "zh"
+          ? `[失效豁免] ${u.file}:${u.line} 规则=${u.ruleIds.join(",")}`
+          : `[unused-ignore] ${u.file}:${u.line} rules=${u.ruleIds.join(",")}`
+      );
+    }
+  }
+
+  for (const s of skipped) {
+    const locReason = localizeSkipReason(s.reason, lang);
+    out.push(lang === "zh" ? `[跳过] ${s.file} 原因=${locReason}` : `[skip] ${s.file} reason=${locReason}`);
+  }
+
+  if (!quiet && report.profiles && report.profiles.length > 0) {
+    for (const item of report.profiles) {
+      const p = item.profile;
+      out.push(
+        lang === "zh"
+          ? `[画像] ${item.file} 风险=${p.telemetryRisk.score}/100 句长变异=${p.burstiness.cv} 锚点=${p.concreteness.per100Units}`
+          : `[profile] ${item.file} risk=${p.telemetryRisk.score}/100 cv=${p.burstiness.cv} anchors=${p.concreteness.per100Units}`
+      );
+    }
+  }
+
+  return out.join("\n");
+}
+
+export function formatReport(report, format = "text", lang = "en", options = {}) {
   const { findings, checkedCount, skipped = [], unusedSuppressions = [], coverageWarnings = [], changedFilter = false } = report;
   if (format === "json") {
     return JSON.stringify(report, null, 2);
@@ -3410,60 +4167,115 @@ export function formatReport(report, format = "text", lang = "en") {
     ];
     return rows.join("\n");
   }
+  if (format === "agent") {
+    return formatAgentReport(report, lang, options);
+  }
 
   // Default human text format
+  const quiet = Boolean(options?.quiet);
+  const failOn = options?.failOn || "error";
+  const minRank = SEVERITY_RANK[failOn] || SEVERITY_RANK.error;
+  const visibleFindings = quiet
+    ? findings.filter((f) => (SEVERITY_RANK[f.severity] || 1) >= minRank)
+    : findings;
+
+  if (quiet && visibleFindings.length === 0 && unusedSuppressions.length === 0 && skipped.length === 0 && coverageWarnings.length === 0) {
+    return "";
+  }
+
+  const isReview = report.schema === "dislop.review/1";
   const out = [];
   const skipNote = skipped.length > 0 ? `, ${skipped.length} skipped` : "";
-  if (changedFilter && checkedCount === 0 && skipped.length === 0 && findings.length === 0 && coverageWarnings.length === 0) {
-    out.push(
-      lang === "zh"
-        ? "dislop: --changed 未匹配到可检查的变更文件（已检 0 项，0 处命中）"
-        : "dislop: --changed matched 0 inspectable files (0 checked, 0 findings)"
-    );
-  } else if (findings.length === 0 && unusedSuppressions.length === 0) {
-    out.push(
-      lang === "zh"
-        ? `dislop: 未发现已知模式（已检 ${checkedCount} 项${skipped.length > 0 ? `，跳过 ${skipped.length} 项` : ""}，0 处命中）`
-        : `dislop: no known patterns found (${checkedCount} checked${skipNote}, 0 findings)`
-    );
+  const zhSkip = skipped.length > 0 ? `，跳过 ${skipped.length} 项` : "";
+  if (changedFilter && checkedCount === 0 && skipped.length === 0 && visibleFindings.length === 0 && coverageWarnings.length === 0) {
+    if (!quiet) {
+      out.push(
+        lang === "zh"
+          ? "dislop: --changed 未匹配到可检查的变更文件（已检 0 项，0 处命中）"
+          : "dislop: --changed matched 0 inspectable files (0 checked, 0 findings)"
+      );
+    }
+  } else if (visibleFindings.length === 0 && unusedSuppressions.length === 0) {
+    if (!quiet) {
+      const fileLabel = checkedCount === 1 ? "1 file" : `${checkedCount} files`;
+      if (isReview) {
+        out.push(
+          lang === "zh"
+            ? `dislop review: 未标出 AI 味问题（已审 ${checkedCount} 项${zhSkip}，0 处命中）`
+            : `dislop review: no AI-flavor issues flagged (${fileLabel} reviewed${skipNote}, 0 findings)`
+        );
+      } else {
+        out.push(
+          lang === "zh"
+            ? `dislop: 未发现已知模式（已检 ${checkedCount} 项${zhSkip}，0 处命中）`
+            : `dislop: no known patterns found (${fileLabel} checked${skipNote}, 0 findings)`
+        );
+      }
+    }
   } else {
     const isZh = lang === "zh";
-    const errCount = findings.filter((f) => f.severity === "error").length;
-    const advCount = findings.length - errCount;
-    const zhSkip = skipped.length > 0 ? `，跳过 ${skipped.length} 项` : "";
-    out.push(
-      isZh
-        ? `dislop: 发现 ${findings.length} 处问题（${errCount} 硬伤 · ${advCount} 提醒，已检 ${checkedCount} 个文件${zhSkip}）`
-        : `dislop: ${findings.length} finding(s) (${errCount} error · ${advCount} advisory) across ${checkedCount} checked file(s)${skipNote}`
-    );
+    const errCount = visibleFindings.filter((f) => f.severity === "error").length;
+    const warnCount = visibleFindings.filter((f) => f.severity === "warning").length;
+    const infoCount = visibleFindings.filter((f) => f.severity === "info").length;
+    if (isZh) {
+      const zhParts = [];
+      if (errCount > 0) zhParts.push(`${errCount} 处硬伤`);
+      if (warnCount > 0) zhParts.push(`${warnCount} 处提醒`);
+      if (infoCount > 0) zhParts.push(`${infoCount} 处提示`);
+      const detail = zhParts.length > 0 ? `（${zhParts.join("、")}）` : "";
+      const headNoun =
+        visibleFindings.length > 0
+          ? `发现 ${visibleFindings.length} 处问题${detail}`
+          : `发现 ${unusedSuppressions.length} 处失效豁免`;
+      out.push(`${isReview ? "dislop review" : "dislop"}: ${headNoun}，${isReview ? "已审" : "已检"} ${checkedCount} 项${zhSkip}`);
+    } else {
+      const enParts = [];
+      if (errCount > 0) enParts.push(`${errCount} ${errCount === 1 ? "error" : "errors"}`);
+      if (warnCount > 0) enParts.push(`${warnCount} ${warnCount === 1 ? "warning" : "warnings"}`);
+      if (infoCount > 0) enParts.push(`${infoCount} info`);
+      const breakdown = enParts.length > 0 ? ` (${enParts.join(", ")})` : "";
+      const fLabel =
+        visibleFindings.length > 0
+          ? `${visibleFindings.length} ${visibleFindings.length === 1 ? "finding" : "findings"}${breakdown}`
+          : `${unusedSuppressions.length} stale ${unusedSuppressions.length === 1 ? "suppression" : "suppressions"}`;
+      const cLabel = checkedCount === 1 ? "1 file" : `${checkedCount} files`;
+      out.push(`${isReview ? "dislop review" : "dislop"}: ${fLabel} across ${cLabel}${skipNote}`);
+    }
     const stratLabelsZh = { delete: "删掉", "need-source": "补出处", "unwrap-layout": "去套壳", rephrase: "改写" };
     const seenRuleIds = new Set();
     const ruleCounts = new Map();
-    for (const f of findings) {
+    for (const f of visibleFindings) {
       ruleCounts.set(f.ruleId, (ruleCounts.get(f.ruleId) || 0) + 1);
       const strat = f.fixStrategy || deriveFixStrategy({ id: f.ruleId, family: f.family });
       const tag = isZh ? stratLabelsZh[strat] || "改写" : strat;
-      out.push(`  [${f.severity.toUpperCase()}] ${f.file}:${f.location}  ${f.ruleId} [${tag}]  "${f.match}"`);
+      if (isZh) {
+        const sevZh = f.severity === "error" ? "硬伤" : f.severity === "warning" ? "提醒" : "提示";
+        out.push(`  [${sevZh}] ${f.file}:${f.location}  ${f.ruleId} [${tag}]`);
+        out.push(`    原文: "${f.match}"`);
+      } else {
+        out.push(`  [${f.severity.toUpperCase()}] ${f.file}:${f.location}  ${f.ruleId} [${tag}]`);
+        out.push(`    match: "${f.match}"`);
+      }
       if (!seenRuleIds.has(f.ruleId)) {
         seenRuleIds.add(f.ruleId);
         const msg = f.message?.[lang] || f.message?.en || "";
         const testTxt = f.deletionTest ? f.deletionTest[lang] || f.deletionTest.en || "" : "";
         if (msg) {
-          out.push(isZh ? `    原因: ${msg}` : `    why: ${msg}`);
+          out.push(isZh ? `    原因: ${msg}` : `    why:   ${msg}`);
         }
         if (testTxt && testTxt !== msg) {
-          out.push(isZh ? `    改法: ${testTxt}` : `    fix: ${testTxt}`);
+          out.push(isZh ? `    改法: ${testTxt}` : `    fix:   ${testTxt}`);
         }
       }
     }
     for (const u of unusedSuppressions) {
       out.push(
         isZh
-          ? `  [UNUSED] ${u.file}:${u.line}  失效忽略注释 dislop-ignore (${u.ruleIds.join(", ")})`
+          ? `  [失效豁免] ${u.file}:${u.line}  未命中的 dislop-ignore (${u.ruleIds.join(", ")})`
           : `  [UNUSED] ${u.file}:${u.line}  stale dislop-ignore (${u.ruleIds.join(", ")})`
       );
     }
-    if (findings.length >= 4 || (checkedCount >= 2 && findings.length > 0)) {
+    if (visibleFindings.length >= 4 || (checkedCount >= 2 && visibleFindings.length > 0)) {
       const topStr = Array.from(ruleCounts.entries())
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
         .slice(0, 5)
@@ -3474,18 +4286,43 @@ export function formatReport(report, format = "text", lang = "en") {
     }
   }
   for (const s of skipped) {
-    out.push(`  [SKIP] ${s.file} — ${s.reason}`);
+    const locReason = localizeSkipReason(s.reason, lang);
+    out.push(lang === "zh" ? `  [跳过] ${s.file} — ${locReason}` : `  [SKIP] ${s.file} — ${locReason}`);
   }
   for (const w of coverageWarnings) {
-    out.push(`  [COVERAGE] ${w.file} — ${w.message}`);
+    out.push(lang === "zh" ? `  [覆盖提示] ${w.file} — ${w.message}` : `  [COVERAGE] ${w.file} — ${w.message}`);
   }
-  if (report.profiles && report.profiles.length > 0) {
+  if (!quiet && report.profiles && report.profiles.length > 0) {
+    const levelZhMap = { low: "低", medium: "中", high: "高" };
+    const statusZhMap = { varied: "有起伏", flat: "偏平", short: "偏短", grounded: "具体", moderate: "一般", vapor: "偏虚", ok: "正常" };
+    const signalZhMap = {
+      "cooccurrence-slop-cluster": "弱套词共现",
+      "semicolon-tricolon": "分号三段排比",
+      "rhetorical-qa-cadence": "自问自答设问",
+      "comma-chain-runon": "多逗号连环句",
+      "narrative-sandwich-frame": "三明治叙事壳",
+      "template-skeleton-echo": "句首骨架复用",
+      "low-burstiness-vapor": "句长齐平空话",
+      "flat-sentence-rhythm": "句长偏平",
+      "zero-concrete-anchors": "缺乏具体锚点",
+      "high-em-dash-density": "破折号过密",
+    };
     for (const item of report.profiles) {
       const p = item.profile;
       const sigs = p.telemetryRisk.signals.length > 0 ? p.telemetryRisk.signals.join(", ") : "none";
-      out.push(
-        `  [PROFILE] ${item.file}  risk=${p.telemetryRisk.score}/100 (${p.telemetryRisk.level}) | burstiness_cv=${p.burstiness.cv} (${p.burstiness.status}) | concreteness=${p.concreteness.per100Units}/100u (${p.concreteness.status}) | mattr=${p.lexical.mattr} | entropy=${p.lexical.charEntropy} | signals=${sigs}`
-      );
+      if (lang === "zh") {
+        const sigsZh =
+          p.telemetryRisk.signals.length > 0
+            ? p.telemetryRisk.signals.map((s) => signalZhMap[s] || s).join("、")
+            : "无";
+        out.push(
+          `  [统计] ${item.file}  风险=${p.telemetryRisk.score}/100（${levelZhMap[p.telemetryRisk.level] || p.telemetryRisk.level}） | 句长变异=${p.burstiness.cv}（${statusZhMap[p.burstiness.status] || p.burstiness.status}） | 具体锚点=${p.concreteness.per100Units}/100字（${statusZhMap[p.concreteness.status] || p.concreteness.status}） | 词汇丰富度=${p.lexical.mattr} | 字符熵=${p.lexical.charEntropy} | 信号=${sigsZh}`
+        );
+      } else {
+        out.push(
+          `  [PROFILE] ${item.file}  risk=${p.telemetryRisk.score}/100 (${p.telemetryRisk.level}) | burstiness_cv=${p.burstiness.cv} (${p.burstiness.status}) | concreteness=${p.concreteness.per100Units}/100u (${p.concreteness.status}) | mattr=${p.lexical.mattr} | entropy=${p.lexical.charEntropy} | signals=${sigs}`
+        );
+      }
     }
   }
   return out.join("\n");
@@ -3943,7 +4780,7 @@ function extractLeadingQualifier(cleanScan, numStart, lookbackChars = 24) {
   return { qualifier, spanStart };
 }
 
-export function extractProtectedFacts(text, { modality = "markdown" } = {}) {
+export function extractProtectedFacts(text, { modality = "markdown", keepMode = false } = {}) {
   const raw = String(text || "");
   if (!raw.trim() || modality === "css") return [];
   const lineStarts = buildLineStarts(raw);
@@ -4016,7 +4853,10 @@ export function extractProtectedFacts(text, { modality = "markdown" } = {}) {
   const applyTrailingQual = (scanStr, spanEnd, initialQual) => {
     if (initialQual) return { qualifier: initialQual, spanEnd };
     const suffixWindow = scanStr.slice(spanEnd, Math.min(scanStr.length, spanEnd + 6));
-    for (const sp of FACT_SUFFIX_QUALIFIERS) {
+    const suffixList = keepMode
+      ? [{ group: "max_inc", re: /^\s*(?:以内|内|以下|上限)/ }, ...FACT_SUFFIX_QUALIFIERS.slice(1)]
+      : FACT_SUFFIX_QUALIFIERS;
+    for (const sp of suffixList) {
       const sm = suffixWindow.match(sp.re);
       if (sm) {
         return { qualifier: sp.group, spanEnd: spanEnd + sm[0].length };
@@ -4024,6 +4864,27 @@ export function extractProtectedFacts(text, { modality = "markdown" } = {}) {
     }
     return { qualifier: null, spanEnd };
   };
+
+  if (keepMode) {
+    const cleanKeepDates = maskOccupied();
+    const keepDatePatterns = [
+      /\b\d{4}-\d{1,2}-\d{1,2}(?:[T ]\d{1,2}:\d{2}(?::\d{2})?Z?)?\b/g,
+      /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:,\s*\d{4})?\b/gi,
+      /\d{4}\s*年(?:\s*\d{1,2}\s*月(?:\s*\d{1,2}\s*[日号])?)?/g,
+    ];
+    for (const dp of keepDatePatterns) {
+      while ((m = dp.exec(cleanKeepDates)) !== null) {
+        const cleaned = raw.slice(m.index, m.index + m[0].length).trim();
+        claim({
+          kind: "date",
+          raw: cleaned,
+          canonical: cleaned,
+          qualifier: null,
+          span: { start: m.index, end: m.index + m[0].length },
+        });
+      }
+    }
+  }
 
   // 3a. Atomic ratios (`3:1`, context-ratio `1/2`), dates (`2026-11-23.`, `05/06/2024`, `11/20`, `11月20日`), and clock times (`10:30`)
   let cleanScan = maskOccupied();
@@ -4115,7 +4976,9 @@ export function extractProtectedFacts(text, { modality = "markdown" } = {}) {
 
   // 3c. Arabic numbers, units, versions, and bounding qualifiers in visible prose
   cleanScan = maskOccupied();
-  const numRe = /(?<![A-Za-z0-9_])(?:v\d+(?:\.\d+){1,3}(?![A-Za-z0-9_.])|\d+(?:\.\d+){2,3}(?![A-Za-z0-9_.])|Q[1-4](?![A-Za-z0-9_])|P(?:50|90|95|99)(?![A-Za-z0-9_])|(?:(?<![A-Za-z0-9_.-])[+-])?[$€¥£]\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?|(?:(?<![A-Za-z0-9_.-])[+-])?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?(?:%|(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|个月|倍|秒|分钟|小时|天|年|万|亿|元|美元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?)/g;
+  const numRe = keepMode
+    ? /(?<![A-Za-z0-9_])(?:v\d+(?:\.\d+){1,3}(?![A-Za-z0-9_.])|\d+(?:\.\d+){2,3}(?![A-Za-z0-9_.])|Q[1-4](?![A-Za-z0-9_])|P(?:50|90|95|99)(?![A-Za-z0-9_])|(?:(?<![A-Za-z0-9_.-])[+-])?[$€¥£]\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万元|亿元|万|亿)?|(?:(?<![A-Za-z0-9_.-])[+-])?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:(?:x|×)(?![A-Za-z0-9_])|\s?(?:%|requests?\/s|req\/s|(?:milliseconds?|ms|microseconds?|us|µs|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|weeks?|months?|years?|KB|MB|GB|TB|PB|QPS|TPS|RPS|fps|px|rows?|items?|files?)(?![A-Za-z0-9_])|毫秒|微秒|秒钟|分钟|小时|个月|万元|亿元|万美元|美元|欧元|日元|千瓦时|倍|秒|天|年|万|亿|元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?)/g
+    : /(?<![A-Za-z0-9_])(?:v\d+(?:\.\d+){1,3}(?![A-Za-z0-9_.])|\d+(?:\.\d+){2,3}(?![A-Za-z0-9_.])|Q[1-4](?![A-Za-z0-9_])|P(?:50|90|95|99)(?![A-Za-z0-9_])|(?:(?<![A-Za-z0-9_.-])[+-])?[$€¥£]\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?|(?:(?<![A-Za-z0-9_.-])[+-])?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?(?:%|(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|个月|倍|秒|分钟|小时|天|年|万|亿|元|美元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?)/g;
 
   while ((m = numRe.exec(cleanScan)) !== null) {
     const numStart = m.index;
@@ -4240,6 +5103,7 @@ export function verifyRevisionBundle(
     modality = null,
     pack = null,
     config = {},
+    register = null,
     keepTerms = [],
     allowAdded = false,
     strict = false,
@@ -4248,6 +5112,8 @@ export function verifyRevisionBundle(
   const bef = String(beforeText || "");
   const aft = String(afterText || "");
   const mod = modality || detectModality(filename) || "markdown";
+  const regInfo = resolveRegister(bef, { filename, flagRegister: register, config });
+  const effRegister = regInfo.register;
   const factLedger = verifyRevision(bef, aft, { allowAdded });
 
   const requested = [];
@@ -4271,8 +5137,8 @@ export function verifyRevisionBundle(
 
   let findingsDelta = null;
   if (pack) {
-    const beforeRes = auditText(bef, { filename, modality: mod, pack, config });
-    const afterRes = auditText(aft, { filename, modality: mod, pack, config });
+    const beforeRes = auditText(bef, { filename, modality: mod, pack, config, register: effRegister });
+    const afterRes = auditText(aft, { filename, modality: mod, pack, config, register: effRegister });
     const beforeCounts = new Map();
     const afterCounts = new Map();
     const findingKey = (f) => `${f.ruleId}|${f.match || ""}`;
@@ -4354,6 +5220,8 @@ export function verifyRevisionBundle(
   }
 
   if (
+    effRegister !== "technical" &&
+    effRegister !== "official" &&
     beforeProf.sentenceCount >= 4 &&
     afterProf.sentenceCount >= 4 &&
     beforeProf.burstiness.cv >= 0.32 &&
@@ -4368,6 +5236,39 @@ export function verifyRevisionBundle(
         zh: "原文错落的句长节奏被压平变呆板，丢失了自然的表达起伏。",
       },
     });
+  }
+
+  const CASUAL_MARKER_RE = /(?:自己收|只出|咱们|大伙|顺手|包邮|私聊|闲置|\b(?:folks|gonna|wanna|my own)\b)/gi;
+  const STIFF_BOOKISH_RE = /(?:旨在|谨此|兹有|切勿|务必|仅出|略有|偶见|赋能|抓手|闭环|\b(?:thereof|herein|pursuant to|endeavor to|facilitate)\b)/gi;
+  const SLANG_DRIFT_RE = /(?:家人们|绝绝子|咱就是说|尊嘟假嘟|\b(?:no cap|frfr|lowkey)\b)/gi;
+  const befCasualHits = (bef.match(CASUAL_MARKER_RE) || []).length;
+  const befStiffSet = new Set((bef.match(STIFF_BOOKISH_RE) || []).map((x) => x.toLowerCase()));
+  const aftNewStiff = (aft.match(STIFF_BOOKISH_RE) || []).filter((x) => !befStiffSet.has(x.toLowerCase()));
+  const isCasualRegister = effRegister === "casual" || (befCasualHits >= 2 && befStiffSet.size === 0);
+  if (isCasualRegister && aftNewStiff.length >= 2) {
+    degWarnings.push({
+      code: "register-drift",
+      severity: "warning",
+      message: {
+        en: "Conversational wording drifted into stiff bookish/bureaucratic prose instead of keeping the original casual voice.",
+        zh: "口语/个人表达被改写成生硬书面或公文腔，丢掉了原本的自然口吻。",
+      },
+    });
+  } else if (
+    (effRegister === "official" || effRegister === "technical" || pack?.id === "regulated-comms" || pack?.id === "engineering-spec") &&
+    !SLANG_DRIFT_RE.test(bef)
+  ) {
+    SLANG_DRIFT_RE.lastIndex = 0;
+    if (SLANG_DRIFT_RE.test(aft)) {
+      degWarnings.push({
+        code: "register-drift",
+        severity: "warning",
+        message: {
+          en: "Formal/technical draft drifted into fake-casual internet slang.",
+          zh: "正式或技术文本中混入了轻浮网络口水词，与当前写作场景不符。",
+        },
+      });
+    }
   }
 
   if (

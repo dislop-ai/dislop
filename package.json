@@ -63,6 +63,7 @@
     "server.json",
     "bin/",
     "src/core.mjs",
+    "src/review-client.mjs",
     "src/pattern-engine.mjs",
     "src/pocket-model.mjs",
     "src/local-model.mjs",

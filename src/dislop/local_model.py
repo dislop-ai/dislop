@@ -24,7 +24,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from .engine import audit_text, extract_protected_facts, verify_revision
+from .engine import audit_text, extract_protected_facts, get_scenario_strategy, verify_revision
 from .pocket_model import load_pocket_model_bundle, score_pocket_span
 
 _HERE = Path(__file__).resolve().parent
@@ -249,8 +249,18 @@ def recommend_model_tier(hw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-# Bypass HTTP_PROXY / HTTPS_PROXY unconditionally on loopback requests so drafts never leak via system proxies
-_NO_PROXY_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+class _LoopbackNoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(
+        self, req: urllib.request.Request, fp: Any, code: int, msg: str, headers: Any, newurl: str
+    ) -> urllib.request.Request | None:
+        raise urllib.error.HTTPError(req.full_url, code, f"Loopback redirect blocked ({code})", headers, fp)
+
+
+# Bypass HTTP_PROXY / HTTPS_PROXY and disallow HTTP redirects on loopback requests so drafts never leak externally
+_NO_PROXY_OPENER = urllib.request.build_opener(
+    urllib.request.ProxyHandler({}),
+    _LoopbackNoRedirectHandler(),
+)
 
 
 def _open_url_safe(req: urllib.request.Request | str, *, timeout_sec: float, bypass_proxy: bool) -> Any:
@@ -713,8 +723,12 @@ def _build_paragraph_deslop_prompt(
     pocket_score: dict[str, Any],
     protected_facts: list[dict[str, Any]],
     repair_feedback: str | None = None,
+    *,
+    pack_id: str = "business-brief",
+    register: str = "unspecified",
 ) -> tuple[str, str]:
     is_zh = bool(re.search(r"[\u4e00-\u9fff]", paragraph))
+    strategy = get_scenario_strategy(pack_id=pack_id, register=register)
     locked_tokens = [f["raw"] for f in protected_facts]
     rule_notes = [
         f"- {f['ruleId']}: {((f.get('message') or {}).get('zh' if is_zh else 'en')) or f['ruleId']}"
@@ -727,10 +741,16 @@ def _build_paragraph_deslop_prompt(
     diag = "\n".join((rule_notes + ml_notes)[:5])
 
     if is_zh:
-        sys_p = (
-            "你是朴实、直接的技术与商业文字编辑。只输出改写后的纯正文段落，不加解释、不加引号、不加开头寒暄，严禁编造原句没有的数字，严禁篡改单位，严禁写成『不是……而是……』或三段分号排比。"
+        sys_p = "\n".join(
+            [
+                f"你是贴合当前写作场景（{strategy['label']['zh']}）的审改编辑。",
+                f"重点清除：{strategy['cut']['zh']}",
+                f"必须保留：{strategy['protect']['zh']}",
+                f"严禁改偏：{strategy['avoid']['zh']}",
+                "只输出改写后的纯正文段落，不加解释、不加引号、不加开头寒暄，严禁编造原句没有的数字，严禁篡改单位，严禁写成『不是……而是……』或三段分号排比。",
+            ]
         )
-        usr_p = f"请去掉下面段落里的空洞套话和模板腔，保留全部事实含义：\n\n【原段】\n{paragraph}\n"
+        usr_p = f"请按「{strategy['label']['zh']}」场景要求改净下面段落，保留全部事实含义：\n\n【原段】\n{paragraph}\n"
         if diag:
             usr_p += f"\n【检测到的问题】\n{diag}\n"
         if locked_tokens:
@@ -739,10 +759,16 @@ def _build_paragraph_deslop_prompt(
             usr_p += f"\n【上一版改写未通过核验，请立即修正】\n{repair_feedback}\n"
         return sys_p, usr_p
 
-    sys_p = (
-        "You are a plain, direct technical editor. Output ONLY the rewritten paragraph text—no preamble, no quotes, no invented numbers, no altered units, no semicolon tricolons, and no 'Not X, but Y' slogans."
+    sys_p = "\n".join(
+        [
+            f"You are an editor tuned for {strategy['label']['en']} ({strategy['id']}).",
+            f"Cut: {strategy['cut']['en']}",
+            f"Protect: {strategy['protect']['en']}",
+            f"Avoid: {strategy['avoid']['en']}",
+            "Output ONLY the rewritten paragraph text—no preamble, no quotes, no invented numbers, no altered units, no semicolon tricolons, and no 'Not X, but Y' slogans.",
+        ]
     )
-    usr_p = f"Cut filler and corporate padding from this paragraph while preserving every fact:\n\n[Original]\n{paragraph}\n"
+    usr_p = f"Clean AI slop from this {strategy['label']['en']} paragraph while preserving every fact:\n\n[Original]\n{paragraph}\n"
     if diag:
         usr_p += f"\n[Detected issues]\n{diag}\n"
     if locked_tokens:
@@ -804,6 +830,7 @@ def run_local_deslop(
     text: str,
     pack: dict[str, Any],
     modality: str = "markdown",
+    register: str | None = None,
     endpoint: str | None = None,
     runner_kind: str | None = None,
     model: str | None = None,
@@ -852,7 +879,7 @@ def run_local_deslop(
             out_segments.append(seg)
             continue
 
-        before_audit = audit_text(seg, filename="draft.md", modality=modality, pack=pack)
+        before_audit = audit_text(seg, filename="draft.md", modality=modality, pack=pack, register=register)
         before_pocket = score_pocket_span(seg)
         needs_rewrite = bool(before_audit["findings"]) or (
             before_pocket["eligible"] and before_pocket["slopProbability"] >= 0.65
@@ -868,7 +895,13 @@ def run_local_deslop(
 
         for _ in range(2):
             sys_p, usr_p = _build_paragraph_deslop_prompt(
-                seg, before_audit["findings"], before_pocket, protected_facts, repair_feedback
+                seg,
+                before_audit["findings"],
+                before_pocket,
+                protected_facts,
+                repair_feedback,
+                pack_id=str((pack or {}).get("id") or "business-brief"),
+                register=str(register or "unspecified"),
             )
             candidate = _call_local_chat_completion(
                 endpoint=resolved_endpoint,
@@ -884,7 +917,7 @@ def run_local_deslop(
                 continue
 
             fact_check = verify_facts_with_units(seg, candidate, modality=modality)
-            after_audit = audit_text(candidate, filename="draft.md", modality=modality, pack=pack)
+            after_audit = audit_text(candidate, filename="draft.md", modality=modality, pack=pack, register=register)
             hard_after = [f for f in after_audit["findings"] if f["severity"] in {"error", "warning"}]
             hard_before = [f for f in before_audit["findings"] if f["severity"] in {"error", "warning"}]
 

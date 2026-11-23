@@ -18,15 +18,19 @@ from typing import Any
 from .engine import (
     ENGINE_VERSION,
     SEVERITY_RANK,
+    VALID_REGISTERS,
     analyze_text_profile,
+    apply_register_override,
     audit_image_document,
     audit_ooxml_entries,
     audit_pdf_document,
     audit_text,
     build_catalog,
+    build_finding_revision,
     build_line_starts,
     build_zones,
     collect_target_files,
+    compute_finding_confidence,
     compute_ruleset_hash,
     default_pack_for_modality,
     derive_fix_strategy,
@@ -35,6 +39,7 @@ from .engine import (
     extract_voice_profile_offline,
     find_patterns_dir,
     fnv1a_hex,
+    get_scenario_strategy,
     has_embedded_ui_markup,
     inspect_file,
     is_long_form_html_document,
@@ -49,6 +54,7 @@ from .engine import (
     query_catalog,
     resolve_config_for_file,
     resolve_effective_pack,
+    resolve_register,
     rule_doc_url,
     verify_revision,
     verify_revision_bundle,
@@ -64,6 +70,19 @@ from .local_model import (
 from .mcp_server import run_mcp_stdio
 from .pattern_engine import analyze_pattern_profile, audit_patterns, load_pattern_banks
 from .pocket_model import analyze_document_with_pocket_models, predict_pack_with_pocket_router
+from .review_client import (
+    ReviewConfigError,
+    assert_loopback_endpoint,
+    build_review_prompt,
+    chunk_text_by_paragraphs,
+    extract_ooxml_review_text,
+    inspect_byok_env_status,
+    ping_endpoint_health,
+    resolve_provider_config,
+    run_review_request,
+    scrub_secrets,
+    validate_and_normalize_review_response,
+)
 
 
 PROSE_ML_MODALITIES = {"markdown", "text", "html", "svg"}
@@ -73,18 +92,88 @@ def _js_round_pct(v: float) -> int:
     return int(math.floor(v * 100.0 + 0.5))
 
 
+def _lookup_rule_across_packs(
+    packs: dict[str, dict[str, Any]] | None,
+    pack: dict[str, Any] | None,
+    rule_id: str,
+) -> dict[str, Any] | None:
+    if pack:
+        for r in pack.get("rules", []):
+            if r.get("id") == rule_id:
+                return r
+    for p in (packs or {}).values():
+        for r in p.get("rules", []):
+            if r.get("id") == rule_id:
+                return r
+    return None
+
+
 def _merge_pattern_bank_findings(
     existing_findings: list[dict[str, Any]],
     pat_findings: list[dict[str, Any]],
+    *,
+    packs: dict[str, dict[str, Any]] | None = None,
+    pack: dict[str, Any] | None = None,
+    register: str = "unspecified",
+    config: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
-    seen = {f"{f.get('ruleId')}:{f.get('line')}:{f.get('col') or 1}" for f in existing_findings}
+    seen = {f"{f.get('ruleId')}:{f.get('line')}" for f in existing_findings}
     out = list(existing_findings)
     for pf in pat_findings:
-        key = f"{pf.get('ruleId')}:{pf.get('line')}:{pf.get('col') or 1}"
+        rid = str(pf.get("ruleId") or "")
+        key = f"{rid}:{pf.get('line')}"
         if key in seen:
             continue
+        rule_ref = _lookup_rule_across_packs(packs, pack, rid)
+        reg_adjusted = False
+        eff_sev = pf.get("severity") or "info"
+        eff_msg = pf.get("message")
+        eff_del = pf.get("deletionTest") or (rule_ref.get("deletionTest") if rule_ref else None)
+        if rule_ref:
+            reg_ov = apply_register_override(rule_ref, register, config)
+            if reg_ov["skip"]:
+                continue
+            if reg_ov["registerAdjusted"]:
+                reg_adjusted = True
+                ov_rule = reg_ov["rule"]
+                eff_sev = ov_rule.get("severity") or eff_sev
+                if ov_rule.get("message"):
+                    eff_msg = ov_rule["message"]
+                if ov_rule.get("deletionTest"):
+                    eff_del = ov_rule["deletionTest"]
         seen.add(key)
-        out.append(pf)
+        fam = pf.get("family") or (f"{pf['dimension']}/{rid}" if pf.get("dimension") else "pattern-bank")
+        mod = pf.get("modality") or "markdown"
+        rev_scope = (rule_ref.get("revisionScope") if rule_ref else None) or (
+            "paragraph" if rid == "low-burstiness-vapor" else None
+        )
+        fix_strat = pf.get("fixStrategy") or derive_fix_strategy({"id": rid, "family": fam})
+        enriched = dict(pf)
+        enriched["severity"] = eff_sev
+        enriched["fixStrategy"] = fix_strat
+        enriched["message"] = eff_msg
+        if eff_del:
+            enriched["deletionTest"] = eff_del
+        enriched["confidence"] = pf.get("confidence") or compute_finding_confidence(
+            rule_id=rid,
+            tier=pf.get("tier") or "taste",
+            severity=eff_sev,
+            register_adjusted=reg_adjusted,
+        )
+        enriched["revision"] = pf.get("revision") or build_finding_revision(
+            rule_id=rid,
+            tier=pf.get("tier") or "taste",
+            family=fam,
+            modality=mod,
+            message=eff_msg,
+            deletion_test=eff_del,
+            sentence=str(pf.get("match") or ""),
+            revision_kind=rule_ref.get("revisionKind") if rule_ref else None,
+            revision_scope=rev_scope,
+            revision_avoid=rule_ref.get("revisionAvoid") if rule_ref else None,
+            fix_strategy=fix_strat,
+        )
+        out.append(enriched)
     return out
 
 
@@ -112,10 +201,14 @@ def _build_pocket_ml_findings(
     *,
     profile: dict[str, Any] | None = None,
     modality: str | None = None,
+    register: str = "unspecified",
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    if register == "technical":
+        return {"documentProbability": 0, "paragraphs": [], "flaggedCount": 0}, []
     doc = analyze_document_with_pocket_models(text, threshold=threshold)
     extras: list[dict[str, Any]] = []
     mod = modality or detect_modality(filename) or "markdown"
+    text_lines = re.split(r"\r?\n", str(text or ""))
     for p in doc["paragraphs"]:
         if not p["flagged"]:
             continue
@@ -127,12 +220,26 @@ def _build_pocket_ml_findings(
         drv_zh = "、".join(d["reason"]["zh"] for d in active_drivers) or "句式与用词高度均质"
         loc = str(p["startLine"])
         clean_excerpt = str(p.get("excerpt") or "")
+        full_para = "\n".join(text_lines[max(0, int(p["startLine"]) - 1) : int(p["endLine"])]) or clean_excerpt
         fp = f"pocket-stealth-vapor:{fnv1a_hex(f'pocket-stealth-vapor|{clean_excerpt.lower()}|{loc}')}"
+        msg_obj = {
+            "en": f"Paragraph reads as predictable low-concreteness AI filler ({pct}% pocket-ML score: {drv_en}).",
+            "zh": f"段落呈高度可预测、低事实密度的温吞水套话（内置模型评分 {pct}%：{drv_zh}）。",
+        }
+        del_obj = {
+            "en": "Cut this paragraph or replace abstract cushion wrappers with one concrete event, number, file path, or direct action.",
+            "zh": "删掉整段空泛铺垫，或把抽象缓冲外壳直接换成具体事件、数字、文件路径或明确动作。",
+        }
         extras.append({
             "fingerprint": fp,
             "ruleId": "pocket-stealth-vapor",
             "packId": "pocket-model",
             "severity": "warning",
+            "confidence": compute_finding_confidence(
+                rule_id="pocket-stealth-vapor",
+                tier="taste",
+                severity="warning",
+            ),
             "tier": "taste",
             "fixStrategy": "rephrase",
             "family": "rhythm/pocket-stealth-vapor",
@@ -146,14 +253,18 @@ def _build_pocket_ml_findings(
             "match": clean_excerpt,
             "excerpt": clean_excerpt,
             "mlProbability": p["slopProbability"],
-            "message": {
-                "en": f"Paragraph reads as predictable low-concreteness AI filler ({pct}% pocket-ML score: {drv_en}).",
-                "zh": f"段落呈高度可预测、低事实密度的温吞水套话（内置模型评分 {pct}%：{drv_zh}）。",
-            },
-            "deletionTest": {
-                "en": "Cut this paragraph or replace abstract cushion wrappers with one concrete event, number, file path, or direct action.",
-                "zh": "删掉整段空泛铺垫，或把抽象缓冲外壳直接换成具体事件、数字、文件路径或明确动作。",
-            },
+            "message": msg_obj,
+            "deletionTest": del_obj,
+            "revision": build_finding_revision(
+                rule_id="pocket-stealth-vapor",
+                tier="taste",
+                family="rhythm/pocket-stealth-vapor",
+                modality=mod,
+                message=msg_obj,
+                deletion_test=del_obj,
+                sentence=full_para,
+                fix_strategy="rephrase",
+            ),
         })
     return doc, extras
 
@@ -322,7 +433,212 @@ def _escape_github_data(val: Any) -> str:
     return str("" if val is None else val).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
 
 
-def format_report(report: dict[str, Any], fmt: str = "text", lang: str = "en") -> str:
+def _clean_agent_text(val: Any, max_len: int) -> str:
+    return re.sub(r"\s+", " ", str(val or "")).strip()[:max_len]
+
+
+def _localize_skip_reason(reason: Any, lang: str = "en") -> str:
+    r = str(reason or "")
+    if lang != "zh":
+        return r
+    m = re.match(r"^Unsupported file extension '(.*)'$", r)
+    if m:
+        return f"不支持的文件扩展名 '{m.group(1)}'"
+    if r == "File not found":
+        return "文件不存在"
+    if r.startswith("Non-UTF-8 text encoding"):
+        return "非 UTF-8 编码文本，请转换为 UTF-8 后检查"
+    if r.startswith("File exceeds 25 MB"):
+        return "文件超过 25 MB 单文件检查上限"
+    if r == "Missing word/document.xml inside DOCX archive":
+        return "DOCX 归档缺少正文文件 word/document.xml"
+    if r == "Missing ppt/slides/*.xml inside PPTX archive":
+        return "PPTX 归档缺少幻灯片文件 ppt/slides/*.xml"
+    if r.startswith("Uninspectable "):
+        tail = re.sub(r"^Uninspectable\s+", "", r)
+        return f"无法解析的文档归档：{tail}"
+    return r
+
+
+def _format_agent_report(
+    report: dict[str, Any],
+    lang: str = "en",
+    *,
+    quiet: bool = False,
+    fail_on: str = "error",
+) -> str:
+    findings = report.get("findings", [])
+    checked_count = int(report.get("checkedCount", 0))
+    skipped = report.get("skipped", [])
+    unused = report.get("unusedSuppressions", [])
+    min_rank = SEVERITY_RANK.get(fail_on or "error", SEVERITY_RANK["error"])
+    visible = [f for f in findings if SEVERITY_RANK.get(f.get("severity", "info"), 1) >= min_rank] if quiet else findings
+
+    if quiet and not visible and not unused and not skipped:
+        return ""
+
+    out: list[str] = []
+    ver = report.get("version") or ENGINE_VERSION
+    if not visible and not unused and skipped:
+        out.append(
+            f"dislop {ver}: 未完成（已检 {checked_count} 项、跳过 {len(skipped)} 项）"
+            if lang == "zh"
+            else f"dislop {ver}: skipped (checked={checked_count}, skipped={len(skipped)})"
+        )
+    elif not visible and not unused:
+        if not quiet:
+            out.append(
+                f"dislop {ver}: 通过（已检 {checked_count} 项、0 处命中）"
+                if lang == "zh"
+                else f"dislop {ver}: ok (checked={checked_count}, findings=0)"
+            )
+    else:
+        err_count = sum(1 for f in visible if f.get("severity") == "error")
+        warn_count = sum(1 for f in visible if f.get("severity") == "warning")
+        info_count = sum(1 for f in visible if f.get("severity") == "info")
+        ctx = report.get("context") or {}
+        reg = ctx.get("register") or "unspecified"
+        reg_source = ctx.get("registerSource") or "default"
+
+        if lang == "zh":
+            reg_zh_map = {
+                "unspecified": "未指定",
+                "official": "公文",
+                "casual": "随笔/口语",
+                "argumentative": "议论",
+                "technical": "技术文档",
+                "marketing": "营销",
+                "narrative": "叙事",
+                "mixed": "混合",
+            }
+            src_zh_map = {"flag": "参数", "frontmatter": "前言", "config": "配置", "default": "默认", "mixed": "多来源"}
+            out.append(
+                f"dislop {ver}: 已检={checked_count} 问题={len(visible)}（硬伤={err_count}、提醒={warn_count}、提示={info_count}） 语体={reg_zh_map.get(reg, reg)}·{src_zh_map.get(reg_source, reg_source)}"
+            )
+        else:
+            out.append(
+                f"dislop {ver}: checked={checked_count} findings={len(visible)} (error={err_count}, warning={warn_count}, info={info_count}) register={reg}({reg_source})"
+            )
+
+        sorted_findings = sorted(
+            visible,
+            key=lambda f: (
+                -SEVERITY_RANK.get(f.get("severity", "info"), 1),
+                str(f.get("file") or ""),
+                int(f.get("line") or 0),
+                int(f.get("col") or 0),
+                str(f.get("ruleId") or ""),
+            ),
+        )
+        agent_max = 30
+        shown = sorted_findings[:agent_max]
+        sev_zh_map = {"error": "硬伤", "warning": "提醒", "info": "提示"}
+        conf_zh_map = {"high": "高", "medium": "中", "low": "低"}
+        kind_zh_map = {"delete": "删减", "rewrite": "改写", "restructure": "重构"}
+        scope_zh_map = {"span": "片段", "sentence": "句级", "paragraph": "段级", "document": "全文", "element": "元素"}
+
+        for f in shown:
+            rev = f.get("revision") or {}
+            conf = f.get("confidence") or "medium"
+            kind = rev.get("kind") or "rewrite"
+            scope = rev.get("scope") or "sentence"
+            rev_instr = rev.get("instruction") or {}
+            dt = f.get("deletionTest") or {}
+            msg = f.get("message") or {}
+            instr_src = (
+                rev_instr.get(lang)
+                or rev_instr.get("en")
+                or (dt.get(lang) if isinstance(dt, dict) else "")
+                or (dt.get("en") if isinstance(dt, dict) else "")
+                or msg.get(lang)
+                or msg.get("en")
+                or ""
+            )
+            keep_arr = rev.get("keep") if isinstance(rev.get("keep"), list) else []
+            match_s = _clean_agent_text(f.get("match"), 90)
+            fix_s = _clean_agent_text(instr_src, 140)
+            if lang == "zh":
+                keep_part = (" | 保留=" + "、".join(keep_arr)) if keep_arr else ""
+                sev_lbl = sev_zh_map.get(f.get("severity", ""), f.get("severity", ""))
+                conf_lbl = conf_zh_map.get(conf, conf)
+                kind_lbl = kind_zh_map.get(kind, kind)
+                scope_lbl = scope_zh_map.get(scope, scope)
+                out.append(
+                    f"[{sev_lbl}] {f['file']}:{f['location']} {f['ruleId']} 置信={conf_lbl} {kind_lbl}/{scope_lbl} | 原文=\"{match_s}\" | 改法=\"{fix_s}\"{keep_part}"
+                )
+            else:
+                keep_part = (" | keep=" + ", ".join(keep_arr)) if keep_arr else ""
+                out.append(
+                    f"[{f['severity']}] {f['file']}:{f['location']} {f['ruleId']} conf={conf} {kind}/{scope} | match=\"{match_s}\" | fix=\"{fix_s}\"{keep_part}"
+                )
+
+        if len(sorted_findings) > agent_max:
+            overflow = len(sorted_findings) - agent_max
+            out.append(
+                f"... 另有 {overflow} 处命中（完整列表请加 --format json）"
+                if lang == "zh"
+                else f"... +{overflow} more findings (use --format json for full list)"
+            )
+
+        for u in unused:
+            rules_csv = ",".join(u.get("ruleIds") or [])
+            out.append(
+                f"[失效豁免] {u['file']}:{u['line']} 规则={rules_csv}"
+                if lang == "zh"
+                else f"[unused-ignore] {u['file']}:{u['line']} rules={rules_csv}"
+            )
+
+    for s in skipped:
+        loc_reason = _localize_skip_reason(s.get("reason"), lang)
+        out.append(
+            f"[跳过] {s['file']} 原因={loc_reason}"
+            if lang == "zh"
+            else f"[skip] {s['file']} reason={loc_reason}"
+        )
+
+    if not quiet and report.get("profiles"):
+        for item in report["profiles"]:
+            p = item["profile"]
+            out.append(
+                f"[画像] {item['file']} 风险={p['telemetryRisk']['score']}/100 句长变异={p['burstiness']['cv']} 锚点={p['concreteness']['per100Units']}"
+                if lang == "zh"
+                else f"[profile] {item['file']} risk={p['telemetryRisk']['score']}/100 cv={p['burstiness']['cv']} anchors={p['concreteness']['per100Units']}"
+            )
+    return "\n".join(out)
+
+
+def _summarize_report_context(reg_pairs: list[dict[str, str]], flag_register: str | None) -> dict[str, str]:
+    if flag_register and str(flag_register).strip().lower() != "auto":
+        return {"register": str(flag_register).strip().lower(), "registerSource": "flag"}
+    if not reg_pairs:
+        return {"register": "unspecified", "registerSource": "default"}
+    regs = {r["register"] for r in reg_pairs}
+    srcs = {r["registerSource"] for r in reg_pairs}
+    if len(regs) == 1:
+        reg = reg_pairs[0]["register"]
+        src = reg_pairs[0]["registerSource"] if len(srcs) == 1 else "mixed"
+        return {"register": reg, "registerSource": src}
+    return {"register": "mixed", "registerSource": "mixed"}
+
+
+def _fmt_js_num(val: Any) -> str:
+    if isinstance(val, bool):
+        return str(val).lower()
+    if isinstance(val, float):
+        if val.is_integer():
+            return str(int(val))
+        return str(val)
+    return str(val)
+
+
+def format_report(
+    report: dict[str, Any],
+    fmt: str = "text",
+    lang: str = "en",
+    *,
+    quiet: bool = False,
+    fail_on: str = "error",
+) -> str:
     findings = report["findings"]
     checked_count = report["checkedCount"]
     skipped = report.get("skipped", [])
@@ -354,56 +670,113 @@ def format_report(report: dict[str, Any], fmt: str = "text", lang: str = "en") -
             msg = (f.get("message") or {}).get(lang) or (f.get("message") or {}).get("en") or ""
             rows.append(f"| `{f['severity']}` | `{f['file']}` | `{f['location']}` | `{f['ruleId']}` | `{match_esc}` | {msg} |")
         return "\n".join(rows)
+    if fmt == "agent":
+        return _format_agent_report(report, lang, quiet=quiet, fail_on=fail_on)
 
+    min_rank = SEVERITY_RANK.get(fail_on or "error", SEVERITY_RANK["error"])
+    visible_findings = (
+        [f for f in findings if SEVERITY_RANK.get(f.get("severity", "info"), 1) >= min_rank]
+        if quiet
+        else findings
+    )
+    if quiet and not visible_findings and not unused and not skipped and not coverage_warnings:
+        return ""
+
+    is_review = report.get("schema") == "dislop.review/1"
     skip_note = f", {len(skipped)} skipped" if skipped else ""
+    zh_skip = f"，跳过 {len(skipped)} 项" if skipped else ""
     out: list[str] = []
-    if changed_filter and checked_count == 0 and not skipped and not findings and not coverage_warnings:
-        out.append(
-            "dislop: --changed 未匹配到可检查的变更文件（已检 0 项，0 处命中）"
-            if lang == "zh"
-            else "dislop: --changed matched 0 inspectable files (0 checked, 0 findings)"
-        )
-    elif not findings and not unused:
-        if lang == "zh":
-            zh_skip = f"，跳过 {len(skipped)} 项" if skipped else ""
-            out.append(f"dislop: 未发现已知模式（已检 {checked_count} 项{zh_skip}，0 处命中）")
-        else:
-            out.append(f"dislop: no known patterns found ({checked_count} checked{skip_note}, 0 findings)")
+    if changed_filter and checked_count == 0 and not skipped and not visible_findings and not coverage_warnings:
+        if not quiet:
+            out.append(
+                "dislop: --changed 未匹配到可检查的变更文件（已检 0 项，0 处命中）"
+                if lang == "zh"
+                else "dislop: --changed matched 0 inspectable files (0 checked, 0 findings)"
+            )
+    elif not visible_findings and not unused:
+        if not quiet:
+            file_label = "1 file" if checked_count == 1 else f"{checked_count} files"
+            if is_review:
+                out.append(
+                    f"dislop review: 未标出 AI 味问题（已审 {checked_count} 项{zh_skip}，0 处命中）"
+                    if lang == "zh"
+                    else f"dislop review: no AI-flavor issues flagged ({file_label} reviewed{skip_note}, 0 findings)"
+                )
+            else:
+                out.append(
+                    f"dislop: 未发现已知模式（已检 {checked_count} 项{zh_skip}，0 处命中）"
+                    if lang == "zh"
+                    else f"dislop: no known patterns found ({file_label} checked{skip_note}, 0 findings)"
+                )
     else:
         is_zh = lang == "zh"
-        err_count = sum(1 for f in findings if f["severity"] == "error")
-        adv_count = len(findings) - err_count
-        zh_skip = f"，跳过 {len(skipped)} 项" if skipped else ""
-        out.append(
-            f"dislop: 发现 {len(findings)} 处问题（{err_count} 硬伤 · {adv_count} 提醒，已检 {checked_count} 个文件{zh_skip}）"
-            if is_zh
-            else f"dislop: {len(findings)} finding(s) ({err_count} error · {adv_count} advisory) across {checked_count} checked file(s){skip_note}"
-        )
+        err_count = sum(1 for f in visible_findings if f["severity"] == "error")
+        warn_count = sum(1 for f in visible_findings if f["severity"] == "warning")
+        info_count = sum(1 for f in visible_findings if f["severity"] == "info")
+        prefix = "dislop review" if is_review else "dislop"
+        if is_zh:
+            zh_parts: list[str] = []
+            if err_count > 0:
+                zh_parts.append(f"{err_count} 处硬伤")
+            if warn_count > 0:
+                zh_parts.append(f"{warn_count} 处提醒")
+            if info_count > 0:
+                zh_parts.append(f"{info_count} 处提示")
+            detail = f"（{'、'.join(zh_parts)}）" if zh_parts else ""
+            head_noun = f"发现 {len(visible_findings)} 处问题{detail}" if visible_findings else f"发现 {len(unused)} 处失效豁免"
+            verb = "已审" if is_review else "已检"
+            out.append(f"{prefix}: {head_noun}，{verb} {checked_count} 项{zh_skip}")
+        else:
+            en_parts: list[str] = []
+            if err_count > 0:
+                en_parts.append(f"{err_count} {'error' if err_count == 1 else 'errors'}")
+            if warn_count > 0:
+                en_parts.append(f"{warn_count} {'warning' if warn_count == 1 else 'warnings'}")
+            if info_count > 0:
+                en_parts.append(f"{info_count} info")
+            breakdown = f" ({', '.join(en_parts)})" if en_parts else ""
+            if visible_findings:
+                f_noun = "finding" if len(visible_findings) == 1 else "findings"
+                f_label = f"{len(visible_findings)} {f_noun}{breakdown}"
+            else:
+                s_noun = "suppression" if len(unused) == 1 else "suppressions"
+                f_label = f"{len(unused)} stale {s_noun}"
+            c_label = "1 file" if checked_count == 1 else f"{checked_count} files"
+            out.append(f"{prefix}: {f_label} across {c_label}{skip_note}")
+
         strat_labels_zh = {"delete": "删掉", "need-source": "补出处", "unwrap-layout": "去套壳", "rephrase": "改写"}
         seen_rule_ids: set[str] = set()
         rule_counts: dict[str, int] = {}
-        for f in findings:
+        for f in visible_findings:
             rid = f["ruleId"]
             rule_counts[rid] = rule_counts.get(rid, 0) + 1
             strat = f.get("fixStrategy") or derive_fix_strategy({"id": rid, "family": f.get("family")})
             tag = strat_labels_zh.get(strat, "改写") if is_zh else strat
-            out.append(f'  [{f["severity"].upper()}] {f["file"]}:{f["location"]}  {rid} [{tag}]  "{f["match"]}"')
+            if is_zh:
+                sev_zh = "硬伤" if f["severity"] == "error" else ("提醒" if f["severity"] == "warning" else "提示")
+                out.append(f"  [{sev_zh}] {f['file']}:{f['location']}  {rid} [{tag}]")
+                out.append(f'    原文: "{f["match"]}"')
+            else:
+                sev_en = f["severity"].upper()
+                out.append(f"  [{sev_en}] {f['file']}:{f['location']}  {rid} [{tag}]")
+                out.append(f'    match: "{f["match"]}"')
             if rid not in seen_rule_ids:
                 seen_rule_ids.add(rid)
                 msg = (f.get("message") or {}).get(lang) or (f.get("message") or {}).get("en") or ""
                 dt = f.get("deletionTest")
                 test_txt = (dt.get(lang) or dt.get("en") or "") if isinstance(dt, dict) else ""
                 if msg:
-                    out.append(f"    原因: {msg}" if is_zh else f"    why: {msg}")
+                    out.append(f"    原因: {msg}" if is_zh else f"    why:   {msg}")
                 if test_txt and test_txt != msg:
-                    out.append(f"    改法: {test_txt}" if is_zh else f"    fix: {test_txt}")
+                    out.append(f"    改法: {test_txt}" if is_zh else f"    fix:   {test_txt}")
         for u in unused:
+            rules_str = ", ".join(u["ruleIds"])
             out.append(
-                f"  [UNUSED] {u['file']}:{u['line']}  失效忽略注释 dislop-ignore ({', '.join(u['ruleIds'])})"
+                f"  [失效豁免] {u['file']}:{u['line']}  未命中的 dislop-ignore ({rules_str})"
                 if is_zh
-                else f"  [UNUSED] {u['file']}:{u['line']}  stale dislop-ignore ({', '.join(u['ruleIds'])})"
+                else f"  [UNUSED] {u['file']}:{u['line']}  stale dislop-ignore ({rules_str})"
             )
-        if len(findings) >= 4 or (checked_count >= 2 and len(findings) > 0):
+        if len(visible_findings) >= 4 or (checked_count >= 2 and len(visible_findings) > 0):
             top_str = ", ".join(
                 f"{rid}×{cnt}"
                 for rid, cnt in sorted(rule_counts.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
@@ -411,18 +784,60 @@ def format_report(report: dict[str, Any], fmt: str = "text", lang: str = "en") -
             out.append(f"  按规则分布: {top_str}" if is_zh else f"  Top rules: {top_str}")
             out.append("  下一步: 改完可跑 dislop verify --git HEAD <文件>" if is_zh else "  Next: verify edits with dislop verify --git HEAD <file>")
     for s in skipped:
-        out.append(f"  [SKIP] {s['file']} — {s['reason']}")
-    for w in coverage_warnings:
-        out.append(f"  [COVERAGE] {w['file']} — {w['message']}")
-    for item in report.get("profiles") or []:
-        p = item["profile"]
-        sigs = ", ".join(p["telemetryRisk"]["signals"]) if p["telemetryRisk"]["signals"] else "none"
+        loc_reason = _localize_skip_reason(s["reason"], lang)
         out.append(
-            f"  [PROFILE] {item['file']}  risk={p['telemetryRisk']['score']}/100 ({p['telemetryRisk']['level']}) | "
-            f"burstiness_cv={p['burstiness']['cv']} ({p['burstiness']['status']}) | "
-            f"concreteness={p['concreteness']['per100Units']}/100u ({p['concreteness']['status']}) | "
-            f"mattr={p['lexical']['mattr']} | entropy={p['lexical']['charEntropy']} | signals={sigs}"
+            f"  [跳过] {s['file']} — {loc_reason}"
+            if lang == "zh"
+            else f"  [SKIP] {s['file']} — {loc_reason}"
         )
+    for w in coverage_warnings:
+        out.append(
+            f"  [覆盖提示] {w['file']} — {w['message']}"
+            if lang == "zh"
+            else f"  [COVERAGE] {w['file']} — {w['message']}"
+        )
+    if not quiet and report.get("profiles"):
+        level_zh_map = {"low": "低", "medium": "中", "high": "高"}
+        status_zh_map = {"varied": "有起伏", "flat": "偏平", "short": "偏短", "grounded": "具体", "moderate": "一般", "vapor": "偏虚", "ok": "正常"}
+        signal_zh_map = {
+            "cooccurrence-slop-cluster": "弱套词共现",
+            "semicolon-tricolon": "分号三段排比",
+            "rhetorical-qa-cadence": "自问自答设问",
+            "comma-chain-runon": "多逗号连环句",
+            "narrative-sandwich-frame": "三明治叙事壳",
+            "template-skeleton-echo": "句首骨架复用",
+            "low-burstiness-vapor": "句长齐平空话",
+            "flat-sentence-rhythm": "句长偏平",
+            "zero-concrete-anchors": "缺乏具体锚点",
+            "high-em-dash-density": "破折号过密",
+        }
+        for item in report["profiles"]:
+            p = item["profile"]
+            sigs_list = p["telemetryRisk"]["signals"]
+            sc = _fmt_js_num(p["telemetryRisk"]["score"])
+            b_cv = _fmt_js_num(p["burstiness"]["cv"])
+            c_u = _fmt_js_num(p["concreteness"]["per100Units"])
+            mattr_s = _fmt_js_num(p["lexical"]["mattr"])
+            ent_s = _fmt_js_num(p["lexical"]["charEntropy"])
+            if lang == "zh":
+                sigs_zh = "、".join(signal_zh_map.get(s, s) for s in sigs_list) if sigs_list else "无"
+                lvl_zh = level_zh_map.get(p["telemetryRisk"]["level"], p["telemetryRisk"]["level"])
+                b_stat = status_zh_map.get(p["burstiness"]["status"], p["burstiness"]["status"])
+                c_stat = status_zh_map.get(p["concreteness"]["status"], p["concreteness"]["status"])
+                out.append(
+                    f"  [统计] {item['file']}  风险={sc}/100（{lvl_zh}） | "
+                    f"句长变异={b_cv}（{b_stat}） | "
+                    f"具体锚点={c_u}/100字（{c_stat}） | "
+                    f"词汇丰富度={mattr_s} | 字符熵={ent_s} | 信号={sigs_zh}"
+                )
+            else:
+                sigs = ", ".join(sigs_list) if sigs_list else "none"
+                out.append(
+                    f"  [PROFILE] {item['file']}  risk={sc}/100 ({p['telemetryRisk']['level']}) | "
+                    f"burstiness_cv={b_cv} ({p['burstiness']['status']}) | "
+                    f"concreteness={c_u}/100u ({p['concreteness']['status']}) | "
+                    f"mattr={mattr_s} | entropy={ent_s} | signals={sigs}"
+                )
     return "\n".join(out)
 
 
@@ -530,6 +945,7 @@ def _inspect_single_file_full(
     include_patterns: bool = False,
     include_profile: bool = False,
     banks: dict[str, Any] | None = None,
+    register: str | None = None,
 ) -> dict[str, Any]:
     if abs_p.stat().st_size > 25 * 1024 * 1024:
         return {
@@ -550,6 +966,7 @@ def _inspect_single_file_full(
             "cli-flag" if explicit_pack and explicit_pack != "auto"
             else ("auto-modality" if explicit_pack == "auto" else ("config" if file_cfg.get("pack") else "default-modality"))
         )
+        reg_info = resolve_register("", filename=rel, flag_register=register, config=file_cfg)
         import io
         import zipfile
         try:
@@ -565,12 +982,19 @@ def _inspect_single_file_full(
                         if total_bytes > 120 * 1024 * 1024:
                             raise ValueError("OOXML uncompressed XML exceeds 120 MB safety ceiling")
                         entries[info.filename] = zf.read(info.filename).decode("utf-8", errors="replace")
-            res = audit_ooxml_entries(entries, filename=rel, modality=modality, pack=pack, config=file_cfg)
+            res = audit_ooxml_entries(entries, filename=rel, modality=modality, pack=pack, config=file_cfg, register=register)
             missing_core = any(s["file"] == rel for s in res["skipped"])
             f_list = list(res["findings"])
             if include_patterns and not missing_core:
                 pat_res = audit_patterns("", filename=rel, modality=modality, banks=banks, ooxml=entries, config=file_cfg)
-                f_list = _merge_pattern_bank_findings(f_list, pat_res["findings"])
+                f_list = _merge_pattern_bank_findings(
+                    f_list,
+                    pat_res["findings"],
+                    packs=packs,
+                    pack=pack,
+                    register=reg_info["register"],
+                    config=file_cfg,
+                )
             return {
                 "checked": not missing_core,
                 "findings": f_list,
@@ -580,6 +1004,8 @@ def _inspect_single_file_full(
                 "effectivePack": pack_id,
                 "packSource": pack_source,
                 "rulesetHash": compute_ruleset_hash(pack),
+                "register": reg_info["register"],
+                "registerSource": reg_info["registerSource"],
             }
         except Exception as exc:
             return {
@@ -597,6 +1023,7 @@ def _inspect_single_file_full(
             "cli-flag" if explicit_pack and explicit_pack != "auto"
             else ("auto-modality" if explicit_pack == "auto" else ("config" if file_cfg.get("pack") else "default-modality"))
         )
+        reg_info = resolve_register("", filename=rel, flag_register=register, config=file_cfg)
         try:
             parsed = parse_image_bytes(raw_bytes)
             res = audit_image_document(parsed, filename=rel, pack=pack, config=file_cfg)
@@ -609,6 +1036,8 @@ def _inspect_single_file_full(
                 "effectivePack": pack_id,
                 "packSource": pack_source,
                 "rulesetHash": compute_ruleset_hash(pack),
+                "register": reg_info["register"],
+                "registerSource": reg_info["registerSource"],
             }
         except Exception as exc:
             return {
@@ -620,6 +1049,7 @@ def _inspect_single_file_full(
             }
 
     if modality == "pdf":
+        reg_info = resolve_register("", filename=rel, flag_register=register, config=file_cfg)
         try:
             parsed = parse_pdf_bytes(raw_bytes)
             if explicit_pack and explicit_pack != "auto":
@@ -646,7 +1076,7 @@ def _inspect_single_file_full(
                 pack = resolve_effective_pack(pack_id, packs, file_cfg)
                 eff_pack = pack_id
                 pack_source = "config" if file_cfg.get("pack") else "default-modality"
-            res = audit_pdf_document(parsed, filename=rel, pack=pack, config=file_cfg)
+            res = audit_pdf_document(parsed, filename=rel, pack=pack, config=file_cfg, register=register)
             uninspectable = any(s["file"] == rel for s in res["skipped"])
             return {
                 "checked": not uninspectable,
@@ -657,6 +1087,8 @@ def _inspect_single_file_full(
                 "effectivePack": eff_pack,
                 "packSource": pack_source,
                 "rulesetHash": compute_ruleset_hash(pack),
+                "register": reg_info["register"],
+                "registerSource": reg_info["registerSource"],
             }
         except Exception as exc:
             return {
@@ -679,11 +1111,19 @@ def _inspect_single_file_full(
         }
 
     pack, eff_pack, pack_source = _resolve_text_pack_and_source(text, rel, modality, explicit_pack, file_cfg, packs)
-    res = audit_text(text, filename=rel, modality=modality, pack=pack, config=file_cfg)
+    reg_info = resolve_register(text, filename=rel, flag_register=register, config=file_cfg)
+    res = audit_text(text, filename=rel, modality=modality, pack=pack, config=file_cfg, register=register)
     f_list = list(res["findings"])
     if include_patterns:
         pat_res = audit_patterns(text, filename=rel, modality=modality, banks=banks, config=file_cfg)
-        f_list = _merge_pattern_bank_findings(f_list, pat_res["findings"])
+        f_list = _merge_pattern_bank_findings(
+            f_list,
+            pat_res["findings"],
+            packs=packs,
+            pack=pack,
+            register=reg_info["register"],
+            config=file_cfg,
+        )
 
     profile_obj: dict[str, Any] | None = None
     ml_input: str | None = None
@@ -691,7 +1131,14 @@ def _inspect_single_file_full(
         profile_obj = analyze_text_profile(text, modality=modality, config=file_cfg)
         if include_ml:
             ml_input = build_zones(text, modality, {"proseFences": file_cfg.get("proseFences"), "maskBlockquotes": file_cfg.get("maskBlockquotes")})["prose"] if modality in {"html", "svg"} else text
-            _, ml_extras = _build_pocket_ml_findings(ml_input, rel, f_list, profile=profile_obj, modality=modality)
+            _, ml_extras = _build_pocket_ml_findings(
+                ml_input,
+                rel,
+                f_list,
+                profile=profile_obj,
+                modality=modality,
+                register=reg_info["register"],
+            )
             f_list.extend(ml_extras)
 
     coverage_warnings = _collect_text_coverage_warnings(text, modality, rel, profile_obj)
@@ -717,6 +1164,8 @@ def _inspect_single_file_full(
         "effectivePack": eff_pack,
         "packSource": pack_source,
         "rulesetHash": compute_ruleset_hash(pack),
+        "register": reg_info["register"],
+        "registerSource": reg_info["registerSource"],
         "profileItem": profile_item,
         "_lineStarts": build_line_starts(text),
     }
@@ -761,46 +1210,181 @@ def _apply_compact_report(report: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _should_use_color() -> bool:
+    force = os.environ.get("FORCE_COLOR", "")
+    if force and force != "0":
+        return True
+    if os.environ.get("NO_COLOR", "") != "":
+        return False
+    return bool(sys.stdout.isatty())
+
+
+def _colorize_text_report(text: str, use_color: bool) -> str:
+    if not use_color or not text:
+        return text
+    reset, red, yellow, cyan, dim, green = "\033[0m", "\033[31m", "\033[33m", "\033[36m", "\033[2m", "\033[32m"
+    lines: list[str] = []
+    for line in text.split("\n"):
+        if line.startswith(("  [ERROR]", "  [硬伤]")):
+            line = re.sub(r"^(\s*\[(?:ERROR|硬伤)\])", f"{red}\\1{reset}", line)
+        elif line.startswith(("  [WARNING]", "  [提醒]")):
+            line = re.sub(r"^(\s*\[(?:WARNING|提醒)\])", f"{yellow}\\1{reset}", line)
+        elif line.startswith(("  [INFO]", "  [提示]")):
+            line = re.sub(r"^(\s*\[(?:INFO|提示)\])", f"{cyan}\\1{reset}", line)
+        elif line.startswith(("  [SKIP]", "  [跳过]", "  [UNUSED]", "  [失效豁免]", "  [COVERAGE]", "  [覆盖提示]")):
+            line = f"{dim}{line}{reset}"
+        elif line.startswith(("dislop: no known patterns found", "dislop: 未发现已知模式")):
+            line = f"{green}{line}{reset}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def _read_stdin_text_checked(cmd_label: str = "check") -> str:
+    raw = sys.stdin.buffer.read()
+    if raw[:4] == b"PK\x03\x04":
+        raise ValueError(
+            f"dislop {cmd_label}: stdin looks like binary ZIP/OOXML (.docx/.pptx); pass the file path instead (e.g., 'dislop {cmd_label} deck.pptx')."
+        )
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError(
+            f"dislop {cmd_label}: stdin is not valid UTF-8 text; convert to UTF-8 or pass a supported file path."
+        ) from exc
+
+
+def _detect_stdin_filename(raw_text: str, explicit_name: str | None) -> str:
+    if explicit_name:
+        return explicit_name
+    head = raw_text.lstrip("\ufeff \t\r\n")[:128].lower()
+    if head.startswith(("<!doctype html", "<html")):
+        return "stdin.html"
+    return "stdin.md"
+
+
+def _collect_known_rule_ids(packs: dict[str, dict[str, Any]], banks: dict[str, Any] | None = None) -> set[str]:
+    known = {"pocket-stealth-vapor"}
+    for p in packs.values():
+        for r in p.get("rules", []):
+            if r.get("id"):
+                known.add(r["id"])
+    loaded_banks = banks if banks is not None else load_pattern_banks()
+    for b in loaded_banks.values():
+        for pat in b.get("patterns", []):
+            if pat.get("ruleId"):
+                known.add(pat["ruleId"])
+    for rid in load_pattern_library():
+        known.add(rid)
+    return known
+
+
 def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
     cwd = Path.cwd()
-    config = load_config(cwd, ns.config)
+    try:
+        config = load_config(cwd, ns.config)
+    except ValueError as exc:
+        print(f"dislop: {exc}", file=sys.stderr)
+        return 2
     fmt = "json" if ns.json else ns.format
     fail_on = ns.fail_on or config.get("failOn", "error")
     if fail_on not in SEVERITY_RANK:
         print(f"dislop: invalid --fail-on '{fail_on}'", file=sys.stderr)
         return 2
 
+    flag_register: str | None = None
+    if getattr(ns, "register", None) is not None:
+        norm = str(ns.register).strip().lower()
+        if not norm or (norm != "auto" and norm not in VALID_REGISTERS):
+            joined = ", ".join(VALID_REGISTERS)
+            print(f"dislop: invalid --register '{ns.register}' (expected auto, {joined})", file=sys.stderr)
+            return 2
+        flag_register = norm
+
+    include_profile = bool(ns.profile or getattr(ns, "deep", False))
     include_ml = bool(ns.ml or getattr(ns, "deep", False))
     include_patterns = bool(ns.patterns or getattr(ns, "deep", False))
     compact_json = bool(getattr(ns, "compact", False) and fmt == "json")
+    quiet = bool(getattr(ns, "quiet", False))
+    use_color = fmt == "text" and _should_use_color()
     banks_cached = load_pattern_banks() if include_patterns else None
 
+    rule_filter: set[str] | None = None
+    if getattr(ns, "rule", None) is not None:
+        requested = [s.strip() for s in str(ns.rule).split(",") if s.strip()]
+        if not requested:
+            print("dislop check: '--rule' requires at least one rule ID", file=sys.stderr)
+            return 2
+        known_ids = _collect_known_rule_ids(packs, banks_cached)
+        unknown = [r for r in requested if r not in known_ids]
+        if unknown:
+            print(
+                f"dislop check: unknown rule ID(s): {', '.join(unknown)}. Run 'dislop catalog' to list valid rule IDs.",
+                file=sys.stderr,
+            )
+            return 2
+        rule_filter = set(requested)
+
+    if ns.pack and ns.pack != "auto" and ns.pack not in packs:
+        avail = ", ".join(packs.keys())
+        print(f"dislop: unknown pack '{ns.pack}' (available: auto, {avail})", file=sys.stderr)
+        return 2
+
     if "-" in ns.paths:
-        stdin_text = sys.stdin.read()
-        fn = ns.stdin_filename or "stdin.md"
+        try:
+            stdin_text = _read_stdin_text_checked("check")
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        fn = _detect_stdin_filename(stdin_text, ns.stdin_filename)
         mod = detect_modality(fn) or "markdown"
         file_cfg = resolve_config_for_file(fn, config)
         try:
             pack, eff_pack, pack_source = _resolve_text_pack_and_source(stdin_text, fn, mod, ns.pack, file_cfg, packs)
+            reg_info = resolve_register(stdin_text, filename=fn, flag_register=flag_register, config=file_cfg)
         except Exception as exc:
             print(f"dislop: {exc}", file=sys.stderr)
             return 2
-        res = audit_text(stdin_text, filename=fn, modality=mod, pack=pack, config=file_cfg)
+        res = audit_text(stdin_text, filename=fn, modality=mod, pack=pack, config=file_cfg, register=flag_register)
         findings = list(res["findings"])
         if include_patterns:
             pat_res = audit_patterns(stdin_text, filename=fn, modality=mod, banks=banks_cached, config=file_cfg)
-            findings = _merge_pattern_bank_findings(findings, pat_res["findings"])
+            findings = _merge_pattern_bank_findings(
+                findings,
+                pat_res["findings"],
+                packs=packs,
+                pack=pack,
+                register=reg_info["register"],
+                config=file_cfg,
+            )
         profile_obj: dict[str, Any] | None = None
         ml_input: str | None = None
-        if mod in PROSE_ML_MODALITIES and (include_ml or ns.profile or len(stdin_text) >= 2000 or mod == "html"):
+        if mod in PROSE_ML_MODALITIES and (include_ml or include_profile or len(stdin_text) >= 2000 or mod == "html"):
             profile_obj = analyze_text_profile(stdin_text, modality=mod, config=file_cfg)
             if include_ml:
                 ml_input = build_zones(stdin_text, mod, {"proseFences": file_cfg.get("proseFences"), "maskBlockquotes": file_cfg.get("maskBlockquotes")})["prose"] if mod in {"html", "svg"} else stdin_text
-                _, ml_extras = _build_pocket_ml_findings(ml_input, fn, findings, profile=profile_obj, modality=mod)
+                _, ml_extras = _build_pocket_ml_findings(
+                    ml_input,
+                    fn,
+                    findings,
+                    profile=profile_obj,
+                    modality=mod,
+                    register=reg_info["register"],
+                )
                 findings.extend(ml_extras)
+        if rule_filter is not None:
+            findings = [f for f in findings if f.get("ruleId") in rule_filter]
+        triggered = any(SEVERITY_RANK[f["severity"]] >= SEVERITY_RANK[fail_on] for f in findings) or (
+            ns.report_unused and len(res["unusedSuppressions"]) > 0
+        )
+        out_findings = (
+            [f for f in findings if SEVERITY_RANK.get(f.get("severity", "info"), 1) >= SEVERITY_RANK[fail_on]]
+            if quiet
+            else findings
+        )
         coverage_warnings = _collect_text_coverage_warnings(stdin_text, mod, fn, profile_obj)
         report: dict[str, Any] = {
             "version": ENGINE_VERSION,
+            "context": {"register": reg_info["register"], "registerSource": reg_info["registerSource"]},
             "rulesetHash": compute_ruleset_hash(pack),
             "effectivePack": eff_pack,
             "packSource": pack_source,
@@ -809,10 +1393,10 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
             "checkedCount": 1,
             "skipped": [],
             "coverageWarnings": coverage_warnings,
-            "findings": findings,
+            "findings": out_findings,
             "unusedSuppressions": res["unusedSuppressions"] if ns.report_unused else [],
         }
-        if ns.profile and mod in PROSE_ML_MODALITIES:
+        if include_profile and mod in PROSE_ML_MODALITIES:
             pocket_src = ml_input if ml_input is not None else (
                 build_zones(stdin_text, mod, {"proseFences": file_cfg.get("proseFences"), "maskBlockquotes": file_cfg.get("maskBlockquotes")})["prose"]
                 if mod in {"html", "svg"}
@@ -826,10 +1410,9 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
                 }
             ]
         out_report = _apply_compact_report(report) if compact_json else report
-        print(format_report(out_report, fmt, ns.lang))
-        triggered = any(SEVERITY_RANK[f["severity"]] >= SEVERITY_RANK[fail_on] for f in findings) or (
-            ns.report_unused and len(res["unusedSuppressions"]) > 0
-        )
+        rendered = _colorize_text_report(format_report(out_report, fmt, ns.lang, quiet=quiet, fail_on=fail_on), use_color)
+        if rendered:
+            print(rendered)
         return 1 if triggered else 0
 
     changed_map: dict[str, set[int] | str] | None = None
@@ -856,6 +1439,7 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
     seen_hashes: set[str] = set()
     seen_packs: set[str] = set()
     seen_sources: set[str] = set()
+    reg_pairs: list[dict[str, str]] = []
     checked_count = 0
     explicit_targets = {(cwd / p).resolve() for p in ns.paths}
     explicit_uninspectable = bool(skipped_init)
@@ -880,8 +1464,9 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
                 config,
                 include_ml=include_ml,
                 include_patterns=include_patterns,
-                include_profile=bool(ns.profile),
+                include_profile=include_profile,
                 banks=banks_cached,
+                register=flag_register,
             )
         except Exception as exc:
             print(f"dislop: {exc}", file=sys.stderr)
@@ -890,6 +1475,8 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
         f_list = list(res["findings"])
         if res["checked"]:
             checked_count += 1
+            if res.get("register"):
+                reg_pairs.append({"register": res["register"], "registerSource": res.get("registerSource", "default")})
             if res.get("effectivePack"):
                 seen_packs.add(res["effectivePack"])
             if res.get("packSource"):
@@ -924,6 +1511,9 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
                         filtered_findings.append(f)
                 f_list = filtered_findings
 
+        if rule_filter is not None:
+            f_list = [f for f in f_list if f.get("ruleId") in rule_filter]
+
         all_findings.extend(f_list)
         all_skipped.extend(res["skipped"])
         if res.get("coverageWarnings"):
@@ -944,8 +1534,18 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
         else ("mixed" if len(seen_sources) > 1 else None)
     )
 
+    should_fail = any(SEVERITY_RANK[f["severity"]] >= SEVERITY_RANK[fail_on] for f in all_findings) or (
+        ns.report_unused and len(all_unused) > 0
+    )
+    out_findings = (
+        [f for f in all_findings if SEVERITY_RANK.get(f.get("severity", "info"), 1) >= SEVERITY_RANK[fail_on]]
+        if quiet
+        else all_findings
+    )
+
     report = {
         "version": ENGINE_VERSION,
+        "context": _summarize_report_context(reg_pairs, flag_register),
         "rulesetHash": ruleset_hash,
         "effectivePack": eff_pack_out,
         "packSource": pack_source_out,
@@ -954,21 +1554,18 @@ def _cmd_check(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
         "checkedCount": checked_count,
         "skipped": all_skipped,
         "coverageWarnings": all_coverage_warnings,
-        "findings": all_findings,
+        "findings": out_findings,
         "unusedSuppressions": all_unused,
     }
     if all_profiles:
         report["profiles"] = all_profiles
     out_report = _apply_compact_report(report) if compact_json else report
-    rendered = format_report(out_report, fmt, ns.lang)
+    rendered = _colorize_text_report(format_report(out_report, fmt, ns.lang, quiet=quiet, fail_on=fail_on), use_color)
     if rendered:
         print(rendered)
 
     if explicit_uninspectable or (checked_count == 0 and len(all_skipped) > 0):
         return 2
-    should_fail = any(SEVERITY_RANK[f["severity"]] >= SEVERITY_RANK[fail_on] for f in all_findings) or (
-        ns.report_unused and len(all_unused) > 0
-    )
     return 1 if should_fail else 0
 
 
@@ -1199,6 +1796,35 @@ def _cmd_pack_test(packs: dict[str, dict[str, Any]]) -> int:
             for pat in rule.get("patterns") or []:
                 if ".*" in pat:
                     errors.append(f"{pack['id']}/{rid}: unbounded '.*' forbidden in portable pack regex: {pat}")
+            reg_ov = rule.get("registerOverrides")
+            if reg_ov:
+                if rule.get("tier") == "invariant":
+                    errors.append(f"{pack['id']}/{rid}: invariant rules cannot define registerOverrides")
+                for rk, rov in reg_ov.items():
+                    if rk not in VALID_REGISTERS or rk == "unspecified":
+                        errors.append(f"{pack['id']}/{rid}: invalid registerOverrides key '{rk}'")
+                    if isinstance(rov, dict) and rov.get("severity") and SEVERITY_RANK.get(rov["severity"], 0) > SEVERITY_RANK[rule["severity"]]:
+                        errors.append(f"{pack['id']}/{rid}: registerOverrides['{rk}'] cannot raise severity above '{rule['severity']}'")
+                reg_fixtures = (rule.get("fixtures") or {}).get("register") or []
+                if not reg_fixtures:
+                    errors.append(f"{pack['id']}/{rid}: registerOverrides requires at least 1 fixtures.register assertion")
+                for rf in reg_fixtures:
+                    assertions += 1
+                    res = audit_text(
+                        rf["text"],
+                        filename=f"fixture.{mod}",
+                        modality=mod,
+                        pack=eff,
+                        allow_synthetic_fixtures=True,
+                        register=rf["register"],
+                    )
+                    hit = next((f for f in res["findings"] if f["ruleId"] == rid), None)
+                    if rf["expect"] == "skip":
+                        if hit is not None:
+                            errors.append(f"{pack['id']}/{rid}: expected register '{rf['register']}' to skip")
+                    elif hit is None or hit.get("severity") != rf["expect"]:
+                        got_sev = hit.get("severity") if hit else "none"
+                        errors.append(f"{pack['id']}/{rid}: register '{rf['register']}' expected '{rf['expect']}', got '{got_sev}'")
     if errors:
         print(f"dislop pack-test: FAILED ({len(errors)} error(s) across {assertions} assertions)", file=sys.stderr)
         for e in errors:
@@ -1388,6 +2014,16 @@ def _cmd_local_deslop(target: str | None, ns: argparse.Namespace, packs: dict[st
 
     mod = detect_modality(fn) or "markdown"
     config = load_config(Path.cwd(), getattr(ns, "config", None))
+    flag_register: str | None = None
+    if getattr(ns, "register", None) is not None:
+        norm = str(ns.register).strip().lower()
+        if not norm or (norm != "auto" and norm not in VALID_REGISTERS):
+            joined = ", ".join(VALID_REGISTERS)
+            print(f"dislop: invalid --register '{ns.register}' (expected auto, {joined})", file=sys.stderr)
+            return 2
+        flag_register = norm
+    file_cfg = resolve_config_for_file(fn, config)
+    reg_info = resolve_register(raw_text, filename=fn, flag_register=flag_register, config=file_cfg)
     raw_pack = getattr(ns, "pack", None)
     eff_pack = (
         predict_pack_with_pocket_router(raw_text)["recommendedPack"]
@@ -1402,6 +2038,7 @@ def _cmd_local_deslop(target: str | None, ns: argparse.Namespace, packs: dict[st
             text=raw_text,
             pack=pack,
             modality=mod,
+            register=reg_info["register"],
             endpoint=getattr(ns, "endpoint", None),
             model=getattr(ns, "model", None),
             allow_lan=bool(getattr(ns, "allow_lan", False)),
@@ -1662,6 +2299,14 @@ def _cmd_verify(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int
     fmt = "json" if ns.json else ns.format
     keep_terms = [t.strip() for t in (ns.keep or "").split(",") if t.strip()]
     config = load_config(cwd, ns.config)
+    flag_register: str | None = None
+    if getattr(ns, "register", None) is not None:
+        norm = str(ns.register).strip().lower()
+        if not norm or (norm != "auto" and norm not in VALID_REGISTERS):
+            joined = ", ".join(VALID_REGISTERS)
+            print(f"dislop: invalid --register '{ns.register}' (expected auto, {joined})", file=sys.stderr)
+            return 2
+        flag_register = norm
 
     if ns.git is not None:
         git_ref = "HEAD"
@@ -1715,6 +2360,7 @@ def _cmd_verify(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int
         modality=mod,
         pack=pack,
         config=file_cfg,
+        register=flag_register,
         keep_terms=keep_terms,
         allow_added=bool(ns.allow_added),
         strict=bool(ns.strict),
@@ -1969,17 +2615,56 @@ def _build_rubric_prompt_digest(rubric: dict[str, Any], lang: str = "en") -> str
     return "\n".join(lines)
 
 
-def _cmd_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
+_REVIEW_MAX_ZIP_ENTRIES = 3000
+_REVIEW_MAX_ZIP_BYTES = 120 * 1024 * 1024
+
+
+def _read_ooxml_zip_entries_bounded(zip_path: Path) -> dict[str, str]:
+    import zipfile
+    entries: dict[str, str] = {}
+    total_actual = 0
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        infos = zf.infolist()
+        if len(infos) > _REVIEW_MAX_ZIP_ENTRIES:
+            raise ReviewConfigError(
+                f"Archive exceeds maximum XML entry cap ({len(infos)} > {_REVIEW_MAX_ZIP_ENTRIES})"
+            )
+        declared_sum = sum(max(0, info.file_size) for info in infos)
+        if declared_sum > _REVIEW_MAX_ZIP_BYTES:
+            raise ReviewConfigError(
+                f"Archive exceeds maximum uncompressed cap ({declared_sum} bytes > {_REVIEW_MAX_ZIP_BYTES})"
+            )
+        for info in infos:
+            if info.filename.endswith((".xml", ".rels")):
+                raw_bytes = zf.read(info.filename)
+                total_actual += len(raw_bytes)
+                if total_actual > _REVIEW_MAX_ZIP_BYTES:
+                    raise ReviewConfigError(
+                        f"Archive exceeds maximum uncompressed cap ({total_actual} bytes > {_REVIEW_MAX_ZIP_BYTES})"
+                    )
+                entries[info.filename] = raw_bytes.decode("utf-8", errors="replace")
+    return entries
+
+
+def _cmd_rubric_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
     cwd = Path.cwd()
     fmt = "json" if ns.json else ns.format
-    config = load_config(cwd, ns.config)
+    try:
+        config = load_config(cwd, ns.config)
+    except ValueError as exc:
+        print(f"dislop: {exc}", file=sys.stderr)
+        return 2
     voice_info = discover_voice_card(cwd)
     rubric = _load_ai_tic_rubric()
     target = ns.target or "-"
 
     if target == "-":
-        text = sys.stdin.read()
-        label = ns.stdin_filename or "stdin.md"
+        try:
+            text = _read_stdin_text_checked("review")
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        label = _detect_stdin_filename(text, ns.stdin_filename)
     else:
         abs_t = (cwd / target).resolve()
         if not abs_t.is_file():
@@ -1990,8 +2675,18 @@ def _cmd_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int
 
     mod = detect_modality(label) or "markdown"
     file_cfg = resolve_config_for_file(label, config)
+    flag_register: str | None = None
+    if getattr(ns, "register", None) is not None:
+        norm = str(ns.register).strip().lower()
+        if not norm or (norm != "auto" and norm not in VALID_REGISTERS):
+            joined = ", ".join(VALID_REGISTERS)
+            print(f"dislop: invalid --register '{ns.register}' (expected auto, {joined})", file=sys.stderr)
+            return 2
+        flag_register = norm
+    reg_info = resolve_register(text, filename=label, flag_register=flag_register, config=file_cfg)
     pack, eff_pack, pack_source = _resolve_text_pack_and_source(text, label, mod, ns.pack or "auto", file_cfg, packs)
-    audit_res = audit_text(text, filename=label, modality=mod, pack=pack, config=file_cfg)
+    strategy = get_scenario_strategy(pack_id=eff_pack, register=reg_info["register"])
+    audit_res = audit_text(text, filename=label, modality=mod, pack=pack, config=file_cfg, register=reg_info["register"])
     rule_findings = list(audit_res["findings"])
     pat_res = audit_patterns(text, filename=label, modality=mod, banks=load_pattern_banks(), config=file_cfg)
     pattern_findings = list(pat_res["findings"])
@@ -2043,13 +2738,17 @@ def _cmd_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int
             return 2
         chat_url = endpoint if endpoint.endswith("/chat/completions") else f"{endpoint.rstrip('/')}/chat/completions"
         model_id = str(ns.model or os.environ.get("DISLOP_REVIEW_MODEL") or "gpt-4o-mini")
+        strat_tag = "zh" if ns.lang == "zh" else "en"
         sys_prompt = (
-            "你是 dislop 审校助手，请结合五层 AI 口癖准则交叉核对确定性预检与统计信号。只输出 JSON：{\"summary\":\"...\",\"issues\":[{\"quote\":\"原文原样片段\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"原因\",\"replacement\":\"仅edit填\",\"instruction\":\"仅rewrite填\",\"question\":\"仅ask填\"}]}。硬规则：1) 保留作者原有视角、自然句长起伏、个性化表达与带事实锚点的行业术语，禁止改写成死板说教、廉价“装人味”口水词（家人们/其实吧/绝绝子）或删减干货；2) quote 必须一字不差从原文复制；3) 禁止引入全闭环/闭环/赋能/抓手/不是A而是B等新套词；4) 绝不改丢数字或范围限定词（预计/仅在/除非/待确认）。"
+            f"你是 dislop 审校助手，请结合五层 AI 口癖准则与当前写作场景（{strategy['label']['zh']}）交叉核对确定性预检与统计信号。本场景清理重点：{strategy['cut']['zh']}；必须保留：{strategy['protect']['zh']}；严禁改偏：{strategy['avoid']['zh']}。只输出 JSON：{{\"summary\":\"...\",\"issues\":[{{\"quote\":\"原文原样片段\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"原因\",\"replacement\":\"仅edit填\",\"instruction\":\"仅rewrite填\",\"question\":\"仅ask填\"}}]}}。硬规则：1) 保留作者原有视角、自然句长起伏、个性化表达与带事实锚点的行业术语，禁止改写成死板说教、廉价“装人味”口水词（家人们/其实吧/绝绝子）或删减干货；2) quote 必须一字不差从原文复制；3) 禁止引入全闭环/闭环/赋能/抓手/不是A而是B等新套词；4) 绝不改丢数字或范围限定词（预计/仅在/除非/待确认）。"
             if ns.lang == "zh"
-            else "You are dislop's multi-layer AI-tic reviewer. Cross-check deterministic findings and telemetry against the 5-layer rubric. Output strict JSON only: {\"summary\":\"...\",\"issues\":[{\"quote\":\"exact verbatim substring\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"reason\",\"replacement\":\"for edit\",\"instruction\":\"for rewrite\",\"question\":\"for ask\"}]}. Rules: 1) preserve author voice, perspective, rhythm contrast, vivid phrasing, grounded domain terms, and modality qualifiers; never suggest cheesy fake-human slang; 2) quote MUST match verbatim; 3) never introduce filler slogans; 4) keep every number and unit intact."
+            else f"You are dislop's multi-layer AI-tic reviewer tuned for {strategy['label']['en']} ({strategy['id']}). Cut: {strategy['cut']['en']} Protect: {strategy['protect']['en']} Avoid: {strategy['avoid']['en']} Cross-check deterministic findings and telemetry against the 5-layer rubric. Output strict JSON only: {{\"summary\":\"...\",\"issues\":[{{\"quote\":\"exact verbatim substring\",\"ticLayer\":\"lexical|syntactic|rhythm|cognitive-framing|rhetorical-stance|visual|artifact\",\"action\":\"edit|rewrite|ask\",\"severity\":\"error|warning|info\",\"why\":\"reason\",\"replacement\":\"for edit\",\"instruction\":\"for rewrite\",\"question\":\"for ask\"}}]}}. Rules: 1) preserve author voice, perspective, rhythm contrast, vivid phrasing, grounded domain terms, and modality qualifiers; never suggest cheesy fake-human slang; 2) quote MUST match verbatim; 3) never introduce filler slogans; 4) keep every number and unit intact."
         )
         rubric_digest = _build_rubric_prompt_digest(rubric, ns.lang)
-        user_parts = [f"Modality: {mod} | Pack: {eff_pack}"]
+        user_parts = [
+            f"Modality: {mod} | Pack: {eff_pack} | Register: {reg_info['register']} | Scenario: {strategy['id']}",
+            f"Scenario Strategy ({strategy['label'][strat_tag]}): cut=[{strategy['cut'][strat_tag]}] protect=[{strategy['protect'][strat_tag]}] avoid=[{strategy['avoid'][strat_tag]}]",
+        ]
         if rubric_digest:
             user_parts.append(f"5-Layer AI-Tic Rubric:\n{rubric_digest}")
         user_parts.append(f"Local Cross-Check Signals: {json.dumps(cross_check, ensure_ascii=False)}")
@@ -2101,6 +2800,8 @@ def _cmd_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int
         "modality": mod,
         "effectivePack": eff_pack,
         "packSource": pack_source,
+        "register": reg_info["register"],
+        "scenarioStrategy": strategy["id"],
         "crossCheck": cross_check,
         "rubricLayers": [l.get("id") for l in (rubric.get("layers") or [])],
         "voiceCard": {"found": voice_info["found"], "scope": voice_info["scope"]},
@@ -2144,6 +2845,577 @@ def _cmd_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int
     return 0
 
 
+def _cmd_provider_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
+    cwd = Path.cwd()
+    try:
+        config = load_config(cwd, ns.config)
+    except ValueError as exc:
+        print(f"dislop: {exc}", file=sys.stderr)
+        return 2
+
+    lang = ns.lang
+    fmt = "json" if ns.json else ns.format
+    fail_on = ns.fail_on or "warning"
+    if fail_on not in SEVERITY_RANK:
+        print(
+            f"dislop review: invalid --fail-on '{fail_on}' (expected error, warning, info, or never)",
+            file=sys.stderr,
+        )
+        return 2
+    if ns.timeout < 1000 or ns.timeout > 120000:
+        print("dislop review: --timeout must be between 1000 and 120000 ms", file=sys.stderr)
+        return 2
+    max_chunks = getattr(ns, "max_chunks", 20)
+    if max_chunks < 1 or max_chunks > 100:
+        print("dislop review: --max-chunks must be between 1 and 100", file=sys.stderr)
+        return 2
+
+    target = ns.target or "-"
+    raw_text = ""
+    filename = "stdin.md"
+    modality = "markdown"
+    if target == "-":
+        try:
+            raw_text = _read_stdin_text_checked("review")
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        filename = _detect_stdin_filename(raw_text, ns.stdin_filename)
+        modality = detect_modality(filename) or "markdown"
+        if ns.stdin_filename and modality in {"docx", "pptx", "pdf"}:
+            print(
+                f"dislop review: '--stdin-filename' cannot treat stdin as binary '{modality}'; pass the file path directly.",
+                file=sys.stderr,
+            )
+            return 2
+    else:
+        abs_p = (cwd / target).resolve()
+        if not abs_p.is_file():
+            print(f"dislop review: file not found: {target}", file=sys.stderr)
+            return 2
+        try:
+            filename = abs_p.relative_to(cwd.resolve()).as_posix()
+        except ValueError:
+            filename = abs_p.name
+        mod = detect_modality(abs_p.name)
+        if not mod:
+            print(f"dislop review: unsupported file type '{abs_p.suffix or '(none)'}'", file=sys.stderr)
+            return 2
+        modality = mod
+        if modality in {"docx", "pptx"}:
+            try:
+                entries = _read_ooxml_zip_entries_bounded(abs_p)
+                raw_text = extract_ooxml_review_text(
+                    entries,
+                    modality,
+                    include_notes=bool(ns.include_notes),
+                    include_hidden=bool(ns.include_hidden),
+                )
+            except Exception as exc:
+                print(f"dislop review: {exc}", file=sys.stderr)
+                return 2
+        else:
+            try:
+                raw_text = abs_p.read_bytes().decode("utf-8")
+            except UnicodeDecodeError:
+                print(f"dislop review: '{target}' is not valid UTF-8 text", file=sys.stderr)
+                return 2
+
+    filename = re.sub(r"[\r\n]+", " ", str(filename)).strip() or "draft.md"
+
+    if not raw_text.strip():
+        print("dislop review: extracted draft text is empty", file=sys.stderr)
+        return 2
+
+    flag_register = str(ns.register).strip().lower() if ns.register is not None else None
+    try:
+        reg_info = resolve_register(raw_text, filename=filename, flag_register=flag_register, config=config)
+    except Exception as exc:
+        print(f"dislop review: {exc}", file=sys.stderr)
+        return 2
+
+    pack_flag = (
+        predict_pack_with_pocket_router(raw_text)["recommendedPack"]
+        if ns.pack == "auto" and modality in {"markdown", "text"}
+        else (None if ns.pack == "auto" else ns.pack)
+    )
+    pack_id = pick_pack_for_file(filename, modality, pack_flag, config)
+    if pack_id not in packs:
+        print(f"dislop review: unknown pack '{pack_id}'", file=sys.stderr)
+        return 2
+
+    is_dry_run = bool(ns.dry_run)
+    is_print_prompt = bool(ns.print_prompt)
+    try:
+        prov = resolve_provider_config(
+            provider=ns.provider or os.environ.get("DISLOP_REVIEW_PROVIDER") or "openai",
+            model=ns.model,
+            base_url=ns.base_url,
+            allow_missing_key=(is_dry_run or is_print_prompt),
+            env=os.environ,
+        )
+    except ReviewConfigError as exc:
+        print(f"dislop review: {exc}", file=sys.stderr)
+        return 2
+
+    try:
+        chunks = chunk_text_by_paragraphs(raw_text, 10000, max_chunks=max_chunks)
+    except ReviewConfigError as exc:
+        print(f"dislop review: {exc}", file=sys.stderr)
+        return 2
+
+    first_prompt = build_review_prompt(
+        chunk_text=chunks[0]["text"],
+        filename=filename,
+        modality=modality,
+        pack_id=pack_id,
+        register=reg_info["register"],
+        lang=lang,
+    )
+    total_bytes = len(raw_text.encode("utf-8"))
+    consent_mode = (
+        "local-loopback"
+        if prov["isLocal"]
+        else ("--yes" if ns.yes else ("DISLOP_ALLOW_REMOTE=1" if os.environ.get("DISLOP_ALLOW_REMOTE") == "1" else "required"))
+    )
+
+    if is_print_prompt:
+        if fmt == "json":
+            print(
+                json.dumps(
+                    {
+                        "schema": "dislop.review-prompt/1",
+                        "provider": prov["provider"],
+                        "host": prov["host"],
+                        "model": prov["model"],
+                        "chunks": len(chunks),
+                        "bytes": total_bytes,
+                        "delimiter": first_prompt["delimiter"],
+                        "systemPrompt": first_prompt["systemPrompt"],
+                        "userPrompt": first_prompt["userPrompt"],
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+        else:
+            print(
+                f"=== SYSTEM PROMPT ===\n{first_prompt['systemPrompt']}\n\n"
+                f"=== USER PROMPT (chunk 1/{len(chunks)}) ===\n{first_prompt['userPrompt']}"
+            )
+        return 0
+
+    if is_dry_run:
+        dry_payload = {
+            "schema": "dislop.review-dry-run/1",
+            "provider": prov["provider"],
+            "host": prov["host"],
+            "endpointUrl": prov["safeUrl"],
+            "model": prov["model"],
+            "consent": consent_mode,
+            "keyPresent": bool(prov["apiKey"]),
+            "keySource": prov["keySource"],
+            "headers": {
+                "content-type": "application/json",
+                **({"authorization": "Bearer <REDACTED>"} if prov["apiKey"] else {}),
+            },
+            "file": filename,
+            "modality": modality,
+            "pack": pack_id,
+            "context": reg_info,
+            "chunks": len(chunks),
+            "bytes": total_bytes,
+            "requestBody": {
+                "model": prov["model"],
+                "temperature": 0,
+                "messages": [
+                    {"role": "system", "content": first_prompt["systemPrompt"]},
+                    {"role": "user", "content": first_prompt["userPrompt"]},
+                ],
+            },
+        }
+        if fmt == "json":
+            print(json.dumps(dry_payload, ensure_ascii=False, indent=2))
+        elif lang == "zh":
+            auth_desc = f"环境变量 {prov['keySource']}（已脱敏）" if prov["apiKey"] else "未设置 / 本地免密钥"
+            print("dislop review 演练（0 次网络请求）")
+            print(f"  目标接口 : {prov['safeUrl']} (provider={prov['provider']}, model={prov['model']}, consent={consent_mode})")
+            print(f"  鉴权来源 : {auth_desc}")
+            print(f"  待审文稿 : {filename}（{total_bytes} 字节，{len(chunks)} 段，语域={reg_info['register']}）")
+            print(f"  分隔标记 : {first_prompt['delimiter']}")
+        else:
+            auth_desc = f"env {prov['keySource']} (redacted)" if prov["apiKey"] else "none/unset"
+            print("dislop review dry-run: 0 network calls made")
+            print(f"  destination : {prov['safeUrl']} (provider={prov['provider']}, model={prov['model']}, consent={consent_mode})")
+            print(f"  auth        : {auth_desc}")
+            print(f"  draft       : {filename} ({total_bytes} bytes, {len(chunks)} chunk(s), register={reg_info['register']})")
+            print(f"  delimiter   : {first_prompt['delimiter']}")
+        return 0
+
+    forbid_list = config.get("forbid") if isinstance(config, dict) else None
+    if not prov["isLocal"] and isinstance(forbid_list, list) and len(forbid_list) > 0:
+        hit_locs: list[str] = []
+        for pat in forbid_list:
+            try:
+                cre = re.compile(pat, re.I | re.M | re.U)
+            except re.error as exc:
+                print(f"dislop review: invalid .dislop.local.json forbid regex: {exc}", file=sys.stderr)
+                return 2
+            if cre.search(filename):
+                hit_locs.append("filename")
+            for fm in cre.finditer(raw_text):
+                line_num = raw_text[: fm.start()].count("\n") + 1
+                hit_locs.append(str(line_num))
+                if len(hit_locs) >= 20:
+                    break
+        if hit_locs:
+            uniq = ", ".join(list(dict.fromkeys(hit_locs))[:5])
+            print(
+                f"dislop review: refusing remote upload — matched {len(hit_locs)} local '.dislop.local.json' forbid policy hit(s) ({uniq}).",
+                file=sys.stderr,
+            )
+            return 2
+
+    if prov["isLocal"]:
+        try:
+            assert_loopback_endpoint(prov["hostname"])
+        except ReviewConfigError as exc:
+            print(
+                f"dislop review: {scrub_secrets(str(exc), [prov['apiKey']] if prov.get('apiKey') else [])}",
+                file=sys.stderr,
+            )
+            return 2
+    elif not ns.yes and os.environ.get("DISLOP_ALLOW_REMOTE") != "1":
+        print(
+            "dislop review: refusing remote upload without explicit confirmation (--yes or DISLOP_ALLOW_REMOTE=1).\n"
+            f"  target: host={prov['host']} provider={prov['provider']} model={prov['model']} file={filename} bytes={total_bytes} chunks={len(chunks)}",
+            file=sys.stderr,
+        )
+        return 2
+
+    print(
+        f"dislop review: sending to host={prov['host']} provider={prov['provider']} model={prov['model']} file={filename} bytes={total_bytes} chunks={len(chunks)} register={reg_info['register']}",
+        file=sys.stderr,
+    )
+
+    all_findings: list[dict[str, Any]] = []
+    seen_fps: set[str] = set()
+    rejected = {"ungroundedQuote": 0, "inventedFact": 0, "malformed": 0}
+    summaries: list[str] = []
+    levels: list[str] = []
+    prompt_tokens = 0
+    completion_tokens = 0
+    total_tokens = 0
+    has_usage = False
+    redact_list = [prov["apiKey"]] if prov["apiKey"] else []
+
+    for ch in chunks:
+        prompt = (
+            first_prompt
+            if ch["index"] == 0
+            else build_review_prompt(
+                chunk_text=ch["text"],
+                filename=filename,
+                modality=modality,
+                pack_id=pack_id,
+                register=reg_info["register"],
+                lang=lang,
+            )
+        )
+        try:
+            api_res = run_review_request(
+                endpoint_url=prov["endpointUrl"],
+                is_local=prov["isLocal"],
+                hostname=prov["hostname"],
+                model=prov["model"],
+                api_key=prov["apiKey"],
+                system_prompt=prompt["systemPrompt"],
+                user_prompt=prompt["userPrompt"],
+                timeout_ms=ns.timeout,
+            )
+            usage = api_res.get("usage")
+            if isinstance(usage, dict):
+                try:
+                    _max_tok = 1_000_000_000
+
+                    def _safe_tok_int(val: Any) -> int:
+                        if isinstance(val, bool) or val is None:
+                            return 0
+                        if isinstance(val, int):
+                            return val if 0 <= val <= _max_tok else 0
+                        if isinstance(val, float):
+                            return int(val) if math.isfinite(val) and 0 <= val <= _max_tok and val.is_integer() else 0
+                        if isinstance(val, str):
+                            s = val.strip()
+                            if len(s) <= 10 and s.isascii() and s.isdigit():
+                                iv = int(s)
+                                return iv if iv <= _max_tok else 0
+                        return 0
+
+                    pt = _safe_tok_int(usage.get("prompt_tokens"))
+                    ct = _safe_tok_int(usage.get("completion_tokens"))
+                    tt = _safe_tok_int(usage.get("total_tokens"))
+                    has_usage = True
+                    prompt_tokens += pt
+                    completion_tokens += ct
+                    total_tokens += tt
+                except Exception:
+                    pass
+            norm = validate_and_normalize_review_response(
+                raw_content=api_res["content"],
+                chunk_text=ch["text"],
+                full_text=raw_text,
+                chunk_start_offset=ch["startOffset"],
+                filename=filename,
+                modality=modality,
+                lang=lang,
+                redact_secrets=redact_list,
+            )
+            for f in norm["findings"]:
+                fp = f["fingerprint"]
+                if fp not in seen_fps:
+                    seen_fps.add(fp)
+                    all_findings.append(f)
+            rejected["ungroundedQuote"] += norm["rejected"]["ungroundedQuote"]
+            rejected["inventedFact"] += norm["rejected"]["inventedFact"]
+            rejected["malformed"] += norm["rejected"]["malformed"]
+            if norm["summary"]:
+                summaries.append(norm["summary"])
+            levels.append(norm["aiFlavorLevel"])
+        except Exception as exc:
+            safe_err = scrub_secrets(str(exc), redact_list)
+            print(f"dislop review: chunk {ch['index'] + 1}/{len(chunks)} failed — {safe_err}", file=sys.stderr)
+            return 2
+
+    overall_level = "high" if "high" in levels else ("medium" if "medium" in levels else "low")
+    level_label = {"high": "高", "medium": "中", "low": "低"}.get(overall_level, overall_level) if lang == "zh" else overall_level
+    summary_text = " ".join(summaries).strip()
+    usage_summary = (
+        {"promptTokens": prompt_tokens, "completionTokens": completion_tokens, "totalTokens": total_tokens}
+        if has_usage
+        else None
+    )
+    report = {
+        "schema": "dislop.review/1",
+        "version": ENGINE_VERSION,
+        "provider": prov["provider"],
+        "host": prov["host"],
+        "model": prov["model"],
+        "file": filename,
+        "pack": pack_id,
+        "lang": lang,
+        "chunks": len(chunks),
+        "bytes": total_bytes,
+        "aiFlavorLevel": overall_level,
+        "summary": summary_text,
+        "context": {"register": reg_info["register"], "registerSource": reg_info["registerSource"]},
+        "checkedCount": 1,
+        "skipped": [],
+        "findings": all_findings,
+        "unusedSuppressions": [],
+        "rejected": rejected,
+        "usage": usage_summary,
+    }
+    if fmt == "json":
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        print(format_report(report, fmt, lang, fail_on=fail_on))
+        if fmt == "text" and summary_text:
+            print(
+                f"  [综述 · {level_label}] {summary_text}"
+                if lang == "zh"
+                else f"  [summary · {overall_level}] {summary_text}"
+            )
+        rej_total = rejected["ungroundedQuote"] + rejected["inventedFact"] + rejected["malformed"]
+        if fmt == "text" and rej_total > 0:
+            if lang == "zh":
+                print(
+                    f"  [校验过滤] 已丢弃 {rej_total} 条未通过核验的建议（无原文引用={rejected['ungroundedQuote']}，编造事实={rejected['inventedFact']}，格式异常={rejected['malformed']}）"
+                )
+            else:
+                print(
+                    f"  [guard] filtered {rej_total} unverified suggestion(s) (ungrounded={rejected['ungroundedQuote']}, inventedFact={rejected['inventedFact']}, malformed={rejected['malformed']})"
+                )
+    triggered = any(SEVERITY_RANK.get(f["severity"], 1) >= SEVERITY_RANK[fail_on] for f in all_findings)
+    return 1 if triggered else 0
+
+
+def _cmd_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
+    if getattr(ns, "offline", False) or getattr(ns, "endpoint", None) or getattr(ns, "api_key_env", None):
+        return _cmd_rubric_review(ns, packs)
+    return _cmd_provider_review(ns, packs)
+
+
+def _cmd_doctor(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
+    cwd = Path.cwd()
+    lang = ns.lang
+    fmt = "json" if ns.json else ns.format
+    rules_count = sum(len(p.get("rules", [])) for p in packs.values())
+    base_status = build_model_status_report(
+        packs_count=len(packs),
+        rules_count=rules_count,
+        probe_loopback=not ns.no_loopback,
+        cache_dir=ns.cache_dir,
+    )
+
+    skill_rel = "skills/dislop/SKILL.md"
+    pkg_root = Path(__file__).resolve().parent
+    repo_root = pkg_root.parent.parent
+    workspace_ready = (cwd / skill_rel).is_file()
+    bundled_ready = (pkg_root / skill_rel).is_file() or (repo_root / skill_rel).is_file()
+    skill_ready = workspace_ready or bundled_ready
+    byok_env = inspect_byok_env_status(os.environ)
+    cfg_found = any(
+        (cwd / name).is_file() for name in (".dislop.json", "dislop.json", ".disloprc.json", ".dislop.local.json")
+    )
+    cfg_valid = True
+    cfg_error: str | None = None
+    try:
+        load_config(cwd, None)
+    except Exception as exc:
+        cfg_valid = False
+        cfg_error = scrub_secrets(str(exc))
+
+    gitignore_local: bool | None = None
+    try:
+        g = subprocess.run(
+            ["git", "check-ignore", "-q", ".dislop.local.json"],
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+        if g.returncode == 0:
+            gitignore_local = True
+        elif g.returncode == 1:
+            gitignore_local = False
+    except Exception:
+        pass
+
+    ping = (
+        ping_endpoint_health("https://dislop.com/api/health")
+        if ns.online
+        else {"checked": False, "ok": None, "status": None, "error": None}
+    )
+
+    report = {
+        **base_status,
+        "schema": "dislop.doctor/1",
+        "layers": {
+            "skill": {
+                "ready": skill_ready,
+                "workspaceReady": workspace_ready,
+                "bundledReady": bundled_ready,
+                "path": skill_rel,
+            },
+            "localCli": {
+                "ready": True,
+                "version": ENGINE_VERSION,
+                "packs": len(packs),
+                "rules": rules_count,
+                "pocketMlReady": True,
+                "localRunnersCount": len(base_status["localRunners"]),
+            },
+            "byokReview": byok_env,
+            "officialCloudMcp": {
+                "url": "https://dislop.com/mcp",
+                "freeCreditsPerMonth": 30,
+                "ping": ping,
+            },
+            "config": {
+                "found": cfg_found,
+                "valid": cfg_valid,
+                "error": cfg_error,
+                "gitignoreLocalConfig": gitignore_local,
+            },
+        },
+    }
+
+    if fmt == "json":
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0 if cfg_valid else 2
+
+    configured_names = [f"{k}({v['keySource']})" for k, v in byok_env["providers"].items() if v["keyPresent"]]
+    hw = report["hardware"]
+    rec = report["recommendation"]
+    if lang == "zh":
+        skill_label = "已就绪（当前工作区）" if workspace_ready else ("已就绪（安装包内置）" if bundled_ready else "未找到")
+        print(f"dislop doctor v{ENGINE_VERSION}（三层体检 · 默认 0 联网）")
+        print(f"  1. 纯文档 Skill   : {skill_label} ({skill_rel})")
+        print(
+            f"  2. 本地 CLI 引擎  : 已就绪（{len(packs)} 套规则包 / {rules_count} 条规则 · 14.6 KB Pocket ML · {len(base_status['localRunners'])} 个本地推理端）"
+        )
+        rec_tail = f" ({rec['modelId']})" if rec.get("modelId") else "（内置模型即可）"
+        print(f"     硬件与选装推荐 : {hw['platform']}/{hw['arch']} · {hw['totalMemoryGb']} GB 内存 -> {rec['tier']}{rec_tail}")
+        print(
+            f"     BYOK 深度审校  : {'已配置 ' + '、'.join(configured_names) if configured_names else '未配置密钥环境变量（仅按需 --yes 启用）'}"
+        )
+        ping_msg = (
+            (f"在线连通 HTTP {ping['status']}" if ping["ok"] else f"连通失败：{ping['error'] or 'HTTP ' + str(ping['status'])}")
+            if ping["checked"]
+            else (f"已拦截（{ping['error']}）" if ping.get("error") else "未联网检测，可加 --online")
+        )
+        print(f"  3. 官方云端 MCP   : https://dislop.com/mcp（免费额度 30 次/月 · {ping_msg}）")
+        cfg_msg = "使用默认" if not cfg_found else ("有效" if cfg_valid else f"异常：{cfg_error}")
+        gi_msg = "已忽略" if gitignore_local is True else ("未加入 .gitignore" if gitignore_local is False else "非 git 仓库")
+        print(f"  配置与隐私边界    : 配置={cfg_msg} | .dislop.local.json 忽略={gi_msg}")
+    else:
+        skill_label = "ready (workspace)" if workspace_ready else ("ready (bundled)" if bundled_ready else "not found")
+        print(f"dislop doctor v{ENGINE_VERSION} (3-layer readiness · offline by default)")
+        print(f"  1. Pure-doc Skill : {skill_label} ({skill_rel})")
+        print(
+            f"  2. Local CLI/ML   : ready ({len(packs)} packs / {rules_count} rules · 14.6 KB Pocket ML · {len(base_status['localRunners'])} local runner(s))"
+        )
+        rec_tail = f" ({rec['modelId']})" if rec.get("modelId") else " (bundled only)"
+        print(f"     Hardware fit   : {hw['platform']}/{hw['arch']} · {hw['totalMemoryGb']} GB RAM -> {rec['tier']}{rec_tail}")
+        print(
+            f"     BYOK review    : {'configured: ' + ', '.join(configured_names) if configured_names else 'no API key env set (explicit opt-in only)'}"
+        )
+        ping_msg = (
+            (f"reachable HTTP {ping['status']}" if ping["ok"] else f"unreachable: {ping['error'] or 'HTTP ' + str(ping['status'])}")
+            if ping["checked"]
+            else (f"blocked ({ping['error']})" if ping.get("error") else "offline (pass --online to ping)")
+        )
+        print(f"  3. Cloud MCP      : https://dislop.com/mcp (30 free/mo · {ping_msg})")
+        cfg_msg = "defaults" if not cfg_found else ("valid" if cfg_valid else f"invalid ({cfg_error})")
+        gi_msg = "n/a" if gitignore_local is None else str(gitignore_local).lower()
+        print(f"  Config & hygiene  : config={cfg_msg} | .dislop.local.json gitignored={gi_msg}")
+    return 0 if cfg_valid else 2
+
+
+def _print_grouped_help() -> None:
+    print(f"""dislop v{ENGINE_VERSION} — Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI, and slides
+
+Usage: dislop <command> [options]
+
+Check & fix (local, 0 network calls):
+  check [paths... | -]      Audit files or stdin [--pack <id|auto>] [--register <id|auto>] [--deep] [-q|--quiet]
+                            [--fail-on error|warning|info|never] [--format text|json|agent|sarif|github|md]
+                            [--changed [ref] | --staged] [--rule <id,...>] [--lang en|zh]
+  verify <before> <after>   Verify edits retain numbers/qualifiers & --keep terms [--git [ref] <file>] [--strict]
+  explain <rule-id>         Show rationale, deletion test, and bad/trap/good examples
+  init                      Create starter .dislop.json and gitignore .dislop.local.json
+
+Browse rules & style:
+  catalog [query]           Search the 53-rule AI-slop catalog (alias: search)
+  packs                     List bundled rule packs and supported formats
+  patterns [file | -]       Run multi-angle extended pattern-bank scan
+  voice [paths... | -]      Extract offline dislop.voice/1 writing profile
+
+Agent & review:
+  review [file | -]         Multi-layer review (--offline | --endpoint <url> | --provider openai|gemini|local)
+  --mcp                     Run local stdio MCP server (7 offline tools)
+  resources                 Show bundled packs, static agent links, and Official Cloud MCP
+
+Diagnostics & optional local models:
+  doctor [--online]         Check 3-layer readiness (Skill, Local CLI/ML, BYOK env, config, and optional Cloud ping)
+  model [action]            Manage/score Pocket ML & optional local models (status|score|install|import|remove|deslop)
+  pack-test                 Validate Pack Schema v2 manifests and embedded fixtures
+
+Exit codes: 0 clean | 1 findings >= --fail-on | 2 usage, config, or unreadable file error
+Example:    dislop check draft.md --deep --lang zh""")
+
+
 def _cmd_init() -> int:
     cwd = Path.cwd()
     cfg = cwd / ".dislop.json"
@@ -2165,7 +3437,79 @@ def _cmd_init() -> int:
         if ".dislop.local.json" not in cur.splitlines():
             gi.write_text(cur.rstrip() + "\n.dislop.local.json\n", encoding="utf-8")
             print("Added .dislop.local.json to .gitignore")
+    elif (cwd / ".git").exists():
+        gi.write_text(".dislop.local.json\n", encoding="utf-8")
+        print("Created .gitignore with .dislop.local.json")
     return 0
+
+
+_CHECK_BOOL_FLAGS = {
+    "json", "staged", "report-unused", "profile", "ml", "patterns", "deep", "compact", "quiet", "help", "version"
+}
+_CHECK_VALUE_FLAGS = {"pack", "register", "config", "fail-on", "format", "stdin-filename", "lang", "rule"}
+
+
+def _preprocess_changed_args(args: list[str]) -> list[str]:
+    if not args or args[0] != "check":
+        return args
+    opts: list[str] = ["check"]
+    pos: list[str] = []
+    cwd = Path.cwd()
+    i = 1
+    end_of_flags = False
+    while i < len(args):
+        tok = args[i]
+        if end_of_flags:
+            pos.append(tok)
+            i += 1
+            continue
+        if tok == "--":
+            end_of_flags = True
+            pos.append(tok)
+            i += 1
+            continue
+        if tok in {"-h", "--help"}:
+            return ["check", "--help"]
+        if tok == "--changed=":
+            opts.append("--changed=HEAD")
+            i += 1
+            continue
+        if tok == "--changed":
+            if i + 1 < len(args):
+                nxt = args[i + 1]
+                if nxt == "-" or nxt.startswith("-") or (cwd / nxt).exists():
+                    opts.append("--changed=HEAD")
+                    i += 1
+                    continue
+                opts.append(f"--changed={nxt}")
+                i += 2
+                continue
+            opts.append("--changed=HEAD")
+            i += 1
+            continue
+        if tok.startswith("--") and "=" in tok:
+            k, v = tok[2:].split("=", 1)
+            if k in _CHECK_BOOL_FLAGS:
+                low = v.strip().lower()
+                if low in {"true", "1", "yes"}:
+                    opts.append(f"--{k}")
+                elif low in {"false", "0", "no"}:
+                    pass
+                else:
+                    opts.append(tok)
+                i += 1
+                continue
+        if tok.startswith("--") and tok[2:] in _CHECK_VALUE_FLAGS and "=" not in tok:
+            if i + 1 < len(args) and not (len(args[i + 1]) > 1 and args[i + 1].startswith("-")):
+                opts.extend([tok, args[i + 1]])
+                i += 2
+                continue
+        if tok == "-" or not tok.startswith("-"):
+            pos.append(tok)
+        else:
+            opts.append(tok)
+        i += 1
+    return opts + pos
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -2174,16 +3518,34 @@ def main(argv: list[str] | None = None) -> None:
         run_mcp_stdio()
         return
 
-    parser = argparse.ArgumentParser(prog="dislop", description="Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI, and slides")
+    if not args or args[0] in {"-h", "--help"}:
+        _print_grouped_help()
+        return
+
+    known_cmds = {
+        "check", "verify", "review", "explain", "packs", "catalog", "search", "patterns",
+        "voice", "model", "doctor", "setup", "deslop", "resources", "pack-test", "init",
+    }
+    if args[0] == "help":
+        if len(args) == 1:
+            _print_grouped_help()
+            return
+        if args[1] not in known_cmds:
+            print(f"dislop: unknown command '{args[1]}'. Run 'dislop --help' for usage.", file=sys.stderr)
+            sys.exit(2)
+        args = [args[1], "--help"]
+
+    parser = argparse.ArgumentParser(prog="dislop", description="Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI, and slides", allow_abbrev=False)
     parser.add_argument("-v", "--version", action="version", version=ENGINE_VERSION)
     sub = parser.add_subparsers(dest="cmd")
 
-    p_check = sub.add_parser("check", help="Audit files or directories")
+    p_check = sub.add_parser("check", help="Audit files or directories", allow_abbrev=False)
     p_check.add_argument("paths", nargs="*")
     p_check.add_argument("--pack", default=None)
+    p_check.add_argument("--register", default=None)
     p_check.add_argument("--config", default=None)
     p_check.add_argument("--fail-on", default=None)
-    p_check.add_argument("--format", default="text", choices=["text", "json", "sarif", "github", "md"])
+    p_check.add_argument("--format", default="text", choices=["text", "json", "agent", "sarif", "github", "md"])
     p_check.add_argument("--json", action="store_true")
     p_check.add_argument("--changed", nargs="?", const="HEAD", default=None)
     p_check.add_argument("--staged", action="store_true")
@@ -2194,13 +3556,16 @@ def main(argv: list[str] | None = None) -> None:
     p_check.add_argument("--compact", action="store_true", help="Deduplicate repeated rule metadata into ruleMeta in --json output")
     p_check.add_argument("--ml", action="store_true", help="Enable bundled Pocket ML stealth-vapor paragraph detection")
     p_check.add_argument("--patterns", action="store_true", help="Include extended 6-dimension pattern-bank probes")
+    p_check.add_argument("-q", "--quiet", action="store_true", help="Show only findings >= --fail-on and suppress clean summary")
+    p_check.add_argument("--rule", default=None, help="Filter findings to comma-separated rule IDs")
     p_check.add_argument("--lang", default="en", choices=["en", "zh"])
 
-    p_verify = sub.add_parser("verify", help="Verify fact ledger, keep terms, and anti-degradation guardrails on a revision")
+    p_verify = sub.add_parser("verify", help="Verify fact ledger, keep terms, and anti-degradation guardrails on a revision", allow_abbrev=False)
     p_verify.add_argument("targets", nargs="*")
     p_verify.add_argument("--git", nargs="?", const="HEAD", default=None)
     p_verify.add_argument("--keep", default=None)
     p_verify.add_argument("--pack", default=None)
+    p_verify.add_argument("--register", default=None)
     p_verify.add_argument("--config", default=None)
     p_verify.add_argument("--allow-added", action="store_true")
     p_verify.add_argument("--strict", action="store_true")
@@ -2208,32 +3573,43 @@ def main(argv: list[str] | None = None) -> None:
     p_verify.add_argument("--json", action="store_true")
     p_verify.add_argument("--lang", default="en", choices=["en", "zh"])
 
-    p_review = sub.add_parser("review", help="Structured dislop.review/1 inspection (offline deterministic or optional BYOK endpoint)")
+    p_review = sub.add_parser("review", help="Multi-layer review (--offline | --endpoint | --provider)", allow_abbrev=False)
     p_review.add_argument("target", nargs="?", default="-")
     p_review.add_argument("--pack", default=None)
+    p_review.add_argument("--register", default=None)
     p_review.add_argument("--config", default=None)
     p_review.add_argument("--stdin-filename", default=None)
     p_review.add_argument("--deep", action="store_true")
     p_review.add_argument("--offline", action="store_true")
     p_review.add_argument("--endpoint", default=None)
-    p_review.add_argument("--model", default=None)
     p_review.add_argument("--api-key-env", default=None)
-    p_review.add_argument("--format", default="text", choices=["text", "json"])
+    p_review.add_argument("--provider", default=None)
+    p_review.add_argument("--model", default=None)
+    p_review.add_argument("--base-url", default=None)
+    p_review.add_argument("--fail-on", default="warning")
+    p_review.add_argument("--timeout", type=int, default=30000)
+    p_review.add_argument("--max-chunks", type=int, default=20)
+    p_review.add_argument("--dry-run", action="store_true")
+    p_review.add_argument("--print-prompt", action="store_true")
+    p_review.add_argument("-y", "--yes", action="store_true")
+    p_review.add_argument("--include-notes", action="store_true")
+    p_review.add_argument("--include-hidden", action="store_true")
+    p_review.add_argument("--format", default="text", choices=["text", "json", "agent"])
     p_review.add_argument("--json", action="store_true")
     p_review.add_argument("--lang", default="en", choices=["en", "zh"])
 
-    p_exp = sub.add_parser("explain", help="Show check question and before/trap/after examples for a rule")
+    p_exp = sub.add_parser("explain", help="Show check question and before/trap/after examples for a rule", allow_abbrev=False)
     p_exp.add_argument("rule_id")
     p_exp.add_argument("--lang", default="en", choices=["en", "zh"])
     p_exp.add_argument("--format", default="text", choices=["text", "json"])
     p_exp.add_argument("--json", action="store_true")
 
-    p_packs = sub.add_parser("packs", help="List installed rule packs")
+    p_packs = sub.add_parser("packs", help="List installed rule packs", allow_abbrev=False)
     p_packs.add_argument("--format", default="text", choices=["text", "json"])
     p_packs.add_argument("--json", action="store_true")
 
     for alias in ("catalog", "search"):
-        p_cat = sub.add_parser(alias, help="Search and filter dislop's AI-slop pattern catalog")
+        p_cat = sub.add_parser(alias, help="Search and filter dislop's AI-slop pattern catalog", allow_abbrev=False)
         p_cat.add_argument("terms", nargs="*")
         p_cat.add_argument("--query", default=None)
         p_cat.add_argument("--pack", default=None)
@@ -2249,7 +3625,7 @@ def main(argv: list[str] | None = None) -> None:
         p_cat.add_argument("--no-exemplars", action="store_true")
         p_cat.add_argument("--limit", type=int, default=None)
 
-    p_pat = sub.add_parser("patterns", help="Run AI-Slop Pattern Library multi-angle scan & profile")
+    p_pat = sub.add_parser("patterns", help="Run AI-Slop Pattern Library multi-angle scan & profile", allow_abbrev=False)
     p_pat.add_argument("target", nargs="?", default="-")
     p_pat.add_argument("--stdin-filename", default=None)
     p_pat.add_argument("--angle", default=None)
@@ -2257,39 +3633,46 @@ def main(argv: list[str] | None = None) -> None:
     p_pat.add_argument("--format", default="text", choices=["text", "json"])
     p_pat.add_argument("--json", action="store_true")
 
-    p_voice = sub.add_parser("voice", help="Extract offline deterministic dislop.voice/1 profile (0 network calls)")
+    p_voice = sub.add_parser("voice", help="Extract offline deterministic dislop.voice/1 profile (0 network calls)", allow_abbrev=False)
     p_voice.add_argument("paths", nargs="*")
     p_voice.add_argument("--output", "-o", default=None)
     p_voice.add_argument("--format", default="text", choices=["text", "json"])
     p_voice.add_argument("--json", action="store_true")
     p_voice.add_argument("--lang", default="auto", choices=["auto", "en", "zh"])
 
-    for m_alias in ("model", "doctor"):
-        p_mod = sub.add_parser(m_alias, help="Inspect bundled ML, hardware fit, and manage optional local models")
-        p_mod.add_argument("action", nargs="?", default="status")
-        p_mod.add_argument("target", nargs="?", default=None)
-        p_mod.add_argument("--tier", default=None)
-        p_mod.add_argument("--provider", default="ollama")
-        p_mod.add_argument("--force", action="store_true")
-        p_mod.add_argument("--dry-run", action="store_true")
-        p_mod.add_argument("--yes", action="store_true")
-        p_mod.add_argument("--sha256", default=None)
-        p_mod.add_argument("--no-copy", action="store_true")
-        p_mod.add_argument("--cache-dir", default=None)
-        p_mod.add_argument("--threshold", type=float, default=None)
-        p_mod.add_argument("--stdin-filename", default=None)
-        p_mod.add_argument("--pack", default=None)
-        p_mod.add_argument("--config", default=None)
-        p_mod.add_argument("--endpoint", default=None)
-        p_mod.add_argument("--model", default=None)
-        p_mod.add_argument("--allow-lan", action="store_true")
-        p_mod.add_argument("--output", "-o", default=None)
-        p_mod.add_argument("--no-loopback", action="store_true")
-        p_mod.add_argument("--format", default="text", choices=["text", "json"])
-        p_mod.add_argument("--json", action="store_true")
-        p_mod.add_argument("--lang", default="en", choices=["en", "zh"])
+    p_mod = sub.add_parser("model", help="Inspect bundled ML, hardware fit, and manage optional local models", allow_abbrev=False)
+    p_mod.add_argument("action", nargs="?", default="status")
+    p_mod.add_argument("target", nargs="?", default=None)
+    p_mod.add_argument("--tier", default=None)
+    p_mod.add_argument("--provider", default="ollama")
+    p_mod.add_argument("--force", action="store_true")
+    p_mod.add_argument("--dry-run", action="store_true")
+    p_mod.add_argument("--yes", action="store_true")
+    p_mod.add_argument("--sha256", default=None)
+    p_mod.add_argument("--no-copy", action="store_true")
+    p_mod.add_argument("--cache-dir", default=None)
+    p_mod.add_argument("--threshold", type=float, default=None)
+    p_mod.add_argument("--stdin-filename", default=None)
+    p_mod.add_argument("--pack", default=None)
+    p_mod.add_argument("--config", default=None)
+    p_mod.add_argument("--endpoint", default=None)
+    p_mod.add_argument("--model", default=None)
+    p_mod.add_argument("--allow-lan", action="store_true")
+    p_mod.add_argument("--output", "-o", default=None)
+    p_mod.add_argument("--no-loopback", action="store_true")
+    p_mod.add_argument("--format", default="text", choices=["text", "json"])
+    p_mod.add_argument("--json", action="store_true")
+    p_mod.add_argument("--lang", default="en", choices=["en", "zh"])
 
-    p_setup = sub.add_parser("setup", help="Interactive or flag-driven optional local model setup")
+    p_doc = sub.add_parser("doctor", help="Check 3-layer readiness, BYOK env, config, and optional --online Cloud ping", allow_abbrev=False)
+    p_doc.add_argument("--online", action="store_true")
+    p_doc.add_argument("--no-loopback", action="store_true")
+    p_doc.add_argument("--cache-dir", default=None)
+    p_doc.add_argument("--format", default="text", choices=["text", "json"])
+    p_doc.add_argument("--json", action="store_true")
+    p_doc.add_argument("--lang", default="en", choices=["en", "zh"])
+
+    p_setup = sub.add_parser("setup", help="Interactive or flag-driven optional local model setup", allow_abbrev=False)
     p_setup.add_argument("target", nargs="?", default=None)
     p_setup.add_argument("--tier", default=None)
     p_setup.add_argument("--provider", default="ollama")
@@ -2301,10 +3684,11 @@ def main(argv: list[str] | None = None) -> None:
     p_setup.add_argument("--json", action="store_true")
     p_setup.add_argument("--lang", default="en", choices=["en", "zh"])
 
-    p_deslop = sub.add_parser("deslop", help="Fact-locked paragraph cleanup using a local loopback model (--local)")
+    p_deslop = sub.add_parser("deslop", help="Fact-locked paragraph cleanup using a local loopback model (--local)", allow_abbrev=False)
     p_deslop.add_argument("target", nargs="?", default="-")
     p_deslop.add_argument("--local", action="store_true")
     p_deslop.add_argument("--pack", default=None)
+    p_deslop.add_argument("--register", default=None)
     p_deslop.add_argument("--config", default=None)
     p_deslop.add_argument("--stdin-filename", default=None)
     p_deslop.add_argument("--endpoint", default=None)
@@ -2315,18 +3699,30 @@ def main(argv: list[str] | None = None) -> None:
     p_deslop.add_argument("--json", action="store_true")
     p_deslop.add_argument("--lang", default="en", choices=["en", "zh"])
 
-    p_res = sub.add_parser("resources", help="Show bundled offline packs and optional static/cloud resource links")
+    p_res = sub.add_parser("resources", help="Show bundled offline packs and optional static/cloud resource links", allow_abbrev=False)
     p_res.add_argument("--format", default="text", choices=["text", "json"])
     p_res.add_argument("--json", action="store_true")
 
-    sub.add_parser("pack-test", help="Validate Pack Schema v2 manifests and embedded fixtures")
-    sub.add_parser("init", help="Create starter .dislop.json config")
+    sub.add_parser("pack-test", help="Validate Pack Schema v2 manifests and embedded fixtures", allow_abbrev=False)
+    sub.add_parser("init", help="Create starter .dislop.json config", allow_abbrev=False)
 
-    if not args or args[0] in {"-h", "--help", "help"}:
-        parser.print_help()
-        return
+    if args and args[0] == "review":
+        for tok in args[1:]:
+            if tok == "--api-key" or tok.startswith("--api-key=") or tok == "--token" or tok.startswith("--token="):
+                print(
+                    "dislop review: passing --api-key or --token as CLI arguments is forbidden (exposed via process list); set DISLOP_REVIEW_API_KEY or the provider env var instead.",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
 
-    ns = parser.parse_args(args)
+    ns = parser.parse_args(_preprocess_changed_args(args))
+    if ns.cmd == "voice":
+        sys.exit(_cmd_voice(ns))
+    if ns.cmd == "patterns":
+        sys.exit(_cmd_patterns(ns))
+    if ns.cmd == "init":
+        sys.exit(_cmd_init())
+
     packs = load_all_packs()
     pattern_by_rule_id = load_pattern_library()
 
@@ -2336,9 +3732,9 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(_cmd_verify(ns, packs))
     if ns.cmd == "review":
         sys.exit(_cmd_review(ns, packs))
-    if ns.cmd == "voice":
-        sys.exit(_cmd_voice(ns))
-    if ns.cmd in {"model", "doctor"}:
+    if ns.cmd == "doctor":
+        sys.exit(_cmd_doctor(ns, packs))
+    if ns.cmd == "model":
         sys.exit(_cmd_model(ns, packs))
     if ns.cmd == "setup":
         ns.action = "setup"
@@ -2353,18 +3749,14 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(_cmd_explain(ns, packs, pattern_by_rule_id))
     if ns.cmd in {"catalog", "search"}:
         sys.exit(_cmd_catalog(ns, packs, pattern_by_rule_id))
-    if ns.cmd == "patterns":
-        sys.exit(_cmd_patterns(ns))
     if ns.cmd == "packs":
         sys.exit(_cmd_packs(ns, packs))
     if ns.cmd == "resources":
         sys.exit(_cmd_resources(ns, packs))
     if ns.cmd == "pack-test":
         sys.exit(_cmd_pack_test(packs))
-    if ns.cmd == "init":
-        sys.exit(_cmd_init())
 
-    parser.print_help()
+    _print_grouped_help()
 
 
 if __name__ == "__main__":
