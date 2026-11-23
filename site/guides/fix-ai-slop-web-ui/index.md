@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: zh
 updated: 2026-11-23
-version: 0.8.0
+version: 0.8.1
 ---
 
 # Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮

@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: en
 updated: 2026-11-23
-version: 0.8.0
+version: 0.8.1
 ---
 
 # Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons

@@ -2,7 +2,7 @@
 
 [简体中文](./ROADMAP.zh-CN.md) · [Product Brief](./PRODUCT.md)
 
-Last updated: `2026-11-23` · Current baseline: `v0.8.0` (`dislop.com` live)
+Last updated: `2026-11-23` · Current baseline: `v0.8.1` (`dislop.com` live)
 
 This roadmap tracks what `dislop` ships today, how we expand from coding agent users to office agent users (Claude Cowork, WorkBuddy, Qwen) and everyone delivering work with AI, and the open design questions we want to decide together. To pick up a track, push back on a rule threshold, or propose a new idea, start a thread in [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) or claim an [Issue](https://github.com/dislop-ai/dislop/issues).
 

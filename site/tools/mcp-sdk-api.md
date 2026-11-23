@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 0.8.0
+version: 0.8.1
 ---
 
 # Official Cloud MCP, HTTP API & JS Core

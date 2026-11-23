@@ -2,7 +2,7 @@
   "name": "dislop",
   "displayName": "dislop",
   "description": "Cutting AI slop is real productivity. Linter for AI Slop in docs and web UI (7 packs, 53 rules, offline).",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "publisher": "dislop-ai",
   "license": "Apache-2.0",
   "homepage": "https://dislop.com",
