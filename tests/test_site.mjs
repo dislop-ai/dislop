@@ -854,8 +854,22 @@ for (const refItem of mainSkillEntry.references || []) {
 assert.ok(llmsTxt.includes("npx --yes dislop check"), "site/llms.txt missing CLI Quick Start command");
 assert.ok(llmsTxt.includes("https://dislop.com/.well-known/mcp/server-card.json"), "site/llms.txt missing server-card.json link");
 
+const toolsIndexMd = fs.readFileSync(path.join(SITE_DIR, "tools", "index.md"), "utf8");
+assert.ok(
+  toolsIndexMd.includes("Agent Evaluation, Install & Rollout Workflow"),
+  "site/tools/index.md missing Agent Evaluation, Install & Rollout Workflow"
+);
+
 for (const homeRel of ["index.html", "en/index.html"]) {
   const homeDoc = fs.readFileSync(path.join(SITE_DIR, homeRel), "utf8");
+  if (homeRel === "index.html") {
+    assert.ok(homeDoc.includes('id="hero-prompt"'), "index.html missing #hero-prompt");
+    assert.ok(homeDoc.includes("https://dislop.com/llms.txt"), "index.html prompt missing llms.txt reference");
+  } else {
+    assert.ok(homeDoc.includes('id="en-hero-prompt"'), "en/index.html missing #en-hero-prompt");
+    assert.ok(homeDoc.includes('data-copy-target="en-hero-prompt"'), "en/index.html missing copy button for #en-hero-prompt");
+    assert.ok(homeDoc.includes("https://dislop.com/llms.txt"), "en/index.html prompt missing llms.txt reference");
+  }
   assert.ok(homeDoc.includes("https://www.npmjs.com/package/dislop"), `${homeRel} JSON-LD missing npm sameAs`);
   assert.ok(homeDoc.includes("https://pypi.org/project/dislop/"), `${homeRel} JSON-LD missing PyPI sameAs`);
   assert.ok(homeDoc.includes('"codeRepository": "https://github.com/dislop-ai/dislop"'), `${homeRel} JSON-LD missing codeRepository`);

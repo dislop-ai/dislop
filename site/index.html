@@ -177,10 +177,10 @@
           </div>
 
           <div class="hero-cli-inline">
-            <span class="hero-cli-label" data-i18n="lead.promptLabel">或者免安装：复制这句话直接发给任意联网 AI / Agent</span>
+            <span class="hero-cli-label" data-i18n="lead.promptLabel">或者直接把这句话发给你的 Agent，让它完成评估、安装和试跑</span>
             <div class="cmd-box is-prompt">
-              <code id="hero-prompt" data-i18n="lead.promptText">先读 https://dislop.com/llms.txt，按里面整理的文案和设计去 AI 味规矩与检查方法，帮我把接下来这份稿子发之前过一遍。</code>
-              <button type="button" class="ctrl-btn" style="min-height:32px;padding:5px 12px;font-size:0.8rem;flex-shrink:0;" data-copy-target="hero-prompt" data-i18n="lead.copyPromptBtn">复制发给 AI</button>
+              <code id="hero-prompt" data-i18n="lead.promptText">请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。</code>
+              <button type="button" class="ctrl-btn" style="min-height:32px;padding:5px 12px;font-size:0.8rem;flex-shrink:0;" data-copy-target="hero-prompt" data-i18n="lead.copyPromptBtn">复制发给 Agent</button>
             </div>
           </div>
         </div>
@@ -642,8 +642,8 @@
           <p data-i18n="surf.w3Desc">在 WorkBuddy、千问、Claude Cowork 或编辑器里直连 https://dislop.com/mcp，登录领每月 30 免费额度，做多模型分文体审校并返回结构化改法。</p>
         </div>
         <div class="where-item">
-          <h3 data-i18n="surf.w4Title">4. 网页工作台与一句话读规则</h3>
-          <p data-i18n="surf.w4Desc">浏览器工作台可先看对比样例和做本地基础检查，登录后使用云端审校；不装任何工具时，也可让联网对话先读 dislop.com/llms.txt。</p>
+          <h3 data-i18n="surf.w4Title">4. 网页工作台与一句话让 Agent 接管安装</h3>
+          <p data-i18n="surf.w4Desc">浏览器工作台可先看对比样例和做本地基础检查，登录后使用云端审校；也可以只给自己的 Agent 发一句 dislop.com/llms.txt，由它自行判断装 Skill、CLI 还是远程 MCP 并完成首轮试跑。</p>
         </div>
       </div>
 
@@ -651,7 +651,7 @@
       <div class="code-panel" id="cli-mcp">
         <div class="code-panel-head">
           <div class="mode-tabs" id="snippet-tabs" role="tablist" aria-label="用法与安装示例">
-            <button type="button" id="tab-prompt" role="tab" aria-selected="true" aria-controls="snippet-panel" tabindex="0" class="ctrl-btn is-active" data-snippet="prompt" data-i18n="snip.prompt">发给 AI</button>
+            <button type="button" id="tab-prompt" role="tab" aria-selected="true" aria-controls="snippet-panel" tabindex="0" class="ctrl-btn is-active" data-snippet="prompt" data-i18n="snip.prompt">发给 Agent</button>
             <button type="button" id="tab-skill" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="skill">Skill</button>
             <button type="button" id="tab-cloud" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cloud" data-i18n="snip.cloud">官方 MCP（云端）</button>
             <button type="button" id="tab-plugin" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="plugin">Plugin</button>
@@ -662,11 +662,8 @@
           <button type="button" id="copy-snippet-btn" class="ctrl-btn" data-i18n="btn.copy">复制</button>
         </div>
         <pre class="code-pre" id="snippet-panel" role="tabpanel" aria-labelledby="tab-prompt" tabindex="0"><code id="snippet-code"><!-- BUILD:DEFAULT_SNIPPET -->
-# 复制下面这段直接发给任意能联网的 AI / Agent（免安装）：
-请先读 https://dislop.com/llms.txt，按里面的去 AI 味写作规矩和检查方法，帮我把接下来这份稿子（文档 / PPT / 网页）交付前过一遍：
-1. 先删掉 AI 寒暄、没填的占位符和空链接；
-2. 把套话、二阶口号和三段分号推销句改回平实人话，不编造新数字；
-3. 改完再对照规则复检一遍。
+# 复制下面这句话发给你的 Agent（自动评估、安装并试跑）：
+请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。
 <!-- /BUILD:DEFAULT_SNIPPET --></code></pre>
       </div>
 
@@ -691,7 +688,7 @@
               <a class="endpoint-path" href="./llms.txt">/llms.txt</a>
               <div class="endpoint-desc" data-i18n="ep.llms">Agent 入口索引</div>
             </div>
-            <span class="endpoint-meta">2.4 KB · ~617 tok</span>
+            <span class="endpoint-meta">2.4 KB · ~622 tok</span>
           </div>
           <div class="endpoint-row">
             <div class="endpoint-main">

@@ -5,6 +5,18 @@ version: 0.8.1
 
 # Zero-Install Audit Checklists (When Local CLI/MCP Is Unavailable)
 
+## One-Line Agent Rollout Prompt
+
+Paste either prompt into your own Agent so it reads [`/llms.txt`](../llms.txt), picks the right surface, installs or configures `dislop`, and runs a first check on your files:
+
+```text
+Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.
+```
+
+```text
+请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。
+```
+
 ## Prose & Technical Brief Checklist
 
 ```text

@@ -1193,6 +1193,17 @@ version: ${VERSION}
 
 # dislop Tools & Usage Options
 
+## Agent Evaluation, Install & Rollout Workflow
+
+Users often hand [\`https://dislop.com/llms.txt\`](../llms.txt) directly to their coding or office agent with a one-line prompt. Follow this three-step workflow:
+
+1. **Evaluate host & deliverables**: Inspect the user's current environment (Claude Code, Codex, Cursor, Windsurf, Gemini CLI, OpenClaw, GitHub Actions, or browser chat) and existing project files (\`.md\`, \`.txt\`, \`.html\`, \`.jsx\`, \`.svg\`, \`.docx\`, \`.pptx\`, or \`.pdf\`). Pick the lightest surface from the table below (Skill for low-token guidance, local CLI for zero-network deterministic gating and CI, or Official Cloud MCP when deep LLM review or \`.docx\`/\`.pptx\` visual/structural audit is needed).
+2. **Install & configure**:
+   - Agent Skill: \`npx --yes skills add dislop-ai/dislop --skill dislop\` (or use plugin marketplaces for Claude Code / Codex / Gemini CLI).
+   - Local CLI (zero network): \`npx --yes dislop init\` (writes \`.dislop.json\` config/hooks) or \`uvx dislop check .\`.
+   - Cloud MCP (optional): configure \`${BASE_URL}/mcp\` (anonymous \`dislop_check\` / \`dislop_rules\` at 0 credits; OAuth 2.1 or free key for \`dislop_review\` / \`dislop_deslop\` / \`dislop_office\`).
+3. **Run first check & report**: Run \`npx --yes dislop check <target> --pack auto --compact --json\` on real workspace files (or pass text/files through \`dislop_check\`), summarize concrete \`error\` and \`warning\` hits, and offer to clean them without inventing facts.
+
 Pick the lightest surface that fits your workflow:
 
 | Surface | Status | How to start |
@@ -1278,6 +1289,18 @@ version: ${VERSION}
 ---
 
 # Zero-Install Audit Checklists (When Local CLI/MCP Is Unavailable)
+
+## One-Line Agent Rollout Prompt
+
+Paste either prompt into your own Agent so it reads [\`/llms.txt\`](../llms.txt), picks the right surface, installs or configures \`dislop\`, and runs a first check on your files:
+
+\`\`\`text
+Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.
+\`\`\`
+
+\`\`\`text
+请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。
+\`\`\`
 
 ## Prose & Technical Brief Checklist
 
@@ -2242,35 +2265,35 @@ const llmsTxt = writeCleanFile(
 
 > Cutting AI slop is real productivity. Linter for AI Slop (7 packs, ${allRules.length} rules, 65 patterns, ${radarData.entries.length} tools) for agents and people.
 
-## Quick Start for Agents
-- Shell (offline): \`npx --yes dislop check <path> --pack auto --compact --json\` (or \`uvx dislop check <path> --compact --json\`; exit \`0\`/\`1\`/\`2\`).
-- Skill: \`npx --yes skills add dislop-ai/dislop --skill dislop\` (or read local \`./references/*.md\`).
-- Remote MCP: \`${BASE_URL}/mcp\` (\`dislop_check\`/\`dislop_rules\` 0 cr, no login; 30 cr/mo after sign-in).
+## Quick Start & Agent Setup
+1. Evaluate: inspect host (Claude Code, Codex, Cursor, Gemini CLI, or web) and deliverables; pick Skill, CLI, or MCP via [Tools & Setup](${BASE_URL}/tools/index.md).
+2. Install: Skill \`npx --yes skills add dislop-ai/dislop --skill dislop\`; CLI \`npx --yes dislop init\` (Node 20+ / \`uvx dislop\`); Remote MCP \`${BASE_URL}/mcp\` (0 cr check, no login).
+3. First check: \`npx --yes dislop check <path> --pack auto --compact --json\` (exit \`0\`/\`1\`/\`2\`), summarize hits, and offer to fix.
 
-## Start by task (~800-1,500 tokens each)
-- [Review a brief](${BASE_URL}/tasks/business-doc.md): AI artifacts and \`business-brief\` rules.
-- [Check web UI or slides](${BASE_URL}/tasks/web-and-deck.md): \`deck-and-ui\` rules and tokens.
-- [Edit an essay](${BASE_URL}/tasks/editorial-writing.md): \`literary-essay\` rules and contrasts.
+## Start by task
+- [Brief](${BASE_URL}/tasks/business-doc.md): AI artifacts and \`business-brief\` rules.
+- [Web & slides](${BASE_URL}/tasks/web-and-deck.md): \`deck-and-ui\` rules and tokens.
+- [Essay](${BASE_URL}/tasks/editorial-writing.md): \`literary-essay\` rules and contrasts.
 - [Pre-release gate](${BASE_URL}/tasks/pre-release-gate.md): Core \`error\` checks and CI diff gating.
 
 ## Browse by topic
 - [Guides (EN & ZH)](${BASE_URL}/en/guides/): ${guides.length} tutorials (ZH at \`/guides/\`).
-- [Product Brief](${BASE_URL}/methodology/product-brief.md): Positioning, users, and pitch.
+- [Product Brief](${BASE_URL}/methodology/product-brief.md): Positioning and user tiers.
 - [Methodology](${BASE_URL}/methodology/index.md): Plain writing guide and visual tokens.
 - [Cases & Refs](${BASE_URL}/cases/index.md): Contrasts and 31 design references.
-- [Tools & Setup](${BASE_URL}/tools/index.md): Skill, CLI, Plugin, and Cloud MCP.
+- [Tools & Setup](${BASE_URL}/tools/index.md): Skill, CLI, Plugin, Cloud MCP.
 - [Awesome Anti-Slop](${BASE_URL}/awesome/index.md): ${radarData.entries.length} tools & papers (\`/awesome/index.json\`).
 - [Roadmap](${BASE_URL}/roadmap.md): Active tracks and collaboration.
 
 ## Machine index & discovery
-- [MCP Server Card](${BASE_URL}/.well-known/mcp/server-card.json): Auto-discovery for \`/mcp\` (10 tools).
-- [Agent Skills Index](${BASE_URL}/.well-known/agent-skills/index.json): \`SKILL.md\` and card sha256 digests.
-- [JSON Catalog](${BASE_URL}/catalog.json): \`dislop.catalog/1\` manifest with sha256 and tokens.
-- [Agent Skill](${BASE_URL}/tools/skill.md): Mirror of \`skills/dislop/SKILL.md\` (\`v${VERSION}\`).
-- [Cloud MCP & API](${BASE_URL}/tools/mcp-sdk-api.md): Remote MCP tools, OAuth 2.1, HTTP API.
+- [MCP Server Card](${BASE_URL}/.well-known/mcp/server-card.json): \`/mcp\` discovery (10 tools).
+- [Agent Skills Index](${BASE_URL}/.well-known/agent-skills/index.json): \`SKILL.md\` & card sha256.
+- [JSON Catalog](${BASE_URL}/catalog.json): \`dislop.catalog/1\` manifest with sha256.
+- [Agent Skill](${BASE_URL}/tools/skill.md): \`SKILL.md\` mirror (\`v${VERSION}\`).
+- [Cloud MCP & API](${BASE_URL}/tools/mcp-sdk-api.md): Remote MCP, OAuth 2.1, HTTP API.
 - [Rule Packs](${BASE_URL}/packs/core.md): 7 packs & ${allRules.length} \`/rules/<id>.md\` cards.
 - [Single-Fetch Bundle](${BASE_URL}/llms-full.txt): All ${allRules.length} rules without fixtures.
-- [Privacy](${BASE_URL}/privacy.md): Offline local boundaries and Cloud MCP policy.
+- [Privacy](${BASE_URL}/privacy.md): Offline boundaries and Cloud MCP policy.
 `,
   { isAgentText: true }
 );
@@ -2638,11 +2661,8 @@ const endpointsHtml = featuredEndpoints
 indexHtml = replaceBuildBlock(indexHtml, "ENDPOINTS", endpointsHtml);
 
 // 3c. Default Prompt snippet pre-rendered in Chinese
-const defaultSnippet = `# 复制下面这段直接发给任意能联网的 AI / Agent（免安装）：
-请先读 https://dislop.com/llms.txt，按里面的去 AI 味写作规矩和检查方法，帮我把接下来这份稿子（文档 / PPT / 网页）交付前过一遍：
-1. 先删掉 AI 寒暄、没填的占位符和空链接；
-2. 把套话、二阶口号和三段分号推销句改回平实人话，不编造新数字；
-3. 改完再对照规则复检一遍。`;
+const defaultSnippet = `# 复制下面这句话发给你的 Agent（自动评估、安装并试跑）：
+请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。`;
 
 indexHtml = replaceBuildBlock(indexHtml, "DEFAULT_SNIPPET", escapeHtml(defaultSnippet));
 

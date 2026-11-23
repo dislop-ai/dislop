@@ -59,10 +59,10 @@ const I18N = {
     "lead.title": "去 AI 味才是真正的生产力！",
     "lead.sub":
       "专用的 AI 味检查工具。整合社区验证过的去味规则、语料经验与 90 条精选工具，一行命令接进主流 Coding Agent、办公 Agent 与编辑器，在文档、网页和 PPT 发出前标出硬伤、套话和模板布局。",
-    "lead.promptLabel": "或者免安装：复制这句话直接发给任意联网 AI / Agent",
+    "lead.promptLabel": "或者直接把这句话发给你的 Agent，让它完成评估、安装和试跑",
     "lead.promptText":
-      "先读 https://dislop.com/llms.txt，按里面整理的文案和设计去 AI 味规矩与检查方法，帮我把接下来这份稿子发之前过一遍。",
-    "lead.copyPromptBtn": "复制发给 AI",
+      "请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。",
+    "lead.copyPromptBtn": "复制发给 Agent",
     "lead.cta": "在工作台试用（本地 / 云端）↓",
     "lead.cloudBtn": "免费领 30 额度远程 MCP 密钥",
     "lead.installBtn": "装进 Agent / 编辑器（本地离线）",
@@ -166,7 +166,7 @@ const I18N = {
     "wb.nudgeText": "想在自己电脑上离线查，就装开源 Skill 或 CLI。想让 Agent 用云端审校，登录后每月有 30 免费额度。",
     "wb.nudgeCloud": "验证码登录 · 30 免费额度",
     "wb.nudgeInstall": "装开源 Skill / CLI ↓",
-    "wb.nudgeCopy": "复制发给 AI",
+    "wb.nudgeCopy": "复制发给 Agent",
     "wb.nudgeStar": "GitHub ★",
     "legend.error": "红实线：硬伤",
     "legend.warn": "蓝虚线：提醒（套话与模板味）",
@@ -181,9 +181,9 @@ const I18N = {
     "surf.w2Desc": "安装包不到 250 KB，零依赖，内置全部 7 套规则包。断网也能查文档、Word、PPT 和 Git 改动，适合终端、编辑器和 CI，开发者也可以配自己的模型密钥。",
     "surf.w3Title": "3. 官方云端 MCP（办公与编码 Agent 直连）",
     "surf.w3Desc": "在 WorkBuddy、千问、Claude Cowork 或编辑器里直连 https://dislop.com/mcp，登录领每月 30 免费额度，做多模型分文体审校并返回结构化改法。",
-    "surf.w4Title": "4. 网页工作台与一句话读规则",
-    "surf.w4Desc": "浏览器工作台可先看对比样例和做本地基础检查，登录后使用云端审校；不装任何工具时，也可让联网对话先读 dislop.com/llms.txt。",
-    "snip.prompt": "发给 AI",
+    "surf.w4Title": "4. 网页工作台与一句话让 Agent 接管安装",
+    "surf.w4Desc": "浏览器工作台可先看对比样例和做本地基础检查，登录后使用云端审校；也可以只给自己的 Agent 发一句 dislop.com/llms.txt，由它自行判断装 Skill、CLI 还是远程 MCP 并完成首轮试跑。",
+    "snip.prompt": "发给 Agent",
     "snip.cloud": "官方 MCP（云端）",
     "snip.localMcp": "官方 MCP",
     "snip.cli": "命令行",
@@ -363,10 +363,10 @@ const I18N = {
     "lead.title": "Cutting AI slop is real productivity.",
     "lead.sub":
       "A dedicated linter for AI slop. Catches AI-sounding prose, filler phrases, and stock layouts in docs, web pages, and slides before you ship. Connects to coding agents, office agents, and editors in one command, locally offline or via Cloud MCP.",
-    "lead.promptLabel": "Or zero install: copy this line into any web-capable AI / coding agent",
+    "lead.promptLabel": "Or send this one-line prompt to your Agent to evaluate, install, and run a first check",
     "lead.promptText":
-      "Read https://dislop.com/llms.txt and follow its writing and design anti-slop rules and checks before delivering my next doc, slide deck, or web page.",
-    "lead.copyPromptBtn": "Copy for AI",
+      "Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.",
+    "lead.copyPromptBtn": "Copy for Agent",
     "lead.cta": "Try in workbench (Local / Cloud) ↓",
     "lead.cloudBtn": "Free 30-credit Remote MCP key",
     "lead.installBtn": "Install for Agent / Editor (runs offline)",
@@ -470,7 +470,7 @@ const I18N = {
     "wb.nudgeText": "To check offline on your machine, install the Skill or CLI. For cloud review in your agent, sign in for 30 free credits a month.",
     "wb.nudgeCloud": "Sign in · 30 free credits",
     "wb.nudgeInstall": "Install open-source Skill / CLI ↓",
-    "wb.nudgeCopy": "Copy for AI",
+    "wb.nudgeCopy": "Copy for Agent",
     "wb.nudgeStar": "GitHub ★",
     "legend.error": "Red solid: hard bug",
     "legend.warn": "Blue dashed: warning (cliché / template)",
@@ -485,9 +485,9 @@ const I18N = {
     "surf.w2Desc": "< 250 KB zero-dep CLI bundles all 7 packs for docs, Word, PowerPoint, and Git diffs in terminals, editors, and CI. Developers can also plug in their own model API key for deeper review.",
     "surf.w3Title": "3. Official Cloud MCP (office & coding agents)",
     "surf.w3Desc": "Connect https://dislop.com/mcp in Claude Cowork, WorkBuddy, Qwen, or editors after signing in (30 free credits/mo) for multi-model genre review returning structured guidance.",
-    "surf.w4Title": "4. Web Workbench & One-Line Rules (/llms.txt)",
-    "surf.w4Desc": "Browse before/after examples and run basic local checks in this tab, sign in for cloud review, or ask any web chat to read dislop.com/llms.txt first.",
-    "snip.prompt": "Send to AI",
+    "surf.w4Title": "4. Web Workbench & One-Line Agent Setup (/llms.txt)",
+    "surf.w4Desc": "Browse before/after examples and run basic local checks in this tab, sign in for cloud review, or paste dislop.com/llms.txt to your own Agent so it picks Skill, CLI, or MCP and runs a first check.",
+    "snip.prompt": "Send to Agent",
     "snip.cloud": "Official MCP (Cloud)",
     "snip.localMcp": "Official MCP",
     "snip.cli": "CLI",
@@ -1274,11 +1274,8 @@ const SHARE_BLURBS_BY_LANG = {
 
 const SNIPPETS_BY_LANG = {
   zh: {
-    prompt: `# 复制下面这段直接发给任意能联网的 AI / Agent（免安装）：
-请先读 https://dislop.com/llms.txt，按里面的去 AI 味写作规矩和检查方法，帮我把接下来这份稿子（文档 / PPT / 网页）交付前过一遍：
-1. 先删掉 AI 寒暄、没填的占位符和空链接；
-2. 把套话、二阶口号和三段分号推销句改回平实人话，不编造新数字；
-3. 改完再对照规则复检一遍。`,
+    prompt: `# 复制下面这句话发给你的 Agent（自动评估、安装并试跑）：
+请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。`,
     skill: `# 一行安装跨宿主纯文档 Agent Skill（不含可执行脚本）
 npx skills add dislop-ai/dislop
 
@@ -1351,11 +1348,8 @@ jobs:
 }`,
   },
   en: {
-    prompt: `# Copy and paste this into any web-capable AI chat or coding agent (zero install):
-Read https://dislop.com/llms.txt and follow its anti-slop rules before we ship this draft (doc, slide deck, or web page):
-1. Remove stray AI chat wrappers, unfilled placeholders, and dead links;
-2. Rewrite clichés, 2nd-order slogans, and 3-part semicolon pitches plainly without inventing facts;
-3. Run a final check against the rules before delivering.`,
+    prompt: `# Send this one-line prompt to your Agent (evaluate, install, and run first check):
+Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.`,
     skill: `# Install the pure-Markdown cross-host Agent Skill (no bundled scripts)
 npx skills add dislop-ai/dislop
 

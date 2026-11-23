@@ -5,6 +5,17 @@ version: 0.8.1
 
 # dislop Tools & Usage Options
 
+## Agent Evaluation, Install & Rollout Workflow
+
+Users often hand [`https://dislop.com/llms.txt`](../llms.txt) directly to their coding or office agent with a one-line prompt. Follow this three-step workflow:
+
+1. **Evaluate host & deliverables**: Inspect the user's current environment (Claude Code, Codex, Cursor, Windsurf, Gemini CLI, OpenClaw, GitHub Actions, or browser chat) and existing project files (`.md`, `.txt`, `.html`, `.jsx`, `.svg`, `.docx`, `.pptx`, or `.pdf`). Pick the lightest surface from the table below (Skill for low-token guidance, local CLI for zero-network deterministic gating and CI, or Official Cloud MCP when deep LLM review or `.docx`/`.pptx` visual/structural audit is needed).
+2. **Install & configure**:
+   - Agent Skill: `npx --yes skills add dislop-ai/dislop --skill dislop` (or use plugin marketplaces for Claude Code / Codex / Gemini CLI).
+   - Local CLI (zero network): `npx --yes dislop init` (writes `.dislop.json` config/hooks) or `uvx dislop check .`.
+   - Cloud MCP (optional): configure `https://dislop.com/mcp` (anonymous `dislop_check` / `dislop_rules` at 0 credits; OAuth 2.1 or free key for `dislop_review` / `dislop_deslop` / `dislop_office`).
+3. **Run first check & report**: Run `npx --yes dislop check <target> --pack auto --compact --json` on real workspace files (or pass text/files through `dislop_check`), summarize concrete `error` and `warning` hits, and offer to clean them without inventing facts.
+
 Pick the lightest surface that fits your workflow:
 
 | Surface | Status | How to start |

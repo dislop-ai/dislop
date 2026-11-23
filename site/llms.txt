@@ -2,32 +2,32 @@
 
 > Cutting AI slop is real productivity. Linter for AI Slop (7 packs, 53 rules, 65 patterns, 90 tools) for agents and people.
 
-## Quick Start for Agents
-- Shell (offline): `npx --yes dislop check <path> --pack auto --compact --json` (or `uvx dislop check <path> --compact --json`; exit `0`/`1`/`2`).
-- Skill: `npx --yes skills add dislop-ai/dislop --skill dislop` (or read local `./references/*.md`).
-- Remote MCP: `https://dislop.com/mcp` (`dislop_check`/`dislop_rules` 0 cr, no login; 30 cr/mo after sign-in).
+## Quick Start & Agent Setup
+1. Evaluate: inspect host (Claude Code, Codex, Cursor, Gemini CLI, or web) and deliverables; pick Skill, CLI, or MCP via [Tools & Setup](https://dislop.com/tools/index.md).
+2. Install: Skill `npx --yes skills add dislop-ai/dislop --skill dislop`; CLI `npx --yes dislop init` (Node 20+ / `uvx dislop`); Remote MCP `https://dislop.com/mcp` (0 cr check, no login).
+3. First check: `npx --yes dislop check <path> --pack auto --compact --json` (exit `0`/`1`/`2`), summarize hits, and offer to fix.
 
-## Start by task (~800-1,500 tokens each)
-- [Review a brief](https://dislop.com/tasks/business-doc.md): AI artifacts and `business-brief` rules.
-- [Check web UI or slides](https://dislop.com/tasks/web-and-deck.md): `deck-and-ui` rules and tokens.
-- [Edit an essay](https://dislop.com/tasks/editorial-writing.md): `literary-essay` rules and contrasts.
+## Start by task
+- [Brief](https://dislop.com/tasks/business-doc.md): AI artifacts and `business-brief` rules.
+- [Web & slides](https://dislop.com/tasks/web-and-deck.md): `deck-and-ui` rules and tokens.
+- [Essay](https://dislop.com/tasks/editorial-writing.md): `literary-essay` rules and contrasts.
 - [Pre-release gate](https://dislop.com/tasks/pre-release-gate.md): Core `error` checks and CI diff gating.
 
 ## Browse by topic
 - [Guides (EN & ZH)](https://dislop.com/en/guides/): 6 tutorials (ZH at `/guides/`).
-- [Product Brief](https://dislop.com/methodology/product-brief.md): Positioning, users, and pitch.
+- [Product Brief](https://dislop.com/methodology/product-brief.md): Positioning and user tiers.
 - [Methodology](https://dislop.com/methodology/index.md): Plain writing guide and visual tokens.
 - [Cases & Refs](https://dislop.com/cases/index.md): Contrasts and 31 design references.
-- [Tools & Setup](https://dislop.com/tools/index.md): Skill, CLI, Plugin, and Cloud MCP.
+- [Tools & Setup](https://dislop.com/tools/index.md): Skill, CLI, Plugin, Cloud MCP.
 - [Awesome Anti-Slop](https://dislop.com/awesome/index.md): 90 tools & papers (`/awesome/index.json`).
 - [Roadmap](https://dislop.com/roadmap.md): Active tracks and collaboration.
 
 ## Machine index & discovery
-- [MCP Server Card](https://dislop.com/.well-known/mcp/server-card.json): Auto-discovery for `/mcp` (10 tools).
-- [Agent Skills Index](https://dislop.com/.well-known/agent-skills/index.json): `SKILL.md` and card sha256 digests.
-- [JSON Catalog](https://dislop.com/catalog.json): `dislop.catalog/1` manifest with sha256 and tokens.
-- [Agent Skill](https://dislop.com/tools/skill.md): Mirror of `skills/dislop/SKILL.md` (`v0.8.1`).
-- [Cloud MCP & API](https://dislop.com/tools/mcp-sdk-api.md): Remote MCP tools, OAuth 2.1, HTTP API.
+- [MCP Server Card](https://dislop.com/.well-known/mcp/server-card.json): `/mcp` discovery (10 tools).
+- [Agent Skills Index](https://dislop.com/.well-known/agent-skills/index.json): `SKILL.md` & card sha256.
+- [JSON Catalog](https://dislop.com/catalog.json): `dislop.catalog/1` manifest with sha256.
+- [Agent Skill](https://dislop.com/tools/skill.md): `SKILL.md` mirror (`v0.8.1`).
+- [Cloud MCP & API](https://dislop.com/tools/mcp-sdk-api.md): Remote MCP, OAuth 2.1, HTTP API.
 - [Rule Packs](https://dislop.com/packs/core.md): 7 packs & 53 `/rules/<id>.md` cards.
 - [Single-Fetch Bundle](https://dislop.com/llms-full.txt): All 53 rules without fixtures.
-- [Privacy](https://dislop.com/privacy.md): Offline local boundaries and Cloud MCP policy.
+- [Privacy](https://dislop.com/privacy.md): Offline boundaries and Cloud MCP policy.

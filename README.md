@@ -51,6 +51,14 @@ For hosted review, sign in at [dislop.com](https://dislop.com) or connect Offici
 
 ## Quick start
 
+### One-line handoff to your Agent (evaluate, install, and run first check)
+
+Paste this sentence into your coding or office agent (Claude Code, Codex, Cursor, OpenClaw, etc.) so it reads `https://dislop.com/llms.txt`, selects the right surface for your environment, configures it, and checks existing files:
+
+```text
+Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.
+```
+
 ### Node.js 20+ (npm, zero dependencies, all 7 packs bundled offline)
 
 ```bash

@@ -48,6 +48,14 @@ Markdown、纯文本、HTML/CSS/JSX/SVG、图片（`.png`/`.jpg`/`.webp`/`.gif`�
 
 ## 上手
 
+### 一句话交给你的 Agent（评估、安装并试跑）
+
+把下面这句话直接发给你的 Agent（Claude Code、Codex、Cursor、OpenClaw 等），它会读取 `https://dislop.com/llms.txt` 并根据当前环境完成接入和首轮检查：
+
+```text
+请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。
+```
+
 ### Node.js 20+（npm，零外部依赖，内置全部 7 套规则包）
 
 ```bash

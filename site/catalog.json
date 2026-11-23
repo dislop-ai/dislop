@@ -17,8 +17,8 @@
   "entryPoints": {
     "llmsTxt": {
       "path": "/llms.txt",
-      "bytes": 2469,
-      "approxTokens": 617
+      "bytes": 2488,
+      "approxTokens": 622
     },
     "llmsFullTxt": {
       "path": "/llms-full.txt",
@@ -511,8 +511,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 1969,
-      "approxTokens": 492,
+      "bytes": 3429,
+      "approxTokens": 857,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -520,7 +520,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "45661b7f222c7c603473e0dfda24984935e2862f4b409f1e2b469b3ca89e608b"
+      "sha256": "40a6c33117d07a386d4ac030146b274821c54aefb950a5096fb1ee06878eacea"
     },
     {
       "id": "tools-skill",
@@ -897,13 +897,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 935,
-      "approxTokens": 234,
+      "bytes": 1574,
+      "approxTokens": 394,
       "relatedTools": [
         "browser-workbench",
         "skill"
       ],
-      "sha256": "1853dfb1f4855c8e2eb6315e903dc5da483a6620d1f612b8e12b98d0280d6071"
+      "sha256": "4ccaef3f1ffdf72a191c3b25019757bb03e318186ad52e346c5068d0b141c87e"
     },
     {
       "id": "tools-cli-hooks",
