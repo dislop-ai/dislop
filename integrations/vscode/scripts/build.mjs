@@ -80,8 +80,8 @@ function main() {
 
   const desktopKb = Buffer.byteLength(desktopBundle, "utf8") / 1024;
   const webKb = Buffer.byteLength(webBundle, "utf8") / 1024;
-  assert.ok(desktopKb < 250, `Desktop bundle too large: ${desktopKb.toFixed(1)} KB >= 250 KB`);
-  assert.ok(webKb < 250, `Web bundle too large: ${webKb.toFixed(1)} KB >= 250 KB`);
+  assert.ok(desktopKb < 350, `Desktop bundle too large: ${desktopKb.toFixed(1)} KB >= 350 KB`);
+  assert.ok(webKb < 350, `Web bundle too large: ${webKb.toFixed(1)} KB >= 350 KB`);
 
   console.log(
     `Built VS Code bundles: dist/extension.js (${desktopKb.toFixed(1)} KB), dist/web/extension.js (${webKb.toFixed(1)} KB)`

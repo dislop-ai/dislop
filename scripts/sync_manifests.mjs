@@ -64,6 +64,7 @@ const META = {
     "anti-slop",
     "de-slop",
     "ai-slop",
+    "humanizer",
     "writing",
     "linter",
     "proofreading",

@@ -17,7 +17,7 @@
 - 中英文各自面向独立受众做原生表达、原生案例和原生视觉物料，不做逐字翻译；X 等同时覆盖中英文读者的渠道，可分别发布独立中文帖与独立英文帖，单条内容严格不混排。
 
 ### 用户
-第一批是 Coding Agent 用户，第二批是办公 Agent 用户，最后是所有用 AI 交付成果的人。
+第一批是 Coding Agent 用户，第二批是办公 Agent 用户，最后是所有用 AI 交付成果的人；他们的 Agent 也是直接使用者，能自己找到并调用。
 
 ### 产品形态
 1. **Skill（开源，纯文档）**：按文体整理的写作与界面避坑参考卡，不带可执行脚本。Agent 动笔前按需读取，写完后可调用 CLI 自检。
@@ -47,7 +47,7 @@ Cutting AI slop is real productivity.
 - Chinese and English materials are authored independently for their own audiences—separate examples, banners, social cards, and posts rather than word-for-word translations. Bilingual channels like X can run separate native Chinese and native English posts without mixing languages inside a single post.
 
 ### Users
-First coding agent users, then office agent users, and finally everyone who delivers work with AI.
+First coding agent users, then office agent users, and finally everyone who delivers work with AI. Their agents are direct users too, and can find and run dislop on their own.
 
 ### Product Form
 1. **Skill (open-source, Markdown only)**: Genre-specific writing and UI reference cards with no bundled scripts. Your agent reads the matching card before drafting and can run the CLI afterward to check its work.

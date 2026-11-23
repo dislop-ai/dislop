@@ -11,7 +11,9 @@ A dedicated linter for AI slop. It brings together vetted community rules, corpu
 - Product brief (EN/ZH): https://dislop.com/methodology/product-brief.md
 - Runtime dependencies: 0 (pure-Markdown Skill and local CLI run offline with zero uploads)
 - Live browser workbench: https://dislop.com/#workbench (offline local checks + sign-in Cloud MCP mode, `CSP: connect-src 'self'`)
-- Official Cloud MCP: https://dislop.com/mcp (sign in for 30 free monthly credits via https://dislop.com/#pricing)
+- Official Cloud MCP: https://dislop.com/mcp (0-credit `dislop_check`/`dislop_verify`/`dislop_rules` without login; sign in via https://dislop.com/#pricing for 30 free monthly credits on AI tools)
+- MCP Server Card: https://dislop.com/.well-known/mcp/server-card.json
+- Agent Skills Index: https://dislop.com/.well-known/agent-skills/index.json
 - Agent routing index: https://dislop.com/llms.txt
 - Machine-readable catalog: https://dislop.com/catalog.json
 - Awesome Anti-Slop (90 curated entries): https://dislop.com/awesome/

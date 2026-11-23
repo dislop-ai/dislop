@@ -1,7 +1,7 @@
 {
   "name": "dislop",
   "displayName": "dislop",
-  "description": "Cutting AI slop is real productivity. Linter for AI Slop in docs and web UI (7 packs, 42 rules, offline).",
+  "description": "Cutting AI slop is real productivity. Linter for AI Slop in docs and web UI (7 packs, 53 rules, offline).",
   "version": "0.7.1",
   "publisher": "dislop-ai",
   "license": "Apache-2.0",
@@ -20,6 +20,8 @@
   "keywords": [
     "anti-slop",
     "de-slop",
+    "ai-slop",
+    "humanizer",
     "markdown",
     "proofreading",
     "copywriting",
@@ -113,7 +115,7 @@
       {
         "name": "dislop_check_document",
         "displayName": "Check Document for AI Slop",
-        "modelDescription": "Run dislop deterministic anti-slop audit on text offline using the 7 built-in packs (42 rules).",
+        "modelDescription": "Run dislop deterministic anti-slop audit on text offline using the 7 built-in packs (53 rules).",
         "canBeReferencedInPrompt": true,
         "toolReferenceName": "dislopCheck",
         "inputSchema": {

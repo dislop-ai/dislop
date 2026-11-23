@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 authors = [
   { name = "dislop contributors" }
 ]
-keywords = ["anti-slop", "de-slop", "ai-slop", "linter", "proofreading", "agent-skill", "mcp", "editorial", "quality-gate"]
+keywords = ["anti-slop", "de-slop", "ai-slop", "humanizer", "linter", "proofreading", "agent-skill", "claude-code", "codex", "cursor", "llms-txt", "mcp", "markdown", "docx", "pptx", "editorial", "quality-gate"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",

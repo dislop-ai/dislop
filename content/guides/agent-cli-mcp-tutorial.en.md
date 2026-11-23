@@ -33,7 +33,7 @@ Adding deterministic checks to your agent workflow and CI takes under two minute
 | **Prevent clichés while drafting** | Pure-doc Skill | Local coding agent | `npx --yes skills add dislop-ai/dislop --skill dislop` |
 | **Verify docs, UI, and slides offline** | Zero-dep CLI | Local shell (0 uploads) | `npx --yes dislop check .` or `uvx dislop check .` |
 | **Block PR artifacts incrementally** | `--changed` + GitHub Action | Pre-commit / CI | `npx --yes dislop check --changed origin/main --fail-on error` |
-| **Office agents without local CLI** | Official Cloud MCP | `https://dislop.com/mcp` | Sign in for 30 free credits/mo |
+| **Office agents without local CLI** | Official Cloud MCP | `https://dislop.com/mcp` | 0-credit checks without login; OAuth 2.1 or sign in for 30 free credits/mo |
 
 ## 2. Connect coding agents and editors
 
@@ -52,6 +52,8 @@ Read https://dislop.com/llms.txt and follow its writing and design anti-slop rul
 ```
 
 ### Connect Official Cloud MCP (`mcp.json`)
+
+Auto-discovery metadata is published at `https://dislop.com/.well-known/mcp/server-card.json`. `dislop_check`, `dislop_verify`, and `dislop_rules` run at 0 credits without login; OAuth 2.1 or a free Bearer token unlocks 30 monthly credits for cloud review and rewrite tools.
 
 ```json
 {

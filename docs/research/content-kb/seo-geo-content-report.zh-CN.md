@@ -83,3 +83,32 @@
 1. **搜索/AI 问答 -> 规则百科与指南**：用户在 Google、Bing、Perplexity 或中文搜索里遇到具体报错规则或排版痛点时，落进 `/guides/*`、`/rules/*` 或 `/en/rules/*`，看到直答摘要、三段对照与单句改法要点，不靠推销口号建立信任。
 2. **阅读 -> 一键工作台试用与离线分享**：规则页与工作台打通 `#try=<ruleId>` 与离线 `#share=v1.*` 链接；团队在 GitHub PR 评论（`--format sarif` / `--format github` 注解直链）或群聊引用单条规则卡片，形成无需服务端存储的低摩擦二次传播。
 3. **试用 -> 主仓 Star 与样本共建**：精简后的双语 `README` 只用首屏 3 条命令、可玩工作台链接与 `.github/ISSUE_TEMPLATE/slop_sample.yml` 接住回流访客；同时配合 `.gitattributes` 锁定仓库主语言为 JavaScript/Python，为集中发布冲榜与 `good first issue` 新人转化铺平道路。
+
+---
+
+## 6. Agent EO（AX）与 2026 GEO 实证补全
+
+围绕「大模型找方案时搜得到、Agent 进门后自己跑得通、需要深度能力时顺滑接上云端」这条链路，补充 2025–2026 年一手基础设施实证与本轮全仓对齐动作：
+
+### 6.1 `llms.txt` 实证纠偏与三段漏斗分工
+
+- Ahrefs（13.7 万域名服务器日志）与 SE Ranking（30 万域名统计建模）均表明，约 97% 的 `llms.txt` 很少被主流 AI 搜索爬虫抓取，站内是否放 `llms.txt` 与 ChatGPT、Claude 或 Perplexity 的引用率没有统计相关性。
+- AI 搜索的真正上游是 Google / Bing 索引、语义化 HTML、结构化比较表以及站外证据栈（GitHub README 与活跃度、npm / PyPI 包页、Reddit / HN 真实讨论与第三方清单）。
+- 因此，全链路拆成三段分工：站外证据栈与官网 HTML 负责让大模型搜到并引用（GEO/AEO）；`/llms.txt`、`.well-known` 发现文件与 CLI `--json` 负责让已经进门的 Agent 一次看懂并跑通（Agent EO / AX）；免登录 0 额度远程 MCP 工具与结构化鉴权引导负责承接无终端环境下的顺畅使用。
+
+### 6.2 本轮全仓对齐的协议与实体清单
+
+| 对齐层 | 落地文件或出口 | 解决的具体断点 |
+|---|---|---|
+| 产品定义与包元数据 | [PRODUCT.md](../../../PRODUCT.md)、`package.json`、`pyproject.toml`、`scripts/sync_manifests.mjs`、GitHub About/Topics | 明确 Agent 也是直接使用者，能自己找到并调用；补齐 `humanizer`、`claude-code`、`codex`、`cursor`、`pptx`、`docx` 等高意图检索词并同步线上介绍 |
+| 官网结构化实体 | [scripts/lib/site_content.mjs](../../../scripts/lib/site_content.mjs) | 在首页 `Organization.sameAs` 补全 GitHub 组织、npm 与 PyPI 主页，并在 `SoftwareApplication` 补全 `codeRepository` 与 `softwareHelp` |
+| 机器自动发现协议 | [scripts/build_site.mjs](../../../scripts/build_site.mjs) | 编译生成 `/.well-known/mcp/server-card.json`（及 `/.well-known/mcp.json`）与 `/.well-known/agent-skills/index.json`（含 `SKILL.md` 及 8 张参考卡 `sha256` 摘要），写入 `catalog.json` 与 `robots.txt` 注释 |
+| `/llms.txt` 与 MCP v2 口径 | [scripts/build_site.mjs](../../../scripts/build_site.mjs)、[README.md](../../../README.md)、[README.zh-CN.md](../../../README.zh-CN.md)、`agent-cli-mcp-tutorial` | 在 2,600 字节预算内将 `/llms.txt` 顶部改造成可直接执行的 Quick Start；文档统一对齐线上 MCP v2 的 10 个工具与免登录 0 额度工具边界 |
+| 双端 CLI 一致性 | [bin/dislop.mjs](../../../bin/dislop.mjs)、[src/dislop/cli.py](../../../src/dislop/cli.py) | 在 `--help` 补齐 `check --json` 与退出码说明；同步双端 `resources` 输出，新增 `mcpServerCard`、`agentSkillsIndex`、`freeToolsNoLogin` 与 10 个云端工具 |
+
+### 6.3 发版后 10 题盲测探针（可复算验收）
+
+每次发布前或发版后用 10 条固定无提示提问（中英各 5 条，覆盖文档去味、前端紫粉渐变修复、PPT 排版检查、Git CI 拦截 AI 占位符与 `vale` 对比）做两项核验：
+
+1. **GEO 提及率**：在联网 AI 检索中统计提及 `dislop` 的比例，以及返回链接是否直接指向 `dislop.com` 或 GitHub 主仓。
+2. **Agent 自上手率**：给一个干净 Coding Agent 只提供 `https://dislop.com`（不给安装命令），核验其能否在 2 次工具调用内跑通第一次 `dislop check --compact --json` 并正确解读退出码。

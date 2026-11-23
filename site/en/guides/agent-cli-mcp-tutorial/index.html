@@ -175,7 +175,7 @@
 <tr><td><strong>Prevent clichés while drafting</strong></td><td>Pure-doc Skill</td><td>Local coding agent</td><td><code>npx --yes skills add dislop-ai/dislop --skill dislop</code></td></tr>
 <tr><td><strong>Verify docs, UI, and slides offline</strong></td><td>Zero-dep CLI</td><td>Local shell (0 uploads)</td><td><code>npx --yes dislop check .</code> or <code>uvx dislop check .</code></td></tr>
 <tr><td><strong>Block PR artifacts incrementally</strong></td><td><code>--changed</code> + GitHub Action</td><td>Pre-commit / CI</td><td><code>npx --yes dislop check --changed origin/main --fail-on error</code></td></tr>
-<tr><td><strong>Office agents without local CLI</strong></td><td>Official Cloud MCP</td><td><code>https://dislop.com/mcp</code></td><td>Sign in for 30 free credits/mo</td></tr>
+<tr><td><strong>Office agents without local CLI</strong></td><td>Official Cloud MCP</td><td><code>https://dislop.com/mcp</code></td><td>0-credit checks without login; OAuth 2.1 or sign in for 30 free credits/mo</td></tr>
 </tbody></table></div>
 
 <h2 id="2-connect-coding-agents-and-editors">2. Connect coding agents and editors</h2>
@@ -191,6 +191,8 @@
 <pre><code class="language-text">Read https://dislop.com/llms.txt and follow its writing and design anti-slop rules and checks before delivering my next doc, slide deck, or web page.</code></pre>
 
 <h3 id="connect-official-cloud-mcp-mcpjson">Connect Official Cloud MCP (<code>mcp.json</code>)</h3>
+
+<p>Auto-discovery metadata is published at <code>https://dislop.com/.well-known/mcp/server-card.json</code>. <code>dislop_check</code>, <code>dislop_verify</code>, and <code>dislop_rules</code> run at 0 credits without login; OAuth 2.1 or a free Bearer token unlocks 30 monthly credits for cloud review and rewrite tools.</p>
 
 <pre><code class="language-json">{
   &quot;mcpServers&quot;: {

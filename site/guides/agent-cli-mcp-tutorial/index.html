@@ -174,7 +174,7 @@
 <tr><td><strong>动笔前约束 Agent 写作/设计</strong></td><td>纯文档 Skill</td><td>本地客户端</td><td><code>npx --yes skills add dislop-ai/dislop --skill dislop</code></td></tr>
 <tr><td><strong>写完后本地查硬伤与套话</strong></td><td>开源 CLI（Node / Python）</td><td>纯本机离线</td><td><code>npx --yes dislop check .</code> 或 <code>uvx dislop check .</code></td></tr>
 <tr><td><strong>Git 提交与 PR 自动拦截</strong></td><td><code>--changed</code> + GitHub Actions</td><td>本地 / CI</td><td><code>npx --yes dislop check --changed origin/main --fail-on error</code></td></tr>
-<tr><td><strong>办公 Agent 免环境深度审校</strong></td><td>官方远程 MCP</td><td><code>https://dislop.com/mcp</code></td><td>登录工作台领每月 30 免费额度后直连</td></tr>
+<tr><td><strong>办公 Agent 免环境深度审校</strong></td><td>官方远程 MCP</td><td><code>https://dislop.com/mcp</code></td><td>0 额度基础检查免登录直连；OAuth 2.1 或登录后领每月 30 免费额度</td></tr>
 </tbody></table></div>
 
 <h2 id="2-接进编码-agent-与编辑器">2. 接进编码 Agent 与编辑器</h2>
@@ -190,6 +190,8 @@
 <pre><code class="language-text">先读 https://dislop.com/llms.txt，按里面整理的文案和设计去 AI 味规矩与检查方法，帮我把接下来这份稿子发之前过一遍。</code></pre>
 
 <h3 id="接进远程-mcpcursor-claude-code-codex">接进远程 MCP（Cursor / Claude Code / Codex）</h3>
+
+<p>服务端自动发现描述位于 <code>https://dislop.com/.well-known/mcp/server-card.json</code>。其中 <code>dislop_check</code>、<code>dislop_verify</code> 与 <code>dislop_rules</code> 免登录 0 额度可用；通过 OAuth 2.1 授权或填入免费 Bearer 密钥后，每月可用 30 额度调用多模型审校与改稿工具。</p>
 
 <pre><code class="language-json">{
   &quot;mcpServers&quot;: {

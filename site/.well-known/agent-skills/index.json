@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "version": "0.7.1",
+  "skills": [
+    {
+      "name": "dislop",
+      "type": "skill-md",
+      "description": "Use when drafting or revising text a person will read: README, docs, PR descriptions, release notes, RFCs, postmortems, CLI help/errors, emails, essays, web pages and UI copy (HTML/CSS/JSX), or Word and PowerPoint files. Removes AI-sounding phrasing, chatbot leftovers, placeholders, and template layouts without changing facts. Skip code logic, tests, refactors, commit messages, and configs with no reader-facing text.",
+      "url": "https://dislop.com/tools/skill.md",
+      "digest": "sha256:96cbe4e71befbf83d5f2ad9263361458cc459677dd6de47b4784b6704363c3b0",
+      "install": "npx --yes skills add dislop-ai/dislop --skill dislop",
+      "references": [
+        {
+          "name": "work-docs",
+          "url": "https://dislop.com/tools/references/work-docs.md",
+          "digest": "sha256:fa901d8b39f9a674250a8556ad3128c151e2748aeb2b7a5d542be799312924a5"
+        },
+        {
+          "name": "work-docs.zh-CN",
+          "url": "https://dislop.com/tools/references/work-docs.zh-CN.md",
+          "digest": "sha256:0398407d1c0bc53db36453351af31d0d823b9cbc467dc39a70246fe495b90283"
+        },
+        {
+          "name": "essay",
+          "url": "https://dislop.com/tools/references/essay.md",
+          "digest": "sha256:6e999138e4e117749d5be49713cb411c47b348915b4d22277d7184fa172b593a"
+        },
+        {
+          "name": "essay.zh-CN",
+          "url": "https://dislop.com/tools/references/essay.zh-CN.md",
+          "digest": "sha256:45b6a377fadfe7876ed9d0b90e1151be914ba7f75e5b4d37bc7535e52d315ce6"
+        },
+        {
+          "name": "office",
+          "url": "https://dislop.com/tools/references/office.md",
+          "digest": "sha256:017921ebf1bf151290c96ae4fd04258164bdb47f11ccff0caa29f878759586e2"
+        },
+        {
+          "name": "office.zh-CN",
+          "url": "https://dislop.com/tools/references/office.zh-CN.md",
+          "digest": "sha256:2fbd193afe775782390a9a2cfe3369fc9730cb6a644b2e6835c044aa3ee2ff6a"
+        },
+        {
+          "name": "web-ui",
+          "url": "https://dislop.com/tools/references/web-ui.md",
+          "digest": "sha256:e6e3b3fe90fec7732aa1a525892174fe014baf6f0dc8cec613bc82900459fd52"
+        },
+        {
+          "name": "web-ui.zh-CN",
+          "url": "https://dislop.com/tools/references/web-ui.zh-CN.md",
+          "digest": "sha256:7a41d6b75789fe1d0c466d27bc0395ea2ae11ca921cb62c2f0d3082082548d4c"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "serverInfo": {
+    "name": "dislop",
+    "title": "dislop",
+    "version": "0.7.1",
+    "description": "Linter for AI Slop in docs, web UI, Word, and PowerPoint."
+  },
+  "websiteUrl": "https://dislop.com",
+  "documentationUrl": "https://dislop.com/tools/mcp-sdk-api.md",
+  "llmsTxtUrl": "https://dislop.com/llms.txt",
+  "transport": {
+    "type": "streamable-http",
+    "endpoint": "https://dislop.com/mcp"
+  },
+  "authentication": {
+    "mode": "optional",
+    "oauthProtectedResource": "https://dislop.com/.well-known/oauth-protected-resource/mcp",
+    "bearerTokenUrl": "https://dislop.com/#cloud-token-box",
+    "freeToolsNoLogin": [
+      "dislop_check",
+      "dislop_verify",
+      "dislop_rules"
+    ]
+  },
+  "tools": [
+    {
+      "name": "dislop_check",
+      "credits": 0,
+      "authRequired": false
+    },
+    {
+      "name": "dislop_verify",
+      "credits": 0,
+      "authRequired": false
+    },
+    {
+      "name": "dislop_rules",
+      "credits": 0,
+      "authRequired": false
+    },
+    {
+      "name": "dislop_review",
+      "credits": 1,
+      "authRequired": true
+    },
+    {
+      "name": "dislop_deslop",
+      "credits": 2,
+      "authRequired": true
+    },
+    {
+      "name": "dislop_office",
+      "credits": 2,
+      "authRequired": true
+    },
+    {
+      "name": "dislop_visual_review",
+      "credits": 2,
+      "authRequired": true
+    },
+    {
+      "name": "dislop_voice_extract",
+      "credits": 2,
+      "authRequired": true
+    },
+    {
+      "name": "dislop_voice_manage",
+      "credits": 0,
+      "authRequired": true
+    },
+    {
+      "name": "dislop_account",
+      "credits": 0,
+      "authRequired": true
+    }
+  ]
+}

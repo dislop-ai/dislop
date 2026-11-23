@@ -68,8 +68,8 @@ npx --yes dislop check --changed origin/main --format github
 <summary>More CLI commands (deep checks, review, verify, personal style, Python)</summary>
 
 ```bash
-# Deep inspection (auto-routed pack + rhythm stats + lightweight local model + pattern banks)
-npx --yes dislop check draft.md --pack auto --deep --profile --compact
+# Deep inspection (auto-routed pack + rhythm stats + lightweight local model + pattern banks, compact JSON)
+npx --yes dislop check draft.md --pack auto --deep --profile --compact --json
 
 # Multi-signal review, git anti-degradation check, and offline personal style card
 npx --yes dislop review draft.md
@@ -170,7 +170,7 @@ Beyond the CLI, this repository compiles into a full reference library at `dislo
 }
 ```
 
-Official Cloud MCP (`https://dislop.com/mcp`) exposes `dislop_review` (1 credit, 5-layer rubric + multi-model review returning structured issues and edit guidance for your local agent to apply in context), `dislop_deslop` (2 credits, re-checked rewrite), `dislop_voice_extract` (2 credits), `dislop_verify` (0 credits, fact ledger & anti-degradation check), and 0-credit deterministic checks. Sign in at [dislop.com](https://dislop.com/#cloud-token-box) for a free 30-credit/month key.
+Official Cloud MCP (`https://dislop.com/mcp`, auto-discovery card at `https://dislop.com/.well-known/mcp/server-card.json`) exposes `dislop_check`, `dislop_verify`, and `dislop_rules` at 0 credits without login. Signing in via OAuth 2.1 or claiming a free Bearer key at [dislop.com](https://dislop.com/#cloud-token-box) unlocks 30 monthly credits for `dislop_review` (1 credit), `dislop_deslop` (2 credits), `dislop_office` (2–3 credits for `.docx`/`.pptx`), `dislop_visual_review` (2 credits), and `dislop_voice_extract` (2 credits).
 
 ## Configure it, or overrule it
 
@@ -213,7 +213,7 @@ dislop check .
 ### Open-Source Local (`Skill` + `CLI`) vs. Official Cloud (`dislop.com/mcp`)
 
 - **Open Source (`dislop-ai/dislop`, Apache-2.0)**: Pure-Markdown `SKILL.md` + local `./references/*.md` (no bundled scripts), zero-dependency Node/Python CLI (`check`, `patterns`, `voice`, `explain`, `packs`, `catalog`, `resources`), all 7 built-in packs (`53` rules) + 65-pattern catalog (`patterns/`), bundled `14.6 KB` gzip (`49.0 KB` raw) Pocket ML ensemble (`models/pocket-slop-v1.json`, `< 0.5 ms`, `100.0%` F1 / `0.0%` Clean FPR on `stealth-vapor-v1`), `Awesome Anti-Slop`, and `dislop-bench v2` + `visual-design-v1`. `check` / `patterns` / `voice` make `0` network calls so private drafts never leave your machine (existing `--mcp` and optional local-model modules stay in-repo during real-world evaluation).
-- **Official Cloud MCP & Web Workbench (`https://dislop.com/mcp`, `https://dislop.com/?lang=en#pricing`)**: Closed-source hosted backend calling paid-tier Google Gemini endpoints that do not train on your text (no draft storage or text logging; see [privacy.md](https://dislop.com/privacy.md)). Exposes `dislop_review` (1 credit, multi-model review returning structured issues and edit guidance), `dislop_deslop` (2 credits, re-checked rewrite verifying numbers and qualifiers), and `dislop_voice_extract` (2 credits, `dislop.voice/1`). Sign-in required for cloud AI: claim a free key for **30 monthly credits**, with early-access waitlists for Pro (`$12/mo`, 1,500 credits), PAYGO (`$10 / 800 credits`), and Team (`$29/seat/mo`).
+- **Official Cloud MCP & Web Workbench (`https://dislop.com/mcp`, `https://dislop.com/?lang=en#pricing`)**: Closed-source hosted backend calling paid-tier Google Gemini endpoints that do not train on your text (no draft storage or text logging; see [privacy.md](https://dislop.com/privacy.md)). Deterministic `dislop_check`, `dislop_verify`, and `dislop_rules` run at 0 credits without login; OAuth 2.1 or a free key unlocks **30 monthly credits** for `dislop_review` (1 credit), `dislop_deslop` (2 credits), `dislop_office` (2–3 credits), `dislop_visual_review` (2 credits), and `dislop_voice_extract` (2 credits, `dislop.voice/1`), with early-access waitlists for Pro (`$12/mo`, 1,500 credits), PAYGO (`$10 / 800 credits`), and Team (`$29/seat/mo`).
 
 ## Anti-slop benchmark (`dislop-bench v2`)
 

@@ -472,7 +472,13 @@ export function renderHomeJsonLd({ lang, baseUrl, version, ruleCount, awesomeCou
       name: "dislop",
       url: `${baseUrl}/`,
       logo: `${baseUrl}/assets/logo.svg`,
-      sameAs: ["https://github.com/dislop-ai/dislop", "https://x.com/dislop_ai"],
+      sameAs: [
+        "https://github.com/dislop-ai",
+        "https://github.com/dislop-ai/dislop",
+        "https://www.npmjs.com/package/dislop",
+        "https://pypi.org/project/dislop/",
+        "https://x.com/dislop_ai",
+      ],
     },
     {
       "@type": "WebSite",
@@ -489,6 +495,8 @@ export function renderHomeJsonLd({ lang, baseUrl, version, ruleCount, awesomeCou
       operatingSystem: "macOS, Linux, Windows, Web",
       softwareVersion: version,
       url: pageUrl,
+      codeRepository: "https://github.com/dislop-ai/dislop",
+      softwareHelp: `${baseUrl}/llms.txt`,
       license: "https://www.apache.org/licenses/LICENSE-2.0",
       description: isEn
         ? `Dedicated linter for AI slop across docs, web UI, Word, and PowerPoint (${ruleCount} built-in rules, 7 scenario packs, ${awesomeCount} curated anti-slop tools, ${guideCount} guides).`

@@ -39,4 +39,6 @@ Disallow: /api/
 Disallow: /mcp
 
 # Agent index: https://dislop.com/llms.txt
+# MCP server card: https://dislop.com/.well-known/mcp/server-card.json
+# Agent skills index: https://dislop.com/.well-known/agent-skills/index.json
 Sitemap: https://dislop.com/sitemap.xml

@@ -2095,6 +2095,8 @@ function runResources(rest, packs) {
       llmsIndex: "https://dislop.com/llms.txt",
       catalog: "https://dislop.com/catalog.json",
       awesomeIndex: "https://dislop.com/awesome/index.json",
+      mcpServerCard: "https://dislop.com/.well-known/mcp/server-card.json",
+      agentSkillsIndex: "https://dislop.com/.well-known/agent-skills/index.json",
       tasks: [
         "https://dislop.com/tasks/business-doc.md",
         "https://dislop.com/tasks/web-and-deck.md",
@@ -2105,8 +2107,21 @@ function runResources(rest, packs) {
     },
     optionalCloudMcp: {
       url: "https://dislop.com/mcp",
+      oauthMetadata: "https://dislop.com/.well-known/oauth-protected-resource/mcp",
       pricingAndFreeToken: "https://dislop.com/#pricing",
-      tools: ["dislop_review", "dislop_deslop", "dislop_voice_extract"],
+      freeToolsNoLogin: ["dislop_check", "dislop_verify", "dislop_rules"],
+      tools: [
+        "dislop_check",
+        "dislop_verify",
+        "dislop_rules",
+        "dislop_review",
+        "dislop_deslop",
+        "dislop_office",
+        "dislop_visual_review",
+        "dislop_voice_extract",
+        "dislop_voice_manage",
+        "dislop_account",
+      ],
     },
   };
   if (asJson) {
@@ -2118,9 +2133,11 @@ function runResources(rest, packs) {
   console.log(`\nFree read-only static resources (dislop.com):`);
   console.log(`  - Agent index : ${payload.staticResources.llmsIndex}`);
   console.log(`  - Full catalog: ${payload.staticResources.catalog}`);
-  console.log(`  - Awesome 87  : ${payload.staticResources.awesomeIndex}`);
+  console.log(`  - Awesome 90  : ${payload.staticResources.awesomeIndex}`);
+  console.log(`  - MCP card    : ${payload.staticResources.mcpServerCard}`);
+  console.log(`  - Skills index: ${payload.staticResources.agentSkillsIndex}`);
   console.log(`  - Rule card   : ${payload.staticResources.ruleTemplate}`);
-  console.log(`\nOptional hosted Cloud Remote MCP (login + 30 free credits/mo):`);
+  console.log(`\nOptional hosted Cloud Remote MCP (0-credit check/verify/rules need no login; 30 free credits/mo after sign-in):`);
   console.log(`  - Endpoint    : ${payload.optionalCloudMcp.url}`);
   console.log(`  - Free token  : ${payload.optionalCloudMcp.pricingAndFreeToken}`);
 }
@@ -3097,7 +3114,7 @@ function printHelp() {
 Usage:
   Core Workflow:
     dislop check [paths... | -] [--pack <id|auto>] [--deep] [--compact] [--fail-on error|warning|info|never]
-                 [--format text|json|sarif|github|md] [--profile] [--changed [ref] | --staged]
+                 [--format text|json|sarif|github|md] [--json] [--profile] [--changed [ref] | --staged]
                  [--stdin-filename <name>] [--report-unused] [--lang en|zh]
     dislop review [file | -] [--pack <id|auto>] [--offline | --endpoint <url>] [--lang en|zh] [--json]
     dislop verify <before> <after> | --git [ref] <file> [--keep a,b] [--pack <id|auto>] [--strict] [--json]
@@ -3117,7 +3134,9 @@ Optional / Diagnostics:
   dislop setup [--tier auto|none|fast|balanced|quality] [--dry-run] [--force] [--lang en|zh]
   dislop deslop [file | -] --local [--endpoint <url>] [--model <id>] [--output|-o <file>] [--json]
   dislop resources [--json]
-  dislop pack-test`);
+  dislop pack-test
+
+Exit codes: 0 clean, 1 findings >= --fail-on, 2 invalid usage or unreadable input.`);
 }
 
 async function main() {

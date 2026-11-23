@@ -20,7 +20,7 @@ version: 0.7.1
 | **动笔前约束 Agent 写作/设计** | 纯文档 Skill | 本地客户端 | `npx --yes skills add dislop-ai/dislop --skill dislop` |
 | **写完后本地查硬伤与套话** | 开源 CLI（Node / Python） | 纯本机离线 | `npx --yes dislop check .` 或 `uvx dislop check .` |
 | **Git 提交与 PR 自动拦截** | `--changed` + GitHub Actions | 本地 / CI | `npx --yes dislop check --changed origin/main --fail-on error` |
-| **办公 Agent 免环境深度审校** | 官方远程 MCP | `https://dislop.com/mcp` | 登录工作台领每月 30 免费额度后直连 |
+| **办公 Agent 免环境深度审校** | 官方远程 MCP | `https://dislop.com/mcp` | 0 额度基础检查免登录直连；OAuth 2.1 或登录后领每月 30 免费额度 |
 
 ## 2. 接进编码 Agent 与编辑器
 
@@ -39,6 +39,8 @@ npx --yes skills add dislop-ai/dislop --skill dislop
 ```
 
 ### 接进远程 MCP（Cursor / Claude Code / Codex）
+
+服务端自动发现描述位于 `https://dislop.com/.well-known/mcp/server-card.json`。其中 `dislop_check`、`dislop_verify` 与 `dislop_rules` 免登录 0 额度可用；通过 OAuth 2.1 授权或填入免费 Bearer 密钥后，每月可用 30 额度调用多模型审校与改稿工具。
 
 ```json
 {

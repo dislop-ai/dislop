@@ -66,7 +66,7 @@ npx --yes dislop check --changed origin/main --format github
 
 ```bash
 # 开启 5 轴节奏统计、轻量模型与扩展模式库深查，输出去重 JSON
-npx --yes dislop check draft.md --pack auto --deep --profile --compact
+npx --yes dislop check draft.md --pack auto --deep --profile --compact --json
 
 # 多信号交叉审校、改后校验与离线提取个人文风卡
 npx --yes dislop review draft.md
@@ -167,7 +167,7 @@ Node.js 版（`bin/dislop.mjs`）和 Python 版（`src/dislop/`）都零外部�
 }
 ```
 
-官方远程 MCP 端点（`https://dislop.com/mcp`）提供云端大模型审校与改稿工具：`dislop_review`（1 额度，结合五层 AI 口癖特征与上下文做交叉审校，返回结构化问题与改法建议）、`dislop_deslop`（2 额度，自动复检改写）、`dislop_voice_extract`（2 额度，提炼个人文风卡）、`dislop_verify`（0 额度，改后事实与反退化校验）及 0 额度基础检查。需要先在 [dislop.com](https://dislop.com/#cloud-token-box) 登录领取免费密钥。
+官方远程 MCP 端点（`https://dislop.com/mcp`，自动发现描述在 `https://dislop.com/.well-known/mcp/server-card.json`）中的 `dislop_check`、`dislop_verify`（改后事实校验）和 `dislop_rules` 免登录 0 额度直跑；通过 OAuth 2.1 授权或在 [dislop.com](https://dislop.com/#cloud-token-box) 领免费密钥后，每月有 30 额度可用于 `dislop_review`（1 额度）、`dislop_deslop`（2 额度）、`dislop_office`（`.docx`/`.pptx` 分段审校与改写 2–3 额度）、`dislop_visual_review`（2 额度）和 `dislop_voice_extract`（2 额度）。
 
 ## 配置，以及什么时候不听它的
 
@@ -207,7 +207,7 @@ dislop check .
 ### 开源本地（`Skill` + `CLI`）vs. 官方托管云端（`dislop.com/mcp`）
 
 - **开源本地（`dislop-ai/dislop`，Apache-2.0）**：纯文档 `SKILL.md` 与 `./references/*.md` 参考卡（不含可执行脚本）、Node/Python 零依赖命令行（`check`、`patterns`、`voice`、`explain`、`packs`、`catalog`、`resources`）、全部 7 套内置规则包（53 条规则）、65 条反模式库（`patterns/`）、随包内置的 `14.6 KB` gzip（原始 `49.0 KB`）轻量集成模型（`models/pocket-slop-v1.json`，`< 0.5 ms`，在 `stealth-vapor-v1` 上 F1 `100.0%`、干净误报 `0.0%`）、`Awesome Anti-Slop` 及 `dislop-bench v2` + `visual-design-v1`。`check` / `patterns` / `voice` 全程零联网，私密文档不出本机。仓库里还留着旧的 `--mcp` 和可选本地小模型工具，等真实语料评测完再定去留。
-- **官方托管云端与远程 HTTP MCP（`https://dislop.com/mcp` · [开源与云端方案](https://dislop.com/#pricing)）**：独立闭源云端后台，调用付费版 Google Gemini 接口，不拿你的稿子训练，也不落盘留存草稿（详见 [隐私说明](https://dislop.com/privacy.md)）。提供 `dislop_review`（1 额度，多模型分文体审校，返回结构化问题与改法建议）、`dislop_deslop`（2 额度，自动复检改写，改完核对原稿数字与限定词，对不上自动重改）与 `dislop_voice_extract`（2 额度，提取 `dislop.voice/1` 个人文风）。用邮箱领免费密钥，每月可用 30 额度；Pro（`$12/月` · 1,500 额度）、按量包（`$10 / 800 额度`）与 Team（`$29/席位/月`）已开放预约。
+- **官方托管云端与远程 HTTP MCP（`https://dislop.com/mcp` · [开源与云端方案](https://dislop.com/#pricing)）**：独立闭源云端后台，调用付费版 Google Gemini 接口，不拿你的稿子训练，也不落盘留存草稿（详见 [隐私说明](https://dislop.com/privacy.md)）。`dislop_check`、`dislop_verify` 和 `dislop_rules` 免登录 0 额度可用；用邮箱领免费密钥或 OAuth 2.1 授权后，每月有 **30 额度**可用于 `dislop_review`（1 额度，多模型审校）、`dislop_deslop`（2 额度，改后核对数字与限定词）、`dislop_office`（2–3 额度，`.docx`/`.pptx` 改稿）、`dislop_visual_review`（2 额度，视觉截图审校）与 `dislop_voice_extract`（2 额度，`dislop.voice/1`）；Pro（`$12/月` · 1,500 额度）、按量包（`$10 / 800 额度`）与 Team（`$29/席位/月`）已开放预约。
 
 ## 去 AI 味效果基准测试（`dislop-bench v2`）
 

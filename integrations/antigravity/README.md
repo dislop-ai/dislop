@@ -6,8 +6,8 @@ Cutting AI slop is real productivity. `dislop` checks Markdown, HTML/CSS/JSX, `.
 
 ## Included
 
-- Skill (`skills/dislop/SKILL.md`) and 4 progressive reference cards under `skills/dislop/references/`.
-- Remote MCP config pointing to Official Cloud MCP (`https://dislop.com/mcp`). Offline checks run through the local CLI (`npx dislop check .` / `uvx dislop check .`).
+- Skill (`skills/dislop/SKILL.md`) and 8 bilingual reference cards (4 English + 4 Chinese) under `skills/dislop/references/`.
+- Remote MCP config pointing to Official Cloud MCP (`https://dislop.com/mcp`; discovery metadata at `https://dislop.com/.well-known/mcp/server-card.json`; 0-credit checks run without login). Offline checks run through the local CLI (`npx dislop check .` / `uvx dislop check .`).
 
 ## Validation
 

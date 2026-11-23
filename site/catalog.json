@@ -8,11 +8,17 @@
     "cases",
     "tools"
   ],
+  "discovery": {
+    "mcpServerCard": "/.well-known/mcp/server-card.json",
+    "mcpAlias": "/.well-known/mcp.json",
+    "agentSkillsIndex": "/.well-known/agent-skills/index.json",
+    "oauthProtectedResource": "/.well-known/oauth-protected-resource/mcp"
+  },
   "entryPoints": {
     "llmsTxt": {
       "path": "/llms.txt",
-      "bytes": 2452,
-      "approxTokens": 613
+      "bytes": 2469,
+      "approxTokens": 617
     },
     "llmsFullTxt": {
       "path": "/llms-full.txt",
@@ -60,8 +66,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 3041,
-      "approxTokens": 760,
+      "bytes": 3271,
+      "approxTokens": 818,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -69,7 +75,7 @@
         "mcp",
         "cli"
       ],
-      "sha256": "03f1e097c3f5713054699cc788b6986ca99ea030e293d1546b8ef33afe101279"
+      "sha256": "a177801e19f5b6a93609e6cea4f43388c7f3f1e44426e2e1b47aa1f6f9c3cd2f"
     },
     {
       "id": "methodology-index",
@@ -102,15 +108,15 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 1106,
-      "approxTokens": 277,
+      "bytes": 1084,
+      "approxTokens": 271,
       "relatedTools": [
         "skill",
         "plugin",
         "cli",
         "mcp"
       ],
-      "sha256": "79c2e2890e8a57f9ed68c24403bebf563639108257fecf3956d94f3a16e3e7b2"
+      "sha256": "5c00398ef123b2a4ab6dfee3dce25efde570c5676aea3c85efcf709a58605ca5"
     },
     {
       "id": "methodology-deletion-test",
@@ -251,8 +257,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 5165,
-      "approxTokens": 1291,
+      "bytes": 5309,
+      "approxTokens": 1327,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -260,7 +266,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "bda3085d6ba42a44e5b3a3dba0e94b45b2f4fb3fac3a70af9846dabf7a258d18"
+      "sha256": "f0ac51f5dae09cd5aea5284bd461305440df11810110d9fb2626aec040286b9a"
     },
     {
       "id": "methodology-brand-voice",
@@ -505,8 +511,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 1881,
-      "approxTokens": 470,
+      "bytes": 1969,
+      "approxTokens": 492,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -514,7 +520,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "1e8f68218e14eb1a926c2115727645a29ac5c4722343f9081a0e37cd20b6b110"
+      "sha256": "6dc3b521d4be678b466701dbb98cf3d89c02f19515f58617d0a0d368b535f65a"
     },
     {
       "id": "tools-skill",
@@ -971,13 +977,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 2601,
-      "approxTokens": 650,
+      "bytes": 3543,
+      "approxTokens": 886,
       "relatedTools": [
         "mcp",
         "cli"
       ],
-      "sha256": "d5a1d7a6499aede974b4f7aed6cab299d157d0062a0e24c4e9316f72c495c8b4"
+      "sha256": "1a38be170d9a731fac5f06e516bae47132517d4265365f3f4fe1a1a92920f0b9"
     },
     {
       "id": "privacy-policy",
@@ -3027,14 +3033,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 5832,
-      "approxTokens": 1458,
+      "bytes": 6165,
+      "approxTokens": 1541,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "89a59f6a30fb8e0678360dd2a8589a598fbba3357c3410ca58c1c4eb8e6d2c33"
+      "sha256": "d8422fe2f0857826136fa1c431cf1b6b613d846c580b3038d096a1ad4f8d877c"
     },
     {
       "id": "guide-agent-cli-mcp-tutorial-en",
@@ -3058,14 +3064,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 5805,
-      "approxTokens": 1451,
+      "bytes": 6125,
+      "approxTokens": 1531,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "2f729ea7fe0c5f20c378447b3c05afd0abdd944b3c18daa4043e46b29e9e2275"
+      "sha256": "942aa15ce43e6051dd008df309589df4e4224a513c58d44fe711dd4da5f823cf"
     },
     {
       "id": "guide-deslop-pptx-docx-zh",

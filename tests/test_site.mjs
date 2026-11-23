@@ -824,6 +824,44 @@ for (const sym of ["encodeShareHash", "decodeShareHash", "#try=", "#share="]) {
 const slopTpl = fs.readFileSync(path.join(ROOT, ".github/ISSUE_TEMPLATE/slop_sample.yml"), "utf8");
 assert.ok(slopTpl.trim().length > 100 && /redact|private/i.test(slopTpl), "Expected .github/ISSUE_TEMPLATE/slop_sample.yml with redaction reminder");
 
+// 17. Verify .well-known Agent EO discovery endpoints, llms.txt Quick Start, and expanded JSON-LD sameAs
+const mcpCardPath = path.join(SITE_DIR, ".well-known", "mcp", "server-card.json");
+const mcpAliasPath = path.join(SITE_DIR, ".well-known", "mcp.json");
+assert.ok(fs.existsSync(mcpCardPath), "Missing site/.well-known/mcp/server-card.json");
+assert.ok(fs.existsSync(mcpAliasPath), "Missing site/.well-known/mcp.json");
+const mcpCard = JSON.parse(fs.readFileSync(mcpCardPath, "utf8"));
+const mcpAlias = JSON.parse(fs.readFileSync(mcpAliasPath, "utf8"));
+assert.deepEqual(mcpCard, mcpAlias, "server-card.json and .well-known/mcp.json must match");
+assert.equal(mcpCard.transport?.endpoint, "https://dislop.com/mcp", "server-card.json endpoint mismatch");
+for (const toolName of ["dislop_check", "dislop_verify", "dislop_rules", "dislop_review", "dislop_deslop", "dislop_office", "dislop_visual_review"]) {
+  assert.ok((mcpCard.tools || []).some((t) => t.name === toolName), `server-card.json missing tool ${toolName}`);
+}
+
+const skillsIdxPath = path.join(SITE_DIR, ".well-known", "agent-skills", "index.json");
+assert.ok(fs.existsSync(skillsIdxPath), "Missing site/.well-known/agent-skills/index.json");
+const skillsIdx = JSON.parse(fs.readFileSync(skillsIdxPath, "utf8"));
+const mainSkillEntry = (skillsIdx.skills || []).find((s) => s.name === "dislop");
+assert.ok(mainSkillEntry, "agent-skills/index.json missing dislop skill");
+const canonicalSkillSha = `sha256:${sha256(fs.readFileSync(path.join(ROOT, "skills", "dislop", "SKILL.md"), "utf8"))}`;
+assert.equal(mainSkillEntry.digest, canonicalSkillSha, "agent-skills/index.json SKILL.md digest mismatch");
+assert.equal((mainSkillEntry.references || []).length, 8, "Expected 8 skill reference entries in agent-skills/index.json");
+for (const refItem of mainSkillEntry.references || []) {
+  const refRel = refItem.url.replace("https://dislop.com/tools/references/", "");
+  const refSha = `sha256:${sha256(fs.readFileSync(path.join(ROOT, "skills", "dislop", "references", refRel), "utf8"))}`;
+  assert.equal(refItem.digest, refSha, `Reference digest mismatch for ${refRel}`);
+}
+
+assert.ok(llmsTxt.includes("npx --yes dislop check"), "site/llms.txt missing CLI Quick Start command");
+assert.ok(llmsTxt.includes("https://dislop.com/.well-known/mcp/server-card.json"), "site/llms.txt missing server-card.json link");
+
+for (const homeRel of ["index.html", "en/index.html"]) {
+  const homeDoc = fs.readFileSync(path.join(SITE_DIR, homeRel), "utf8");
+  assert.ok(homeDoc.includes("https://www.npmjs.com/package/dislop"), `${homeRel} JSON-LD missing npm sameAs`);
+  assert.ok(homeDoc.includes("https://pypi.org/project/dislop/"), `${homeRel} JSON-LD missing PyPI sameAs`);
+  assert.ok(homeDoc.includes('"codeRepository": "https://github.com/dislop-ai/dislop"'), `${homeRel} JSON-LD missing codeRepository`);
+  assert.ok(homeDoc.includes('"softwareHelp": "https://dislop.com/llms.txt"'), `${homeRel} JSON-LD missing softwareHelp`);
+}
+
 console.log(
   `dislop site-test: ok (${totalRules} rules, ${tryRulesChecked} Try demos, ${specimenCount} ZH/EN specimens + 2 hero proofs + 6 cases, ` +
     `${catalog.resources.length} catalog resources, ${sitemapUrlCount} sitemap URLs, ${allSiteHtml.length} static HTML pages, ${demoSlugs.length * 2} demo GIFs, ${checkedJsonBlocks} valid JSON configs, ${htmlI18nKeys.length} bilingual i18n keys, CSS braces balanced, ${AWESOME_DATA.entries.length} Awesome entries & WCAG AA passed)`

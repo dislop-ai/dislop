@@ -779,7 +779,9 @@ A dedicated linter for AI slop. It brings together vetted community rules, corpu
 - Product brief (EN/ZH): ${BASE_URL}/methodology/product-brief.md
 - Runtime dependencies: 0 (pure-Markdown Skill and local CLI run offline with zero uploads)
 - Live browser workbench: ${BASE_URL}/#workbench (offline local checks + sign-in Cloud MCP mode, \`CSP: connect-src 'self'\`)
-- Official Cloud MCP: ${BASE_URL}/mcp (sign in for 30 free monthly credits via ${BASE_URL}/#pricing)
+- Official Cloud MCP: ${BASE_URL}/mcp (0-credit \`dislop_check\`/\`dislop_verify\`/\`dislop_rules\` without login; sign in via ${BASE_URL}/#pricing for 30 free monthly credits on AI tools)
+- MCP Server Card: ${BASE_URL}/.well-known/mcp/server-card.json
+- Agent Skills Index: ${BASE_URL}/.well-known/agent-skills/index.json
 - Agent routing index: ${BASE_URL}/llms.txt
 - Machine-readable catalog: ${BASE_URL}/catalog.json
 - Awesome Anti-Slop (90 curated entries): ${BASE_URL}/awesome/
@@ -830,7 +832,7 @@ version: ${VERSION}
 
 Read only the focused document matching your current task:
 
-- [Product Brief (EN/ZH)](./product-brief.md): Core positioning, user sequence (coding agents -> office agents -> everyone delivering with AI), selling points, and one-sentence pitch.
+- [Product Brief (EN/ZH)](./product-brief.md): Core positioning, users (coding/office/general AI users and their agents), selling points, and one-sentence pitch.
 - [Deletion Test & Anti-Slop Loop](./deletion-test.md): Why banning flat word lists causes second-order slogans, and how the \`prevent -> check -> clean up -> re-check\` loop works.
 - [Cross-Modality Anti-Pattern Map](./anti-pattern-map.md): How dislop groups 65 anti-slop patterns across prose, Web UI, SVG, images, Word, PowerPoint, and PDF.
 - [Positive Divergence & Personalization (Draft)](./positive-divergence.md): Keeping structure varied, \`dislop.voice/1\` offline stylometrics, and \`dislop.taste/1\` positive design cards.
@@ -1198,7 +1200,7 @@ Pick the lightest surface that fits your workflow:
 | Zero-Install Prompt & Static Pages | Live | Hand [\`/llms.txt\`](../llms.txt) or [\`/catalog.json\`](../catalog.json) to any web-capable AI, or test drafts offline in the [Browser Workbench](${BASE_URL}/#workbench). |
 | Agent Skill (Pure-Markdown References) | Live | Install [\`SKILL.md\`](./skill.md) + bundled \`references/*.md\` (0 scripts, 0 network calls) with \`npx skills add dislop-ai/dislop\` in Claude Code, Codex, Cursor, Windsurf, or Antigravity. |
 | Local CLI & Offline Voice | Live | See [\`/tools/cli-and-hooks.md\`](./cli-and-hooks.md) for zero-network Node (\`npx\`), Python (\`uvx\`), all 7 built-in packs, 65 patterns, 14.6 KB \`--ml\`, and \`dislop voice\`. |
-| Official Cloud MCP | Live | Connect \`${BASE_URL}/mcp\` with a free 30-credit/month Bearer key from [\`/#pricing\`](${BASE_URL}/#pricing) for \`dislop_review\` (genre-aware structured edits), \`dislop_deslop\`, and \`dislop_voice_extract\`. |
+| Official Cloud MCP | Live | Connect \`${BASE_URL}/mcp\` for 0-credit \`dislop_check\`, \`dislop_verify\`, and \`dislop_rules\` without login, or sign in (OAuth 2.1 / free key from [\`/#pricing\`](${BASE_URL}/#pricing)) for 30 free monthly credits on \`dislop_review\`, \`dislop_deslop\`, \`dislop_office\`, and \`dislop_visual_review\`. |
 | Claude Code Plugin | Live | Install pure-Markdown Skill + Official Cloud MCP in one step using \`.claude-plugin/marketplace.json\` (\`/plugin marketplace add dislop-ai/dislop\` then \`/plugin install dislop@dislop-ai\`; ~130 always-on tokens). |
 | OpenAI Codex Plugin & Gemini CLI Extension | Live | Codex: \`codex plugin marketplace add dislop-ai/dislop\` then \`codex plugin add dislop@dislop-ai\`; Gemini CLI: \`gemini extensions install https://github.com/dislop-ai/dislop\`. |
 | GitHub Action & pre-commit | Live | Gate modified PR lines with \`uses: dislop-ai/dislop@main\` (\`action.yml\`) or \`.pre-commit-hooks.yaml\`. |
@@ -1401,13 +1403,17 @@ version: ${VERSION}
 
 # Official Cloud MCP, HTTP API & JS Core
 
-## 1. Official Cloud HTTP MCP (Sign-In Required, Free 30 Credits/Month)
+## 1. Official Cloud HTTP MCP (Free 0-Credit Checks Without Login; 30 Free Credits/Month After Sign-In)
 
-Claim a free Bearer token (\`dslp_...\`) at \`${BASE_URL}/#cloud-token-box\` (paid-tier Google Gemini API; Google does not train on it, and we do not store drafts; see [\`/privacy.md\`](../privacy.md)).
+Connect directly to \`${BASE_URL}/mcp\` (auto-discovery metadata at [\`/.well-known/mcp/server-card.json\`](../.well-known/mcp/server-card.json) and OAuth 2.1 protected resource at \`${BASE_URL}/.well-known/oauth-protected-resource/mcp\`).
+
+- **No login required**: \`dislop_check\`, \`dislop_verify\`, and \`dislop_rules\` run at 0 credits without an API key.
+- **Sign in or OAuth 2.1**: Claim a free Bearer token (\`dslp_...\`) at \`${BASE_URL}/#cloud-token-box\` (or authorize via OAuth 2.1) for **30 free credits/month** on Cloud AI tools (paid-tier Google Gemini API; Google does not train on it, and we do not store drafts; see [\`/privacy.md\`](../privacy.md)).
 
 ### Claude Code
 \`\`\`bash
-claude mcp add --transport http dislop ${BASE_URL}/mcp --header "Authorization: Bearer dslp_YOUR_FREE_TOKEN"
+claude mcp add --transport http dislop ${BASE_URL}/mcp
+# Optional Bearer header if skipping OAuth: --header "Authorization: Bearer dslp_YOUR_FREE_TOKEN"
 \`\`\`
 
 ### Cursor / Windsurf / Antigravity (\`mcp.json\`)
@@ -1432,18 +1438,20 @@ url = "${BASE_URL}/mcp"
 http_headers = { Authorization = "Bearer dslp_YOUR_FREE_TOKEN" }
 \`\`\`
 
-### Official Cloud MCP Tools
+### Official Cloud MCP v2 Tools (10 Tools)
 
-- \`dislop_check\`, \`dislop_explain\`, \`dislop_packs\` (0 credits; note remote \`dislop_check\` accepts \`text\` only, not local filesystem \`path\`).
-- \`dislop_review\` (1 credit, requires Bearer token):
-  - Input: \`{ "text": "...", "pack"?: "business-brief", "lang"?: "en"|"zh" }\`
-  - Output: \`{ mode, model, deterministic, thirdOrderHits, llmReview: { summary, aiFlavorLevel, issues }, billing }\`
-- \`dislop_deslop\` (2 credits, requires Bearer token):
-  - Input: \`{ "text": "...", "pack"?: "business-brief", "lang"?: "en"|"zh", "voiceProfile"?: object }\`
-  - Output: \`{ mode, model, revised, changes, afterCheck, numericDiff, attempts, repaired, billing }\`
-- \`dislop_voice_extract\` (2 credits, requires Bearer token):
-  - Input: \`{ "samples": ["Sample 1...", "Sample 2..."], "lang"?: "en"|"zh" }\`
-  - Output: \`{ schema: "dislop.voice/1", stylometrics, profile }\` — pass \`output.profile\` as \`voiceProfile\` in \`dislop_deslop\`.
+- **0 credits, no login required**:
+  - \`dislop_check\`: Deterministic anti-slop check on passed \`text\` (note remote check accepts \`text\`, not local filesystem \`path\`).
+  - \`dislop_verify\`: Fact ledger, keep-terms, and anti-degradation guardrails on a \`before\` / \`after\` revision pair.
+  - \`dislop_rules\`: List available rule packs or explain a specific \`ruleId\` with examples.
+- **Sign-in / OAuth 2.1 required (30 free credits/month)**:
+  - \`dislop_review\` (1 credit): Genre-aware multi-model diagnosis returning anchored \`dislop.findings/1\` \`edit\` / \`rewrite\` / \`ask\` guidance.
+  - \`dislop_deslop\` (2 credits): Self-healing LLM rewrite with deterministic and fact-ledger verification.
+  - \`dislop_office\` (2 credits review / 3 credits deslop): Review or rewrite \`.docx\` / \`.pptx\` text segments without emitting binary base64.
+  - \`dislop_visual_review\` (2 credits): Multimodal visual anti-slop screenshot audit for webpages, slides, posters, and print layouts.
+  - \`dislop_voice_extract\` (2 credits): Extract a reusable \`dislop.voice/1\` style card from 1–5 human samples (\`save: true\` stores it to your account).
+  - \`dislop_voice_manage\` (0 credits): List, view, or delete saved personal voice cards.
+  - \`dislop_account\` (0 credits): Inspect active plan, remaining credits, and saved voice count.
 
 ## 2. Cloud HTTP API & JS Core Export
 
@@ -2232,32 +2240,37 @@ const llmsTxt = writeCleanFile(
   "llms.txt",
   `# dislop
 
-> Cutting AI slop is real productivity. Linter for AI Slop with vetted community rules (7 packs, ${allRules.length} rules, 65 patterns) and ${radarData.entries.length} curated tools so coding and office agents catch and fix AI slop in docs, web UI, and slides. Runs locally offline, or via Cloud MCP.
+> Cutting AI slop is real productivity. Linter for AI Slop (7 packs, ${allRules.length} rules, 65 patterns, ${radarData.entries.length} tools) for agents and people.
 
-Read the task page matching your work. If \`skills/dislop/\` is installed locally, use \`./references/*.md\` and \`dislop check\` offline.
+## Quick Start for Agents
+- Shell (offline): \`npx --yes dislop check <path> --pack auto --compact --json\` (or \`uvx dislop check <path> --compact --json\`; exit \`0\`/\`1\`/\`2\`).
+- Skill: \`npx --yes skills add dislop-ai/dislop --skill dislop\` (or read local \`./references/*.md\`).
+- Remote MCP: \`${BASE_URL}/mcp\` (\`dislop_check\`/\`dislop_rules\` 0 cr, no login; 30 cr/mo after sign-in).
 
 ## Start by task (~800-1,500 tokens each)
-- [Review a brief or proposal](${BASE_URL}/tasks/business-doc.md): AI artifacts and \`business-brief\` rules.
-- [Check a web page or slide deck](${BASE_URL}/tasks/web-and-deck.md): \`deck-and-ui\` rules and design tokens.
+- [Review a brief](${BASE_URL}/tasks/business-doc.md): AI artifacts and \`business-brief\` rules.
+- [Check web UI or slides](${BASE_URL}/tasks/web-and-deck.md): \`deck-and-ui\` rules and tokens.
 - [Edit an essay](${BASE_URL}/tasks/editorial-writing.md): \`literary-essay\` rules and contrasts.
-- [Check files before release](${BASE_URL}/tasks/pre-release-gate.md): Core \`error\` checks and git diff CI gating.
+- [Pre-release gate](${BASE_URL}/tasks/pre-release-gate.md): Core \`error\` checks and CI diff gating.
 
 ## Browse by topic
-- [Guides (EN & ZH)](${BASE_URL}/en/guides/): ${guides.length} bilingual tutorials (prose, web UI, PPTX, CI, tools; ZH at \`/guides/\`).
-- [Product Brief](${BASE_URL}/methodology/product-brief.md): Core positioning, target users, and pitch.
-- [Methodology & Voice Guide](${BASE_URL}/methodology/index.md): Plain writing guide and visual tokens.
-- [Examples & References](${BASE_URL}/cases/index.md): Contrasts and 31 print/type design references.
-- [Install & Integrations](${BASE_URL}/tools/index.md): Pure-doc Skill, local CLI, Plugin, and Cloud MCP.
-- [Awesome Anti-Slop](${BASE_URL}/awesome/index.md): ${radarData.entries.length} checked tools & papers (JSON at \`/awesome/index.json\`).
-- [Roadmap & Open Questions](${BASE_URL}/roadmap.md): Active tracks and collaboration guide.
+- [Guides (EN & ZH)](${BASE_URL}/en/guides/): ${guides.length} tutorials (ZH at \`/guides/\`).
+- [Product Brief](${BASE_URL}/methodology/product-brief.md): Positioning, users, and pitch.
+- [Methodology](${BASE_URL}/methodology/index.md): Plain writing guide and visual tokens.
+- [Cases & Refs](${BASE_URL}/cases/index.md): Contrasts and 31 design references.
+- [Tools & Setup](${BASE_URL}/tools/index.md): Skill, CLI, Plugin, and Cloud MCP.
+- [Awesome Anti-Slop](${BASE_URL}/awesome/index.md): ${radarData.entries.length} tools & papers (\`/awesome/index.json\`).
+- [Roadmap](${BASE_URL}/roadmap.md): Active tracks and collaboration.
 
-## Machine index & packs
-- [JSON Catalog](${BASE_URL}/catalog.json): Versioned manifest (\`dislop.catalog/1\`) with sha256 and token estimates.
-- [Agent Skill](${BASE_URL}/tools/skill.md): Mirror of \`skills/dislop/SKILL.md\` (\`v${VERSION}\`); skip if loaded locally.
-- [Official Cloud MCP](${BASE_URL}/tools/mcp-sdk-api.md): \`${BASE_URL}/mcp\` (30 free credits/mo; \`dislop_review\`, \`dislop_deslop\`).
+## Machine index & discovery
+- [MCP Server Card](${BASE_URL}/.well-known/mcp/server-card.json): Auto-discovery for \`/mcp\` (10 tools).
+- [Agent Skills Index](${BASE_URL}/.well-known/agent-skills/index.json): \`SKILL.md\` and card sha256 digests.
+- [JSON Catalog](${BASE_URL}/catalog.json): \`dislop.catalog/1\` manifest with sha256 and tokens.
+- [Agent Skill](${BASE_URL}/tools/skill.md): Mirror of \`skills/dislop/SKILL.md\` (\`v${VERSION}\`).
+- [Cloud MCP & API](${BASE_URL}/tools/mcp-sdk-api.md): Remote MCP tools, OAuth 2.1, HTTP API.
 - [Rule Packs](${BASE_URL}/packs/core.md): 7 packs & ${allRules.length} \`/rules/<id>.md\` cards.
-- [Single-Fetch Bundle](${BASE_URL}/llms-full.txt): All ${allRules.length} rules compiled without test fixtures.
-- [Privacy & Data Boundaries](${BASE_URL}/privacy.md): Offline boundaries (Skill, CLI) and Cloud MCP Gemini API policy.
+- [Single-Fetch Bundle](${BASE_URL}/llms-full.txt): All ${allRules.length} rules without fixtures.
+- [Privacy](${BASE_URL}/privacy.md): Offline local boundaries and Cloud MCP policy.
 `,
   { isAgentText: true }
 );
@@ -2312,6 +2325,79 @@ ${fullPackDigest}
   { isAgentText: true }
 );
 
+// 2j-bis. Machine Discovery Endpoints (/.well-known/mcp/server-card.json, /.well-known/mcp.json, /.well-known/agent-skills/index.json)
+const mcpServerCardObj = {
+  serverInfo: {
+    name: "dislop",
+    title: "dislop",
+    version: VERSION,
+    description: "Linter for AI Slop in docs, web UI, Word, and PowerPoint.",
+  },
+  websiteUrl: BASE_URL,
+  documentationUrl: `${BASE_URL}/tools/mcp-sdk-api.md`,
+  llmsTxtUrl: `${BASE_URL}/llms.txt`,
+  transport: {
+    type: "streamable-http",
+    endpoint: `${BASE_URL}/mcp`,
+  },
+  authentication: {
+    mode: "optional",
+    oauthProtectedResource: `${BASE_URL}/.well-known/oauth-protected-resource/mcp`,
+    bearerTokenUrl: `${BASE_URL}/#cloud-token-box`,
+    freeToolsNoLogin: ["dislop_check", "dislop_verify", "dislop_rules"],
+  },
+  tools: [
+    { name: "dislop_check", credits: 0, authRequired: false },
+    { name: "dislop_verify", credits: 0, authRequired: false },
+    { name: "dislop_rules", credits: 0, authRequired: false },
+    { name: "dislop_review", credits: 1, authRequired: true },
+    { name: "dislop_deslop", credits: 2, authRequired: true },
+    { name: "dislop_office", credits: 2, authRequired: true },
+    { name: "dislop_visual_review", credits: 2, authRequired: true },
+    { name: "dislop_voice_extract", credits: 2, authRequired: true },
+    { name: "dislop_voice_manage", credits: 0, authRequired: true },
+    { name: "dislop_account", credits: 0, authRequired: true },
+  ],
+};
+const mcpServerCardJsonStr = JSON.stringify(mcpServerCardObj, null, 2) + "\n";
+fs.mkdirSync(path.join(SITE_DIR, ".well-known", "mcp"), { recursive: true });
+fs.writeFileSync(path.join(SITE_DIR, ".well-known", "mcp", "server-card.json"), mcpServerCardJsonStr, "utf8");
+fs.writeFileSync(path.join(SITE_DIR, ".well-known", "mcp.json"), mcpServerCardJsonStr, "utf8");
+
+const skillDescMatch = canonicalSkillMd.match(/^description:\s*(.+)$/m);
+const skillDescription = skillDescMatch
+  ? skillDescMatch[1].trim()
+  : "Pure-Markdown anti-slop reference cards for docs, essays, web UI, Word, and PowerPoint.";
+const skillReferences = SKILL_REFS.map((ref) => {
+  const refPath = path.join(ROOT, "skills", "dislop", "references", ref.file);
+  if (!fs.existsSync(refPath)) return null;
+  const refBody = fs.readFileSync(refPath, "utf8");
+  return {
+    name: ref.file.replace(/\.md$/, ""),
+    url: `${BASE_URL}/tools/references/${ref.file}`,
+    digest: `sha256:${crypto.createHash("sha256").update(refBody, "utf8").digest("hex")}`,
+  };
+}).filter(Boolean);
+
+const agentSkillsIndexObj = {
+  $schema: "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  version: VERSION,
+  skills: [
+    {
+      name: "dislop",
+      type: "skill-md",
+      description: skillDescription,
+      url: `${BASE_URL}/tools/skill.md`,
+      digest: `sha256:${crypto.createHash("sha256").update(canonicalSkillMd, "utf8").digest("hex")}`,
+      install: "npx --yes skills add dislop-ai/dislop --skill dislop",
+      references: skillReferences,
+    },
+  ],
+};
+const agentSkillsIndexJsonStr = JSON.stringify(agentSkillsIndexObj, null, 2) + "\n";
+fs.mkdirSync(path.join(SITE_DIR, ".well-known", "agent-skills"), { recursive: true });
+fs.writeFileSync(path.join(SITE_DIR, ".well-known", "agent-skills", "index.json"), agentSkillsIndexJsonStr, "utf8");
+
 // 2k. /catalog.json (schema: "dislop.catalog/1")
 const catalogObj = {
   schema: "dislop.catalog/1",
@@ -2319,6 +2405,12 @@ const catalogObj = {
   snapshotDate: SNAPSHOT_DATE,
   baseUrl: BASE_URL,
   pillars: ["methodology", "cases", "tools"],
+  discovery: {
+    mcpServerCard: "/.well-known/mcp/server-card.json",
+    mcpAlias: "/.well-known/mcp.json",
+    agentSkillsIndex: "/.well-known/agent-skills/index.json",
+    oauthProtectedResource: "/.well-known/oauth-protected-resource/mcp",
+  },
   entryPoints: {
     llmsTxt: { path: "/llms.txt", bytes: Buffer.byteLength(llmsTxt, "utf8"), approxTokens: approxTokens(llmsTxt) },
     llmsFullTxt: {
@@ -2356,6 +2448,8 @@ Disallow: /mcp`
   `
 
 # Agent index: ${BASE_URL}/llms.txt
+# MCP server card: ${BASE_URL}/.well-known/mcp/server-card.json
+# Agent skills index: ${BASE_URL}/.well-known/agent-skills/index.json
 Sitemap: ${BASE_URL}/sitemap.xml
 `;
 fs.writeFileSync(path.join(SITE_DIR, "robots.txt"), robotsTxt, "utf8");
@@ -2505,6 +2599,8 @@ indexHtml = replaceBuildBlock(indexHtml, "RULES_TABLE", preRenderedRules);
 const featuredEndpoints = [
   { path: "./llms.txt", label: "/llms.txt", i18nKey: "ep.llms", desc: "Agent 入口索引", bytes: Buffer.byteLength(llmsTxt, "utf8"), tok: approxTokens(llmsTxt) },
   { path: "./catalog.json", label: "/catalog.json", i18nKey: "ep.catalog", desc: "全部文档的 JSON 目录", bytes: Buffer.byteLength(catalogJsonStr, "utf8"), tok: approxTokens(catalogJsonStr) },
+  { path: "./.well-known/mcp/server-card.json", label: "/.well-known/mcp/server-card.json", i18nKey: "ep.mcpCard", desc: "MCP 自动发现描述（10 个工具）", bytes: Buffer.byteLength(mcpServerCardJsonStr, "utf8"), tok: approxTokens(mcpServerCardJsonStr) },
+  { path: "./.well-known/agent-skills/index.json", label: "/.well-known/agent-skills/index.json", i18nKey: "ep.skillsIdx", desc: "Agent Skills 索引与 SHA-256", bytes: Buffer.byteLength(agentSkillsIndexJsonStr, "utf8"), tok: approxTokens(agentSkillsIndexJsonStr) },
   { path: "./tasks/business-doc.md", label: "/tasks/business-doc.md", i18nKey: "ep.taskBiz", desc: "任务卡：工作文档与技术方案", resId: "task-business-doc" },
   { path: "./tasks/web-and-deck.md", label: "/tasks/web-and-deck.md", i18nKey: "ep.taskWeb", desc: "任务卡：网页与 PPT 模板味", resId: "task-web-and-deck" },
   { path: "./tasks/editorial-writing.md", label: "/tasks/editorial-writing.md", i18nKey: "ep.taskEdit", desc: "任务卡：随笔与长文", resId: "task-editorial-writing" },
@@ -2635,7 +2731,7 @@ for (const res of catalogResources) {
 const DYNAMIC_CLOUD_PATHS = new Set(["/mcp", "/api/health"]);
 for (const m of llmsTxt.matchAll(/https:\/\/dislop\.com(\/[^\s)`]+)/g)) {
   if (DYNAMIC_CLOUD_PATHS.has(m[1])) continue;
-  const target = m[1].replace(/\/$/, "/index.html");
+  const target = m[1].split("#")[0].replace(/\/$/, "/index.html");
   const full = path.join(SITE_DIR, target.replace(/^\//, ""));
   if (!fs.existsSync(full)) {
     errors.push(`Broken URL in llms.txt: ${m[0]} (missing site${target})`);

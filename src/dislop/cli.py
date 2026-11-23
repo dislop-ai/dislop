@@ -1218,6 +1218,8 @@ def _cmd_resources(ns: argparse.Namespace, packs: dict[str, Any]) -> int:
             "llmsIndex": "https://dislop.com/llms.txt",
             "catalog": "https://dislop.com/catalog.json",
             "awesomeIndex": "https://dislop.com/awesome/index.json",
+            "mcpServerCard": "https://dislop.com/.well-known/mcp/server-card.json",
+            "agentSkillsIndex": "https://dislop.com/.well-known/agent-skills/index.json",
             "tasks": [
                 "https://dislop.com/tasks/business-doc.md",
                 "https://dislop.com/tasks/web-and-deck.md",
@@ -1228,8 +1230,21 @@ def _cmd_resources(ns: argparse.Namespace, packs: dict[str, Any]) -> int:
         },
         "optionalCloudMcp": {
             "url": "https://dislop.com/mcp",
+            "oauthMetadata": "https://dislop.com/.well-known/oauth-protected-resource/mcp",
             "pricingAndFreeToken": "https://dislop.com/#pricing",
-            "tools": ["dislop_review", "dislop_deslop", "dislop_voice_extract"],
+            "freeToolsNoLogin": ["dislop_check", "dislop_verify", "dislop_rules"],
+            "tools": [
+                "dislop_check",
+                "dislop_verify",
+                "dislop_rules",
+                "dislop_review",
+                "dislop_deslop",
+                "dislop_office",
+                "dislop_visual_review",
+                "dislop_voice_extract",
+                "dislop_voice_manage",
+                "dislop_account",
+            ],
         },
     }
     if ns.json or getattr(ns, "format", "text") == "json":
@@ -1240,9 +1255,11 @@ def _cmd_resources(ns: argparse.Namespace, packs: dict[str, Any]) -> int:
     print("\nFree read-only static resources (dislop.com):")
     print(f"  - Agent index : {payload['staticResources']['llmsIndex']}")
     print(f"  - Full catalog: {payload['staticResources']['catalog']}")
-    print(f"  - Awesome 87  : {payload['staticResources']['awesomeIndex']}")
+    print(f"  - Awesome 90  : {payload['staticResources']['awesomeIndex']}")
+    print(f"  - MCP card    : {payload['staticResources']['mcpServerCard']}")
+    print(f"  - Skills index: {payload['staticResources']['agentSkillsIndex']}")
     print(f"  - Rule card   : {payload['staticResources']['ruleTemplate']}")
-    print("\nOptional hosted Cloud Remote MCP (login + 30 free credits/mo):")
+    print("\nOptional hosted Cloud Remote MCP (0-credit check/verify/rules need no login; 30 free credits/mo after sign-in):")
     print(f"  - Endpoint    : {payload['optionalCloudMcp']['url']}")
     print(f"  - Free token  : {payload['optionalCloudMcp']['pricingAndFreeToken']}")
     return 0
