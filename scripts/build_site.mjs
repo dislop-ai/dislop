@@ -2366,7 +2366,7 @@ fs.writeFileSync(path.join(SITE_DIR, ".well-known", "mcp.json"), mcpServerCardJs
 
 const skillDescMatch = canonicalSkillMd.match(/^description:\s*(.+)$/m);
 const skillDescription = skillDescMatch
-  ? skillDescMatch[1].trim()
+  ? skillDescMatch[1].trim().replace(/^["']|["']$/g, "")
   : "Pure-Markdown anti-slop reference cards for docs, essays, web UI, Word, and PowerPoint.";
 const skillReferences = SKILL_REFS.map((ref) => {
   const refPath = path.join(ROOT, "skills", "dislop", "references", ref.file);

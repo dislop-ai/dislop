@@ -1,7 +1,7 @@
 ---
 name: dislop
 version: 0.8.0
-description: Use when drafting or revising text a person will read: README, docs, PR descriptions, release notes, RFCs, postmortems, CLI help/errors, emails, essays, web pages and UI copy (HTML/CSS/JSX), or Word and PowerPoint files. Removes AI-sounding phrasing, chatbot leftovers, placeholders, and template layouts without changing facts. Skip code logic, tests, refactors, commit messages, and configs with no reader-facing text.
+description: "Use when drafting or revising text a person will read: README, docs, PR descriptions, release notes, RFCs, postmortems, CLI help/errors, emails, essays, web pages and UI copy (HTML/CSS/JSX), or Word and PowerPoint files. Removes AI-sounding phrasing, chatbot leftovers, placeholders, and template layouts without changing facts. Skip code logic, tests, refactors, commit messages, and configs with no reader-facing text."
 ---
 
 # dislop

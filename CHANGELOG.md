@@ -4,6 +4,11 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 2026-11-23
+
+### Fixed
+- **Strict YAML `SKILL.md` frontmatter**: Quoted the `description` value in `skills/dislop/SKILL.md` so `npx skills add` parses the skill cleanly under strict YAML rules, and stripped optional surrounding quotes when generating `.well-known/agent-skills/index.json` and running skill benchmarks.
+
 ## [0.8.0] - 2026-11-23
 
 ### Added

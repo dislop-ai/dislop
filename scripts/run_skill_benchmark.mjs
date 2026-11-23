@@ -814,7 +814,7 @@ export function loadSkillPackage(skillDir) {
   const frontmatter = fmMatch[1];
   const body = fmMatch[2].trim();
   const name = frontmatter.match(/^name:\s*(.+)$/m)?.[1]?.trim() || "dislop";
-  const desc = frontmatter.match(/^description:\s*(.+)$/m)?.[1]?.trim() || "";
+  const desc = (frontmatter.match(/^description:\s*(.+)$/m)?.[1]?.trim() || "").replace(/^["']|["']$/g, "");
   const refsDir = path.join(skillDir, "references");
   const refs = {};
   if (fs.existsSync(refsDir)) {

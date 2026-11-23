@@ -7,7 +7,7 @@
       "type": "skill-md",
       "description": "Use when drafting or revising text a person will read: README, docs, PR descriptions, release notes, RFCs, postmortems, CLI help/errors, emails, essays, web pages and UI copy (HTML/CSS/JSX), or Word and PowerPoint files. Removes AI-sounding phrasing, chatbot leftovers, placeholders, and template layouts without changing facts. Skip code logic, tests, refactors, commit messages, and configs with no reader-facing text.",
       "url": "https://dislop.com/tools/skill.md",
-      "digest": "sha256:df7efc274e8eee7405db2c39e04fd39b198363cae46ef794589b80edd1bdb3c8",
+      "digest": "sha256:51cd1423ecce4c4efa4831f911f0cdf73216b79a3964ea48153bd26e9eb3fa7b",
       "install": "npx --yes skills add dislop-ai/dislop --skill dislop",
       "references": [
         {

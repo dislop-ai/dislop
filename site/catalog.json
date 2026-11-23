@@ -555,14 +555,14 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 5862,
+      "bytes": 5864,
       "approxTokens": 1466,
       "relatedTools": [
         "skill",
         "cli",
         "mcp"
       ],
-      "sha256": "df7efc274e8eee7405db2c39e04fd39b198363cae46ef794589b80edd1bdb3c8"
+      "sha256": "51cd1423ecce4c4efa4831f911f0cdf73216b79a3964ea48153bd26e9eb3fa7b"
     },
     {
       "id": "tools-skill-ref-work-docs",
