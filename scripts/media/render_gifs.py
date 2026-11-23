@@ -40,7 +40,7 @@ SITE_DIR = ROOT / "site"
 DEFAULT_SHEET_DIR = Path(tempfile.gettempdir()) / "dislop-gif-sheets"
 
 FONT_SANS = '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif'
-FONT_SERIF = 'Georgia, "Source Serif 4", "Noto Serif CJK SC", "Songti SC", "STSong", "Microsoft YaHei", serif'
+FONT_SERIF = '"Songti SC", "Noto Serif CJK SC", "STSong", Georgia, "Source Serif 4", serif'
 FONT_MONO = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'
 
 LOGO_SVG_INNER = """
@@ -380,7 +380,7 @@ body {{
   min-height: 0;
 }}
 .galley {{
-  padding: 28px 28px 20px 24px;
+  padding: 26px 22px 18px 20px;
   border-right: 1px solid #D5D7D2;
   display: flex;
   flex-direction: column;
@@ -402,7 +402,7 @@ body {{
 }}
 .manuscript {{
   font-family: {FONT_SERIF};
-  font-size: 23px;
+  font-size: 22.5px;
   line-height: 1.72;
   color: #14171A;
   margin: 0;
@@ -412,14 +412,14 @@ body {{
   display: inline-block;
   background: rgba(240, 68, 56, 0.08);
   color: #B42318;
-  padding: 1px 2px;
+  padding: 0;
 }}
 .pen-svg {{
   position: absolute;
-  left: -3px;
-  right: -3px;
+  left: 0;
+  right: 0;
   top: 44%;
-  width: calc(100% + 6px);
+  width: 100%;
   height: 14px;
   overflow: visible;
   pointer-events: none;
@@ -438,7 +438,9 @@ body {{
   background: rgba(27, 82, 176, var(--warn-bg, 0));
   border-bottom: 2px dashed rgba(27, 82, 176, var(--warn-alpha, 0));
   color: #14171A;
-  padding: 1px 1px;
+  padding: 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }}
 .mark-clean {{
   background: rgba(30, 107, 71, var(--ok-bg, 0));
@@ -582,12 +584,14 @@ body {{
     <section class="galley">
       <div class="manuscript-wrap" id="stage-box">
         <div class="lnum mono">01</div>
+        <!-- dislop-quote-start -->
         <p class="manuscript" id="ms-0">
           <span class="mark-err" id="err-span">{copy["s1_err"]}<span class="pen-underline"></span><svg class="pen-svg" viewBox="0 0 180 14" preserveAspectRatio="none"><path id="pen-strike-path" d="M2 8 C52 5 124 10 178 6" stroke="#F04438" stroke-width="2.8" stroke-linecap="round" fill="none" stroke-dasharray="220" stroke-dashoffset="220"/></svg></span>{copy["s1_mid1"]}<span class="mark-warn" id="w1-span">{copy["s1_w1"]}</span>{copy["s1_mid2"]}<span class="mark-warn" id="w2-span">{copy["s1_w2"]}</span>{copy["s1_mid3"]}{f'<span class="mark-warn" id="w3-span">{copy["s1_w3"]}</span>' if copy["s1_w3"] else ""}{copy["s1_end"]}
         </p>
         <p class="manuscript" id="ms-1" style="display:none;">
           <span class="mark-warn" id="trap-span">{copy["s2_w1"]}</span>{copy["s2_end"]}
         </p>
+        <!-- dislop-quote-end -->
         <p class="manuscript" id="ms-2" style="display:none;">
           <span class="mark-clean" id="clean-span">{copy["s3_text"]}</span>
         </p>
@@ -920,7 +924,7 @@ def ui_slop_html(lang: str, duration: float = 6.8) -> str:
                 ("err", "ui-dead-control", "空链接 # 与无动作禁用按钮"),
                 ("warn", "ui-ai-gradient", "默认蓝紫粉渐变标题"),
                 ("warn", "ui-pill-soup", "6 枚无实质过滤功能的圆角胶囊墙"),
-                ("warn", "ui-prompt-echo-badge", "把提示词贴成“AI 强力驱动”装饰牌"),
+                ("warn", "ui-prompt-echo-badge", "把提示词营销口号贴成装饰牌"),
             ],
             "good_kicker": "校样检查报告 · 纯色纸面 + 1px 标尺",
             "good_title": "把稿子里的 AI 味挑出来",
@@ -1034,6 +1038,7 @@ body {{
   flex-direction: column;
   justify-content: space-between;
 }}
+/* <!-- dislop-quote-start --> */
 .slop-badge {{
   display: inline-block;
   align-self: flex-start;
@@ -1052,6 +1057,7 @@ body {{
   -webkit-background-clip: text;
   color: transparent;
 }}
+/* <!-- dislop-quote-end --> */
 .slop-p {{
   margin: 0 0 14px;
   color: #CBD5E1;
@@ -1135,10 +1141,10 @@ body {{
   background: #FFFFFF;
   border: 1px solid #D5D7D2;
   border-left-width: 3px;
-  padding: 8px 10px;
+  padding: 9px 11px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }}
 .flag-item.is-err {{ border-left-color: #F04438; }}
 .flag-item.is-warn {{ border-left-color: #1B52B0; }}
@@ -1148,9 +1154,9 @@ body {{
 .flag-item.is-err .flag-id {{ color: #B42318; }}
 .flag-item.is-warn .flag-id {{ color: #1B52B0; }}
 .flag-item.is-resolved .flag-id {{ color: #1E6B47; }}
-.flag-state {{ font-size: 11px; font-weight: 700; color: #5E646E; }}
+.flag-state {{ font-size: 11px; font-weight: 700; color: #474C55; }}
 .flag-item.is-resolved .flag-state {{ color: #1E6B47; }}
-.flag-desc {{ font-size: 12.5px; color: #474C55; }}
+.flag-desc {{ font-size: 12.5px; color: #3D424B; }}
 </style>
 </head>
 <body>
@@ -1159,13 +1165,14 @@ body {{
     <div class="bar-left">
       {LOGO_SVG_INNER}
       <span>dislop</span>
-      <span class="mono" style="font-size:12.5px;color:#5E646E;font-weight:400;">deck-and-ui</span>
+      <span class="mono" style="font-size:12.5px;color:#474C55;font-weight:400;">deck-and-ui</span>
     </div>
     <span class="bar-status bad mono" id="bar-status">{copy["header_bad"]}</span>
   </header>
 
   <div class="stage">
     <div class="preview-col">
+      <!-- dislop-quote-start -->
       <div class="slop-card">
         <div>
           <div class="slop-badge">{copy["bad_badge"]}</div>
@@ -1175,6 +1182,7 @@ body {{
         </div>
         <div class="slop-btn mono">{copy["bad_btn"]}</div>
       </div>
+      <!-- dislop-quote-end -->
 
       <div class="good-layer" id="good-layer">
         <div class="good-box">
@@ -1436,26 +1444,27 @@ body {{
   font-weight: 700;
   color: #14171A;
   padding-bottom: 8px;
-  border-bottom: 1.5px dashed #1B52B0;
+  border-bottom: 1px solid #D5D7D2;
 }}
 .slide-body-bad {{
   font-size: 13px;
-  line-height: 1.5;
-  color: #474C55;
+  line-height: 1.55;
+  color: #3D424B;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border: 1.5px dashed #1B52B0;
-  padding: 10px;
-  background: rgba(27, 82, 176, 0.04);
+  border: 1px solid #C7D7F5;
+  border-left: 3px solid #1B52B0;
+  padding: 10px 12px;
+  background: #F8FAFE;
 }}
 .raw-md {{
-  background: rgba(240, 68, 56, 0.12);
+  background: rgba(240, 68, 56, 0.10);
   color: #B42318;
   border-bottom: 2px solid #F04438;
   font-family: {FONT_MONO};
   font-weight: 700;
-  padding: 0 2px;
+  padding: 0;
 }}
 .scale-chip {{
   align-self: flex-start;
@@ -1465,7 +1474,7 @@ body {{
   background: #E6EEFC;
   border: 1px solid #1B52B0;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 2px;
 }}
 .slide-head-good {{
   font-size: 20px;
@@ -1500,7 +1509,7 @@ body {{
   background: #E3F3EB;
   border: 1px solid #1E6B47;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: 2px;
 }}
 .margin {{
   background: #FFFFFF;
@@ -1527,12 +1536,12 @@ body {{
 .note-row.is-ok {{ border-left-color: #1E6B47; background: #F4FAF7; }}
 .note-top {{ display: flex; justify-content: space-between; align-items: center; gap: 6px; }}
 .note-rule {{ font-size: 11.5px; font-weight: 700; color: #14171A; }}
-.note-state {{ font-size: 10.5px; font-weight: 700; color: #5E646E; }}
+.note-state {{ font-size: 10.5px; font-weight: 700; color: #474C55; }}
 .note-row.is-ok .note-state {{ color: #1E6B47; }}
 .note-row.is-err .note-rule {{ color: #B42318; }}
 .note-row.is-warn .note-rule {{ color: #1B52B0; }}
 .note-row.is-ok .note-rule {{ color: #1E6B47; }}
-.note-desc {{ font-size: 12px; color: #474C55; margin-top: 2px; line-height: 1.4; }}
+.note-desc {{ font-size: 12px; color: #3D424B; margin-top: 2px; line-height: 1.4; }}
 .footer {{
   height: 34px;
   border-top: 1px solid #D5D7D2;
@@ -1542,7 +1551,7 @@ body {{
   align-items: center;
   justify-content: space-between;
   font-size: 11.5px;
-  color: #5E646E;
+  color: #474C55;
 }}
 </style>
 </head>
@@ -1552,7 +1561,7 @@ body {{
     <div class="brand">
       {LOGO_SVG_INNER}
       <span>dislop</span>
-      <span class="mono" style="font-size:12px;color:#5E646E;font-weight:400;">executive-deck</span>
+      <span class="mono" style="font-size:12px;color:#474C55;font-weight:400;">executive-deck</span>
     </div>
     <span class="status-pill bad mono" id="status-pill">{copy["header_bad"]}</span>
   </header>
@@ -1786,7 +1795,7 @@ body {{
   align-items: center;
   justify-content: space-between;
   font-size: 11.5px;
-  color: #8C939E;
+  color: #A6ACB5;
 }}
 </style>
 </head>
@@ -1796,7 +1805,7 @@ body {{
     <div class="brand">
       {LOGO_SVG_INNER}
       <span>dislop</span>
-      <span class="mono" style="font-size:12px;color:#A6ACB5;font-weight:400;">{copy["top_badge"]}</span>
+      <span class="mono" style="font-size:12px;color:#B8BEC7;font-weight:400;">{copy["top_badge"]}</span>
     </div>
     <div class="steps">
       <div class="st-pill active" id="sp-0">{copy["steps"][0]}</div>
@@ -1809,16 +1818,16 @@ body {{
     <div class="card is-active" id="c-0">
       <div class="c-title">{copy["step1_title"]}</div>
       <div class="c-cmd mono">{copy["step1_cmd"]}</div>
-      <div class="c-out mono" style="color:#A6ACB5;">{copy["step1_out"]}</div>
+      <div class="c-out mono" style="color:#B8BEC7;">{copy["step1_out"]}</div>
     </div>
 
-    <div class="card is-err" id="c-1" style="opacity:0.25;">
+    <div class="card is-err" id="c-1" style="opacity:0.65;">
       <div class="c-title">{copy["step2_title"]}</div>
       <div class="c-cmd mono">{copy["step2_cmd"]}</div>
       <div class="c-out mono">{s2_html}</div>
     </div>
 
-    <div class="card is-ok" id="c-2" style="opacity:0.25;">
+    <div class="card is-ok" id="c-2" style="opacity:0.65;">
       <div class="c-title">{copy["step3_title"]}</div>
       <div class="c-cmd mono">{copy["step3_cmd"]}</div>
       <div class="c-out mono">{s3_html}</div>
@@ -1848,9 +1857,9 @@ window.__renderAt = function(t) {{
   }}
   document.getElementById("c-0").style.opacity = 1;
   const p1 = easeOut((t - 1.55) / 0.24);
-  document.getElementById("c-1").style.opacity = t >= 1.55 ? (0.35 + 0.65 * p1) : 0.25;
+  document.getElementById("c-1").style.opacity = t >= 1.55 ? (0.65 + 0.35 * p1) : 0.65;
   const p2 = easeOut((t - 3.85) / 0.24);
-  document.getElementById("c-2").style.opacity = t >= 3.85 ? (0.35 + 0.65 * p2) : 0.25;
+  document.getElementById("c-2").style.opacity = t >= 3.85 ? (0.65 + 0.35 * p2) : 0.65;
 }};
 window.__renderAt(0.0);
 </script>

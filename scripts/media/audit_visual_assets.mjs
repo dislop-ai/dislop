@@ -29,7 +29,7 @@ import { auditPatterns } from "../../src/pattern-engine.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../..");
 const ASSETS_DIR = path.join(ROOT, "assets");
-const DEFAULT_OUT = path.join(__dirname, "visual-dogfood-audit-latest.json");
+const DEFAULT_OUT = path.join(ROOT, "benchmarks", "results", "visual-dogfood-audit-latest.json");
 
 const IMAGE_EXTS = new Set([".svg", ".png", ".jpg", ".jpeg", ".webp", ".gif"]);
 const RASTER_EXTS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif"]);
@@ -380,25 +380,27 @@ JS_AUDIT = r"""(rel) => {
     }
   }
 
-  // 4. Inline phrase gap check on same visual baseline (within +-3px y and height ~same)
+  // 4. Inline phrase gap check on same visual baseline (within +-4px y and height ~same)
   for (let i = 0; i < textBoxes.length; i++) {
     for (let j = i + 1; j < textBoxes.length; j++) {
       const a = textBoxes[i];
       const b = textBoxes[j];
-      if (a.isTspan && b.isTspan) continue; // tspans in same <text> flow naturally
+      if (a.isTspan && b.isTspan && a.parentTextEl === b.parentTextEl) continue; // tspans in same <text> flow naturally
       if (Math.abs(a.midY - b.midY) > 4) continue;
       if (Math.abs(a.h - b.h) > 8) continue;
       const [left, right] = a.x <= b.x ? [a, b] : [b, a];
       const gap = right.x - left.right;
-      // Only check adjacent inline fragments (< 140px apart, inside same panel)
+      // Only check adjacent inline fragments (< 120px apart, inside same panel)
       if (gap >= -6 && gap < 120) {
+        const bothMonoLegend = left.isMono && right.isMono && left.fontSize < 16 && right.fontSize < 16;
+        const isProsePair = !bothMonoLegend && (left.h >= 18 || right.h >= 18 || /serif/i.test(left.fontFamily + ' ' + right.fontFamily));
         if (gap < 2) {
           defects.push({
             ruleId: 'svg-inline-phrase-collision',
             severity: 'error',
             message: 'Text overlap/tight collision (' + Math.round(gap) + 'px) between "' + left.text.slice(0, 16) + '" and "' + right.text.slice(0, 16) + '"'
           });
-        } else if (gap > 20 && !right.text.startsWith('http') && !right.text.startsWith('$') && !left.text.startsWith('$')) {
+        } else if (gap > 20 && isProsePair && !right.text.startsWith('http') && !right.text.startsWith('$') && !left.text.startsWith('$')) {
           defects.push({
             ruleId: 'svg-inline-phrase-gap',
             severity: 'warning',
@@ -415,31 +417,34 @@ JS_AUDIT = r"""(rel) => {
   for (const el of strokes) {
     const stroke = (el.getAttribute('stroke') || '').toUpperCase();
     const isRed = stroke === '#F04438' || stroke === '#FF5F56' || stroke === '#EF4444';
-    const isBlue = stroke === '#0F52BA' || stroke === '#60A5FA' || stroke === '#3B82F6';
+    const isBlue = stroke === '#1B52B0' || stroke === '#0F52BA' || stroke === '#60A5FA' || stroke === '#3B82F6' || stroke === '#85B4FF';
     if (!isRed && !isBlue) continue;
     let b;
     try { b = el.getBBox(); } catch (_) { continue; }
     // Ignore tiny logo marks inside logo box (width <= 64 && height <= 64 and near logo origin)
     if (b.width <= 46 && (b.x < 160 && b.y < 140)) continue;
     const isStrike = isRed;
-    const candidates = textBoxes.filter((tb) => {
+    const overlapping = textBoxes.filter((tb) => {
       const horizOverlap = Math.min(tb.right, b.x + b.width) - Math.max(tb.x, b.x);
-      if (horizOverlap <= 10) return false;
+      if (horizOverlap <= 6) return false;
       if (isStrike) {
         return Math.abs((b.y + b.height / 2) - tb.midY) <= Math.max(10, tb.h * 0.55);
       }
       return b.y >= tb.midY - 2 && b.y <= tb.bottom + 14;
     });
-    if (candidates.length === 0) continue;
-    // Merge all text fragments on that target line that overlap the stroke horizontally
+    if (overlapping.length === 0) continue;
+    // Narrow to strongly-overlapping spans if available (handles multiple independent underlines on one line)
+    const strong = overlapping.filter((tb) => {
+      const ov = Math.min(tb.right, b.x + b.width) - Math.max(tb.x, b.x);
+      return ov / Math.max(1, Math.min(tb.w, b.width)) >= 0.45;
+    });
+    const candidates = strong.length > 0 ? strong : overlapping;
     const minLeft = Math.min(...candidates.map((c) => c.x));
     const maxRight = Math.max(...candidates.map((c) => c.right));
     const strokeLeft = b.x;
     const strokeRight = b.x + b.width;
     const leftOvershoot = minLeft - strokeLeft;
     const rightOvershoot = strokeRight - maxRight;
-    const leftUndershoot = strokeLeft - minLeft;
-    const rightUndershoot = maxRight - strokeRight;
     const label = candidates.map((c) => c.text).join(' ').slice(0, 32);
     strokeChecks.push({
       kind: isStrike ? 'strike' : 'underline',
@@ -447,6 +452,7 @@ JS_AUDIT = r"""(rel) => {
       label,
       strokeX: [Math.round(strokeLeft), Math.round(strokeRight)],
       textX: [Math.round(minLeft), Math.round(maxRight)],
+      textBBox: { x: Math.round(minLeft), w: Math.round(maxRight - minLeft), y: Math.round(Math.min(...candidates.map((c) => c.y))), h: Math.round(Math.max(...candidates.map((c) => c.h))) },
       leftOvershoot: Math.round(leftOvershoot),
       rightOvershoot: Math.round(rightOvershoot),
     });
@@ -456,10 +462,6 @@ JS_AUDIT = r"""(rel) => {
         severity: 'warning',
         message: (isStrike ? 'Strike' : 'Underline') + ' overshoots "' + label + '" (left +' + Math.round(leftOvershoot) + 'px, right +' + Math.round(rightOvershoot) + 'px; stroke ' + Math.round(strokeLeft) + '..' + Math.round(strokeRight) + ' vs text ' + Math.round(minLeft) + '..' + Math.round(maxRight) + ')'
       });
-    }
-    if (candidates.length === 1 && (leftUndershoot > 18 || rightUndershoot > 18)) {
-      // Only check undershoot when stroke clearly targets the whole phrase on an annotation line
-      // (skip if intentionally marking first half, unless stroke ends far off within 18..90px? Actually check 22..80px? Better: skip partial phrase markers unless rightOvershoot)
     }
   }
 

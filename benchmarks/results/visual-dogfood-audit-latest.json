@@ -1,0 +1,1638 @@
+{
+  "schema": "dislop.visual-dogfood-audit/1",
+  "generatedAt": "2026-11-23T03:58:01.481Z",
+  "layer1": {
+    "assets": {
+      "assetCount": 61,
+      "totalFindings": 0,
+      "flaggedCount": 0,
+      "flagged": [],
+      "pythonParity": {
+        "checked": true,
+        "matched": true,
+        "pythonFilesCount": 61,
+        "mismatches": []
+      },
+      "assets": [
+        {
+          "file": "assets/banner-dark.svg",
+          "ext": ".svg",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": null
+        },
+        {
+          "file": "assets/banner-light.svg",
+          "ext": ".svg",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": null
+        },
+        {
+          "file": "assets/banner-zh-dark.svg",
+          "ext": ".svg",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": null
+        },
+        {
+          "file": "assets/banner-zh-light.svg",
+          "ext": ".svg",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": null
+        },
+        {
+          "file": "assets/demos/agent-workflow-en-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9144,
+              "highSatRatio": 0.0084,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.0416,
+              "quantizedColors": 55
+            }
+          }
+        },
+        {
+          "file": "assets/demos/agent-workflow-en-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9271,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.0457,
+              "quantizedColors": 39
+            }
+          }
+        },
+        {
+          "file": "assets/demos/agent-workflow-en-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/agent-workflow-zh-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9125,
+              "highSatRatio": 0.0072,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.0558,
+              "quantizedColors": 51
+            }
+          }
+        },
+        {
+          "file": "assets/demos/agent-workflow-zh-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9137,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.0541,
+              "quantizedColors": 41
+            }
+          }
+        },
+        {
+          "file": "assets/demos/agent-workflow-zh-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-en-v1-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 42136,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9548,
+              "highSatRatio": 0.0072,
+              "smoothHighSatRatio": 0.0132,
+              "neutralRatio": 0.0182,
+              "quantizedColors": 46
+            }
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-en-v1.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 42136,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9837,
+              "highSatRatio": 0.0001,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.0086,
+              "quantizedColors": 39
+            }
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-en-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 42136,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9465,
+              "highSatRatio": 0.0106,
+              "smoothHighSatRatio": 0.0045,
+              "neutralRatio": 0.0216,
+              "quantizedColors": 62
+            }
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-en-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 42136,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9843,
+              "highSatRatio": 0.0001,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.0068,
+              "quantizedColors": 33
+            }
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-en-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-zh-v1-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 42136,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9597,
+              "highSatRatio": 0.0052,
+              "smoothHighSatRatio": 0.0092,
+              "neutralRatio": 0.0234,
+              "quantizedColors": 45
+            }
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-zh-v1.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 42136,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9866,
+              "highSatRatio": 0.0001,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.0098,
+              "quantizedColors": 37
+            }
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-zh-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 42136,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9406,
+              "highSatRatio": 0.0136,
+              "smoothHighSatRatio": 0.0035,
+              "neutralRatio": 0.0197,
+              "quantizedColors": 63
+            }
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-zh-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 42136,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.9834,
+              "highSatRatio": 0.0001,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.0084,
+              "quantizedColors": 36
+            }
+          }
+        },
+        {
+          "file": "assets/demos/cli-check-zh-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 920,
+            "height": 460,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/deck-office-en-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0027,
+              "highSatRatio": 0.0075,
+              "smoothHighSatRatio": 0.075,
+              "neutralRatio": 0.7671,
+              "quantizedColors": 51
+            }
+          }
+        },
+        {
+          "file": "assets/demos/deck-office-en-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0028,
+              "highSatRatio": 0.007,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.7784,
+              "quantizedColors": 50
+            }
+          }
+        },
+        {
+          "file": "assets/demos/deck-office-en-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/deck-office-zh-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0035,
+              "highSatRatio": 0.0019,
+              "smoothHighSatRatio": 0.3137,
+              "neutralRatio": 0.7881,
+              "quantizedColors": 50
+            }
+          }
+        },
+        {
+          "file": "assets/demos/deck-office-zh-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0037,
+              "highSatRatio": 0.0013,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.7986,
+              "quantizedColors": 49
+            }
+          }
+        },
+        {
+          "file": "assets/demos/deck-office-zh-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-en-v1-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0121,
+              "highSatRatio": 0.0053,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.8684,
+              "quantizedColors": 41
+            }
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-en-v1.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0108,
+              "highSatRatio": 0.002,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.889,
+              "quantizedColors": 37
+            }
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-en-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0075,
+              "highSatRatio": 0.004,
+              "smoothHighSatRatio": 0.0187,
+              "neutralRatio": 0.8757,
+              "quantizedColors": 50
+            }
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-en-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0063,
+              "highSatRatio": 0.0012,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.8981,
+              "quantizedColors": 40
+            }
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-en-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-zh-v1-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0097,
+              "highSatRatio": 0.0046,
+              "smoothHighSatRatio": 0.0248,
+              "neutralRatio": 0.8773,
+              "quantizedColors": 39
+            }
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-zh-v1.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0086,
+              "highSatRatio": 0.0017,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.8951,
+              "quantizedColors": 42
+            }
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-zh-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0087,
+              "highSatRatio": 0.0036,
+              "smoothHighSatRatio": 0.0104,
+              "neutralRatio": 0.8814,
+              "quantizedColors": 51
+            }
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-zh-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0072,
+              "highSatRatio": 0.0011,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9012,
+              "quantizedColors": 33
+            }
+          }
+        },
+        {
+          "file": "assets/demos/proof-cycle-zh-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-en-v1-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0.0111,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.3022,
+              "highSatRatio": 0.0103,
+              "smoothHighSatRatio": 0.2015,
+              "neutralRatio": 0.5306,
+              "quantizedColors": 47
+            }
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-en-v1.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0.0099,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.3019,
+              "highSatRatio": 0.011,
+              "smoothHighSatRatio": 0.2705,
+              "neutralRatio": 0.5511,
+              "quantizedColors": 60
+            }
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-en-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0.0085,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.3303,
+              "highSatRatio": 0.0112,
+              "smoothHighSatRatio": 0.1414,
+              "neutralRatio": 0.5261,
+              "quantizedColors": 70
+            }
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-en-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0.0084,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.3303,
+              "highSatRatio": 0.011,
+              "smoothHighSatRatio": 0.2612,
+              "neutralRatio": 0.5354,
+              "quantizedColors": 62
+            }
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-en-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-zh-v1-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0.0099,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.3081,
+              "highSatRatio": 0.0047,
+              "smoothHighSatRatio": 0.2222,
+              "neutralRatio": 0.5333,
+              "quantizedColors": 48
+            }
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-zh-v1.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0.0088,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.3075,
+              "highSatRatio": 0.0045,
+              "smoothHighSatRatio": 0.1345,
+              "neutralRatio": 0.5505,
+              "quantizedColors": 63
+            }
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-zh-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0.008,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.3355,
+              "highSatRatio": 0.0052,
+              "smoothHighSatRatio": 0.0432,
+              "neutralRatio": 0.5291,
+              "quantizedColors": 68
+            }
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-zh-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26560,
+              "neonPurpleRatio": 0.008,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.3355,
+              "highSatRatio": 0.0058,
+              "smoothHighSatRatio": 0.2987,
+              "neutralRatio": 0.5357,
+              "quantizedColors": 66
+            }
+          }
+        },
+        {
+          "file": "assets/demos/ui-slop-zh-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 960,
+            "height": 500,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-en-v1-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 1140,
+            "height": 580,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 31459,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0134,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9369,
+              "quantizedColors": 32
+            }
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-en-v1.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 1140,
+            "height": 580,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 31459,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0132,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9475,
+              "quantizedColors": 47
+            }
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-en-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 1140,
+            "height": 640,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26080,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.008,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9393,
+              "quantizedColors": 44
+            }
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-en-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 1140,
+            "height": 640,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26080,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0081,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9481,
+              "quantizedColors": 47
+            }
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-en-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 1140,
+            "height": 640,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-zh-v1-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 1140,
+            "height": 580,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 31459,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.011,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9531,
+              "quantizedColors": 33
+            }
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-zh-v1.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 1140,
+            "height": 580,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 31459,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0107,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9575,
+              "quantizedColors": 51
+            }
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-zh-v2-poster.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 1140,
+            "height": 640,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26080,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0052,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9602,
+              "quantizedColors": 39
+            }
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-zh-v2.gif",
+          "ext": ".gif",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "gif",
+            "width": 1140,
+            "height": 640,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 26080,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0046,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9596,
+              "quantizedColors": 42
+            }
+          }
+        },
+        {
+          "file": "assets/demos/workbench-live-zh-v2.webp",
+          "ext": ".webp",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "webp",
+            "width": 1140,
+            "height": 640,
+            "frameCount": 1,
+            "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/logo.svg",
+          "ext": ".svg",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": null
+        },
+        {
+          "file": "assets/og-card-zh.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 1200,
+            "height": 630,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 36120,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.022,
+              "highSatRatio": 0.0048,
+              "smoothHighSatRatio": 0.4566,
+              "neutralRatio": 0.9682,
+              "quantizedColors": 49
+            }
+          }
+        },
+        {
+          "file": "assets/og-card-zh.svg",
+          "ext": ".svg",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": null
+        },
+        {
+          "file": "assets/og-card.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 1200,
+            "height": 630,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 36120,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.0234,
+              "highSatRatio": 0.0028,
+              "smoothHighSatRatio": 0.5941,
+              "neutralRatio": 0.9686,
+              "quantizedColors": 48
+            }
+          }
+        },
+        {
+          "file": "assets/og-card.svg",
+          "ext": ".svg",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": null
+        }
+      ]
+    },
+    "demoHtmls": {
+      "sceneHtmlCount": 10,
+      "totalFindings": 0,
+      "flagged": [],
+      "scenes": [
+        {
+          "name": "proof-cycle-zh-v2",
+          "slug": "proof-cycle",
+          "lang": "zh",
+          "findingCount": 0,
+          "findings": []
+        },
+        {
+          "name": "proof-cycle-en-v2",
+          "slug": "proof-cycle",
+          "lang": "en",
+          "findingCount": 0,
+          "findings": []
+        },
+        {
+          "name": "cli-check-zh-v2",
+          "slug": "cli-check",
+          "lang": "zh",
+          "findingCount": 0,
+          "findings": []
+        },
+        {
+          "name": "cli-check-en-v2",
+          "slug": "cli-check",
+          "lang": "en",
+          "findingCount": 0,
+          "findings": []
+        },
+        {
+          "name": "ui-slop-zh-v2",
+          "slug": "ui-slop",
+          "lang": "zh",
+          "findingCount": 0,
+          "findings": []
+        },
+        {
+          "name": "ui-slop-en-v2",
+          "slug": "ui-slop",
+          "lang": "en",
+          "findingCount": 0,
+          "findings": []
+        },
+        {
+          "name": "deck-office-zh-v2",
+          "slug": "deck-office",
+          "lang": "zh",
+          "findingCount": 0,
+          "findings": []
+        },
+        {
+          "name": "deck-office-en-v2",
+          "slug": "deck-office",
+          "lang": "en",
+          "findingCount": 0,
+          "findings": []
+        },
+        {
+          "name": "agent-workflow-zh-v2",
+          "slug": "agent-workflow",
+          "lang": "zh",
+          "findingCount": 0,
+          "findings": []
+        },
+        {
+          "name": "agent-workflow-en-v2",
+          "slug": "agent-workflow",
+          "lang": "en",
+          "findingCount": 0,
+          "findings": []
+        }
+      ]
+    }
+  },
+  "layer2": {
+    "svgCount": 6,
+    "totalDefects": 0,
+    "svgs": [
+      {
+        "file": "assets/banner-light.svg",
+        "slug": "banner-light",
+        "width": 1200,
+        "height": 300,
+        "viewBox": [
+          1200,
+          300
+        ],
+        "defects": [],
+        "strokeChecks": [
+          {
+            "kind": "strike",
+            "stroke": "#F04438",
+            "label": "Certainly! Here is:",
+            "strokeX": [
+              650,
+              823
+            ],
+            "textX": [
+              652,
+              822
+            ],
+            "textBBox": {
+              "x": 652,
+              "w": 170,
+              "y": 109,
+              "h": 24
+            },
+            "leftOvershoot": 2,
+            "rightOvershoot": 1
+          },
+          {
+            "kind": "underline",
+            "stroke": "#1B52B0",
+            "label": "not just faster — it's a paradig",
+            "strokeX": [
+              652,
+              998
+            ],
+            "textX": [
+              652,
+              997
+            ],
+            "textBBox": {
+              "x": 652,
+              "w": 345,
+              "y": 147,
+              "h": 24
+            },
+            "leftOvershoot": 0,
+            "rightOvershoot": 1
+          }
+        ],
+        "textCount": 9,
+        "rectCount": 3
+      },
+      {
+        "file": "assets/banner-dark.svg",
+        "slug": "banner-dark",
+        "width": 1200,
+        "height": 300,
+        "viewBox": [
+          1200,
+          300
+        ],
+        "defects": [],
+        "strokeChecks": [
+          {
+            "kind": "strike",
+            "stroke": "#F04438",
+            "label": "Certainly! Here is:",
+            "strokeX": [
+              650,
+              823
+            ],
+            "textX": [
+              652,
+              822
+            ],
+            "textBBox": {
+              "x": 652,
+              "w": 170,
+              "y": 109,
+              "h": 24
+            },
+            "leftOvershoot": 2,
+            "rightOvershoot": 1
+          },
+          {
+            "kind": "underline",
+            "stroke": "#85B4FF",
+            "label": "not just faster — it's a paradig",
+            "strokeX": [
+              652,
+              998
+            ],
+            "textX": [
+              652,
+              997
+            ],
+            "textBBox": {
+              "x": 652,
+              "w": 345,
+              "y": 147,
+              "h": 24
+            },
+            "leftOvershoot": 0,
+            "rightOvershoot": 1
+          }
+        ],
+        "textCount": 9,
+        "rectCount": 3
+      },
+      {
+        "file": "assets/banner-zh-light.svg",
+        "slug": "banner-zh-light",
+        "width": 1200,
+        "height": 300,
+        "viewBox": [
+          1200,
+          300
+        ],
+        "defects": [],
+        "strokeChecks": [
+          {
+            "kind": "strike",
+            "stroke": "#F04438",
+            "label": "好的，以下是修改后：",
+            "strokeX": [
+              650,
+              862
+            ],
+            "textX": [
+              652,
+              862
+            ],
+            "textBBox": {
+              "x": 652,
+              "w": 210,
+              "y": 106,
+              "h": 29
+            },
+            "leftOvershoot": 2,
+            "rightOvershoot": 0
+          },
+          {
+            "kind": "underline",
+            "stroke": "#1B52B0",
+            "label": "这不是一次升级，而是一场范式革命。",
+            "strokeX": [
+              652,
+              1012
+            ],
+            "textX": [
+              652,
+              1009
+            ],
+            "textBBox": {
+              "x": 652,
+              "w": 357,
+              "y": 146,
+              "h": 29
+            },
+            "leftOvershoot": 0,
+            "rightOvershoot": 3
+          }
+        ],
+        "textCount": 9,
+        "rectCount": 3
+      },
+      {
+        "file": "assets/banner-zh-dark.svg",
+        "slug": "banner-zh-dark",
+        "width": 1200,
+        "height": 300,
+        "viewBox": [
+          1200,
+          300
+        ],
+        "defects": [],
+        "strokeChecks": [
+          {
+            "kind": "strike",
+            "stroke": "#F04438",
+            "label": "好的，以下是修改后：",
+            "strokeX": [
+              650,
+              862
+            ],
+            "textX": [
+              652,
+              862
+            ],
+            "textBBox": {
+              "x": 652,
+              "w": 210,
+              "y": 106,
+              "h": 29
+            },
+            "leftOvershoot": 2,
+            "rightOvershoot": 0
+          },
+          {
+            "kind": "underline",
+            "stroke": "#85B4FF",
+            "label": "这不是一次升级，而是一场范式革命。",
+            "strokeX": [
+              652,
+              1012
+            ],
+            "textX": [
+              652,
+              1009
+            ],
+            "textBBox": {
+              "x": 652,
+              "w": 357,
+              "y": 146,
+              "h": 29
+            },
+            "leftOvershoot": 0,
+            "rightOvershoot": 3
+          }
+        ],
+        "textCount": 9,
+        "rectCount": 3
+      },
+      {
+        "file": "assets/og-card.svg",
+        "slug": "og-card",
+        "width": 1200,
+        "height": 630,
+        "viewBox": [
+          1200,
+          630
+        ],
+        "defects": [],
+        "strokeChecks": [
+          {
+            "kind": "strike",
+            "stroke": "#F04438",
+            "label": "Certainly! Here is",
+            "strokeX": [
+              114,
+              445
+            ],
+            "textX": [
+              116,
+              443
+            ],
+            "textBBox": {
+              "x": 116,
+              "w": 327,
+              "y": 207,
+              "h": 48
+            },
+            "leftOvershoot": 2,
+            "rightOvershoot": 2
+          },
+          {
+            "kind": "underline",
+            "stroke": "#1B52B0",
+            "label": "It's worth noting that",
+            "strokeX": [
+              148,
+              401
+            ],
+            "textX": [
+              148,
+              401
+            ],
+            "textBBox": {
+              "x": 148,
+              "w": 253,
+              "y": 403,
+              "h": 31
+            },
+            "leftOvershoot": 0,
+            "rightOvershoot": 0
+          },
+          {
+            "kind": "underline",
+            "stroke": "#1B52B0",
+            "label": "a game-changer",
+            "strokeX": [
+              589,
+              779
+            ],
+            "textX": [
+              589,
+              779
+            ],
+            "textBBox": {
+              "x": 589,
+              "w": 190,
+              "y": 403,
+              "h": 31
+            },
+            "leftOvershoot": 0,
+            "rightOvershoot": 0
+          }
+        ],
+        "textCount": 10,
+        "rectCount": 4
+      },
+      {
+        "file": "assets/og-card-zh.svg",
+        "slug": "og-card-zh",
+        "width": 1200,
+        "height": 630,
+        "viewBox": [
+          1200,
+          630
+        ],
+        "defects": [],
+        "strokeChecks": [
+          {
+            "kind": "strike",
+            "stroke": "#F04438",
+            "label": "好的，以下是为您润色后的版本。",
+            "strokeX": [
+              114,
+              688
+            ],
+            "textX": [
+              116,
+              686
+            ],
+            "textBBox": {
+              "x": 116,
+              "w": 570,
+              "y": 204,
+              "h": 53
+            },
+            "leftOvershoot": 2,
+            "rightOvershoot": 2
+          },
+          {
+            "kind": "underline",
+            "stroke": "#1B52B0",
+            "label": "值得注意的是，",
+            "strokeX": [
+              148,
+              304
+            ],
+            "textX": [
+              148,
+              330
+            ],
+            "textBBox": {
+              "x": 148,
+              "w": 182,
+              "y": 400,
+              "h": 37
+            },
+            "leftOvershoot": 0,
+            "rightOvershoot": -26
+          },
+          {
+            "kind": "underline",
+            "stroke": "#1B52B0",
+            "label": "抓手",
+            "strokeX": [
+              590,
+              642
+            ],
+            "textX": [
+              590,
+              642
+            ],
+            "textBBox": {
+              "x": 590,
+              "w": 52,
+              "y": 400,
+              "h": 37
+            },
+            "leftOvershoot": 0,
+            "rightOvershoot": 0
+          },
+          {
+            "kind": "underline",
+            "stroke": "#1B52B0",
+            "label": "全面赋能",
+            "strokeX": [
+              668,
+              772
+            ],
+            "textX": [
+              668,
+              772
+            ],
+            "textBBox": {
+              "x": 668,
+              "w": 104,
+              "y": 400,
+              "h": 37
+            },
+            "leftOvershoot": 0,
+            "rightOvershoot": 0
+          }
+        ],
+        "textCount": 12,
+        "rectCount": 4
+      }
+    ]
+  },
+  "layer3": null
+}

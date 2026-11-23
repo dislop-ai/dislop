@@ -242,10 +242,10 @@
     "encryptedPdfSkippedHonest": true
   },
   "latency": {
-    "nodeTotalMs": 208.28,
-    "nodePerItemMs": 3.47,
-    "pythonTotalMs": 220.79,
-    "pythonPerItemMs": 3.68
+    "nodeTotalMs": 97.29,
+    "nodePerItemMs": 1.62,
+    "pythonTotalMs": 228.09,
+    "pythonPerItemMs": 3.8
   },
   "pixelAblation": {
     "selectedThresholds": {

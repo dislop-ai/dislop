@@ -24,12 +24,11 @@
   <text x="652" y="76" fill="#474C55" font-family="'PingFang SC', 'Hiragino Sans GB', ui-monospace, SFMono-Regular, monospace" font-size="12.5">dislop check  ·  1 处硬伤  ·  1 条提醒</text>
 
   <!-- Struck AI chat opener -->
-  <text x="652" y="128" fill="#5E646E" font-family="'PingFang SC', 'Songti SC', 'Noto Serif CJK SC', serif" font-size="21">好的，以下是修改后：</text>
-  <line x1="648" y1="121" x2="854" y2="121" stroke="#F04438" stroke-width="2.6" stroke-linecap="round"/>
-  <text x="874" y="128" fill="#14171A" font-family="'PingFang SC', 'Songti SC', 'Noto Serif CJK SC', serif" font-size="21">本次上线说明</text>
+  <text x="652" y="128" font-family="'Songti SC', 'Noto Serif CJK SC', 'STSong', Georgia, serif" font-size="21"><tspan fill="#5E646E">好的，以下是修改后：</tspan><tspan fill="#14171A" dx="10">本次上线说明</tspan></text>
+  <line x1="650" y1="120" x2="862" y2="120" stroke="#F04438" stroke-width="2.6" stroke-linecap="round"/>
 
   <!-- Dashed blue cliché mark -->
-  <text x="652" y="168" fill="#14171A" font-family="'PingFang SC', 'Songti SC', 'Noto Serif CJK SC', serif" font-size="21">这不是一次升级，而是一场范式革命。</text>
+  <text x="652" y="168" fill="#14171A" font-family="'Songti SC', 'Noto Serif CJK SC', 'STSong', Georgia, serif" font-size="21">这不是一次升级，而是一场范式革命。</text>
   <line x1="652" y1="177" x2="1012" y2="177" stroke="#1B52B0" stroke-width="2.2" stroke-dasharray="6 4"/>
 
   <!-- Legend -->

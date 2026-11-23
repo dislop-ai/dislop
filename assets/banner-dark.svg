@@ -17,20 +17,19 @@
   </g>
 
   <text x="84" y="176" fill="#ECEEF0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="23" font-weight="600">Cutting AI slop is real productivity.</text>
-  <text x="84" y="210" fill="#A6ACB5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">Linter for AI Slop  |  Skill · Plugin · CLI · MCP</text>
+  <text x="84" y="210" fill="#B8BEC7" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">Linter for AI Slop  |  Skill · Plugin · CLI · MCP</text>
 
   <!-- Right column: Monotonic raised sheet (#15181C > #0E1012) -->
   <rect x="621" y="37" width="530" height="226" fill="#15181C"/>
-  <text x="652" y="76" fill="#A6ACB5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">dislop check  ·  1 artifact  ·  1 cliché</text>
+  <text x="652" y="76" fill="#B8BEC7" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">dislop check  ·  1 artifact  ·  1 cliché</text>
 
   <!-- Struck AI chat opener -->
-  <text x="652" y="128" fill="#8C939E" font-family="Georgia, 'Times New Roman', serif" font-size="21">Certainly! Here is:</text>
-  <line x1="648" y1="121" x2="824" y2="121" stroke="#F04438" stroke-width="2.6" stroke-linecap="round"/>
-  <text x="836" y="128" fill="#ECEEF0" font-family="Georgia, 'Times New Roman', serif" font-size="21">This release is</text>
+  <text x="652" y="128" font-family="Georgia, 'Times New Roman', serif" font-size="21"><tspan fill="#9CA3AF">Certainly! Here is:</tspan><tspan fill="#ECEEF0" dx="10">This release is</tspan></text>
+  <line x1="650" y1="121" x2="823" y2="121" stroke="#F04438" stroke-width="2.6" stroke-linecap="round"/>
 
   <!-- Dashed blue cliché mark -->
   <text x="652" y="166" fill="#ECEEF0" font-family="Georgia, 'Times New Roman', serif" font-size="21">not just faster — it's a paradigm shift.</text>
-  <line x1="652" y1="175" x2="1014" y2="175" stroke="#85B4FF" stroke-width="2.2" stroke-dasharray="6 4"/>
+  <line x1="652" y1="175" x2="998" y2="175" stroke="#85B4FF" stroke-width="2.2" stroke-dasharray="6 4"/>
 
   <!-- Legend -->
   <text x="652" y="216" fill="#FF7A6B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="600">red: chatbot greeting</text>

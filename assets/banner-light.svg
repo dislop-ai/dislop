@@ -24,13 +24,12 @@
   <text x="652" y="76" fill="#474C55" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">dislop check  ·  1 artifact  ·  1 cliché</text>
 
   <!-- Struck AI chat opener -->
-  <text x="652" y="128" fill="#5E646E" font-family="Georgia, 'Times New Roman', serif" font-size="21">Certainly! Here is:</text>
-  <line x1="648" y1="121" x2="824" y2="121" stroke="#F04438" stroke-width="2.6" stroke-linecap="round"/>
-  <text x="836" y="128" fill="#14171A" font-family="Georgia, 'Times New Roman', serif" font-size="21">This release is</text>
+  <text x="652" y="128" font-family="Georgia, 'Times New Roman', serif" font-size="21"><tspan fill="#5E646E">Certainly! Here is:</tspan><tspan fill="#14171A" dx="10">This release is</tspan></text>
+  <line x1="650" y1="121" x2="823" y2="121" stroke="#F04438" stroke-width="2.6" stroke-linecap="round"/>
 
   <!-- Dashed blue cliché mark -->
   <text x="652" y="166" fill="#14171A" font-family="Georgia, 'Times New Roman', serif" font-size="21">not just faster — it's a paradigm shift.</text>
-  <line x1="652" y1="175" x2="1014" y2="175" stroke="#1B52B0" stroke-width="2.2" stroke-dasharray="6 4"/>
+  <line x1="652" y1="175" x2="998" y2="175" stroke="#1B52B0" stroke-width="2.2" stroke-dasharray="6 4"/>
 
   <!-- Legend -->
   <text x="652" y="216" fill="#B42318" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="600">red: chatbot greeting</text>
