@@ -1,6 +1,6 @@
 # Grammarly 发展历程与 AI Agent 化进程深度复盘
 
-日期：`2026-11-23` · 状态：竞品复盘与战略输入（关联 [business-model-and-open-core.zh-CN.md](./business-model-and-open-core.zh-CN.md)、[universal-adaptation-and-marketplace-strategy.zh-CN.md](./universal-adaptation-and-marketplace-strategy.zh-CN.md)、[positive-divergence-and-personalization.zh-CN.md](./positive-divergence-and-personalization.zh-CN.md)、[PRODUCT.md](../../PRODUCT.md) 与 [ROADMAP.zh-CN.md](../../ROADMAP.zh-CN.md)；配套扩展档案见 [grammarly-intel/dossier.zh-CN.md](./grammarly-intel/dossier.zh-CN.md) 与 [grammarly-intel/sources.json](./grammarly-intel/sources.json)）
+日期：`2026-11-23` · 状态：竞品复盘与战略输入（关联 [business-model-and-open-core.zh-CN.md](./business-model-and-open-core.zh-CN.md)、[universal-adaptation-and-marketplace-strategy.zh-CN.md](./universal-adaptation-and-marketplace-strategy.zh-CN.md)、[positive-divergence-and-personalization.zh-CN.md](./positive-divergence-and-personalization.zh-CN.md)、[PRODUCT.md](../../PRODUCT.md) 与 [ROADMAP.zh-CN.md](../../ROADMAP.zh-CN.md)；配套扩展档案见 [grammarly-intel/dossier.zh-CN.md](./grammarly-intel/dossier.zh-CN.md)、10 款产品拆解见 [grammarly-intel/product-deep-dives.zh-CN.md](./grammarly-intel/product-deep-dives.zh-CN.md)、五层综合借鉴研报见 [grammarly-intel/five-layer-takeaways-for-dislop.zh-CN.md](./grammarly-intel/five-layer-takeaways-for-dislop.zh-CN.md)，数据索引见 [grammarly-intel/sources.json](./grammarly-intel/sources.json)）
 
 > 证据边界说明：本文「第 1–3 节」中关于公司里程碑、融资金额、产品发布、定价档位、诉讼事件与社区反馈的陈述，均核验自截至 **2026-11-23** 的公开报道、官方产品文档、诉讼摘要与社区讨论；「第 4 节」为面向 `dislop` 架构与商业化路线的战略推演，两者严格区隔。
 
@@ -142,10 +142,12 @@ Grammarly 与 Superhuman 的实践证明，高频交互产品的第一道护城�
 | **5. 拒绝黑盒打分，夯实「可复算交付质检凭据」** | 避开「左手改写、右手误报」的黑盒检测器陷阱，借鉴 `Authorship` 的过程可审计思路 | 坚持 `no known patterns found` 诚实口径，不做概率裁判与规避工具；在 GitHub Action PR 摘要与 SARIF/JSON 输出中沉淀命中规则、已修项、豁免注释与保真校验记录 |
 | **6. 借势开放协议生态，不造重型办公套件** | 顺应 Superhuman Docs 开放 MCP 与 Go SDK 的协议互操作趋势，避开重资产并购泥潭 | 继续打磨 `SKILL.md`、`.vsix`、GitHub Action 与 `https://dislop.com/mcp`，让任意办公或编码 Agent 在交付前一步轻量挂载 `dislop` |
 
+进一步逐个拆解 10 款邻近产品后（详见 [product-deep-dives.zh-CN.md](./grammarly-intel/product-deep-dives.zh-CN.md)），上述卡位获得了三项更直接的市场验证。第一，Acrolinx 更名为 **Markup AI** 并推出 `Content Guardian Agents` 与 MCP，印证「确定性规则核 + MCP」切入企业 AI 内容门禁是明确刚需。第二，**LanguageTool** 被美企 Learneo 收购引出隐私迁移质疑、**Harper** 获 Automattic 收购并在 GitHub 斩获 1.6 万–1.7 万+ 星标，证明本地零上传开源检查器正迅速接管开发者心智。第三，**Hemingway Plus** 的逐句确认、**QuillBot** 的力度滑杆、**ProWritingAid** 的弃读点标定与 **Superhuman Mail** 的 `100ms / Cmd+K` 极速命令流，为 `dislop` 官网工作台、编辑器插件与云端审校提供了直接可落地的界面设计参照。
+
 ---
 
 ## 5. 情报资料索引与零负担维护边界（核验日期：2026-11-23）
 
-为避免在主研报与底层情报库之间重复维护两套出处表，本篇核验的 29 条一手及权威出处已统一沉淀在独立静态情报包 [grammarly-intel/sources.json](./grammarly-intel/sources.json)（`dislop.intel/1`，覆盖产品与竞品、技术论文与架构、人物访谈与播客、媒体分析、法律治理及社区反馈 6 大类），并配扩展分析档案 [grammarly-intel/dossier.zh-CN.md](./grammarly-intel/dossier.zh-CN.md)。
+为避免在主研报与底层情报库之间重复维护两套出处表，本篇核验的 34 条一手及权威出处已统一沉淀在独立静态情报包 [grammarly-intel/sources.json](./grammarly-intel/sources.json)（`dislop.intel/1`，覆盖产品与竞品、技术论文与架构、人物访谈与播客、媒体分析、法律治理及社区反馈 6 大类），并配扩展分析档案 [grammarly-intel/dossier.zh-CN.md](./grammarly-intel/dossier.zh-CN.md)、10 款关联产品深度拆解 [grammarly-intel/product-deep-dives.zh-CN.md](./grammarly-intel/product-deep-dives.zh-CN.md) 与五层系统借鉴研报 [grammarly-intel/five-layer-takeaways-for-dislop.zh-CN.md](./grammarly-intel/five-layer-takeaways-for-dislop.zh-CN.md)。
 
 该目录定位为静态历史快照（`snapshot-only`），不接入 `site/` 构建、清单同步或定时外链巡检脚本，日常开发零维护负担，仅在复盘竞品路线时按需手动增量更新。

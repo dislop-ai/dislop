@@ -1,6 +1,6 @@
 # Grammarly / Superhuman 扩展情报档案库（产品、技术栈、访谈、媒体与社区）
 
-日期：`2026-11-23` · 状态：静态历史情报快照（`snapshot-only`）· 索引数据源：[sources.json](./sources.json)（`dislop.intel/1`，29 条已核验条目）· 主研报：[grammarly-evolution-and-agent-lessons.zh-CN.md](../grammarly-evolution-and-agent-lessons.zh-CN.md)
+日期：`2026-11-23` · 状态：静态历史情报快照（`snapshot-only`）· 数据索引：[sources.json](./sources.json)（`dislop.intel/1`，34 条已核验条目）· 10 款产品深度拆解：[product-deep-dives.zh-CN.md](./product-deep-dives.zh-CN.md) · 五层系统借鉴研报：[five-layer-takeaways-for-dislop.zh-CN.md](./five-layer-takeaways-for-dislop.zh-CN.md) · 主研报：[grammarly-evolution-and-agent-lessons.zh-CN.md](../grammarly-evolution-and-agent-lessons.zh-CN.md)
 
 > 维护边界说明：本目录（`docs/research/grammarly-intel/`）为独立静态情报包，不接入 `site/` 构建、`scripts/sync_manifests.mjs` 或每周外链巡检工作流。日常开发无需维护本目录，仅在复盘竞品路线时按需手动增量补充。
 
@@ -13,15 +13,15 @@
 | 产品 | 2025–2026 核心定位 | 核心机制与代表能力 | 目标人群与定价/许可 | 对 Grammarly 的压力及对 `dislop` 的启发 |
 |---|---|---|---|---|
 | **Superhuman Suite（Grammarly）** | 跨应用 Agent 生产力套件 | 原位嵌入百万应用、8 个垂直 Agent、`Superhuman Go`（Go SDK 接入 20+ 伙伴）、`Superhuman Docs`（MCP）、`Authorship` | 个人 Free（100 次提示）/ Pro \$12 年付；团队 Business \$33/席位/月年付 | 重资产并购抬高运营与变现压力，个人档位默认 Opt-out 训练与弹窗膨胀反而让出轻量可信检查空间 |
-| **Writer.com** | 企业级 Agentic AI 平台 | `WRITER Agent`、`Playbooks`、`Routines`、CRM/Workfront 连接器、`Enterprise Brain` 集中品牌事实库 | 中大型企业跨部门团队（法务、HR、市场、销售） | 证明企业愿意为「共享品牌语调 + 私有事实约束 + 跨流程执行」持续付费，对应 `dislop` 团队声纹库方向 |
-| **Acrolinx** | 受监管行业内容治理与 QA | 确定性术语、可读性、包容性规则评分引擎 + 企业批准的生成式助手，深嵌 AEM / FrameMaker / Creative Cloud | 制造、生命科学、大型科技企业文档部门（闭源企业年费） | 验证确定性规则检查在强合规场景的长期壁垒，提示 `dislop` 用 `engineering-spec` 与 `regulated-comms` 切入高价值行业文档 |
-| **LanguageTool** | 隐私优先多语种纠错 | 覆盖数十种语言的高精度语法/风格检查与本地化 AI 改写 | 欧洲市场、多语种写作者与隐私敏感机构（Freemium / 订阅） | 说明不依赖单一美国通用大模型的数据边界，本身就是明确的获客卖点 |
-| **QuillBot** | 学术与大众日常改写套件 | 改写器、摘要、引用生成、语法检查与轻量起草界面 | 学生、博客作者与低预算创作者（Freemium / \$8.33 年付） | 缺乏工作流嵌入与事实保真校对的纯改写工具极易陷入低价红海 |
-| **Apple Writing Tools** | OS 级原生免费写作层 | macOS / iPadOS / iOS 系统级选区校对、重写、调语气，端侧优先加可选云端 | 全部 Apple 设备个人用户（随系统免费） | 直接抽走轻度个人用户的「基础润色」付费意愿，证明单靠普通改写已无收费壁垒 |
-| **Microsoft 365 Copilot** | 办公套件原生 AI 助手 | 深植 Word、Outlook、Teams、Excel，直接调用企业工作区文件与会议纪要起草与总结 | M365 商业与企业订阅客户（按席位增购） | 压缩企业再另买一套写作插件的预算，迫使第三方工具要么像 Superhuman 那样自建套件，要么做极轻标准门禁 |
-| **Harper** | 本地优先极速开源语法检查器 | Rust 单体实现、零联网、`< 10ms` 本地检查，原生进入 VS Code、Obsidian 与浏览器 | 开发者、技术作者、开源与隐私优先人群（开源免费） | 与 `dislop` 最值得参照的技术同路人：Harper 解决英文基础语法，`dislop` 解决跨媒介去 AI 味与模板味，两者零冲突互补 |
+| **Writer.com** | 企业级 Agentic AI 平台 | 自研 `Palmyra` 模型族、`WRITER Agent`、`AI Studio` 图谱 RAG、`Enterprise Brain` 集中品牌事实库 | C 轮 \$2 亿（估值 \$19 亿–\$19.8 亿）、ARR 超 \$4,700 万，服务数百家 Global 2000 | 证明企业愿意为「共享品牌语调 + 私有事实约束 + 跨流程执行」持续付费，对应 `dislop` 团队声纹库方向 |
+| **Markup AI（原 Acrolinx）** | 受监管行业内容治理与 QA | 2025–2026 正式更名 Markup AI，确定性 `Acrolinx Score` + 滑出式 Sidebar + `Content Guardian Agents` 与 MCP | 制造、生命科学、大型科技企业文档部门（闭源企业年费） | 验证「确定性核 + MCP 接入企业 AI 流水线」的长期壁垒，提示 `dislop` 用 `engineering-spec` 与 `regulated-comms` 切入高价值行业文档 |
+| **LanguageTool** | 多语种语法与低打扰精修 | 覆盖 30+ 语种与多方言、三档 AI 改写、默认安静可按需切换的 `Picky Mode` | 已被美国 **Learneo** 收购并迁数据控制方至加州（年付约 \$5.83/月） | `Picky Mode` 交互值得学；其被美企收购引欧洲隐私社群反感，反衬本地零上传的稀缺性 |
+| **QuillBot** | 学术与大众日常改写套件 | 左右分栏 Diff + `Synonym Slider` 力度滑杆、摘要、引文生成与 AI 检测 | 同属 Learneo，学生与非母语写作者（Freemium / 季节折扣） | 缺乏工作流嵌入与事实保真校对的纯改写工具极易陷入低价红海 |
+| **Apple Writing Tools** | OS 级原生免费写作层 | macOS / iPadOS / iOS 系统级零界面壳浮窗，端侧优先加可选云端 | 全部 Apple 设备个人用户（随系统免费） | 直接抽走轻度个人用户的「基础润色」付费意愿，证明单靠普通改写已无收费壁垒 |
+| **Microsoft 365 Copilot** | 办公套件原生 AI 助手 | Word/Outlook 内 `Editor` 红蓝波浪线 + `Alt+I` 内联框 + 常驻右侧 Copilot 聊天栏 | M365 商业与企业订阅客户（按席位增购） | 压缩企业另购写作插件预算，但界面拥挤造成「正文 ↔ 侧栏视线乒乓疲劳」 |
+| **Harper** | 本地优先极速开源语法检查器 | Rust 单体实现、零联网零遥测、`< 10ms` 本地检查，原生跳过代码块进入 VS Code / Obsidian / Neovim | 已被 **Automattic** 收购，GitHub 1.6 万–1.7 万+ 星标（开源免费） | 与 `dislop` 最值得参照的技术同路人：Harper 管基础英文语法，`dislop` 管跨媒介去 AI 味，两者零冲突互补 |
 
-从这组横向对照能看清一个共同规律：凡是只做「通用润色和基础纠错」的工具，都在被操作系统和通用大模型加速替代；真正能留住用户的，要么下沉成 **Harper / `dislop` 这样零上传、毫秒级、贴合编辑器与 CLI 的确定性工具**，要么上浮成 **Writer / Acrolinx / Superhuman 这类掌握私有语调与企业工作流的治理平台**。
+上述 8 款产品连同 **Hemingway Editor Plus**、**ProWritingAid** 与 **Vale** 共 10 组产品的具体功能、2025–2026 发展现状、市场反馈与 UI/UX 呈现范式深度拆解，已独立沉淀至 [product-deep-dives.zh-CN.md](./product-deep-dives.zh-CN.md)。从这组横向对照能看清一个共同规律：凡是只做「通用润色和基础纠错」的工具，都在被操作系统和通用大模型加速替代；真正能留住用户的，要么下沉成 **Harper / `dislop` 这样零上传、毫秒级、贴合编辑器与 CLI 的确定性工具**，要么上浮成 **Writer / Markup AI / Superhuman 这类掌握私有语调与企业工作流的治理平台**。
 
 ---
 
@@ -77,6 +77,6 @@ Grammarly 的工程口碑，很大程度上建立在它在 NLP 研究与客户�
 
 ## 5. 零负担索引与维护边界约定
 
-为避免外部情报越滚越大反过来拖累 `dislop` 主仓库的日常迭代，本目录采用**单源双文件隔离**结构：全部 29 条结构化情报元数据集中存放在 [sources.json](./sources.json)（`dislop.intel/1`），扩展分析集中在本文件 [dossier.zh-CN.md](./dossier.zh-CN.md)；主研报只保留核心结论与指向链接，不在两处同步维护重复出处表。
+为避免外部情报越滚越大反过来拖累 `dislop` 主仓库的日常迭代，本目录采用**单源四文件隔离**结构。全部 34 条结构化情报元数据集中存放在 [sources.json](./sources.json)（`dislop.intel/1`），宏观演进与交叉分析集中在 [dossier.zh-CN.md](./dossier.zh-CN.md)。10 款相关产品的逐个拆解见 [product-deep-dives.zh-CN.md](./product-deep-dives.zh-CN.md)，面向 `dislop` 的战略、产品、设计、技术与运营五层系统借鉴见 [five-layer-takeaways-for-dislop.zh-CN.md](./five-layer-takeaways-for-dislop.zh-CN.md)；主研报只保留核心结论与指向链接，不在多处同步维护重复出处表。
 
 在工程与运维边界上，`scripts/build_site.mjs`、`scripts/sync_manifests.mjs`、`scripts/check_awesome_links.mjs` 与 `tests/test_site.mjs` 均不读取本目录，主仓升级规则、发版或更新 `awesome/` 清单时无需改动这里。本目录仅随其余 `docs/research/` 文档一并接受 `dislop check docs/research --fail-on info` 静态自审（不为未实测深链编造 URL，播客与报道以节目/刊物及日期归档），平时零日常维护，只在重新评估商业模式、竞品定价或云端 Agent 审校方向时按需手动增量补充。
