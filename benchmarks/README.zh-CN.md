@@ -1,6 +1,6 @@
 # dislop 去 AI 味效果测试基准（`dislop-bench v2`）
 
-[English](./README.md) · [离线基线报告](./REPORT.md) · [多角度模式库报告](./PATTERN-BENCHMARK.md) · [Agent Skill 评测报告](./SKILL-BENCHMARK.md) · [真实模型在线对比](./MODEL-COMPARISON.md)
+[English](./README.md) · [离线基线报告](./REPORT.md) · [多角度模式库报告](./PATTERN-BENCHMARK.md) · [Agent Skill 评测报告](./SKILL-BENCHMARK.md) · [生态 Skill 对比实测（30 题）](./ECOSYSTEM-BENCHMARK.zh-CN.md) · [真实模型在线对比](./MODEL-COMPARISON.md)
 
 这套基准用来回答两个硬问题，不靠主观感觉：
 

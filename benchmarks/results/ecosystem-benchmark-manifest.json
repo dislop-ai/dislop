@@ -1,0 +1,53 @@
+{
+  "fetchedAt": "2026-11-23T06:52:05.613Z",
+  "skills": {
+    "humanizer": {
+      "repo": "blader/humanizer",
+      "lang": "en",
+      "stars": 72451,
+      "license": "MIT",
+      "commitSha": "a32f24407364c74c812b43c15926d638bee1e072",
+      "commitShort": "a32f244073",
+      "commitDate": "2026-11-19T18:53:14Z",
+      "skillPath": "SKILL.md",
+      "bytes": 33628,
+      "sha256": "3013910ef5433dab12f0d2b86d9cf9e3421a253ef986518a68ef07aa29629bdc"
+    },
+    "stop-slop": {
+      "repo": "hardikpandya/stop-slop",
+      "lang": "en",
+      "stars": 19133,
+      "license": "MIT",
+      "commitSha": "8da1f030185bdfe8471220585162991eaeb970e9",
+      "commitShort": "8da1f03018",
+      "commitDate": "2026-03-17T18:50:36Z",
+      "skillPath": "SKILL.md",
+      "bytes": 2629,
+      "sha256": "7432a1d9ebdd42b27666da8458af252edf549f723fb14bcd4791425103930310"
+    },
+    "humanizer-zh": {
+      "repo": "op7418/Humanizer-zh",
+      "lang": "zh",
+      "stars": 23579,
+      "license": "MIT",
+      "commitSha": "f4518a8eab97b8bfebc66a89d34320a89bef6930",
+      "commitShort": "f4518a8eab",
+      "commitDate": "2026-09-23T02:24:26Z",
+      "skillPath": "SKILL.md",
+      "bytes": 20527,
+      "sha256": "95627fd4437d886f98032ccc62d79136e6310f1fc04e354bb86431795ff206df"
+    },
+    "lieflat": {
+      "repo": "larashero3-dotcom/lieflat-less-ai-tone",
+      "lang": "zh",
+      "stars": 8630,
+      "license": "NOASSERTION",
+      "commitSha": "fe77df00a27cf94428632ad449a4aecdcb83db41",
+      "commitShort": "fe77df00a2",
+      "commitDate": "2026-11-11T10:55:23Z",
+      "skillPath": "SKILL.md",
+      "bytes": 28205,
+      "sha256": "2573957116fe558243c99363101e9e8798387a7e3ce25993e26879a5029aed56"
+    }
+  }
+}

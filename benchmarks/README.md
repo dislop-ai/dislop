@@ -1,6 +1,6 @@
 # dislop Anti-Slop Benchmark (`dislop-bench v2`)
 
-[简体中文](./README.zh-CN.md) · [Offline Baseline Report](./REPORT.md) · [Multi-Angle Pattern Benchmark](./PATTERN-BENCHMARK.md) · [Agent Skill Benchmark](./SKILL-BENCHMARK.md) · [Live Model Comparison](./MODEL-COMPARISON.md)
+[简体中文](./README.zh-CN.md) · [Offline Baseline Report](./REPORT.md) · [Multi-Angle Pattern Benchmark](./PATTERN-BENCHMARK.md) · [Agent Skill Benchmark](./SKILL-BENCHMARK.md) · [Ecosystem Skill Benchmark (30 tasks)](./ECOSYSTEM-BENCHMARK.md) · [Live Model Comparison](./MODEL-COMPARISON.md)
 
 This benchmark measures two concrete things offline, without subjective hand-waving:
 
