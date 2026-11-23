@@ -43,6 +43,12 @@ Layer 3: Closed-Source Official Cloud MCP & Web Workbench (`https://dislop.com/m
 | Static Site Compiler & Content Layer | `scripts/build_site.mjs`, `scripts/lib/site_content.mjs`, `content/guides/*.md` | Zero-dependency compiler turning `src/core.mjs`, `packs/`, `skills/`, `content/guides/`, `docs/research/content-kb/sources.json`, `docs/brand*`, `ROADMAP*.md`, and `anti-slop-radar-index.json` into 119 static HTML pages (`/`, `/en/`, `/guides/`, `/en/guides/`, `/rules/`, `/en/rules/`, `/awesome/`, `/en/awesome/`), Atom feeds (`/feed.xml`, `/en/feed.xml`), JSON-LD `@graph`, reciprocal `hreflang`, explicit AI-search `robots.txt`, and `awesome/README*.md` |
 | Research, Knowledge Base & Linguist Hygiene | `docs/research/`, `docs/research/content-kb/sources.json`, `.gitattributes` | Verified 90-entry Awesome Anti-Slop dataset (`dislop.radar/2`), 55 verified KB references (`dislop.kb/1`, excluded from npm/PyPI bundles via `tests/test_site.mjs`), Star growth research, and `.gitattributes` (`linguist-generated=true`) keeping primary GitHub repo language as JavaScript/Python |
 
+### Applying review edits
+
+For a supported text file, the JSON review carries `sourceSha256` over the exact UTF-8 input bytes. A directly applicable issue or finding carries `edit` with its one-based report position (`id`), zero-based Unicode code point offset (`start`), exact `before` text and literal `after` replacement. An empty replacement deletes the quoted text. Model advice becomes actionable only with an explicit replacement and a unique exact quote in its reviewed context. Reports created from stdin or extracted Office text carry no file edit data.
+
+The Node and Python CLIs accept each other's reports. The shared Vim scratch buffer displays the review and returns the selected IDs to the caller. Both `review --interactive-apply` and `apply --review-file … --source-file …` validate the source digest and selected spans before replacing the source file atomically.
+
 ## 3. Coverage Honesty & Exit Codes
 
 Uninspected inputs never masquerade as clean:

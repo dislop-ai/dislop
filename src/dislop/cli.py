@@ -70,6 +70,7 @@ from .local_model import (
 from .mcp_server import run_mcp_stdio
 from .pattern_engine import analyze_pattern_profile, audit_patterns, load_pattern_banks
 from .pocket_model import analyze_document_with_pocket_models, predict_pack_with_pocket_router
+from .review_apply import apply_review, prepare_edits, require_picker
 from .review_client import (
     ReviewConfigError,
     assert_loopback_endpoint,
@@ -2535,6 +2536,9 @@ def _findings_to_review_issues(findings: list[dict[str, Any]], lang: str = "en")
         }
         if action == "edit":
             item["replacement"] = ""
+            span = f.get("span") or {}
+            if type(span.get("start")) is int and span.get("end") == span["start"] + len(item["quote"]):
+                item["edit"] = dict(start=span["start"], before=item["quote"], after="")
         elif action == "ask":
             item["question"] = guidance
         else:
@@ -2561,7 +2565,9 @@ def _ground_byok_llm_issues(raw_issues: Any, source_text: str, line_starts: list
         action = raw_act if raw_act in {"edit", "replace", "delete", "rewrite", "ask"} else "rewrite"
         if action in {"replace", "delete"}:
             action = "edit"
-        rep = str(iss.get("replacement") if iss.get("replacement") is not None else "") if action == "edit" else ""
+        if action == "edit" and raw_act != "delete" and not isinstance(iss.get("replacement"), str):
+            action = "rewrite"
+        rep = iss["replacement"] if action == "edit" and raw_act != "delete" else ""
         if action == "edit" or iss.get("replacement"):
             rep_txt = str(iss.get("replacement") or "")
             q_lower = q.lower()
@@ -2592,6 +2598,8 @@ def _ground_byok_llm_issues(raw_issues: Any, source_text: str, line_starts: list
         }
         if action == "edit":
             item["replacement"] = rep
+            if idx == src.rfind(q):
+                item["edit"] = dict(start=idx, before=q, after=rep)
         elif action == "ask":
             item["question"] = str(iss.get("question") or final_inst).strip()
         else:
@@ -2810,6 +2818,9 @@ def _cmd_rubric_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]])
         out["profile"] = profile
     out["summary"] = summary
     out["issues"] = issues
+    prepare_edits(out, text, target)
+    if ns.interactive_apply:
+        return apply_review(out, target, interactive=True, lang=ns.lang)
 
     if fmt == "json":
         print(json.dumps(out, ensure_ascii=False, indent=2))
@@ -3216,6 +3227,9 @@ def _cmd_provider_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]
         "rejected": rejected,
         "usage": usage_summary,
     }
+    prepare_edits(report, raw_text, target)
+    if ns.interactive_apply:
+        return apply_review(report, target, interactive=True, lang=ns.lang)
     if fmt == "json":
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
@@ -3241,6 +3255,8 @@ def _cmd_provider_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]
 
 
 def _cmd_review(ns: argparse.Namespace, packs: dict[str, dict[str, Any]]) -> int:
+    if ns.interactive_apply:
+        require_picker(ns.target, not ns.json and ns.format == "text" and not ns.dry_run and not ns.print_prompt)
     if getattr(ns, "offline", False) or getattr(ns, "endpoint", None) or getattr(ns, "api_key_env", None):
         return _cmd_rubric_review(ns, packs)
     return _cmd_provider_review(ns, packs)
@@ -3404,6 +3420,7 @@ Browse rules & style:
 
 Agent & review:
   review [file | -]         Multi-layer review (--offline | --endpoint <url> | --provider openai|gemini|local)
+  apply                     Apply review edits with --review-file and --source-file
   --mcp                     Run local stdio MCP server (7 offline tools)
   resources                 Show bundled packs, static agent links, and Official Cloud MCP
 
@@ -3523,7 +3540,7 @@ def main(argv: list[str] | None = None) -> None:
         return
 
     known_cmds = {
-        "check", "verify", "review", "explain", "packs", "catalog", "search", "patterns",
+        "check", "verify", "review", "apply", "explain", "packs", "catalog", "search", "patterns",
         "voice", "model", "doctor", "setup", "deslop", "resources", "pack-test", "init",
     }
     if args[0] == "help":
@@ -3580,6 +3597,7 @@ def main(argv: list[str] | None = None) -> None:
     p_review.add_argument("--config", default=None)
     p_review.add_argument("--stdin-filename", default=None)
     p_review.add_argument("--deep", action="store_true")
+    p_review.add_argument("--interactive-apply", action="store_true", help="Select exact edits in Vim")
     p_review.add_argument("--offline", action="store_true")
     p_review.add_argument("--endpoint", default=None)
     p_review.add_argument("--api-key-env", default=None)
@@ -3597,6 +3615,14 @@ def main(argv: list[str] | None = None) -> None:
     p_review.add_argument("--format", default="text", choices=["text", "json", "agent"])
     p_review.add_argument("--json", action="store_true")
     p_review.add_argument("--lang", default="en", choices=["en", "zh"])
+
+    p_apply = sub.add_parser("apply", help="Apply exact edits from a saved JSON review", allow_abbrev=False)
+    p_apply.add_argument("--review-file", required=True)
+    p_apply.add_argument("--source-file", required=True)
+    selection = p_apply.add_mutually_exclusive_group(required=True)
+    selection.add_argument("--all", action="store_true")
+    selection.add_argument("--include", metavar="IDS")
+    p_apply.add_argument("--exclude", metavar="IDS")
 
     p_exp = sub.add_parser("explain", help="Show check question and before/trap/after examples for a rule", allow_abbrev=False)
     p_exp.add_argument("rule_id")
@@ -3730,8 +3756,15 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(_cmd_check(ns, packs))
     if ns.cmd == "verify":
         sys.exit(_cmd_verify(ns, packs))
-    if ns.cmd == "review":
-        sys.exit(_cmd_review(ns, packs))
+    if ns.cmd in ("review", "apply"):
+        try:
+            if ns.cmd == "review":
+                sys.exit(_cmd_review(ns, packs))
+            report = json.loads(Path(ns.review_file).read_text(encoding="utf-8"))
+            sys.exit(apply_review(report, ns.source_file, include=ns.include, exclude=ns.exclude, all_edits=ns.all))
+        except (ValueError, OSError) as exc:
+            print(f"dislop {ns.cmd}: {exc}", file=sys.stderr)
+            sys.exit(2)
     if ns.cmd == "doctor":
         sys.exit(_cmd_doctor(ns, packs))
     if ns.cmd == "model":
