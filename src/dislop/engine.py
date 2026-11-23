@@ -18,7 +18,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
 
-ENGINE_VERSION = "0.8.1"
+ENGINE_VERSION = "0.8.2"
 
 SEVERITY_RANK = {
     "info": 1,

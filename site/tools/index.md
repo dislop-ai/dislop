@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 0.8.1
+version: 0.8.2
 ---
 
 # dislop Tools & Usage Options
