@@ -328,6 +328,7 @@ JS_AUDIT = r"""(rel) => {
       try { b = node.getBBox(); } catch (_) { continue; }
       const parentText = node.tagName.toLowerCase() === 'tspan' ? t : node;
       const ff = (node.getAttribute('font-family') || parentText.getAttribute('font-family') || svg.getAttribute('font-family') || '').trim();
+      const fsAttr = parseFloat(node.getAttribute('font-size') || parentText.getAttribute('font-size') || '16');
       const fill = (node.getAttribute('fill') || parentText.getAttribute('fill') || '').toUpperCase();
       textBoxes.push({
         text: str,
@@ -339,9 +340,12 @@ JS_AUDIT = r"""(rel) => {
         bottom: b.y + b.height,
         midY: b.y + b.height / 2,
         fontFamily: ff,
+        fontSize: Number.isFinite(fsAttr) ? fsAttr : 16,
         fill,
         isCjk: hasCjk(str),
-        isTspan: node.tagName.toLowerCase() === 'tspan'
+        isTspan: node.tagName.toLowerCase() === 'tspan',
+        parentTextEl: parentText,
+        isMono: /monospace|sfmono|menlo|consolas/i.test(ff),
       });
     }
   }
