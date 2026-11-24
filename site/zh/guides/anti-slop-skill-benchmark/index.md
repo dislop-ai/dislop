@@ -7,7 +7,7 @@ version: 0.9.0
 
 # 4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准）
 
-> 先交代口径偏置：第 2 节通过率由 dislop 自身规则打分。从原始输出字符串看，4 款独立 Skill 在 HTML 任务上全部留下了 href=\"#\" 空链接，stop-slop 在 .pptx XML 里留下了裸 **Summary**: 与 62.5% 缩字参数，3 款原样退回了三分号旧推销句。接入一道 dislop 复检后，英文一次过检率提升 +13.3 个百分点，中文提升 +20.0 个百分点，6 份干净人工对照稿零误伤。
+> 先交代口径偏置：第 2 节通过率由 dislop 自身规则打分。从原始输出字符串看，4 款独立 Skill 在 HTML 任务上全部留下了 href="#" 空链接，stop-slop 在 .pptx XML 里留下了裸 **Summary**: 与 62.5% 缩字参数，3 款原样退回了三分号旧推销句。接入一道 dislop 复检后，英文一次过检率提升 +13.3 个百分点，中文提升 +20.0 个百分点，6 份干净人工对照稿零误伤。
 
 `2026-11-23`，我们拉取公开仓 `blader/humanizer`（commit `a32f244073`）、`hardikpandya/stop-slop`（`8da1f03018`）、`op7418/Humanizer-zh`（`f4518a8eab`）与 `larashero3-dotcom/lieflat-less-ai-tone`（`fe77df00a2`）的完整 `SKILL.md`，在同一模型（`gemini-3.5-flash`，总花费 `$0.18886`，`0` 次长度截断）上实跑 `30` 份修改与保真对照任务。
 
@@ -88,7 +88,7 @@ npx --yes dislop verify --git HEAD draft.md --strict
 
 ### 为什么只装写作类去味 Skill，还是会漏掉网页死按钮和 PPT 裸星号？
 
-纯文字 Skill 的指令集中在散文用词和语气上，Agent 修改 HTML 属性或 Office Open XML 时很少主动排查 href=\"#\" 空链接、三层套盒边框或幻灯片里的 **Summary**: 符号。
+纯文字 Skill 的指令集中在散文用词和语气上，Agent 修改 HTML 属性或 Office Open XML 时很少主动排查 href="#" 空链接、三层套盒边框或幻灯片里的 **Summary**: 符号。
 
 ### 在 Humanizer-zh 后面再挂一道 dislop，会不会把原本写得好的人话改坏或改丢数字？
 

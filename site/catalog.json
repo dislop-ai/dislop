@@ -558,14 +558,14 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 5864,
-      "approxTokens": 1466,
+      "bytes": 5728,
+      "approxTokens": 1432,
       "relatedTools": [
         "skill",
         "cli",
         "mcp"
       ],
-      "sha256": "c330bd147dd353fa5cb5cbfa377b9aca850abcb2a5c6a8887e3f2932da03bde7"
+      "sha256": "40b859dc9b3774ef03ac1ca35d6ca3f0aebbdc96fc169f92edcf3e4d180acac5"
     },
     {
       "id": "tools-skill-ref-work-docs",
@@ -3098,14 +3098,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 8937,
-      "approxTokens": 2234,
+      "bytes": 8933,
+      "approxTokens": 2233,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "42bc8670f0fb6443cceacf0d8f6f27ec04cd274c74f1f2b3a106b51f8cd564e5"
+      "sha256": "ffe5e12a3ccab99cd6b8c06b04e6add670a1189f752a219e5bc741a382a7ae81"
     },
     {
       "id": "guide-anti-slop-skill-benchmark-zh",
@@ -3129,14 +3129,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 8943,
-      "approxTokens": 2236,
+      "bytes": 8939,
+      "approxTokens": 2235,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "3bfee2c448fea2f334f5d78e49bd8e97b583cbd0946513d988061845bb6dc107"
+      "sha256": "f7825b4669fa554a713a843bc1e5d86fc7949da4c1905425d114f93aeaebc515"
     },
     {
       "id": "guide-deslop-pptx-docx-en",
@@ -3253,14 +3253,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 6562,
-      "approxTokens": 1641,
+      "bytes": 6558,
+      "approxTokens": 1640,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "9b7122a4fad9aec02e58861ce213e7971d0abb84527eb1ef313d3622bc15906d"
+      "sha256": "698041ce12fa3c0fd50c0853962f42c6383b18b4e11a303ec41e790808d5170d"
     },
     {
       "id": "guide-linter-vs-detector-vs-skill-en",
@@ -3315,14 +3315,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 6773,
+      "bytes": 6771,
       "approxTokens": 1693,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "2dab3d2fcdc244858f955a0fc1f12c78343f07852e8899ccf2374188c8571edf"
+      "sha256": "63256377094f234c11c84a0f0f1000d26d44ed147cfa5c04ff5666710d1620c3"
     },
     {
       "id": "guide-remove-ai-slop-writing-en",
@@ -3408,14 +3408,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 7584,
+      "bytes": 7582,
       "approxTokens": 1896,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "e22b3011105e11694b38940c44570b2ff776a92cd1ce3031e41d697d0228ce4d"
+      "sha256": "aaf0fdd0d00090b89bcca7f9787c6959c70a49d4aa75f33ef209a3df4818c048"
     },
     {
       "id": "guide-what-is-ai-slop-zh",
@@ -3439,14 +3439,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 7656,
+      "bytes": 7654,
       "approxTokens": 1914,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "fd1cbe4964d52516e4ee359c6db32dd1c5567958e3013a2e20ac72ce785762f2"
+      "sha256": "90ed78d907fb9cda645701477478d96a49f6170843b8686b281ba4950521d702"
     },
     {
       "id": "roadmap-en",

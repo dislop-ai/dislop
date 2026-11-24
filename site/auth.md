@@ -4,7 +4,10 @@ version: 0.9.0
 snapshot: 2026-11-21
 ---
 
-# dislop Agent Auth & Access Guide
+# auth.md
+
+- **Resource Server:** `https://dislop.com/mcp`
+- **Authorization Server:** `https://dislop.com`
 
 Connect to `https://dislop.com/mcp` with zero configuration for free checks, or sign in when you need multi-model review, layout-preserving Office cleanup, or visual screenshot audits.
 

@@ -95,7 +95,7 @@
           "name": "为什么只装写作类去味 Skill，还是会漏掉网页死按钮和 PPT 裸星号？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "纯文字 Skill 的指令集中在散文用词和语气上，Agent 修改 HTML 属性或 Office Open XML 时很少主动排查 href=\\\"#\\\" 空链接、三层套盒边框或幻灯片里的 **Summary**: 符号。"
+            "text": "纯文字 Skill 的指令集中在散文用词和语气上，Agent 修改 HTML 属性或 Office Open XML 时很少主动排查 href=\"#\" 空链接、三层套盒边框或幻灯片里的 **Summary**: 符号。"
           }
         },
         {
@@ -164,7 +164,7 @@
           </div>
           <div class="answer-box">
             <div class="answer-box-label">先说结论</div>
-            <p>先交代口径偏置：第 2 节通过率由 dislop 自身规则打分。从原始输出字符串看，4 款独立 Skill 在 HTML 任务上全部留下了 href=\&quot;#\&quot; 空链接，stop-slop 在 .pptx XML 里留下了裸 <strong>Summary</strong>: 与 62.5% 缩字参数，3 款原样退回了三分号旧推销句。接入一道 dislop 复检后，英文一次过检率提升 +13.3 个百分点，中文提升 +20.0 个百分点，6 份干净人工对照稿零误伤。</p>
+            <p>先交代口径偏置：第 2 节通过率由 dislop 自身规则打分。从原始输出字符串看，4 款独立 Skill 在 HTML 任务上全部留下了 href=&quot;#&quot; 空链接，stop-slop 在 .pptx XML 里留下了裸 <strong>Summary</strong>: 与 62.5% 缩字参数，3 款原样退回了三分号旧推销句。接入一道 dislop 复检后，英文一次过检率提升 +13.3 个百分点，中文提升 +20.0 个百分点，6 份干净人工对照稿零误伤。</p>
           </div>
         </header>
 
@@ -250,7 +250,7 @@ npx --yes dislop verify --git HEAD draft.md --strict</code></pre>
         <div class="faq-list">
           <div class="faq-item">
             <h3>为什么只装写作类去味 Skill，还是会漏掉网页死按钮和 PPT 裸星号？</h3>
-            <p>纯文字 Skill 的指令集中在散文用词和语气上，Agent 修改 HTML 属性或 Office Open XML 时很少主动排查 href=\&quot;#\&quot; 空链接、三层套盒边框或幻灯片里的 <strong>Summary</strong>: 符号。</p>
+            <p>纯文字 Skill 的指令集中在散文用词和语气上，Agent 修改 HTML 属性或 Office Open XML 时很少主动排查 href=&quot;#&quot; 空链接、三层套盒边框或幻灯片里的 <strong>Summary</strong>: 符号。</p>
           </div>
           <div class="faq-item">
             <h3>在 Humanizer-zh 后面再挂一道 dislop，会不会把原本写得好的人话改坏或改丢数字？</h3>

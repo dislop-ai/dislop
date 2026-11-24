@@ -962,6 +962,8 @@ assert.ok(Array.isArray(apiCatalog.linkset) && apiCatalog.linkset.length >= 2, "
 const aiCatalogPath = path.join(SITE_DIR, ".well-known", "ai-catalog.json");
 assert.ok(fs.existsSync(aiCatalogPath), "Missing site/.well-known/ai-catalog.json");
 const aiCatalog = JSON.parse(fs.readFileSync(aiCatalogPath, "utf8"));
+assert.equal(aiCatalog.specVersion, "1.0", ".well-known/ai-catalog.json missing specVersion");
+assert.ok(Array.isArray(aiCatalog.entries) && aiCatalog.entries.length >= 3, ".well-known/ai-catalog.json missing ARD entries");
 assert.equal(aiCatalog.apiCatalog, "/.well-known/api-catalog", ".well-known/ai-catalog.json apiCatalog mismatch");
 assert.equal(aiCatalog.authDoc, "/auth.md", ".well-known/ai-catalog.json authDoc mismatch");
 assert.ok(Array.isArray(aiCatalog.resources) && aiCatalog.resources.length > 0, ".well-known/ai-catalog.json missing resources");
@@ -969,7 +971,7 @@ assert.ok(Array.isArray(aiCatalog.resources) && aiCatalog.resources.length > 0, 
 const authMdPath = path.join(SITE_DIR, "auth.md");
 assert.ok(fs.existsSync(authMdPath), "Missing site/auth.md");
 const authMd = fs.readFileSync(authMdPath, "utf8");
-assert.ok(authMd.includes("oauth-authorization-server") && authMd.includes("dislop_check"), "site/auth.md missing OAuth / free-tool guide");
+assert.ok(authMd.includes("# auth.md") && authMd.includes("oauth-authorization-server") && authMd.includes("dislop_check"), "site/auth.md missing # auth.md or OAuth guide");
 
 assert.ok(llmsTxt.includes("npx --yes dislop check"), "site/llms.txt missing CLI Quick Start command");
 assert.ok(llmsTxt.includes("https://dislop.com/.well-known/mcp/server-card.json"), "site/llms.txt missing server-card.json link");

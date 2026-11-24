@@ -2337,7 +2337,10 @@ version: ${VERSION}
 snapshot: ${SNAPSHOT_DATE}
 ---
 
-# dislop Agent Auth & Access Guide
+# auth.md
+
+- **Resource Server:** \`${BASE_URL}/mcp\`
+- **Authorization Server:** \`${BASE_URL}\`
 
 Connect to \`${BASE_URL}/mcp\` with zero configuration for free checks, or sign in when you need multi-model review, layout-preserving Office cleanup, or visual screenshot audits.
 
@@ -2401,8 +2404,59 @@ fs.writeFileSync(path.join(SITE_DIR, "catalog.json"), catalogJsonStr, "utf8");
 
 // ARD Agentic Resource Discovery (/.well-known/ai-catalog.json)
 const aiCatalogObj = {
+  specVersion: "1.0",
   version: VERSION,
   baseUrl: BASE_URL,
+  host: {
+    displayName: "dislop",
+    identifier: "did:web:dislop.com",
+    documentationUrl: `${BASE_URL}/llms.txt`,
+    logoUrl: `${BASE_URL}/assets/logo.svg`,
+    trustManifest: {
+      identity: "dislop.com",
+      contact: "security@dislop.com",
+      license: "Apache-2.0",
+    },
+  },
+  entries: [
+    {
+      identifier: "urn:air:dislop.com:mcp:dislop",
+      displayName: "dislop Remote MCP Server",
+      type: "application/mcp-server-card+json",
+      description:
+        "Check drafts, verify numbers and qualifiers, review prose by genre, and audit Office XML or webpage screenshots against AI slop.",
+      url: `${BASE_URL}/.well-known/mcp/server-card.json`,
+      tags: ["mcp", "anti-slop", "linter", "office", "markdown"],
+      representativeQueries: [
+        "check markdown draft for AI slop before sending",
+        "verify edited technical spec kept all numbers and units",
+        "audit Word or PowerPoint segments for leftover markdown",
+      ],
+    },
+    {
+      identifier: "urn:air:dislop.com:skills:dislop",
+      displayName: "dislop Agent Skills Index",
+      type: "application/agent-skills-index+json",
+      description: "Pure-Markdown agent skills for docs, essays, web UI, Word, and PowerPoint.",
+      url: `${BASE_URL}/.well-known/agent-skills/index.json`,
+      tags: ["skills", "agent-skills", "markdown"],
+      representativeQueries: [
+        "install anti-slop skill for Claude Code or Codex",
+        "avoid AI clichés when drafting web UI or slide decks",
+      ],
+    },
+    {
+      identifier: "urn:air:dislop.com:api:catalog",
+      displayName: "dislop API Catalog",
+      type: "application/linkset+json",
+      description: "RFC 9727 linkset catalog for dislop Remote MCP and Cloud API endpoints.",
+      url: `${BASE_URL}/.well-known/api-catalog`,
+      tags: ["api-catalog", "rfc-9727", "mcp"],
+      representativeQueries: [
+        "discover dislop API and MCP health endpoints",
+      ],
+    },
+  ],
   llmsTxt: "/llms.txt",
   apiCatalog: "/.well-known/api-catalog",
   mcpServerCard: "/.well-known/mcp/server-card.json",

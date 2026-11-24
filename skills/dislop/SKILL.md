@@ -6,7 +6,7 @@ description: "Use when drafting or revising text a person will read: README, doc
 
 # dislop
 
-Pick the single card below matching the **language of the text you are writing or editing**, not the request language (English -> `.md` such as `office.md`, Chinese -> `.zh-CN.md`). Read it before drafting or revising. If `./references/` files are unavailable in your host, fetch the same file from `https://dislop.com/tools/references/<file>` (or follow Sections 2–3 directly if offline).
+Pick the single card below matching the **language of the text you are writing or editing**, not the request language (English -> `.md` such as `office.md`, Chinese -> `.zh-CN.md`). Read it before drafting or revising. If `./references/` files are unavailable in your host, follow Sections 2–3 directly.
 
 ## 1. Reference Cards
 
@@ -45,7 +45,7 @@ Match cleanup strategy to the writing scenario (`--register`):
 ## 4. Check & Finish
 
 Run a check only if a callable tool or shell exists in this session:
-1. Only if `dislop_*` tools appear in your active tool list: call `dislop_check` first, then `dislop_review` if needed, and verify edits with `dislop_verify` (pass `register` to match scenario strategy; setup: `https://dislop.com/tools/mcp-sdk-api.md`).
+1. Only if `dislop_*` tools appear in your active tool list: call `dislop_check` first, then `dislop_review` if needed, and verify edits with `dislop_verify` (pass `register` to match scenario strategy).
 2. Only if you have a shell tool: run `dislop check <path> --pack auto --register <scenario> --deep` (or `npx --yes dislop check ...`), run `dislop review` with user config (`~/.config/dislop/config.json` / `voice.json`) when deep review is needed, and finish with `dislop verify --git HEAD <path> --register <scenario>` (or `dislop verify <before> <after> --register <scenario>`) to check facts and anti-degradation guards.
 3. Otherwise, review your draft against Sections 2–3 and the loaded card checklist.
 

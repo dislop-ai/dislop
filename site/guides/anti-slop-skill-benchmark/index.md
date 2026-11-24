@@ -7,7 +7,7 @@ version: 0.9.0
 
 # 4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark)
 
-> Upfront disclosure: pass-rate scores use dislop's own deterministic packs. Across 30 drafts on gemini-3.5-flash, all four standalone Markdown skills left dead href=\"#\" links in HTML cards, stop-slop left raw **Summary**: markdown and 62.5% text shrink inside .pptx XML, and 3 of 4 returned a three-semicolon pitch verbatim. Adding one dislop check pass lifted clean passes by +13.3 pp in English and +20.0 pp in Chinese with 0 fact drift.
+> Upfront disclosure: pass-rate scores use dislop's own deterministic packs. Across 30 drafts on gemini-3.5-flash, all four standalone Markdown skills left dead href="#" links in HTML cards, stop-slop left raw **Summary**: markdown and 62.5% text shrink inside .pptx XML, and 3 of 4 returned a three-semicolon pitch verbatim. Adding one dislop check pass lifted clean passes by +13.3 pp in English and +20.0 pp in Chinese with 0 fact drift.
 
 On 2026-11-23, we ran the unmodified upstream `SKILL.md` prompts from four public anti-slop skills—`blader/humanizer` (`a32f244073`), `hardikpandya/stop-slop` (`8da1f03018`), `op7418/Humanizer-zh` (`f4518a8eab`), and `larashero3-dotcom/lieflat-less-ai-tone` (`fe77df00a2`)—on 30 drafts using `gemini-3.5-flash` (total run cost `$0.18886`, zero length truncations).
 
@@ -88,7 +88,7 @@ npx --yes dislop verify --git HEAD draft.md --strict
 
 ### Why did standalone prose skills miss HTML dead links and PowerPoint XML leaks?
 
-Prompt-only writing skills focus on prose vocabulary and sentence tone. When an agent edits HTML cards or OOXML runs, prompt rules rarely trigger on attribute strings like href=\"#\", nested card borders, or raw asterisks inside slide XML.
+Prompt-only writing skills focus on prose vocabulary and sentence tone. When an agent edits HTML cards or OOXML runs, prompt rules rarely trigger on attribute strings like href="#", nested card borders, or raw asterisks inside slide XML.
 
 ### Does running dislop after humanizer or stop-slop alter numbers or over-edit clean human drafts?
 

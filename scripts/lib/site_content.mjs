@@ -198,8 +198,11 @@ export function loadKnowledgeBase(rootDir) {
 function parseScalar(raw) {
   const s = String(raw || "").trim();
   if (!s) return "";
-  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
-    return s.slice(1, -1);
+  if (s.startsWith('"') && s.endsWith('"')) {
+    return s.slice(1, -1).replace(/\\"/g, '"');
+  }
+  if (s.startsWith("'") && s.endsWith("'")) {
+    return s.slice(1, -1).replace(/''/g, "'");
   }
   if (/^\d+$/.test(s)) return Number(s);
   if (s === "true") return true;

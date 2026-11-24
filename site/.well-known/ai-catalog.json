@@ -1,6 +1,70 @@
 {
+  "specVersion": "1.0",
   "version": "0.9.0",
   "baseUrl": "https://dislop.com",
+  "host": {
+    "displayName": "dislop",
+    "identifier": "did:web:dislop.com",
+    "documentationUrl": "https://dislop.com/llms.txt",
+    "logoUrl": "https://dislop.com/assets/logo.svg",
+    "trustManifest": {
+      "identity": "dislop.com",
+      "contact": "security@dislop.com",
+      "license": "Apache-2.0"
+    }
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:dislop.com:mcp:dislop",
+      "displayName": "dislop Remote MCP Server",
+      "type": "application/mcp-server-card+json",
+      "description": "Check drafts, verify numbers and qualifiers, review prose by genre, and audit Office XML or webpage screenshots against AI slop.",
+      "url": "https://dislop.com/.well-known/mcp/server-card.json",
+      "tags": [
+        "mcp",
+        "anti-slop",
+        "linter",
+        "office",
+        "markdown"
+      ],
+      "representativeQueries": [
+        "check markdown draft for AI slop before sending",
+        "verify edited technical spec kept all numbers and units",
+        "audit Word or PowerPoint segments for leftover markdown"
+      ]
+    },
+    {
+      "identifier": "urn:air:dislop.com:skills:dislop",
+      "displayName": "dislop Agent Skills Index",
+      "type": "application/agent-skills-index+json",
+      "description": "Pure-Markdown agent skills for docs, essays, web UI, Word, and PowerPoint.",
+      "url": "https://dislop.com/.well-known/agent-skills/index.json",
+      "tags": [
+        "skills",
+        "agent-skills",
+        "markdown"
+      ],
+      "representativeQueries": [
+        "install anti-slop skill for Claude Code or Codex",
+        "avoid AI clichés when drafting web UI or slide decks"
+      ]
+    },
+    {
+      "identifier": "urn:air:dislop.com:api:catalog",
+      "displayName": "dislop API Catalog",
+      "type": "application/linkset+json",
+      "description": "RFC 9727 linkset catalog for dislop Remote MCP and Cloud API endpoints.",
+      "url": "https://dislop.com/.well-known/api-catalog",
+      "tags": [
+        "api-catalog",
+        "rfc-9727",
+        "mcp"
+      ],
+      "representativeQueries": [
+        "discover dislop API and MCP health endpoints"
+      ]
+    }
+  ],
   "llmsTxt": "/llms.txt",
   "apiCatalog": "/.well-known/api-catalog",
   "mcpServerCard": "/.well-known/mcp/server-card.json",

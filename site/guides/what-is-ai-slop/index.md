@@ -60,7 +60,7 @@ When models lose cliché nouns and verbs, post-trained RLHF habits shift to stru
 
 ### What are the fastest AI delivery leftovers to catch before shipping?
 
-Check for leftover chat replies, unfilled bracketed placeholders (`TODO` markers), raw Markdown asterisks pasted into Word or PowerPoint, and dead `href=\"#\"` placeholder buttons in web pages.
+Check for leftover chat replies, unfilled bracketed placeholders (`TODO` markers), raw Markdown asterisks pasted into Word or PowerPoint, and dead `href="#"` placeholder buttons in web pages.
 
 ### Is there hard evidence on how widespread AI slop has become?
 
