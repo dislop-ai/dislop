@@ -4,6 +4,16 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2026-11-24
+
+### Added
+- **Agent discovery & install manifests**: Added `context7.json` (indexing config + 5 agent rules), `llms-install.md` (install guide for Cline, Roo Code, Cursor, Claude Code, Codex, Antigravity, and Gemini CLI), `glama.json` + `.well-known/glama.json`, and `assets/logo-400.png`.
+- **Web agent auto-discovery & guides**: Added `/.well-known/api-catalog`, `/.well-known/ai-catalog.json`, `/.well-known/agent-skills/index.json`, `/auth.md`, progressive WebMCP `dislop_check_draft`, and the bilingual `anti-slop-skill-benchmark` guide.
+
+### Changed
+- **Local stdio MCP annotations & schema parity**: Added `annotations` (`readOnlyHint`, `idempotentHint`, `destructiveHint`, `openWorldHint`) and missing parameter descriptions across all 6 offline tools in `bin/dislop.mjs` and `src/dislop/mcp_server.py`.
+- **Registry & package discoverability**: Expanded npm and PyPI search keywords (`deslop`, `ai-writing`, `slides`, `web-ui`, `cline`, `windsurf`, `claude`, `mcp-server`), added the SVG icon to `server.json`, removed external fetch instructions from `skills/dislop/SKILL.md`, and aligned `PRODUCT.md`, `ROADMAP*.md`, `AGENTS.md`, `CONTRIBUTING.md`, and docs around the interface contract.
+
 ## [0.9.0] - 2026-11-24
 
 ### Changed
