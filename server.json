@@ -3,7 +3,7 @@
   "name": "io.github.dislop-ai/dislop",
   "title": "dislop",
   "description": "Cutting AI slop is real productivity. Linter for AI Slop in docs, web UI & slides (Cloud MCP).",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "websiteUrl": "https://dislop.com",
   "repository": {
     "url": "https://github.com/dislop-ai/dislop",

@@ -1,9 +1,9 @@
 ---
 content-type: reference-data
-version: 0.8.4
+version: 0.9.0
 ---
 
-# CLI, Git Diff, Hooks & CI (`v0.8.4`)
+# CLI, Git Diff, Hooks & CI (`v0.9.0`)
 
 ## Node.js 20+ & Python 3.10+ (Shipped, Zero Dependencies)
 

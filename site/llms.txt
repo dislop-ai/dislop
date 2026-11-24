@@ -26,7 +26,7 @@
 - [MCP Server Card](https://dislop.com/.well-known/mcp/server-card.json): `/mcp` discovery (10 tools).
 - [Agent Skills Index](https://dislop.com/.well-known/agent-skills/index.json): `SKILL.md` & card sha256.
 - [JSON Catalog](https://dislop.com/catalog.json): `dislop.catalog/1` manifest with sha256.
-- [Agent Skill](https://dislop.com/tools/skill.md): `SKILL.md` mirror (`v0.8.4`).
+- [Agent Skill](https://dislop.com/tools/skill.md): `SKILL.md` mirror (`v0.9.0`).
 - [Cloud MCP & API](https://dislop.com/tools/mcp-sdk-api.md): Remote MCP, OAuth 2.1, HTTP API.
 - [Rule Packs](https://dislop.com/packs/core.md): 7 packs & 53 `/rules/<id>.md` cards.
 - [Single-Fetch Bundle](https://dislop.com/llms-full.txt): All 53 rules without fixtures.

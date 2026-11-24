@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: en
 updated: 2026-11-23
-version: 0.8.4
+version: 0.9.0
 ---
 
 # Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions

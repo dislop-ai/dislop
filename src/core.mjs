@@ -3,7 +3,7 @@
  * Shared identically by Node CLI, Node MCP server, and Browser Workbench (`site/`).
  */
 
-export const ENGINE_VERSION = "0.8.4";
+export const ENGINE_VERSION = "0.9.0";
 
 export const SEVERITY_RANK = {
   info: 1,
