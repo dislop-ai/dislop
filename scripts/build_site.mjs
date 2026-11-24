@@ -2328,6 +2328,18 @@ const apiCatalogObj = {
 const apiCatalogJsonStr = JSON.stringify(apiCatalogObj, null, 2) + "\n";
 fs.writeFileSync(path.join(SITE_DIR, ".well-known", "api-catalog"), apiCatalogJsonStr, "utf8");
 
+// Glama Remote Connector domain claim (/.well-known/glama.json)
+const glamaClaimJsonStr =
+  JSON.stringify(
+    {
+      $schema: "https://glama.ai/mcp/schemas/connector.json",
+      claim: "glama_claim_Wr2B8HTSpq2Aml0ysVIiCk1ipNIno7YI",
+    },
+    null,
+    2
+  ) + "\n";
+fs.writeFileSync(path.join(SITE_DIR, ".well-known", "glama.json"), glamaClaimJsonStr, "utf8");
+
 // Agent Auth Guide (/auth.md)
 writeCleanFile(
   "auth.md",
