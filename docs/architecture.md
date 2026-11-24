@@ -1,4 +1,4 @@
-# Architecture (`v0.9.0`)
+# Architecture (`v0.9.1`)
 
 [简体中文](./architecture.zh-CN.md) · [Product Brief](../PRODUCT.md)
 

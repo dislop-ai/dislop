@@ -2,7 +2,7 @@
   "serverInfo": {
     "name": "dislop",
     "title": "dislop",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "description": "Linter for AI Slop in docs, web UI, Word, and PowerPoint."
   },
   "websiteUrl": "https://dislop.com",

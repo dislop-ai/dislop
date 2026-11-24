@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 0.9.0
+version: 0.9.1
 ---
 
 # Zero-Install Audit Checklists (When Local CLI/MCP Is Unavailable)
