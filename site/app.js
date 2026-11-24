@@ -3979,10 +3979,33 @@ let cloudSessionState = {
   pendingLink: null,
 };
 let activeHubTab = "plan";
-let cachedHubData = { keys: null, apps: null, voices: null, usage: null, billingHistory: null };
+let cachedHubData = { accountId: null, keys: null, apps: null, voices: null, usage: null, billingHistory: null };
+let lastAuthModalTrigger = null;
+let lastVisibilitySessionSyncMs = 0;
 
-function resetCachedHubData() {
-  cachedHubData = { keys: null, apps: null, voices: null, usage: null, billingHistory: null };
+function resetCachedHubData(accountId = cloudSessionState.account?.id || null) {
+  cachedHubData = { accountId, keys: null, apps: null, voices: null, usage: null, billingHistory: null };
+}
+
+function buildCurrentPageReturnTo(anchor = "cloud-token-box") {
+  try {
+    const u = new URL(window.location.href);
+    const keep = new URLSearchParams();
+    if (currentLang === "en" && !u.pathname.startsWith("/en")) {
+      keep.set("lang", "en");
+    } else if (u.searchParams.get("lang")) {
+      keep.set("lang", u.searchParams.get("lang"));
+    }
+    const authQ = u.searchParams.get("auth");
+    const nextQ = u.searchParams.get("next");
+    if (authQ === "link" || authQ === "github-link") keep.set("auth", authQ);
+    if (nextQ && /^\/(?!\/)/.test(nextQ)) keep.set("next", nextQ);
+    const qs = keep.toString();
+    const hashPart = anchor ? `#${String(anchor).replace(/^#+/, "")}` : "";
+    return `${u.pathname || "/"}${qs ? `?${qs}` : ""}${hashPart}`;
+  } catch {
+    return currentLang === "en" ? `/?lang=en#${anchor}` : `/#${anchor}`;
+  }
 }
 
 function captureEntrySource() {
@@ -4022,10 +4045,23 @@ function loadSavedVoiceProfile() {
     const raw = safeGetStorage(VOICE_STORE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return parsed && parsed.tone ? parsed : null;
+    if (!parsed || !parsed.tone) return null;
+    if (parsed.sourceAccountId) {
+      const curId = cloudSessionState.authenticated ? cloudSessionState.account?.id : null;
+      if (!curId || parsed.sourceAccountId !== curId) {
+        return null;
+      }
+    }
+    return parsed;
   } catch {
     return null;
   }
+}
+
+function stripVoiceLocalMeta(profile) {
+  if (!profile || typeof profile !== "object") return null;
+  const { sourceAccountId: _sa, sourceVoiceId: _sv, ...rest } = profile;
+  return rest;
 }
 
 function saveVoiceProfile(profile) {
@@ -4156,11 +4192,26 @@ async function handleVoiceExtractClick() {
     );
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
+      if (data.error === "account_changed" || resp.status === 401) {
+        resetCachedHubData(null);
+        await refreshCloudSession();
+      }
       outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
       return;
     }
     updateCreditsFromBilling(data.billing);
-    saveVoiceProfile(data.profile);
+    const savedVoiceId = data.savedVoice?.voiceId || data.savedVoice?.id || null;
+    saveVoiceProfile(
+      active.mode === "session" && active.id
+        ? {
+            ...data.profile,
+            sourceAccountId: active.id,
+            ...(savedVoiceId ? { sourceVoiceId: savedVoiceId } : {}),
+          }
+        : data.profile
+    );
+    cachedHubData.usage = null;
+    cachedHubData.billingHistory = null;
     if (data.savedVoice) cachedHubData.voices = null;
     const habitsStr = formatVoiceHabits(data.profile?.sentenceHabits, isZh);
     outBox.hidden = false;
@@ -4230,9 +4281,19 @@ function isCloudSignedIn() {
   return Boolean(getActiveCloudAccount());
 }
 
+function buildSessionMutationHeaders(extra = {}) {
+  const hdrs = { ...extra };
+  if (cloudSessionState.authenticated && cloudSessionState.account?.id) {
+    hdrs["X-Dislop-Account-Id"] = cloudSessionState.account.id;
+  }
+  return hdrs;
+}
+
 function buildCloudFetchInit({ method = "POST", headers = {}, body = undefined } = {}) {
   const hdrs = { ...headers };
-  if (!cloudSessionState.authenticated) {
+  if (cloudSessionState.authenticated && cloudSessionState.account?.id && !hdrs.Authorization) {
+    hdrs["X-Dislop-Account-Id"] = cloudSessionState.account.id;
+  } else if (!cloudSessionState.authenticated) {
     const saved = loadSavedCloudAccount();
     if (saved?.token && !hdrs.Authorization) {
       hdrs.Authorization = `Bearer ${saved.token}`;
@@ -4253,37 +4314,44 @@ function syncCloudOAuthButtons() {
   const oauthRow = document.getElementById("cloud-google-row");
   const ghBtn = document.getElementById("cloud-github-btn");
   const gBtn = document.getElementById("cloud-google-btn");
-  const isAuthed = isCloudSignedIn();
+  const isSessionAuthed = Boolean(cloudSessionState.authenticated && cloudSessionState.account);
   const hasGh = Boolean(cloudSessionState.methods?.github);
   const hasG = Boolean(cloudSessionState.methods?.google);
+  const retParam = encodeURIComponent(buildCurrentPageReturnTo("cloud-token-box"));
   if (ghBtn) {
     ghBtn.hidden = !hasGh;
+    ghBtn.href = `/api/v1/auth/github/start?return=${retParam}`;
     ghBtn.style.order = currentLang === "zh" ? "1" : "2";
   }
   if (gBtn) {
     gBtn.hidden = !hasG;
+    gBtn.href = `/api/v1/auth/google/start?return=${retParam}`;
     gBtn.style.order = currentLang === "zh" ? "2" : "1";
   }
   if (oauthRow) {
-    oauthRow.hidden = isAuthed || (!hasGh && !hasG);
+    oauthRow.hidden = isSessionAuthed || (!hasGh && !hasG);
   }
 }
 
 function savePendingWorkbenchIntent(action = pendingCloudAction) {
   if (!action) return;
   try {
-    const payload = {
-      action,
-      packId: currentPackId,
-      modality: currentModality,
-      filename: currentFilename,
-      isBinary: Boolean(binaryAuditResult),
-      isCustom: Boolean(customRuleTitle === "user-draft" || currentText !== baselineText || !lastUploadedFile),
-      text: !binaryAuditResult && currentText ? String(currentText).slice(0, 12000) : "",
-      voiceSamples:
-        action === "voice_extract" ? String(document.getElementById("voice-samples-input")?.value || "").slice(0, 6000) : "",
-      ts: Date.now(),
-    };
+    const isCheckout = String(action).startsWith("checkout:");
+    const payload = isCheckout
+      ? { action, ts: Date.now() }
+      : {
+          action,
+          packId: currentPackId,
+          register: currentRegister || "auto",
+          modality: currentModality,
+          filename: currentFilename,
+          isBinary: Boolean(binaryAuditResult),
+          isCustom: Boolean(customRuleTitle === "user-draft" || currentText !== baselineText || !lastUploadedFile),
+          text: !binaryAuditResult && currentText ? String(currentText).slice(0, 50000) : "",
+          voiceSamples:
+            action === "voice_extract" ? String(document.getElementById("voice-samples-input")?.value || "").slice(0, 20000) : "",
+          ts: Date.now(),
+        };
     window.sessionStorage?.setItem(PENDING_WB_KEY, JSON.stringify(payload));
   } catch {
     // ignore storage errors
@@ -4306,7 +4374,6 @@ async function consumePendingWorkbenchIntent() {
     raw = "";
   }
   if (!raw || !isCloudSignedIn()) return false;
-  clearPendingWorkbenchIntent();
   let intent = null;
   try {
     intent = JSON.parse(raw);
@@ -4314,13 +4381,17 @@ async function consumePendingWorkbenchIntent() {
     intent = null;
   }
   if (!intent || !intent.action || !intent.ts || Date.now() - Number(intent.ts) > 15 * 60_000) {
+    clearPendingWorkbenchIntent();
     return false;
   }
   if (String(intent.action).startsWith("checkout:")) {
+    if (!cloudSessionState.authenticated) return false;
+    clearPendingWorkbenchIntent();
     pendingCloudAction = intent.action;
     startPendingCloudContinuation();
     return true;
   }
+  clearPendingWorkbenchIntent();
   if (intent.action === "voice_extract" && intent.voiceSamples) {
     const vsInput = document.getElementById("voice-samples-input");
     const voiceDrawer = document.getElementById("voice-drawer");
@@ -4340,6 +4411,7 @@ async function consumePendingWorkbenchIntent() {
     uploadedOriginalText = null;
     customRuleTitle = "user-draft";
     currentPackId = PACKS_BY_ID[intent.packId] || intent.packId === "auto" ? intent.packId : "auto";
+    currentRegister = intent.register || "auto";
     currentModality = intent.modality || inferPastedTextModality(intent.text, currentPackId);
     currentFilename = intent.filename || `pasted-draft.${currentModality === "markdown" ? "md" : currentModality}`;
     activeSpecimen = {
@@ -4356,6 +4428,8 @@ async function consumePendingWorkbenchIntent() {
     focusedFindingIdx = -1;
     const packSel = document.getElementById("pack-select");
     if (packSel) packSel.value = currentPackId;
+    const regSel = document.getElementById("register-select");
+    if (regSel) regSel.value = currentRegister;
     setViewMode("proof");
     updateSpecimenRailSelection();
     renderWorkbench();
@@ -4369,10 +4443,14 @@ async function consumePendingWorkbenchIntent() {
 
 async function refreshCloudSession() {
   try {
-    const resp = await fetch("/api/v1/auth/session", { credentials: "same-origin" });
+    const resp = await fetch("/api/v1/auth/session", { credentials: "same-origin", cache: "no-store" });
     if (!resp.ok) return false;
     const data = await resp.json().catch(() => null);
     if (!data || typeof data !== "object") return false;
+    const nextAcctId = data.authenticated && data.account ? data.account.id : null;
+    if (cachedHubData.accountId !== nextAcctId) {
+      resetCachedHubData(nextAcctId);
+    }
     cloudSessionState = {
       loaded: true,
       authenticated: Boolean(data.authenticated && data.account),
@@ -4382,6 +4460,12 @@ async function refreshCloudSession() {
       billing: data.billing || { enabled: false, portalEnabled: false },
       pendingLink: data.pendingLink || null,
     };
+    if (cloudSessionState.authenticated && cloudSessionState.account?.email) {
+      const savedKeyAcct = loadSavedCloudAccount();
+      if (savedKeyAcct?.email && savedKeyAcct.email.toLowerCase() !== cloudSessionState.account.email.toLowerCase()) {
+        saveCloudAccount(null);
+      }
+    }
     if (cloudSessionState.pendingLink?.email) {
       const tokenEmailInput = document.getElementById("token-email-input");
       if (tokenEmailInput && !tokenEmailInput.value.trim()) {
@@ -4389,6 +4473,7 @@ async function refreshCloudSession() {
       }
     }
     syncCloudOAuthButtons();
+    renderSavedVoiceState();
     renderCloudAccountState();
     return true;
   } catch {
@@ -4398,34 +4483,71 @@ async function refreshCloudSession() {
 
 async function finalizePendingOAuthLinkIfNeeded() {
   let linkMode = "";
+  let rawNext = "";
   try {
     const params = new URLSearchParams(window.location.search || "");
     const raw = params.get("auth") || "";
     if (raw === "link" || raw === "github-link") linkMode = raw;
+    rawNext = params.get("next") || "";
   } catch {
     linkMode = "";
+    rawNext = "";
   }
-  if (!linkMode) return false;
+  if (!linkMode && cloudSessionState.pendingLink?.provider) {
+    linkMode = cloudSessionState.pendingLink.provider === "github" ? "github-link" : "link";
+  }
+  if (!rawNext && cloudSessionState.pendingLink?.returnTo) {
+    rawNext = cloudSessionState.pendingLink.returnTo;
+  }
+  if (!linkMode || !cloudSessionState.authenticated) return { ok: false, skipped: true };
   const endpoint = linkMode === "github-link" ? "/api/v1/auth/github/link-confirm" : "/api/v1/auth/google/link-confirm";
+  const outBox = document.getElementById("token-output-box");
   try {
     const resp = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: buildSessionMutationHeaders({ "Content-Type": "application/json" }),
       credentials: "same-origin",
       body: JSON.stringify({}),
     });
+    const data = await resp.json().catch(() => ({}));
     if (resp.ok) {
       const url = new URL(window.location.href);
       url.searchParams.delete("auth");
       url.searchParams.delete("next");
       window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+      const safeNext =
+        rawNext &&
+        /^\/(?!\/)/.test(rawNext) &&
+        rawNext !== "/" &&
+        !rawNext.startsWith("/#") &&
+        !rawNext.startsWith("/?lang=");
+      if (safeNext) {
+        window.location.assign(rawNext);
+        return { ok: true, navigated: true };
+      }
       await refreshCloudSession();
-      return true;
+      if (outBox) {
+        const providerName = linkMode === "github-link" ? "GitHub" : "Google";
+        outBox.hidden = false;
+        outBox.textContent =
+          currentLang === "zh" ? `已完成验证并绑定 ${providerName} 账号。` : `Verified and linked your ${providerName} account.`;
+      }
+      return { ok: true, navigated: false };
     }
-  } catch {
-    // ignore
+    if (outBox) {
+      outBox.hidden = false;
+      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(
+        data.message || (currentLang === "zh" ? "第三方账号绑定未完成，请核对邮箱后重试。" : "Could not complete account linking. Check the email and retry.")
+      )}</p>`;
+    }
+    return { ok: false, error: data.error || "link_failed", message: data.message || "" };
+  } catch (err) {
+    if (outBox) {
+      outBox.hidden = false;
+      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
+    }
+    return { ok: false, error: "network_error" };
   }
-  return false;
 }
 
 function startPendingCloudContinuation() {
@@ -4472,17 +4594,20 @@ async function startBillingCheckout(planKey = "pro", { seats = 2, triggerBtn = n
   try {
     const resp = await fetch("/api/v1/billing/checkout", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: buildSessionMutationHeaders({ "Content-Type": "application/json" }),
       credentials: "same-origin",
       body: JSON.stringify({
         plan: planKey,
         seats: planKey === "team" ? Math.max(1, Number(seats) || 2) : 1,
         lang: isZh ? "zh" : "en",
-        returnPath: "/#cloud-token-box",
+        returnTo: buildCurrentPageReturnTo("cloud-token-box"),
       }),
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok || !data.url) {
+      if (data.error === "account_changed" || resp.status === 401) {
+        await refreshCloudSession();
+      }
       if (outBox) {
         outBox.hidden = false;
         outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
@@ -4501,18 +4626,20 @@ async function startBillingCheckout(planKey = "pro", { seats = 2, triggerBtn = n
 }
 
 async function openBillingPortal(triggerBtn = null) {
-  const isZh = currentLang === "zh";
   if (triggerBtn) triggerBtn.disabled = true;
   const outBox = document.getElementById("token-output-box");
   try {
     const resp = await fetch("/api/v1/billing/portal", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: buildSessionMutationHeaders({ "Content-Type": "application/json" }),
       credentials: "same-origin",
-      body: JSON.stringify({ returnPath: "/#cloud-token-box" }),
+      body: JSON.stringify({ returnTo: buildCurrentPageReturnTo("cloud-token-box") }),
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok || !data.url) {
+      if (data.error === "account_changed" || resp.status === 401) {
+        await refreshCloudSession();
+      }
       if (outBox) {
         outBox.hidden = false;
         outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
@@ -4648,7 +4775,6 @@ function renderCloudAccountState() {
     if (wlEmailEl && active.email && !wlEmailEl.value.trim()) {
       wlEmailEl.value = active.email;
     }
-    if (googleRow) googleRow.hidden = true;
     syncCloudOAuthButtons();
     if (authPanelEl) authPanelEl.hidden = active.mode === "session";
     if (statusEl) {
@@ -4659,18 +4785,25 @@ function renderCloudAccountState() {
             ? `已登录 <strong>${escapeHtmlSafe(emailLabel)}</strong>（${escapeHtmlSafe(active.plan || "free")} · 剩余 ${escapeHtmlSafe(rem)} 额度）`
             : `Signed in as <strong>${escapeHtmlSafe(emailLabel)}</strong> (${escapeHtmlSafe(active.plan || "free")} · ${escapeHtmlSafe(rem)} credits left)`
           : isZh
-            ? `已绑定密钥 <strong>${escapeHtmlSafe(emailLabel)}</strong>（剩余 ${escapeHtmlSafe(rem)} 额度；用邮箱验证码登录后可管理多密钥与已连应用）`
-            : `Bound key for <strong>${escapeHtmlSafe(emailLabel)}</strong> (${escapeHtmlSafe(rem)} credits left; sign in with email code for full Account Hub)`;
-      statusEl.innerHTML = `<span>${modeNote}</span><span class="quick-actions"><button type="button" id="btn-refresh-cloud-token" class="ctrl-btn ctrl-btn-sm">${isZh ? "刷新额度" : "Refresh"}</button><button type="button" id="btn-clear-cloud-token" class="ctrl-btn ctrl-btn-sm">${isZh ? "退出登录" : "Sign out"}</button></span>`;
+            ? `已绑定密钥 <strong>${escapeHtmlSafe(emailLabel)}</strong>（剩余 ${escapeHtmlSafe(rem)} 额度；用下方验证码或第三方登录后可管理多密钥与订阅）`
+            : `Bound key for <strong>${escapeHtmlSafe(emailLabel)}</strong> (${escapeHtmlSafe(rem)} credits left; sign in below for full Account Hub & billing)`;
+      statusEl.innerHTML = `<span>${modeNote}</span><span class="quick-actions"><button type="button" id="btn-refresh-cloud-token" class="ctrl-btn ctrl-btn-sm">${isZh ? "刷新额度" : "Refresh"}</button><button type="button" id="btn-clear-cloud-token" class="ctrl-btn ctrl-btn-sm">${
+        active.mode === "session" ? (isZh ? "退出登录" : "Sign out") : isZh ? "清除密钥" : "Unbind key"
+      }</button></span>`;
       document.getElementById("btn-refresh-cloud-token")?.addEventListener("click", async (ev) => {
         const btn = ev.currentTarget;
         btn.disabled = true;
         try {
           if (active.mode === "session") {
-            resetCachedHubData();
+            resetCachedHubData(active.id);
             await refreshCloudSession();
           } else {
             const resp = await fetch("/api/v1/account/me", { headers: { Authorization: `Bearer ${active.token}` } });
+            if (resp.status === 401) {
+              saveCloudAccount(null);
+              renderCloudAccountState();
+              return;
+            }
             const data = await resp.json().catch(() => ({}));
             const stillSignedIn = loadSavedCloudAccount();
             if (resp.ok && data.account && stillSignedIn && stillSignedIn.token === active.token) {
@@ -4689,14 +4822,35 @@ function renderCloudAccountState() {
           btn.disabled = false;
         }
       });
-      document.getElementById("btn-clear-cloud-token")?.addEventListener("click", async () => {
+      document.getElementById("btn-clear-cloud-token")?.addEventListener("click", async (ev) => {
+        const out = document.getElementById("token-output-box");
         if (active.mode === "session") {
-          await fetch("/api/v1/auth/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+          const btn = ev.currentTarget;
+          if (btn) btn.disabled = true;
+          const loResp = await fetch("/api/v1/auth/logout", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: "{}",
+          }).catch(() => null);
+          if (!loResp || (!loResp.ok && loResp.status !== 401)) {
+            if (btn) btn.disabled = false;
+            if (out) {
+              out.hidden = false;
+              out.innerHTML = `<p class="ai-error-msg" style="margin:0;">${
+                isZh ? "退出登录未成功，请检查网络后再试。" : "Could not sign out right now. Please check your connection and retry."
+              }</p>`;
+            }
+            return;
+          }
           cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
         }
+        if (loadSavedVoiceProfile()?.sourceAccountId) {
+          saveVoiceProfile(null);
+          renderSavedVoiceState();
+        }
         saveCloudAccount(null);
-        resetCachedHubData();
-        const out = document.getElementById("token-output-box");
+        resetCachedHubData(null);
         if (out) out.hidden = true;
         renderCloudAccountState();
       });
@@ -4853,6 +5007,12 @@ async function renderAccountHub() {
     }
     return;
   }
+  if (cachedHubData.accountId !== active.id) {
+    resetCachedHubData(active.id);
+  }
+  const renderTab = activeHubTab;
+  const renderAcctId = active.id;
+  const isStaleHubRender = () => activeHubTab !== renderTab || getActiveCloudAccount()?.id !== renderAcctId;
   const isZh = currentLang === "zh";
   const tabDefs = [
     { id: "plan", label: isZh ? "订阅与额度" : "Plan & Quota" },
@@ -4891,27 +5051,44 @@ async function renderAccountHub() {
   if (!bodyEl) return;
 
   if (activeHubTab === "plan") {
+    let loadErrMsg = "";
     if (!cachedHubData.usage) {
-      const resp = await fetch("/api/v1/account/usage?limit=12", { credentials: "same-origin" }).catch(() => null);
-      const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
-      cachedHubData.usage = Array.isArray(data.items) ? data.items : [];
+      const resp = await fetch("/api/v1/account/usage?limit=12", { credentials: "same-origin", cache: "no-store" }).catch(() => null);
+      if (resp?.status === 401) {
+        await refreshCloudSession();
+        return;
+      }
+      if (resp && resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        cachedHubData.usage = Array.isArray(data.items) ? data.items : [];
+      } else {
+        loadErrMsg = isZh ? "调用明细加载失败，请点上方「刷新额度」重试。" : "Could not load usage history. Click Refresh above to retry.";
+      }
     }
     if (!cachedHubData.billingHistory) {
-      const bResp = await fetch("/api/v1/billing/history", { credentials: "same-origin" }).catch(() => null);
-      const bData = bResp && bResp.ok ? await bResp.json().catch(() => ({})) : {};
-      cachedHubData.billingHistory = Array.isArray(bData.items) ? bData.items : [];
+      const bResp = await fetch("/api/v1/billing/history", { credentials: "same-origin", cache: "no-store" }).catch(() => null);
+      if (bResp?.status === 401) {
+        await refreshCloudSession();
+        return;
+      }
+      if (bResp && bResp.ok) {
+        const bData = await bResp.json().catch(() => ({}));
+        cachedHubData.billingHistory = Array.isArray(bData.items) ? bData.items : [];
+      }
     }
+    if (isStaleHubRender()) return;
     const used = Number(active.monthlyUsed || 0);
     const quota = Math.max(1, Number(active.monthlyQuota || 30));
     const pct = Math.min(100, Math.round((used / quota) * 100));
     const bonus = Math.max(0, Number(active.bonusCredits || 0));
     const rem = Number(active.totalRemaining ?? Math.max(0, quota - used) + bonus);
     const planCode = String(active.plan || "free").toLowerCase();
-    const seats = Math.max(1, Number(active.seats || 1));
     const sub = active.subscription || {};
-    const charCap = Number(active.maxTextChars || (planCode !== "free" || bonus > 0 ? 50000 : 12000)).toLocaleString("en-US");
+    const seats = Math.max(1, Number(sub.seats || active.seats || 1));
+    const charCap = Number(active.maxChars || active.maxTextChars || (planCode !== "free" || bonus > 0 ? 50000 : 12000)).toLocaleString("en-US");
     const voiceCap = Number(active.voiceCap || (planCode === "team" ? 50 : planCode === "pro" ? 20 : 3));
     const billingLive = Boolean(cloudSessionState.billing?.enabled);
+    const portalReady = Boolean(sub.hasCustomerPortal && (cloudSessionState.billing?.portalEnabled ?? billingLive));
     const periodEndDay = sub.currentPeriodEnd ? String(sub.currentPeriodEnd).slice(0, 10) : "";
 
     let subStatusHtml = "";
@@ -4956,12 +5133,11 @@ async function renderAccountHub() {
             <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">${
               isZh ? "加购按量包（$10 / 800 额度）" : "Top up 800 Credits ($10)"
             }</button>`;
-      const portalBtn =
-        sub.hasCustomerPortal && cloudSessionState.billing?.portalEnabled
-          ? `<button type="button" class="ctrl-btn ctrl-btn-sm" id="hub-open-portal-btn">${
-              isZh ? "管理账单与发票" : "Manage billing & invoices"
-            }</button>`
-          : "";
+      const portalBtn = portalReady
+        ? `<button type="button" class="ctrl-btn ctrl-btn-sm" id="hub-open-portal-btn">${
+            isZh ? "管理账单与发票" : "Manage billing & invoices"
+          }</button>`
+        : "";
       planActionsHtml = `<div class="quick-actions" style="margin-top:8px;">${upgradeBtns}${portalBtn}</div>`;
     } else {
       planActionsHtml = `<div class="quick-actions" style="margin-top:8px;">
@@ -5018,9 +5194,10 @@ async function renderAccountHub() {
       </div>
       ${billingLedgerHtml}
       <div class="hub-sub-heading">${isZh ? "近期云端调用明细" : "Recent cloud calls"}</div>
+      ${loadErrMsg ? `<p class="ai-error-msg" style="margin:4px 0;">${escapeHtmlSafe(loadErrMsg)}</p>` : ""}
       <ul class="hub-list">
         ${
-          usageItems.length === 0
+          usageItems.length === 0 && !loadErrMsg
             ? `<li class="hub-list-row"><span>${isZh ? "本月还没有云端调用记录。" : "No cloud calls recorded yet."}</span></li>`
             : usageItems
                 .map((it) => {
@@ -5046,12 +5223,22 @@ async function renderAccountHub() {
   }
 
   if (activeHubTab === "keys") {
+    let keysLoadErr = "";
     if (!cachedHubData.keys) {
-      const resp = await fetch("/api/v1/account/keys", { credentials: "same-origin" }).catch(() => null);
-      const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
-      cachedHubData.keys = Array.isArray(data.keys) ? data.keys : [];
+      const resp = await fetch("/api/v1/account/keys", { credentials: "same-origin", cache: "no-store" }).catch(() => null);
+      if (resp?.status === 401) {
+        await refreshCloudSession();
+        return;
+      }
+      if (resp && resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        cachedHubData.keys = Array.isArray(data.keys) ? data.keys : [];
+      } else {
+        keysLoadErr = isZh ? "密钥列表加载失败，请点上方「刷新额度」重试。" : "Could not load API keys. Click Refresh above to retry.";
+      }
     }
-    const keys = cachedHubData.keys;
+    if (isStaleHubRender()) return;
+    const keys = cachedHubData.keys || [];
     const mcpUrl = `${window.location.origin}/mcp`;
     const cliCmd = `claude mcp add --transport http dislop ${mcpUrl}`;
     const renderKeyRowHtml = (k) => {
@@ -5081,7 +5268,25 @@ async function renderAccountHub() {
           const kid = rBtn.getAttribute("data-revoke-key");
           if (!kid) return;
           rBtn.disabled = true;
-          await fetch(`/api/v1/account/keys/${encodeURIComponent(kid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
+          const rResp = await fetch(`/api/v1/account/keys/${encodeURIComponent(kid)}`, {
+            method: "DELETE",
+            headers: buildSessionMutationHeaders(),
+            credentials: "same-origin",
+          }).catch(() => null);
+          if (!rResp || !rResp.ok) {
+            rBtn.disabled = false;
+            const rData = rResp ? await rResp.json().catch(() => ({})) : {};
+            if (rData.error === "account_changed" || rResp?.status === 401) {
+              await refreshCloudSession();
+              return;
+            }
+            const outEl = document.getElementById("hub-new-key-out");
+            if (outEl) {
+              outEl.hidden = false;
+              outEl.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(rData.message || (isZh ? "撤销密钥失败，请重试。" : "Could not revoke key. Please retry."))}</p>`;
+            }
+            return;
+          }
           cachedHubData.keys = null;
           renderAccountHub();
         });
@@ -5103,10 +5308,10 @@ async function renderAccountHub() {
         <input type="number" id="hub-new-key-limit" class="cloud-input hub-key-limit" min="1" max="100000" placeholder="${isZh ? "月度限额（选填）" : "Monthly cap (opt)"}">
         <button type="submit" id="hub-new-key-btn" class="btn-primary" style="min-height:32px;padding:4px 12px;font-size:0.79rem;">${isZh ? "生成新密钥" : "Create API key"}</button>
       </form>
-      <div id="hub-new-key-out" class="cloud-output-box" hidden></div>
+      <div id="hub-new-key-out" class="cloud-output-box" ${keysLoadErr ? "" : "hidden"}>${keysLoadErr ? `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(keysLoadErr)}</p>` : ""}</div>
       <ul class="hub-list">
         ${
-          keys.length === 0
+          keys.length === 0 && !keysLoadErr
             ? `<li class="hub-list-row"><span>${isZh ? "暂未创建长期 API 密钥（用 OAuth 直连无需建密钥）。" : "No API keys yet (OAuth clients don't need one)."}</span></li>`
             : keys.map(renderKeyRowHtml).join("")
         }
@@ -5131,12 +5336,16 @@ async function renderAccountHub() {
       try {
         const resp = await fetch("/api/v1/account/keys", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: buildSessionMutationHeaders({ "Content-Type": "application/json" }),
           credentials: "same-origin",
           body: JSON.stringify({ name, ...(monthlyLimit ? { monthlyLimit } : {}) }),
         });
         const data = await resp.json().catch(() => ({}));
         if (!resp.ok || !data.apiKey) {
+          if (data.error === "account_changed" || resp.status === 401) {
+            await refreshCloudSession();
+            return;
+          }
           if (outEl) {
             outEl.hidden = false;
             outEl.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
@@ -5157,13 +5366,15 @@ async function renderAccountHub() {
             await copyTextWithFeedback(cEv.currentTarget, cfgStr);
           });
         }
-        const kResp = await fetch("/api/v1/account/keys", { credentials: "same-origin" }).catch(() => null);
-        const kData = kResp && kResp.ok ? await kResp.json().catch(() => ({})) : {};
-        cachedHubData.keys = Array.isArray(kData.keys) ? kData.keys : [];
-        const listEl = bodyEl.querySelector(".hub-list");
-        if (listEl) {
-          listEl.innerHTML = cachedHubData.keys.map(renderKeyRowHtml).join("");
-          wireRevokeKeyBtns(listEl);
+        const kResp = await fetch("/api/v1/account/keys", { credentials: "same-origin", cache: "no-store" }).catch(() => null);
+        if (kResp && kResp.ok) {
+          const kData = await kResp.json().catch(() => ({}));
+          cachedHubData.keys = Array.isArray(kData.keys) ? kData.keys : [];
+          const listEl = bodyEl.querySelector(".hub-list");
+          if (listEl) {
+            listEl.innerHTML = cachedHubData.keys.map(renderKeyRowHtml).join("");
+            wireRevokeKeyBtns(listEl);
+          }
         }
       } finally {
         if (btn) btn.disabled = false;
@@ -5174,17 +5385,28 @@ async function renderAccountHub() {
   }
 
   if (activeHubTab === "apps") {
+    let appsLoadErr = "";
     if (!cachedHubData.apps) {
-      const resp = await fetch("/api/v1/account/apps", { credentials: "same-origin" }).catch(() => null);
-      const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
-      cachedHubData.apps = Array.isArray(data.apps) ? data.apps : [];
+      const resp = await fetch("/api/v1/account/apps", { credentials: "same-origin", cache: "no-store" }).catch(() => null);
+      if (resp?.status === 401) {
+        await refreshCloudSession();
+        return;
+      }
+      if (resp && resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        cachedHubData.apps = Array.isArray(data.apps) ? data.apps : [];
+      } else {
+        appsLoadErr = isZh ? "已连应用列表加载失败，请点上方「刷新额度」重试。" : "Could not load connected apps. Click Refresh above to retry.";
+      }
     }
-    const apps = cachedHubData.apps;
+    if (isStaleHubRender()) return;
+    const apps = cachedHubData.apps || [];
     bodyEl.innerHTML = `
       <p class="hub-section-note">${isZh ? "通过 OAuth 2.1 免密钥授权接入的编辑器或 Agent 会列在这里，可随时断开。" : "Editors and agents authorized via OAuth 2.1 appear here and can be revoked anytime."}</p>
+      <div id="hub-apps-feedback" class="ai-result-meta">${appsLoadErr ? `<span class="ai-error-msg">${escapeHtmlSafe(appsLoadErr)}</span>` : ""}</div>
       <ul class="hub-list">
         ${
-          apps.length === 0
+          apps.length === 0 && !appsLoadErr
             ? `<li class="hub-list-row"><span>${isZh ? "暂无已连接的 OAuth 应用。" : "No connected OAuth apps yet."}</span></li>`
             : apps
                 .map((a) => {
@@ -5209,7 +5431,22 @@ async function renderAccountHub() {
         const gid = btn.getAttribute("data-revoke-app");
         if (!gid) return;
         btn.disabled = true;
-        await fetch(`/api/v1/account/apps/${encodeURIComponent(gid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
+        const rResp = await fetch(`/api/v1/account/apps/${encodeURIComponent(gid)}`, {
+          method: "DELETE",
+          headers: buildSessionMutationHeaders(),
+          credentials: "same-origin",
+        }).catch(() => null);
+        if (!rResp || !rResp.ok) {
+          btn.disabled = false;
+          const rData = rResp ? await rResp.json().catch(() => ({})) : {};
+          if (rData.error === "account_changed" || rResp?.status === 401) {
+            await refreshCloudSession();
+            return;
+          }
+          const fb = document.getElementById("hub-apps-feedback");
+          if (fb) fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(rData.message || (isZh ? "断开失败，请重试。" : "Could not disconnect app. Please retry."))}</span>`;
+          return;
+        }
         cachedHubData.apps = null;
         renderAccountHub();
       });
@@ -5218,12 +5455,22 @@ async function renderAccountHub() {
   }
 
   if (activeHubTab === "voices") {
+    let voicesLoadErr = "";
     if (!cachedHubData.voices) {
-      const resp = await fetch("/api/v1/account/voices", { credentials: "same-origin" }).catch(() => null);
-      const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
-      cachedHubData.voices = Array.isArray(data.voices) ? data.voices : [];
+      const resp = await fetch("/api/v1/account/voices", { credentials: "same-origin", cache: "no-store" }).catch(() => null);
+      if (resp?.status === 401) {
+        await refreshCloudSession();
+        return;
+      }
+      if (resp && resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        cachedHubData.voices = Array.isArray(data.voices) ? data.voices : [];
+      } else {
+        voicesLoadErr = isZh ? "云端文风列表加载失败，请点上方「刷新额度」重试。" : "Could not load voice cards. Click Refresh above to retry.";
+      }
     }
-    const voices = cachedHubData.voices;
+    if (isStaleHubRender()) return;
+    const voices = cachedHubData.voices || [];
     const voiceCap = Number(active.voiceCap || (active.plan === "team" ? 50 : active.plan === "pro" ? 20 : 3));
     bodyEl.innerHTML = `
       <p class="hub-section-note">${
@@ -5231,9 +5478,10 @@ async function renderAccountHub() {
           ? `已保存 ${voices.length} / ${voiceCap} 份云端文风。在工作台提炼的文风会自动同步给远程 MCP 改稿复用。`
           : `${voices.length} / ${voiceCap} cloud voice cards saved. Profiles extracted in the workbench sync automatically to Remote MCP.`
       }</p>
+      <div id="hub-voices-feedback" class="ai-result-meta">${voicesLoadErr ? `<span class="ai-error-msg">${escapeHtmlSafe(voicesLoadErr)}</span>` : ""}</div>
       <ul class="hub-list">
         ${
-          voices.length === 0
+          voices.length === 0 && !voicesLoadErr
             ? `<li class="hub-list-row"><span>${isZh ? "还没有云端文风卡。可在工作台下方「提取个人文风」抽屉里保存。" : "No saved voice cards yet. Extract one from the workbench style drawer."}</span></li>`
             : voices
                 .map(
@@ -5259,6 +5507,8 @@ async function renderAccountHub() {
             sentenceHabits: found.sentenceHabits,
             preferredPatterns: found.preferredPatterns,
             avoidPatterns: found.avoidPatterns,
+            sourceAccountId: active.id,
+            sourceVoiceId: vid,
           });
           renderSavedVoiceState(true);
           btn.textContent = isZh ? "已启用" : "Active";
@@ -5270,7 +5520,26 @@ async function renderAccountHub() {
         const vid = btn.getAttribute("data-del-voice");
         if (!vid) return;
         btn.disabled = true;
-        await fetch(`/api/v1/account/voices/${encodeURIComponent(vid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
+        const rResp = await fetch(`/api/v1/account/voices/${encodeURIComponent(vid)}`, {
+          method: "DELETE",
+          headers: buildSessionMutationHeaders(),
+          credentials: "same-origin",
+        }).catch(() => null);
+        if (!rResp || !rResp.ok) {
+          btn.disabled = false;
+          const rData = rResp ? await rResp.json().catch(() => ({})) : {};
+          if (rData.error === "account_changed" || rResp?.status === 401) {
+            await refreshCloudSession();
+            return;
+          }
+          const fb = document.getElementById("hub-voices-feedback");
+          if (fb) fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(rData.message || (isZh ? "删除失败，请重试。" : "Could not delete voice card. Please retry."))}</span>`;
+          return;
+        }
+        if (loadSavedVoiceProfile()?.sourceVoiceId === vid) {
+          saveVoiceProfile(null);
+          renderSavedVoiceState();
+        }
         cachedHubData.voices = null;
         renderAccountHub();
       });
@@ -5279,11 +5548,12 @@ async function renderAccountHub() {
   }
 
   // Sign-in & Security tab
-  const hasGoogleLinked = Boolean(active.identities?.google);
-  const hasGithubLinked = Boolean(active.identities?.github);
+  const hasGoogleLinked = Boolean(active.googleLinked || active.identities?.google);
+  const hasGithubLinked = Boolean(active.githubLinked || active.identities?.github);
   const googleServerReady = Boolean(cloudSessionState.methods?.google);
   const githubServerReady = Boolean(cloudSessionState.methods?.github);
   const deliverableEmail = active.deliverableEmail !== false;
+  const connectRet = encodeURIComponent(buildCurrentPageReturnTo("cloud-token-box"));
 
   const googleRowHtml =
     hasGoogleLinked || googleServerReady
@@ -5292,7 +5562,7 @@ async function renderAccountHub() {
           ${
             hasGoogleLinked
               ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-unlink-provider="google">${isZh ? "解绑" : "Disconnect"}</button>`
-              : `<a href="/api/v1/auth/google/start?intent=link&return=%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;">${isZh ? "绑定 Google" : "Connect Google"}</a>`
+              : `<a href="/api/v1/auth/google/start?intent=link&return=${connectRet}" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;">${isZh ? "绑定 Google" : "Connect Google"}</a>`
           }
         </li>`
       : "";
@@ -5304,7 +5574,7 @@ async function renderAccountHub() {
           ${
             hasGithubLinked
               ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-unlink-provider="github">${isZh ? "解绑" : "Disconnect"}</button>`
-              : `<a href="/api/v1/auth/github/start?intent=link&return=%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;">${isZh ? "绑定 GitHub" : "Connect GitHub"}</a>`
+              : `<a href="/api/v1/auth/github/start?intent=link&return=${connectRet}" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;">${isZh ? "绑定 GitHub" : "Connect GitHub"}</a>`
           }
         </li>`
       : "";
@@ -5359,10 +5629,15 @@ async function renderAccountHub() {
       try {
         const resp = await fetch(`/api/v1/account/identities/${encodeURIComponent(provider)}`, {
           method: "DELETE",
+          headers: buildSessionMutationHeaders(),
           credentials: "same-origin",
         });
         const data = await resp.json().catch(() => ({}));
         if (!resp.ok) {
+          if (data.error === "account_changed" || resp.status === 401) {
+            await refreshCloudSession();
+            return;
+          }
           if (secFb) secFb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</span>`;
           btn.disabled = false;
           return;
@@ -5376,11 +5651,36 @@ async function renderAccountHub() {
   });
 
   document.getElementById("hub-logout-all-btn")?.addEventListener("click", async (ev) => {
-    ev.currentTarget.disabled = true;
-    await fetch("/api/v1/auth/logout-all", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+    const btn = ev.currentTarget;
+    const secFb = document.getElementById("hub-security-feedback");
+    btn.disabled = true;
+    const loResp = await fetch("/api/v1/auth/logout-all", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: buildSessionMutationHeaders({ "Content-Type": "application/json" }),
+      body: "{}",
+    }).catch(() => null);
+    if (!loResp || (!loResp.ok && loResp.status !== 401)) {
+      btn.disabled = false;
+      const lData = loResp ? await loResp.json().catch(() => ({})) : {};
+      if (lData.error === "account_changed") {
+        await refreshCloudSession();
+        return;
+      }
+      if (secFb) {
+        secFb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(
+          lData.message || (isZh ? "退出所有设备失败，请重试。" : "Could not sign out all devices. Please retry.")
+        )}</span>`;
+      }
+      return;
+    }
+    if (loadSavedVoiceProfile()?.sourceAccountId) {
+      saveVoiceProfile(null);
+      renderSavedVoiceState();
+    }
     cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
     saveCloudAccount(null);
-    resetCachedHubData();
+    resetCachedHubData(null);
     renderCloudAccountState();
   });
   document.getElementById("hub-delete-acct-form")?.addEventListener("submit", async (ev) => {
@@ -5394,17 +5694,25 @@ async function renderAccountHub() {
       const resp = await fetch("/api/v1/account", {
         method: "DELETE",
         credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
+        headers: buildSessionMutationHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ confirmEmail }),
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
+        if (data.error === "account_changed") {
+          await refreshCloudSession();
+          return;
+        }
         fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</span>`;
         return;
       }
+      if (loadSavedVoiceProfile()?.sourceAccountId) {
+        saveVoiceProfile(null);
+        renderSavedVoiceState();
+      }
       cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
       saveCloudAccount(null);
-      resetCachedHubData();
+      resetCachedHubData(null);
       renderCloudAccountState();
     } finally {
       if (btn) btn.disabled = false;
@@ -5414,6 +5722,7 @@ async function renderAccountHub() {
 
 function closeAuthModal({ clearPending = false } = {}) {
   const backdrop = document.getElementById("auth-modal-backdrop");
+  const wasOpen = Boolean(backdrop && !backdrop.hidden);
   if (backdrop) backdrop.hidden = true;
   if (modalOtpResendTimer) {
     clearInterval(modalOtpResendTimer);
@@ -5422,6 +5731,11 @@ function closeAuthModal({ clearPending = false } = {}) {
   if (clearPending) {
     pendingCloudAction = null;
     clearPendingWorkbenchIntent();
+  }
+  if (wasOpen && lastAuthModalTrigger && document.contains(lastAuthModalTrigger)) {
+    const restoreEl = lastAuthModalTrigger;
+    lastAuthModalTrigger = null;
+    setTimeout(() => restoreEl.focus?.(), 0);
   }
 }
 
@@ -5433,6 +5747,9 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
   if (!backdrop || !bodyEl) {
     openInlineCloudKeyPanelFallback(reasonMsg);
     return;
+  }
+  if (backdrop.hidden && document.activeElement instanceof HTMLElement) {
+    lastAuthModalTrigger = document.activeElement;
   }
   const isZh = currentLang === "zh";
   if (action) pendingCloudAction = action;
@@ -5466,15 +5783,18 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
   const googleSvg =
     '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.83.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.97 10.72A5.41 5.41 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.82.96 4.05l3.01-2.33Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"/></svg>';
 
+  const modalReturnAnchor = isCheckoutAct ? "cloud-token-box" : "workbench";
+  const modalReturnTo = buildCurrentPageReturnTo(modalReturnAnchor);
+  const encodedModalReturn = encodeURIComponent(modalReturnTo);
   const hasGh = Boolean(cloudSessionState.methods?.github);
   const hasG = Boolean(cloudSessionState.methods?.google);
   const githubBtnHtml = hasGh
-    ? `<a href="/api/v1/auth/github/start?return=%2F%23workbench" class="auth-provider-btn" data-oauth-provider="github">${githubSvg}<span>${
+    ? `<a href="/api/v1/auth/github/start?return=${encodedModalReturn}" class="auth-provider-btn" data-oauth-provider="github">${githubSvg}<span>${
         isZh ? "使用 GitHub 一键继续" : "Continue with GitHub"
       }</span></a>`
     : "";
   const googleBtnHtml = hasG
-    ? `<a href="/api/v1/auth/google/start?return=%2F%23workbench" class="auth-provider-btn" data-oauth-provider="google">${googleSvg}<span>${
+    ? `<a href="/api/v1/auth/google/start?return=${encodedModalReturn}" class="auth-provider-btn" data-oauth-provider="google">${googleSvg}<span>${
         isZh ? "使用 Google 一键继续" : "Continue with Google"
       }</span></a>`
     : "";
@@ -5499,13 +5819,14 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
       </div>
     </form>`;
 
-  const binaryNoteHtml = binaryAuditResult
-    ? `<p class="auth-modal-note">${
-        isZh
-          ? "提示：当前 Word / PPT 已加载在内存，用上方邮箱验证码可不刷新页面直接继续处理。"
-          : "Tip: your Word/PPT file stays loaded in browser RAM when using Email code sign-in below."
-      }</p>`
-    : "";
+  const binaryNoteHtml =
+    binaryAuditResult && !isCheckoutAct
+      ? `<p class="auth-modal-note">${
+          isZh
+            ? "提示：当前 Word / PPT 已加载在内存，用上方邮箱验证码可不刷新页面直接继续处理。"
+            : "Tip: your Word/PPT file stays loaded in browser RAM when using Email code sign-in below."
+        }</p>`
+      : "";
   const reasonHtml = reasonMsg ? `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(reasonMsg)}</p>` : "";
 
   let providersSection = "";
@@ -5523,20 +5844,24 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
       ${otpFormHtml}`;
   }
 
+  const legacyFoldHtml = isCheckoutAct
+    ? ""
+    : `<details class="cloud-legacy-fold">
+        <summary>${isZh ? "已有 dslp_... 密钥？点此绑定" : "Already have a dslp_... API key?"}</summary>
+        <form id="auth-modal-key-form" class="cloud-inline-form" style="margin-top:8px;">
+          <input type="text" id="auth-modal-key-input" class="cloud-input" required placeholder="dslp_..." autocomplete="off">
+          <button type="submit" id="auth-modal-key-btn" class="ctrl-btn ctrl-btn-sm">${isZh ? "绑定" : "Bind"}</button>
+        </form>
+      </details>`;
+
   bodyEl.innerHTML = `
     ${reasonHtml}
     ${binaryNoteHtml}
     ${providersSection}
-    <div id="auth-modal-feedback" class="ai-result-meta">${
+    <div id="auth-modal-feedback" class="ai-result-meta" aria-live="polite">${
       isZh ? "支持直接粘贴 6 位数字验证码自动登录。" : "Paste your 6-digit code to sign in automatically."
     }</div>
-    <details class="cloud-legacy-fold">
-      <summary>${isZh ? "已有 dslp_... 密钥？点此绑定" : "Already have a dslp_... API key?"}</summary>
-      <form id="auth-modal-key-form" class="cloud-inline-form" style="margin-top:8px;">
-        <input type="text" id="auth-modal-key-input" class="cloud-input" required placeholder="dslp_..." autocomplete="off">
-        <button type="submit" id="auth-modal-key-btn" class="ctrl-btn ctrl-btn-sm">${isZh ? "绑定" : "Bind"}</button>
-      </form>
-    </details>`;
+    ${legacyFoldHtml}`;
 
   backdrop.hidden = false;
 
@@ -5555,6 +5880,26 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
   const sendBtn = document.getElementById("auth-modal-send-btn");
   const verifyBtn = document.getElementById("auth-modal-verify-btn");
   const fb = document.getElementById("auth-modal-feedback");
+
+  const startModalSendCooldown = (seconds) => {
+    if (modalOtpResendTimer) clearInterval(modalOtpResendTimer);
+    let left = Math.max(1, Math.ceil(Number(seconds) || 60));
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.textContent = `${left}s`;
+      modalOtpResendTimer = setInterval(() => {
+        left -= 1;
+        if (left <= 0) {
+          clearInterval(modalOtpResendTimer);
+          modalOtpResendTimer = null;
+          sendBtn.disabled = false;
+          sendBtn.textContent = isZh ? "重发验证码" : "Resend";
+        } else {
+          sendBtn.textContent = `${left}s`;
+        }
+      }, 1000);
+    }
+  };
 
   let modalVerifyInFlight = false;
   const submitModalOtpVerify = async () => {
@@ -5577,6 +5922,7 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
         fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</span>`;
         return;
       }
+      resetCachedHubData(data.account.id);
       cloudSessionState = {
         ...cloudSessionState,
         loaded: true,
@@ -5584,9 +5930,10 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
         authMethod: "email_otp",
         account: data.account,
       };
-      await finalizePendingOAuthLinkIfNeeded();
+      const linkOut = await finalizePendingOAuthLinkIfNeeded();
+      if (linkOut?.navigated) return;
+      await refreshCloudSession();
       closeAuthModal({ clearPending: false });
-      renderCloudAccountState();
       if (pendingCloudAction) {
         startPendingCloudContinuation();
       }
@@ -5602,6 +5949,7 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
     ev.preventDefault();
     const email = String(emailEl?.value || "").trim();
     if (!email || !fb) return;
+    if (pendingCloudAction) savePendingWorkbenchIntent(pendingCloudAction);
     if (sendBtn) sendBtn.disabled = true;
     fb.textContent = isZh ? "正在发送 6 位验证码…" : "Sending 6-digit code...";
     try {
@@ -5609,12 +5957,16 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ email, lang: isZh ? "zh" : "en" }),
+        body: JSON.stringify({ email, lang: isZh ? "zh" : "en", returnTo: modalReturnTo }),
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
         fb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</span>`;
-        if (sendBtn) sendBtn.disabled = false;
+        if (Number(data.retryAfterSec) > 0) {
+          startModalSendCooldown(data.retryAfterSec);
+        } else if (sendBtn) {
+          sendBtn.disabled = false;
+        }
         return;
       }
       if (emailEl) emailEl.readOnly = true;
@@ -5623,23 +5975,7 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
         otpInput.value = "";
         otpInput.focus();
       }
-      if (modalOtpResendTimer) clearInterval(modalOtpResendTimer);
-      let left = 60;
-      if (sendBtn) {
-        sendBtn.disabled = true;
-        sendBtn.textContent = isZh ? `${left}s` : `${left}s`;
-        modalOtpResendTimer = setInterval(() => {
-          left -= 1;
-          if (left <= 0) {
-            clearInterval(modalOtpResendTimer);
-            modalOtpResendTimer = null;
-            sendBtn.disabled = false;
-            sendBtn.textContent = isZh ? "重发验证码" : "Resend";
-          } else {
-            sendBtn.textContent = `${left}s`;
-          }
-        }, 1000);
-      }
+      startModalSendCooldown(60);
       fb.textContent =
         data.message || (isZh ? "验证码已发送，输入或粘贴 6 位数字即可自动登录。" : "Code sent — enter or paste 6 digits to continue.");
     } catch (err) {
@@ -5754,13 +6090,28 @@ function openInlineCloudKeyPanelFallback(reasonMsg = "") {
     document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
       panel.hidden = true;
     });
-    document.getElementById("inline-clear-key-btn")?.addEventListener("click", async () => {
+    document.getElementById("inline-clear-key-btn")?.addEventListener("click", async (ev) => {
       if (cloudSessionState.authenticated) {
-        await fetch("/api/v1/auth/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
+        const btn = ev.currentTarget;
+        if (btn) btn.disabled = true;
+        const loResp = await fetch("/api/v1/auth/logout", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: "{}",
+        }).catch(() => null);
+        if (!loResp || (!loResp.ok && loResp.status !== 401)) {
+          if (btn) btn.disabled = false;
+          return;
+        }
         cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
       }
+      if (loadSavedVoiceProfile()?.sourceAccountId) {
+        saveVoiceProfile(null);
+        renderSavedVoiceState();
+      }
       saveCloudAccount(null);
-      resetCachedHubData();
+      resetCachedHubData(null);
       renderCloudAccountState();
       panel.hidden = true;
     });
@@ -5887,8 +6238,22 @@ function renderAiError(errCode, message) {
     openQuotaUpgradePanel(message);
     return;
   }
+  if (errCode === "account_changed") {
+    resetCachedHubData(null);
+    refreshCloudSession();
+    panel.hidden = false;
+    panel.innerHTML = `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>`;
+    return;
+  }
   const needsToken = errCode === "auth_required" || errCode === "unauthorized" || errCode === "invalid_token";
   if (needsToken) {
+    if (cloudSessionState.authenticated) {
+      resetCachedHubData(null);
+      refreshCloudSession();
+    } else if (errCode === "invalid_token" && loadSavedCloudAccount()) {
+      saveCloudAccount(null);
+      renderCloudAccountState();
+    }
     openInlineCloudKeyPanel(message);
     return;
   }
@@ -5957,7 +6322,7 @@ async function runOfficeCloudAction(kind) {
   );
 
   try {
-    const savedVoice = kind === "deslop" ? loadSavedVoiceProfile() : null;
+    const savedVoice = kind === "deslop" ? stripVoiceLocalMeta(loadSavedVoiceProfile()) : null;
     const resp = await fetch(
       endpoint,
       buildCloudFetchInit({
@@ -5983,6 +6348,7 @@ async function runOfficeCloudAction(kind) {
 
     updateCreditsFromBilling(data.billing);
     cachedHubData.usage = null;
+    cachedHubData.billingHistory = null;
     const panel = document.getElementById("ai-result-panel");
     if (!panel) return;
     panel.hidden = false;
@@ -6133,7 +6499,7 @@ async function runCloudAction(kind) {
   );
 
   try {
-    const savedVoice = kind === "deslop" ? loadSavedVoiceProfile() : null;
+    const savedVoice = kind === "deslop" ? stripVoiceLocalMeta(loadSavedVoiceProfile()) : null;
     const resp = await fetch(
       endpoint,
       buildCloudFetchInit({
@@ -6159,12 +6525,13 @@ async function runCloudAction(kind) {
     }
 
     updateCreditsFromBilling(data.billing);
+    cachedHubData.usage = null;
+    cachedHubData.billingHistory = null;
     const panel = document.getElementById("ai-result-panel");
     if (!panel) return;
     panel.hidden = false;
 
     if (kind === "review") {
-      cachedHubData.usage = null;
       const structured = Array.isArray(data.findings) && data.findings.length > 0 ? data.findings : null;
       const level = data.aiFlavorLevel || data.llmReview?.aiFlavorLevel || "medium";
       const summary = data.summary || data.llmReview?.summary || "";
@@ -6334,31 +6701,9 @@ async function handleFreeTokenSubmit(e) {
   const email = String(emailInput?.value || "").trim();
   if (!email || !outBox) return;
 
-  if (submitBtn) submitBtn.disabled = true;
-  outBox.hidden = false;
-  outBox.textContent = isZh ? "正在发送 6 位登录验证码…" : "Sending 6-digit verification code...";
-
-  try {
-    const resp = await fetch("/api/v1/auth/otp/request", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ email, lang: isZh ? "zh" : "en" }),
-    });
-    const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) {
-      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
-      return;
-    }
-
-    if (emailInput) emailInput.readOnly = true;
-    if (otpStep) otpStep.hidden = false;
-    if (otpInput) {
-      otpInput.value = "";
-      otpInput.focus();
-    }
+  const startInlineResendCooldown = (seconds) => {
     if (otpResendTimer) clearInterval(otpResendTimer);
-    let leftSec = 60;
+    let leftSec = Math.max(1, Math.ceil(Number(seconds) || 60));
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.textContent = isZh ? `${leftSec} 秒后可重发` : `Resend (${leftSec}s)`;
@@ -6374,6 +6719,42 @@ async function handleFreeTokenSubmit(e) {
         }
       }, 1000);
     }
+  };
+
+  if (pendingCloudAction) savePendingWorkbenchIntent(pendingCloudAction);
+  if (submitBtn) submitBtn.disabled = true;
+  outBox.hidden = false;
+  outBox.textContent = isZh ? "正在发送 6 位登录验证码…" : "Sending 6-digit verification code...";
+
+  try {
+    const resp = await fetch("/api/v1/auth/otp/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({
+        email,
+        lang: isZh ? "zh" : "en",
+        returnTo: buildCurrentPageReturnTo("cloud-token-box"),
+      }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
+      if (Number(data.retryAfterSec) > 0) {
+        startInlineResendCooldown(data.retryAfterSec);
+      } else if (submitBtn) {
+        submitBtn.disabled = false;
+      }
+      return;
+    }
+
+    if (emailInput) emailInput.readOnly = true;
+    if (otpStep) otpStep.hidden = false;
+    if (otpInput) {
+      otpInput.value = "";
+      otpInput.focus();
+    }
+    startInlineResendCooldown(60);
     outBox.textContent =
       data.message ||
       (isZh ? "验证码已发往你的邮箱（10 分钟内有效），填入上方即可登录。" : "Check your email for the 6-digit code (valid 10 min) and enter it above.");
@@ -6390,8 +6771,8 @@ async function handleOtpVerifySubmit() {
   const verifyBtn = document.getElementById("token-otp-verify-btn");
   const outBox = document.getElementById("token-output-box");
   const email = String(emailInput?.value || "").trim();
-  const code = String(otpInput?.value || "").trim();
-  if (!email || !code || !outBox) return;
+  const code = String(otpInput?.value || "").replace(/\D/g, "").slice(0, 6);
+  if (!email || code.length !== 6 || !outBox) return;
 
   if (verifyBtn) verifyBtn.disabled = true;
   outBox.hidden = false;
@@ -6422,6 +6803,7 @@ async function handleOtpVerifySubmit() {
       submitBtn.textContent = I18N[currentLang]?.["cloud.tokenBtn"] || (isZh ? "发验证码" : "Send code");
     }
 
+    resetCachedHubData(data.account.id);
     cloudSessionState = {
       ...cloudSessionState,
       loaded: true,
@@ -6429,9 +6811,12 @@ async function handleOtpVerifySubmit() {
       authMethod: "email_otp",
       account: data.account,
     };
-    await finalizePendingOAuthLinkIfNeeded();
-    outBox.hidden = true;
-    renderCloudAccountState();
+    const linkOut = await finalizePendingOAuthLinkIfNeeded();
+    if (linkOut?.navigated) return;
+    await refreshCloudSession();
+    if (linkOut?.skipped) {
+      outBox.hidden = true;
+    }
     startPendingCloudContinuation();
   } catch (err) {
     outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
@@ -7263,9 +7648,37 @@ function init() {
     if (ev.target === ev.currentTarget) closeAuthModal({ clearPending: true });
   });
   document.addEventListener("keydown", (ev) => {
+    const modal = document.getElementById("auth-modal-backdrop");
+    if (!modal || modal.hidden) return;
     if (ev.key === "Escape") {
-      const modal = document.getElementById("auth-modal-backdrop");
-      if (modal && !modal.hidden) closeAuthModal({ clearPending: true });
+      closeAuthModal({ clearPending: true });
+      return;
+    }
+    if (ev.key === "Tab") {
+      const card = modal.querySelector(".auth-modal-card") || modal;
+      const focusable = Array.from(
+        card.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), summary, [tabindex]:not([tabindex="-1"])')
+      ).filter((el) => !el.closest("[hidden]") && el.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (ev.shiftKey && (document.activeElement === first || !card.contains(document.activeElement))) {
+        ev.preventDefault();
+        last.focus();
+      } else if (!ev.shiftKey && document.activeElement === last) {
+        ev.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible") return;
+    const now = Date.now();
+    if (now - lastVisibilitySessionSyncMs < 15_000) return;
+    if (cloudSessionState.authenticated || document.cookie.includes("dslp_hint=")) {
+      lastVisibilitySessionSyncMs = now;
+      refreshCloudSession();
     }
   });
 
@@ -7374,28 +7787,38 @@ function init() {
   document.getElementById("waitlist-form")?.addEventListener("submit", handleWaitlistSubmit);
 
   captureEntrySource();
+  let initialMagicToken = "";
+  let initialBillingState = "";
+  let initialAuthError = "";
   try {
-    const hash = String(window.location.hash || "");
-    const params = new URLSearchParams(window.location.search || "");
-    const outBox = document.getElementById("token-output-box");
-    const authParam = params.get("auth") || "";
-    if (hash.startsWith("#auth-error=") && outBox) {
-      const code = decodeURIComponent(hash.slice("#auth-error=".length));
-      outBox.hidden = false;
-      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${
-        currentLang === "zh" ? `登录未完成（${escapeHtmlSafe(code)}），请改用邮箱验证码登录。` : `Sign-in failed (${escapeHtmlSafe(code)}). Use email code sign-in below.`
-      }</p>`;
-      document.getElementById("cloud-token-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else if ((authParam === "link" || authParam === "github-link") && outBox) {
-      const providerName = authParam === "github-link" ? "GitHub" : "Google";
-      outBox.hidden = false;
-      outBox.textContent =
-        currentLang === "zh"
-          ? `检测到同邮箱已有账号。用下方邮箱验证码验证一次后，会自动绑定你的 ${providerName} 账号。`
-          : `An account already exists for this email. Verify with a 6-digit email code below to finish linking ${providerName}.`;
+    const curUrl = new URL(window.location.href);
+    const rawHash = curUrl.hash ? curUrl.hash.slice(1) : "";
+    let restoredAnchor = "";
+    if (rawHash.startsWith("magic=") || rawHash.includes("&magic=")) {
+      const hp = new URLSearchParams(rawHash);
+      initialMagicToken = String(hp.get("magic") || "").trim();
+      restoredAnchor = String(hp.get("anchor") || "cloud-token-box").trim();
+    } else if (rawHash.startsWith("auth-error=")) {
+      initialAuthError = decodeURIComponent(rawHash.slice("auth-error=".length));
+      restoredAnchor = "cloud-token-box";
+    }
+    if (!initialMagicToken) {
+      initialMagicToken = String(curUrl.searchParams.get("magic") || "").trim();
+    }
+    initialBillingState = String(curUrl.searchParams.get("billing") || "").trim();
+    if (initialMagicToken || initialBillingState || initialAuthError) {
+      curUrl.searchParams.delete("magic");
+      curUrl.searchParams.delete("billing");
+      curUrl.searchParams.delete("session_id");
+      if (restoredAnchor) {
+        curUrl.hash = `#${restoredAnchor.replace(/^#+/, "")}`;
+      }
+      window.history.replaceState({}, "", curUrl.pathname + curUrl.search + curUrl.hash);
     }
   } catch {
-    // ignore URL parsing errors
+    initialMagicToken = "";
+    initialBillingState = "";
+    initialAuthError = "";
   }
 
   window.addEventListener("hashchange", () => {
@@ -7404,28 +7827,58 @@ function init() {
 
   applyI18n(false);
   startHeroProofTimer();
-  (async () => {
-    let initialMagicToken = "";
-    let initialBillingState = "";
-    try {
-      const curUrl = new URL(window.location.href);
-      initialMagicToken = String(curUrl.searchParams.get("magic") || "").trim();
-      initialBillingState = String(curUrl.searchParams.get("billing") || "").trim();
-      if (initialMagicToken || initialBillingState) {
-        curUrl.searchParams.delete("magic");
-        curUrl.searchParams.delete("billing");
-        curUrl.searchParams.delete("session_id");
-        window.history.replaceState({}, "", curUrl.pathname + curUrl.search + curUrl.hash);
-      }
-    } catch {
-      initialMagicToken = "";
-      initialBillingState = "";
-    }
 
+  try {
+    const params = new URLSearchParams(window.location.search || "");
+    const outBox = document.getElementById("token-output-box");
+    const authParam = params.get("auth") || "";
+    const isZhNow = currentLang === "zh";
+    if (initialAuthError && outBox) {
+      const errMsgMap = {
+        google_already_linked: isZhNow
+          ? "该 Google 账号已绑定在其他 dislop 账号上，无法重复绑定。"
+          : "That Google account is already linked to another dislop account.",
+        github_already_linked: isZhNow
+          ? "该 GitHub 账号已绑定在其他 dislop 账号上，无法重复绑定。"
+          : "That GitHub account is already linked to another dislop account.",
+        provider_already_connected: isZhNow
+          ? "当前账号已绑定另一个同平台账号，请先在「登录与安全」解绑后再更换。"
+          : "Another account from this provider is already connected. Disconnect it first in Sign-in & Security.",
+        link_session_mismatch: isZhNow
+          ? "登录会话已变化或超时，请确认当前账号后重新绑定。"
+          : "Your signed-in session changed or expired before linking finished. Please retry.",
+        link_reauth_required: isZhNow
+          ? "为保护账号安全，请先重新登录一次再绑定第三方账号。"
+          : "Please sign in again before connecting a new provider.",
+        session_required: isZhNow
+          ? "请先登录你的 dislop 账号，再执行绑定操作。"
+          : "Sign in to your dislop account first before connecting a provider.",
+      };
+      const friendly =
+        errMsgMap[initialAuthError] ||
+        (isZhNow
+          ? `操作未完成（${escapeHtmlSafe(initialAuthError)}），请重试或改用邮箱验证码。`
+          : `Action did not complete (${escapeHtmlSafe(initialAuthError)}). Retry or use an email code.`);
+      outBox.hidden = false;
+      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${friendly}</p>`;
+      document.getElementById("cloud-token-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if ((authParam === "link" || authParam === "github-link") && outBox) {
+      const providerName = authParam === "github-link" ? "GitHub" : "Google";
+      outBox.hidden = false;
+      outBox.textContent = isZhNow
+        ? `检测到同邮箱已有账号。用下方邮箱验证码验证一次后，会自动绑定你的 ${providerName} 账号。`
+        : `An account already exists for this email. Verify with a 6-digit email code below to finish linking ${providerName}.`;
+    }
+  } catch {
+    // ignore URL parsing errors
+  }
+
+  (async () => {
     const outBox = document.getElementById("token-output-box");
     const isZh = currentLang === "zh";
+    let magicSwitchPaused = false;
 
-    if (initialMagicToken) {
+    const executeMagicVerify = async (confirmAccountSwitch = false) => {
       if (outBox) {
         outBox.hidden = false;
         outBox.textContent = isZh ? "正在验证一键登录链接…" : "Verifying 1-click sign-in link...";
@@ -7437,12 +7890,46 @@ function init() {
           credentials: "same-origin",
           body: JSON.stringify({
             token: initialMagicToken,
-            lang: isZh ? "zh" : "en",
+            lang: currentLang === "zh" ? "zh" : "en",
             source: getEntrySource(),
+            ...(confirmAccountSwitch ? { confirmAccountSwitch: true } : {}),
           }),
         });
         const mData = await mResp.json().catch(() => ({}));
+        if (mResp.status === 409 && mData.error === "account_switch_confirm_required" && outBox) {
+          magicSwitchPaused = true;
+          outBox.hidden = false;
+          outBox.innerHTML = `
+            <div style="margin-bottom:8px;">${escapeHtmlSafe(
+              mData.message ||
+                (currentLang === "zh"
+                  ? `当前已登录 ${mData.currentEmail || ""}，确认切换为 ${mData.targetEmail || ""} 吗？`
+                  : `Currently signed in as ${mData.currentEmail || ""}. Switch to ${mData.targetEmail || ""}?`)
+            )}</div>
+            <div class="quick-actions">
+              <button type="button" id="btn-confirm-magic-switch" class="btn-primary" style="min-height:30px;padding:4px 12px;font-size:0.8rem;">${
+                currentLang === "zh" ? "确认切换账号" : "Switch account"
+              }</button>
+              <button type="button" id="btn-cancel-magic-switch" class="ctrl-btn ctrl-btn-sm">${
+                currentLang === "zh" ? "保留当前账号" : "Keep current session"
+              }</button>
+            </div>`;
+          document.getElementById("cloud-token-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
+          document.getElementById("btn-confirm-magic-switch")?.addEventListener("click", async () => {
+            pendingCloudAction = null;
+            clearPendingWorkbenchIntent();
+            magicSwitchPaused = false;
+            await executeMagicVerify(true);
+            await refreshCloudSession();
+            await finalizePendingOAuthLinkIfNeeded();
+          });
+          document.getElementById("btn-cancel-magic-switch")?.addEventListener("click", () => {
+            if (outBox) outBox.hidden = true;
+          });
+          return false;
+        }
         if (mResp.ok && mData.account) {
+          resetCachedHubData(mData.account.id);
           cloudSessionState = {
             ...cloudSessionState,
             loaded: true,
@@ -7452,44 +7939,69 @@ function init() {
           };
           if (outBox) {
             outBox.hidden = false;
-            outBox.textContent = isZh ? "已通过邮件链接登录。" : "Signed in via email link.";
+            outBox.textContent = currentLang === "zh" ? "已通过邮件链接登录。" : "Signed in via email link.";
           }
-        } else if (outBox) {
+          return true;
+        }
+        if (outBox) {
           outBox.hidden = false;
           outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(
-            mData.message || (isZh ? "登录链接已失效，请重新发送验证码。" : "Sign-in link expired. Please request a new code.")
+            mData.message || (currentLang === "zh" ? "登录链接已失效，请重新发送验证码。" : "Sign-in link expired. Please request a new code.")
           )}</p>`;
         }
+        return false;
       } catch (err) {
         if (outBox) {
           outBox.hidden = false;
           outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
         }
+        return false;
       }
+    };
+
+    if (initialMagicToken) {
+      await executeMagicVerify(false);
     }
 
     await refreshCloudSession();
-    await finalizePendingOAuthLinkIfNeeded();
+    if (!magicSwitchPaused) {
+      const linkOut = await finalizePendingOAuthLinkIfNeeded();
+      if (linkOut?.navigated) return;
+    }
 
     if (initialBillingState === "success" || initialBillingState === "cancel") {
       activeHubTab = "plan";
-      resetCachedHubData();
+      resetCachedHubData(cloudSessionState.account?.id || null);
       renderCloudAccountState();
       if (outBox) {
         outBox.hidden = false;
         outBox.textContent =
           initialBillingState === "success"
-            ? isZh
-              ? "支付已完成，订阅或按量额度已同步到当前账号（如仍在确认，几秒后点「刷新额度」即可）。"
-              : "Payment complete. Your plan or credit pack is synced to your account (click Refresh in a few seconds if still finalizing)."
-            : isZh
+            ? currentLang === "zh"
+              ? "已收到结账返回，正在同步订阅或按量额度…"
+              : "Returned from checkout. Syncing your plan or credit pack..."
+            : currentLang === "zh"
               ? "已取消本次结账，未产生扣款。"
               : "Checkout canceled. No charge was made.";
       }
       document.getElementById("cloud-token-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (initialBillingState === "success") {
+        setTimeout(async () => {
+          resetCachedHubData(null);
+          await refreshCloudSession();
+          if (outBox && !outBox.hidden) {
+            outBox.textContent =
+              currentLang === "zh"
+                ? "账单状态已刷新（如银行仍在确认，稍后可点「刷新额度」查看）。"
+                : "Billing status refreshed (if Stripe is still confirming, click Refresh shortly).";
+          }
+        }, 2500);
+      }
     }
 
-    await consumePendingWorkbenchIntent();
+    if (!magicSwitchPaused) {
+      await consumePendingWorkbenchIntent();
+    }
   })();
   handleWorkbenchHash();
   ensurePocketModelLoaded().then((loaded) => {

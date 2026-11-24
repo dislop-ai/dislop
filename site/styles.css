@@ -2157,6 +2157,8 @@ html[lang^="zh"] .proof-line {
 .auth-modal-card {
   width: 100%;
   max-width: 440px;
+  max-height: min(88dvh, 680px);
+  overflow-y: auto;
   background-color: var(--sheet);
   border: 1px solid var(--rule-strong);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);

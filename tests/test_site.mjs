@@ -915,6 +915,11 @@ for (const sym of [
   "/api/v1/billing/checkout",
   "/api/v1/billing/portal",
   "/api/v1/account/identities/",
+  "active.googleLinked",
+  "active.githubLinked",
+  "X-Dislop-Account-Id",
+  "account_switch_confirm_required",
+  "sourceAccountId",
 ]) {
   assert.ok(wbApp.includes(sym), `Expected ${sym} in site/app.js`);
 }
