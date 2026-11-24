@@ -920,6 +920,9 @@ for (const sym of [
   "X-Dislop-Account-Id",
   "account_switch_confirm_required",
   "sourceAccountId",
+  "office_export_upgrade_required",
+  "availableSkus",
+  "officeExportCap",
 ]) {
   assert.ok(wbApp.includes(sym), `Expected ${sym} in site/app.js`);
 }

@@ -4196,6 +4196,9 @@ async function handleVoiceExtractClick() {
         resetCachedHubData(null);
         await refreshCloudSession();
       }
+      if (data.error === "voice_limit_exceeded" || data.error === "insufficient_credits") {
+        openQuotaUpgradePanel(data.message || "", data.error);
+      }
       outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
       return;
     }
@@ -4660,6 +4663,8 @@ async function openBillingPortal(triggerBtn = null) {
 function syncBillingSurfaceUi() {
   const isZh = currentLang === "zh";
   const billingLive = Boolean(cloudSessionState.billing?.enabled);
+  const skus = cloudSessionState.billing?.availableSkus || {};
+  const hasSku = (k) => skus[k] !== false;
   const paidActionsEl = document.getElementById("pricing-paid-actions");
   const wlHeading = document.getElementById("cloud-wl-heading");
   const wlDesc = document.getElementById("cloud-wl-desc");
@@ -4667,13 +4672,18 @@ function syncBillingSurfaceUi() {
 
   if (paidActionsEl) {
     if (billingLive) {
-      paidActionsEl.innerHTML = `
-        <button type="button" class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" data-checkout-plan="pro">${
-          isZh ? "开通 Pro · $12/月" : "Get Pro · $12/mo"
-        }</button>
-        <button type="button" class="ctrl-btn" data-checkout-plan="credits">${
-          isZh ? "买按量包 · $10" : "Buy 800 cr · $10"
-        }</button>`;
+      const creditsFirst = isZh && hasSku("credits");
+      const btnPro = hasSku("pro")
+        ? `<button type="button" class="${creditsFirst ? "ctrl-btn" : "btn-primary"}" ${
+            creditsFirst ? "" : 'style="min-height:32px;padding:6px 12px;font-size:0.8rem;"'
+          } data-checkout-plan="pro">${isZh ? "开通 Pro · $12/月" : "Get Pro · $12/mo"}</button>`
+        : "";
+      const btnCredits = hasSku("credits")
+        ? `<button type="button" class="${creditsFirst ? "btn-primary" : "ctrl-btn"}" ${
+            creditsFirst ? 'style="min-height:32px;padding:6px 12px;font-size:0.8rem;"' : ""
+          } data-checkout-plan="credits">${isZh ? "买按量包 · $10 / 800 额度" : "Buy 800 cr · $10"}</button>`
+        : "";
+      paidActionsEl.innerHTML = creditsFirst ? `${btnCredits}${btnPro}` : `${btnPro}${btnCredits}`;
       paidActionsEl.querySelectorAll("[data-checkout-plan]").forEach((btn) => {
         btn.addEventListener("click", (ev) => {
           startBillingCheckout(btn.getAttribute("data-checkout-plan") || "pro", { triggerBtn: ev.currentTarget });
@@ -4686,27 +4696,35 @@ function syncBillingSurfaceUi() {
   }
 
   if (billingLive) {
-    if (wlHeading) wlHeading.textContent = isZh ? "自助开通 Pro / 按量包 · 团队采购咨询" : "Upgrade to Pro or Credit Pack · Team inquiries";
+    if (wlHeading) wlHeading.textContent = isZh ? "自助开通按量包 / Pro · 团队采购咨询" : "Upgrade to Pro or Credit Pack · Team inquiries";
     if (wlDesc) {
       wlDesc.textContent = isZh
-        ? "支持 Stripe 自助结账并实时到账；如需多席位对公发票或团队部署，也可在下方留言。"
+        ? "支持 Stripe 银行卡、支付宝与微信支付自助结账；如需多席位对公发票，可在下方留言。"
         : "Instant self-serve checkout via Stripe, or leave a note below for multi-seat invoicing.";
     }
     if (selfServeStrip) {
-      selfServeStrip.hidden = false;
-      selfServeStrip.innerHTML = `
-        <button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-wl-checkout="pro">${
-          isZh ? "Pro 月付（$12）" : "Pro Monthly ($12)"
-        }</button>
-        <button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="pro_yearly">${
-          isZh ? "Pro 年付（$108·省25%）" : "Pro Annual ($108)"
-        }</button>
-        <button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="credits">${
-          isZh ? "按量 800 额度（$10）" : "800 Credits ($10)"
-        }</button>
-        <button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="team">${
-          isZh ? "Team（$29/席位）" : "Team ($29/seat)"
-        }</button>`;
+      const stripItems = isZh
+        ? [
+            hasSku("credits")
+              ? `<button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-wl-checkout="credits">按量 800 额度（$10·免月租）</button>`
+              : "",
+            hasSku("pro")
+              ? `<button type="button" class="${hasSku("credits") ? "ctrl-btn ctrl-btn-sm" : "btn-primary"}" data-wl-checkout="pro">Pro 月付（$12）</button>`
+              : "",
+            hasSku("pro_yearly") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="pro_yearly">Pro 年付（$108·省25%）</button>` : "",
+            hasSku("team") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="team">Team（$29/席位）</button>` : "",
+          ]
+        : [
+            hasSku("pro")
+              ? `<button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-wl-checkout="pro">Pro Monthly ($12)</button>`
+              : "",
+            hasSku("pro_yearly") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="pro_yearly">Pro Annual ($108)</button>` : "",
+            hasSku("credits") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="credits">800 Credits ($10)</button>` : "",
+            hasSku("team") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="team">Team ($29/seat)</button>` : "",
+          ];
+      const stripHtml = stripItems.filter(Boolean).join("");
+      selfServeStrip.hidden = !stripHtml;
+      selfServeStrip.innerHTML = stripHtml;
       selfServeStrip.querySelectorAll("[data-wl-checkout]").forEach((btn) => {
         btn.addEventListener("click", (ev) => {
           startBillingCheckout(btn.getAttribute("data-wl-checkout") || "pro", { triggerBtn: ev.currentTarget });
@@ -5086,8 +5104,25 @@ async function renderAccountHub() {
     const sub = active.subscription || {};
     const seats = Math.max(1, Number(sub.seats || active.seats || 1));
     const charCap = Number(active.maxChars || active.maxTextChars || (planCode !== "free" || bonus > 0 ? 50000 : 12000)).toLocaleString("en-US");
-    const voiceCap = Number(active.voiceCap || (planCode === "team" ? 50 : planCode === "pro" ? 20 : 3));
+    const voiceCap = Number(active.voiceCap || (planCode === "team" ? 50 : planCode === "pro" || bonus > 0 ? 20 : 3));
+    const officeCap =
+      active.officeExportCap === null || active.officeExportCap === undefined
+        ? planCode === "free" && bonus === 0
+          ? 2
+          : null
+        : Number(active.officeExportCap);
+    const officeUsed = Math.max(0, Number(active.officeExportsUsed || 0));
+    const officeMeta =
+      officeCap !== null
+        ? isZh
+          ? `Office 导出剩余 ${Math.max(0, officeCap - officeUsed)}/${officeCap} 次`
+          : `${Math.max(0, officeCap - officeUsed)}/${officeCap} free Office exports left`
+        : isZh
+          ? "Office 原排版导出不限次"
+          : "Unlimited Office exports";
     const billingLive = Boolean(cloudSessionState.billing?.enabled);
+    const skus = cloudSessionState.billing?.availableSkus || {};
+    const hasSku = (k) => skus[k] !== false;
     const portalReady = Boolean(sub.hasCustomerPortal && (cloudSessionState.billing?.portalEnabled ?? billingLive));
     const periodEndDay = sub.currentPeriodEnd ? String(sub.currentPeriodEnd).slice(0, 10) : "";
 
@@ -5114,25 +5149,38 @@ async function renderAccountHub() {
 
     let planActionsHtml = "";
     if (billingLive) {
+      const creditsPrimary = isZh && bonus === 0 && hasSku("credits");
       const upgradeBtns =
         planCode === "free"
-          ? `
-            <button type="button" class="btn-primary" style="min-height:30px;padding:4px 12px;font-size:0.79rem;" data-hub-checkout="pro">${
-              isZh ? "升级 Pro（$12/月）" : "Upgrade to Pro ($12/mo)"
-            }</button>
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="pro_yearly">${
-              isZh ? "Pro 年付（$108·省25%）" : "Pro Annual ($108/yr)"
-            }</button>
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">${
-              isZh ? "买按量包（$10 / 800 额度）" : "Buy 800 Credits ($10)"
-            }</button>
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="team">${
-              isZh ? "开通 Team（$29/席位）" : "Start Team ($29/seat)"
-            }</button>`
-          : `
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">${
-              isZh ? "加购按量包（$10 / 800 额度）" : "Top up 800 Credits ($10)"
-            }</button>`;
+          ? (isZh
+              ? [
+                  hasSku("credits")
+                    ? `<button type="button" class="${creditsPrimary ? "btn-primary" : "ctrl-btn ctrl-btn-sm"}" ${
+                        creditsPrimary ? 'style="min-height:30px;padding:4px 12px;font-size:0.79rem;"' : ""
+                      } data-hub-checkout="credits">买按量包（$10 / 800 额度）</button>`
+                    : "",
+                  hasSku("pro")
+                    ? `<button type="button" class="${creditsPrimary ? "ctrl-btn ctrl-btn-sm" : "btn-primary"}" ${
+                        creditsPrimary ? "" : 'style="min-height:30px;padding:4px 12px;font-size:0.79rem;"'
+                      } data-hub-checkout="pro">升级 Pro（$12/月）</button>`
+                    : "",
+                  hasSku("pro_yearly") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="pro_yearly">Pro 年付（$108·省25%）</button>` : "",
+                  hasSku("team") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="team">开通 Team（$29/席位）</button>` : "",
+                ]
+              : [
+                  hasSku("pro")
+                    ? `<button type="button" class="btn-primary" style="min-height:30px;padding:4px 12px;font-size:0.79rem;" data-hub-checkout="pro">Upgrade to Pro ($12/mo)</button>`
+                    : "",
+                  hasSku("pro_yearly") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="pro_yearly">Pro Annual ($108/yr)</button>` : "",
+                  hasSku("credits") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">Buy 800 Credits ($10)</button>` : "",
+                  hasSku("team") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="team">Start Team ($29/seat)</button>` : "",
+                ]
+            ).filter(Boolean).join("")
+          : hasSku("credits")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">${
+                isZh ? "加购按量包（$10 / 800 额度）" : "Top up 800 Credits ($10)"
+              }</button>`
+            : "";
       const portalBtn = portalReady
         ? `<button type="button" class="ctrl-btn ctrl-btn-sm" id="hub-open-portal-btn">${
             isZh ? "管理账单与发票" : "Manage billing & invoices"
@@ -5174,13 +5222,13 @@ async function renderAccountHub() {
       <div class="hub-plan-card">
         <div class="hub-plan-head">
           <span>
-            <span class="hub-badge ${planCode !== "free" ? "is-paid" : ""}">${escapeHtmlSafe(planCode.toUpperCase())}</span>
+            <span class="hub-badge ${planCode !== "free" || bonus > 0 ? "is-paid" : ""}">${escapeHtmlSafe(planCode.toUpperCase())}</span>
             ${planCode === "team" ? `<span style="font-size:0.78rem;color:var(--ink-2);margin-left:6px;">${seats} ${isZh ? "席位" : "seat(s)"}</span>` : ""}
           </span>
           <span style="font-size:0.76rem;color:var(--ink-2);">${
             isZh
-              ? `单次上限 ${charCap} 字 · 云端文风上限 ${voiceCap} 份`
-              : `Up to ${charCap} chars/call · ${voiceCap} voice cards`
+              ? `单次上限 ${charCap} 字 · 文风卡 ${voiceCap} 份 · ${officeMeta}`
+              : `Up to ${charCap} chars/call · ${voiceCap} voice cards · ${officeMeta}`
           }</span>
         </div>
         ${subStatusHtml}
@@ -5831,12 +5879,10 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
 
   let providersSection = "";
   if (isZh) {
-    const topProviders = [githubBtnHtml].filter(Boolean).join("");
-    const bottomProviders = [googleBtnHtml].filter(Boolean).join("");
+    const bottomProviders = [githubBtnHtml, googleBtnHtml].filter(Boolean).join("");
     providersSection = `
-      ${topProviders ? `<div class="auth-provider-stack">${topProviders}</div>` : ""}
       ${otpFormHtml}
-      ${bottomProviders ? `<div class="auth-divider"><span>或</span></div><div class="auth-provider-stack">${bottomProviders}</div>` : ""}`;
+      ${bottomProviders ? `<div class="auth-divider"><span>或用第三方账号</span></div><div class="auth-provider-stack">${bottomProviders}</div>` : ""}`;
   } else {
     const topProviders = [googleBtnHtml, githubBtnHtml].filter(Boolean).join("");
     providersSection = `
@@ -6128,38 +6174,89 @@ function openInlineCloudKeyPanel(reasonMsg = "") {
   openInlineCloudKeyPanelFallback(reasonMsg);
 }
 
-function openQuotaUpgradePanel(message = "") {
+function openQuotaUpgradePanel(message = "", reasonCode = "insufficient_credits") {
   const panel = document.getElementById("ai-result-panel");
   if (!panel) return;
   const isZh = currentLang === "zh";
   const active = getActiveCloudAccount();
   const billingLive = Boolean(cloudSessionState.billing?.enabled);
+  const skus = cloudSessionState.billing?.availableSkus || {};
+  const hasSku = (k) => skus[k] !== false;
   panel.hidden = false;
 
+  const titleByReason = {
+    office_export_upgrade_required: isZh
+      ? "2 次免费 Word/PPT 原排版导出已用完（审校仍可用免费额度）"
+      : "2 complimentary Word/PPT exports used (Office review stays open)",
+    text_too_long: isZh
+      ? "超出免费档 12,000 字单次上限（付费解锁 50,000 字）"
+      : "Draft exceeds the 12,000-char Free limit (unlock 50,000 chars)",
+    voice_limit_exceeded: isZh
+      ? "云端文风卡已达免费上限（付费解锁 20–50 份）"
+      : "Free cloud voice card limit reached (unlock 20–50 cards)",
+  };
+  const panelTitle =
+    titleByReason[reasonCode] ||
+    (billingLive
+      ? isZh
+        ? "当前云端额度不足（本地离线检查仍永久免费）"
+        : "Cloud credits used up (local checks stay unlimited)"
+      : isZh
+        ? "本月云端免费额度已用完（本地离线检查仍永久免费）"
+        : "Monthly cloud credits used up (local checks stay unlimited)");
+
+  const capabilityLead = isZh
+    ? "$10 按量包（800 额度·不过期）或 Pro（$12/月）均可同时解锁不限次 Word/PPT 原排版导出、50,000 字长文与 20 份文风卡："
+    : "Either the $10 Credit Pack (800 non-expiring credits) or Pro ($12/mo) unlocks unlimited Word/PPT exports, 50,000 chars/call, and 20 voice cards:";
+
   if (billingLive) {
+    const creditsLead = (isZh || reasonCode === "office_export_upgrade_required") && hasSku("credits");
+    const actionBtns = (creditsLead
+      ? [
+          hasSku("credits")
+            ? `<button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-inline-checkout="credits">${
+                isZh ? "买按量包（$10 / 800 额度 · 不过期）" : "Buy 800 Credits ($10 · never expires)"
+              }</button>`
+            : "",
+          hasSku("pro")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="pro">${
+                isZh ? "升级 Pro（$12/月 · 1,500 额度）" : "Upgrade to Pro ($12/mo · 1,500 cr)"
+              }</button>`
+            : "",
+          hasSku("team")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="team">${
+                isZh ? "Team（$29/席位）" : "Team ($29/seat)"
+              }</button>`
+            : "",
+        ]
+      : [
+          hasSku("pro")
+            ? `<button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-inline-checkout="pro">${
+                isZh ? "升级 Pro（$12/月 · 1,500 额度）" : "Upgrade to Pro ($12/mo · 1,500 cr)"
+              }</button>`
+            : "",
+          hasSku("credits")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="credits">${
+                isZh ? "买按量包（$10 / 800 额度 · 不过期）" : "Buy 800 Credits ($10 · never expires)"
+              }</button>`
+            : "",
+          hasSku("team")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="team">${
+                isZh ? "Team（$29/席位）" : "Team ($29/seat)"
+              }</button>`
+            : "",
+        ]
+    ).filter(Boolean).join("");
+
     panel.innerHTML = `
       <div class="ai-result-head">
-        <span class="ai-result-title">${isZh ? "当前云端额度不足（本地离线检查仍永久免费）" : "Cloud credits used up (local checks stay unlimited)"}</span>
+        <span class="ai-result-title">${panelTitle}</span>
         <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
       </div>
       ${message ? `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>` : ""}
       <div class="upgrade-box">
-        <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${
-          isZh
-            ? "左侧全部离线规则检查、5 轴节奏体检和命令行（npx dislop check .）依然不限次使用。如需立即补充云端审校额度："
-            : "All local rules, 5-axis telemetry, and CLI checks (npx dislop check .) stay unlimited. To add cloud credits immediately:"
-        }</p>
-        <div class="quick-actions">
-          <button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-inline-checkout="pro">${
-            isZh ? "升级 Pro（$12/月 · 1,500 额度）" : "Upgrade to Pro ($12/mo · 1,500 cr)"
-          }</button>
-          <button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="credits">${
-            isZh ? "买按量包（$10 / 800 额度 · 不过期）" : "Buy 800 Credits ($10 · never expires)"
-          }</button>
-          <button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="team">${
-            isZh ? "Team（$29/席位）" : "Team ($29/seat)"
-          }</button>
-        </div>
+        <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${capabilityLead}</p>
+        <div class="quick-actions">${actionBtns}</div>
       </div>
     `;
     document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
@@ -6175,20 +6272,16 @@ function openQuotaUpgradePanel(message = "") {
 
   panel.innerHTML = `
     <div class="ai-result-head">
-      <span class="ai-result-title">${isZh ? "本月云端免费额度已用完（本地离线检查仍永久免费）" : "Monthly cloud credits used up (local checks stay unlimited)"}</span>
+      <span class="ai-result-title">${panelTitle}</span>
       <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
     </div>
     ${message ? `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>` : ""}
     <div class="upgrade-box">
-      <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${
-        isZh
-          ? "左侧全部离线规则检查、5 轴节奏体检和命令行（npx dislop check .）依然不限次使用。如需更多云端审校与 Word/PPT 原排版处理，可以直接预约："
-          : "All local rules, 5-axis telemetry, and CLI checks (npx dislop check .) stay unlimited. To reserve higher cloud capacity:"
-      }</p>
+      <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${capabilityLead}</p>
       <form id="inline-upgrade-waitlist-form" class="cloud-inline-form">
         <select id="inline-wl-plan" class="pack-select" aria-label="${isZh ? "选择方案" : "Select plan"}">
-          <option value="pro">${isZh ? "Pro（$12/月 · 1,500 额度）" : "Pro ($12/mo · 1,500 credits)"}</option>
-          <option value="credits">${isZh ? "按量包（$10 / 800 额度 · 不过期）" : "PAYGO ($10 / 800 credits · never expires)"}</option>
+          <option value="credits" ${isZh ? "selected" : ""}>${isZh ? "按量包（$10 / 800 额度 · 不过期）" : "PAYGO ($10 / 800 credits · never expires)"}</option>
+          <option value="pro" ${!isZh ? "selected" : ""}>${isZh ? "Pro（$12/月 · 1,500 额度）" : "Pro ($12/mo · 1,500 credits)"}</option>
           <option value="team">${isZh ? "Team（$29/席位 · 团队文风）" : "Team ($29/seat · shared voice)"}</option>
         </select>
         <input type="email" id="inline-wl-email" class="cloud-input" required value="${escapeHtmlSafe(active?.email || "")}" placeholder="you@company.com">
@@ -6213,7 +6306,7 @@ function openQuotaUpgradePanel(message = "") {
       const resp = await fetch("/api/v1/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, plan, note: "exhausted_credits_inline", source: getEntrySource() }),
+        body: JSON.stringify({ email, plan, note: reasonCode || "exhausted_credits_inline", source: getEntrySource() }),
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
@@ -6234,8 +6327,13 @@ function openQuotaUpgradePanel(message = "") {
 function renderAiError(errCode, message) {
   const panel = document.getElementById("ai-result-panel");
   if (!panel) return;
-  if (errCode === "insufficient_credits") {
-    openQuotaUpgradePanel(message);
+  if (
+    errCode === "insufficient_credits" ||
+    errCode === "office_export_upgrade_required" ||
+    errCode === "text_too_long" ||
+    errCode === "voice_limit_exceeded"
+  ) {
+    openQuotaUpgradePanel(message, errCode);
     return;
   }
   if (errCode === "account_changed") {
