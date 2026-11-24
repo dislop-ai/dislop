@@ -4,6 +4,13 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-11-24
+
+### Changed
+- **Global English-first documentation & storefront alignment**: Aligned `PRODUCT.md`, `AGENTS.md`, `ROADMAP*.md`, `docs/architecture*.md`, the GitHub organization profile, Issues/Discussions, and `@dislop_ai` around the single-domain `dislop.com/` (native English `x-default`) and `dislop.com/zh/` (native Chinese) layout (`183` static HTML routes, `/feed.xml` + `/zh/feed.xml`, and `301` redirects on legacy `/en/*`).
+- **Account Hub, dual-market sign-in & Stripe Payment Links integration**: Connected the web workbench and Official Cloud MCP (`https://dislop.com/mcp`) to the 5-tab Account Hub, locale-matched sign-in order (`Google`/`GitHub` OAuth first on `/`; 6-digit email OTP and magic link first on `/zh/`), 2-trial Office capability gate, and `Pro` / `PAYGO` / `Team` checkout links.
+- **Milestone consolidation across 5 Agent Skills, interactive apply & 30-task ecosystem benchmark**: Consolidated the `skills/` bundle (`dislop`, `deslop-docs`, `deslop-slides-docx`, `deslop-web-ui`, and `deslop-verify`), CLI selective review apply (`review --interactive-apply`, `apply`), zero-chrome `20fps` v2 demos, and the 30-task 4-skill benchmark (`benchmarks/ECOSYSTEM-BENCHMARK*.md`) into the `v0.9.0` baseline.
+
 ## [0.8.4] - 2026-11-24
 
 ### Changed

@@ -14,16 +14,16 @@ snapshot: 2026-11-21
 
 ---
 
-## 1. 当前进度（`v0.8.3` 已落地）
+## 1. 当前进度（`v0.9.0` 已落地）
 
 | 模块 | 现已实现 | 核心目录 |
 |---|---|---|
-| 双端零依赖内核 | Node.js 20+ 与 Python 3.10+ 双端零外部依赖，通过 230 项规则与语体样本断言、分场景策略路由（`getScenarioStrategy` / `registerOverrides`）、65 条反模式库核验、离线个人文风提取及 66 项 Python `unittest` 跨运行时一致性、CLI 与安全单测 | `src/core.mjs`、`src/dislop/engine.py`、`src/review-client.mjs`、`tests/` |
+| 双端零依赖内核 | Node.js 20+ 与 Python 3.10+ 双端零外部依赖，通过 230 项规则与语体样本断言、分场景策略路由（`getScenarioStrategy` / `registerOverrides`）、65 条反模式库核验、默认英文终端输出（`--lang en`，可显式切换 `--lang zh`）、按编号写回审校建议（`review --interactive-apply` / `apply`）、离线个人文风提取及 66 项 Python `unittest` 跨运行时一致性、CLI 与安全单测 | `src/core.mjs`、`src/dislop/engine.py`、`src/review-client.mjs`、`tests/` |
 | 全内置规则包与轻量模型 | 全部 7 套场景与行业包（53 条规则）直接内置离线运行：`core`、`business-brief`、`engineering-spec`、`regulated-comms`、`literary-essay`、`deck-and-ui`、`executive-deck`；附 12 条扩展模式库探针（`--patterns`）、随包 `14.6 KB` gzip 零依赖集成模型（`pocket-slop-v1`）与本机内存/芯片小模型选装向导（`dislop model`） | `packs/*/pack.json`、`patterns/`、`models/`、`src/local-model.mjs` |
 | 支持格式 | `.md`、`.mdx`、`.txt`、`.html`、`.css`、`.jsx`、`.tsx`、`.svg`、`.docx`、`.pptx`、`.pdf`、`.png`、`.jpg`、`.jpeg`、`.webp` | `src/binary-node.mjs`、`src/dislop/engine.py` |
-| 官网与在线工作台 | 按浏览器语言自动匹配中文或原生英文的 `dislop.com`，支持场景包 + 语体选择器与分场景改稿提示、两种标线（红实线硬伤 / 蓝虚线套话提醒）、5 格白话节奏条、离线 `#share=v1.*` 分享链接与 `#try=<ruleId>` 直达、双语指南与规则图鉴、`/llms.txt` 端点 | `scripts/build_site.mjs`、`site/` |
-| Awesome Anti-Slop | 90 条双语核验清单（`dislop.radar/2`），同源生成纯英文 `awesome/README.md`、纯中文 `awesome/README.zh-CN.md` 与 `dislop.com/awesome/` 网页筛选页 | `docs/research/anti-slop-radar-index.json`、`awesome/` |
-| 多平台清单与编辑器集成 | 同源生成并受 CI 校验的分发清单与集成包：npm（`dislop`）、PyPI（`dislop`）、官方 MCP Registry（`io.github.dislop-ai/dislop`，直连官方云端 `https://dislop.com/mcp`）、纯文档 Agent Skill（`skills/dislop/` 含 4 张本地参考卡与 `agents/openai.yaml`）、Claude Code 插件（`.claude-plugin/`，常驻仅约 130 tokens）、Codex 插件（`.codex-plugin/` 与 `.agents/plugins/marketplace.json`）、Cursor 插件（`.cursor-plugin/`）、Antigravity 插件包（`integrations/antigravity/`）、VS Code / Open VSX 轻量 Web 扩展（`integrations/vscode/`）、可复用 GitHub Action（`action.yml`）与 `.pre-commit-hooks.yaml` | `scripts/sync_manifests.mjs`、`integrations/`、`server.json`、`action.yml` |
+| 官网与在线工作台 | 单域名 `dislop.com/` 默认纯英文（`x-default`）与 `/zh/` 原生中文子路径（旧路径 `/en/*` 保留 `301` 跳转）、5 标签 Account Hub、分站点登录排序（OAuth 与 6 位邮箱验证码 / Magic Link）、无底条零装饰 `20fps` v2 演示、场景包 + 语体选择器与分场景改稿提示、两种标线（红实线硬伤 / 蓝虚线套话提醒）、5 格白话节奏条、离线 `#share=v1.*` 分享链接与 `#try=<ruleId>` 直达、双语指南与规则图鉴、`/llms.txt` 端点 | `scripts/build_site.mjs`、`site/` |
+| Awesome Anti-Slop | 90 条双语核验清单（`dislop.radar/2`），同源生成纯英文 `awesome/README.md`、纯中文 `awesome/README.zh-CN.md` 与 `dislop.com/awesome/`、`dislop.com/zh/awesome/` 网页筛选页 | `docs/research/anti-slop-radar-index.json`、`awesome/` |
+| 多平台清单与编辑器集成 | 同源生成并受 CI 校验的分发清单与集成包：npm（`dislop`）、PyPI（`dislop`）、官方 MCP Registry（`io.github.dislop-ai/dislop`，直连官方云端 `https://dislop.com/mcp`）、5 套纯文档 Agent Skill（`skills/dislop/` 与 `deslop-docs`、`deslop-slides-docx`、`deslop-web-ui`、`deslop-verify`，含 4 张本地参考卡与 `agents/openai.yaml`）、Claude Code 插件（`.claude-plugin/`，常驻仅约 130 tokens）、Codex 插件（`.codex-plugin/` 与 `.agents/plugins/marketplace.json`）、Cursor 插件（`.cursor-plugin/`）、Antigravity 插件包（`integrations/antigravity/`）、VS Code / Open VSX 轻量 Web 扩展（`integrations/vscode/`）、可复用 GitHub Action（`action.yml`）与 `.pre-commit-hooks.yaml` | `scripts/sync_manifests.mjs`、`integrations/`、`server.json`、`action.yml` |
 
 ---
 
@@ -56,7 +56,7 @@ snapshot: 2026-11-21
 
 目标：从首批 Coding Agent 用户向 WorkBuddy、千问、Claude Cowork 等办公 Agent 用户及日常写方案、周报的人群延伸，并用公开可复现数据持续验证检出率。
 
-- [x] 交付 `dislop-bench v2`：112 份核心检测基准与 154 份多角度反模式基准（精确率 `100.0%`、召回率 `100.0%`、干净原稿误报率 `0.0%`、双端一致率 `100.0%`）、18 组端到端改稿评测（`18/18` 全过）与 5 模型真实在线对比（[benchmarks/REPORT.md](./benchmarks/REPORT.md)）。
+- [x] 交付 `dislop-bench v2`（112 份核心检测基准与 154 份多角度反模式基准，精确率 `100.0%`、召回率 `100.0%`、干净原稿误报率 `0.0%`、双端一致率 `100.0%`，18 组端到端改稿评测 `18/18` 全过及 5 模型真实在线对比，见 [benchmarks/REPORT.md](./benchmarks/REPORT.md)）及 30 任务 4 Skill 生态横向评测（[benchmarks/ECOSYSTEM-BENCHMARK.zh-CN.md](./benchmarks/ECOSYSTEM-BENCHMARK.zh-CN.md)）。
 - [ ] 复用纯 JS `src/core.mjs` 打包上架 **Obsidian Community Plugins**（单文件离线检查 + 可选云端改写）与 **Raycast Store**（系统快捷键检查选中文本 / 剪贴板）。
 - [ ] 扩充真实长文、多页管理汇报 `.pptx` 与跨模型盲评样本，按双周复盘各商店安装量。
 
@@ -81,7 +81,7 @@ snapshot: 2026-11-21
   - 浏览器基础工作台、`Awesome Anti-Slop`、开源单步审校 Prompt 与 `dislop-bench v2`
 - **闭源部分（`dislop-cloud`）**：官方云端 MCP（`https://dislop.com/mcp`）、多模型流水线与防改坏净增益评估服务（`dislop_eval` / `dislop_verify_edit`）。
 
-- [x] **阶段 0（云端上线与登录试用收口）**：官方 `dislop-cloud` 已上线 `https://dislop.com/mcp` 与 `/api/v1/*`，启用登录领取每月 30 免费额度，并开放 Pro / 按量包 / Team 预约；`v0.7.0` 起 CLI 0 命中输出改为“未发现已知模式”并统一全部插件清单直连官方云端 MCP。
+- [x] **阶段 0（云端上线、Account Hub 与双市场登录订阅闭环）**：官方 `dislop-cloud` 已上线 `https://dislop.com/mcp` 与 `/api/v1/*`，落地每月 30 免费额度、5 标签 Account Hub、分站点 `Google`/`GitHub` OAuth 与 6 位邮箱验证码 / Magic Link 登录、2 次 Office 免费试用量封顶与 Stripe Payment Links（`Pro` / `PAYGO` / `Team`）；`v0.7.0+` 保持 CLI 0 命中输出“未发现已知模式”并统一全部插件清单直连官方云端 MCP。
 - [ ] **真实语料保留评测集与 4 臂盲评**：收集覆盖叙事随笔、思辨论述、公文简报与工程文档的真实中英文文章并人工标注，对比离线快检、单个开源 Prompt、纯云端大模型与混合流水线（离线规则 + 5 轴特征注入 + 分文体大模型审校 + 确定性护栏），用保留集结果决定后续代码取舍。
 - [x] **分场景语体策略、结构化 `revision` 与 CLI 自备密钥 `review` + `doctor`**：双端落地 `--register`（`technical` / `official` / `argumentative` / `narrative` / `casual` / `marketing`）、`getScenarioStrategy`、`registerOverrides`、带保护锚点的 `edit`/`rewrite`/`ask` 改法建议、`verify` 口语/书面语域防漂移护栏、`--format agent` 紧凑输出、零联网 `dislop doctor` 与显式授权 BYOK `dislop review`。
 - [ ] **闭源云端防改坏净增益评估（`dislop_eval` / `dislop_verify_edit`）与零训练校准飞轮**：对 `Before vs. After` 改写执行原子事实精确度/召回率与跨厂商换序盲测；全档位坚持用户稿件零训练，仅利用闭源对抗基准、脱敏合成改坏集、Opt-in 纠错反馈与人工金标 Kappa 持续校准评估器。
@@ -104,7 +104,7 @@ snapshot: 2026-11-21
 
 ## 4. 协作方式与合并前检查
 
-开放设计问题先在 [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) 对齐；具体任务认领、规则误报反馈与工具投稿统一建 [Issue](https://github.com/dislop-ai/dislop/issues)，按 `track:*`、`area:*`、`priority:*` 标签和里程碑（`v0.6.1`、`v0.7.0`、`v0.8.0`）汇总。日常状态只看 GitHub Issue 与看板，这份路线图只在发版或里程碑收口时统一勾选，不记两套账。
+开放设计问题先在 [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) 对齐；具体任务认领、规则误报反馈与工具投稿统一建 [Issue](https://github.com/dislop-ai/dislop/issues)，按 `track:*`、`area:*`、`priority:*` 标签和里程碑（`v0.8.0`、`v0.9.0`、`v0.10.0`）汇总。日常状态只看 GitHub Issue 与看板，这份路线图只在发版或里程碑收口时统一勾选，不记两套账。
 
 小修、文案微调和发版可直接快进推 `main`；新功能、改规则或跨模块改动建议建短分支（`feat/...`、`fix/...`、`docs/...`），PR 描述写 `Closes #<编号>` 关联任务，CI 通过即可合入。`.github/CODEOWNERS` 会自动请求维护者评审，合入后自动清理分支；`main` 禁强推和删分支。商业计费、配额与云端托管后台在私有仓单独管理，不放进本仓。
 

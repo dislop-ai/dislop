@@ -15,7 +15,7 @@ Cutting AI slop is real productivity.
 ### Global-First Priority & Single-Domain Strategy
 - **English (Global) first across code, docs, and assets**: Rule precision on native English prose/UI/decks, CLI/MCP/Skill schemas, canonical documentation (`*.md`), and primary visual assets (`og-card.png`, `-en-v2` demos, `@dislop_ai`) always come first. Chinese (`*.zh-CN.md`, `zh-*` rules, `-zh-v2` demos) is maintained in lockstep as a native localized counterpart, never the upstream source for machine translation.
 - **Strategic horizon**: Short-term rollout pairs global package/MCP/skill registries and flagship English benchmarks with fast community seed validation; medium-to-long-term growth focuses on winning the default pre-flight slot across global Agent ecosystems and international team workflows, while serving localized office document cleanup as a complementary track on the same engine.
-- **One brand, one repository, one domain (`dislop.com`)**: Never split into separate regional subdomains or separate codebases. The target URL layout serves native English at the root `dislop.com/` (`x-default`) and native Chinese under `dislop.com/zh/`, with automatic browser language routing, a one-click manual toggle, and `301` compatibility for `/en/` (migrating from the `v0.8.2` `/` + `/en/` layout).
+- **One brand, one repository, one domain (`dislop.com`)**: Never split into separate regional subdomains or separate codebases. The site serves native English at the root `dislop.com/` (`x-default`) and native Chinese under `dislop.com/zh/`, with automatic browser language routing, a one-click manual toggle, and `301` redirects on legacy `/en/*` paths.
 - **Strict language separation**: English and Chinese materials use their own native examples, banners, social cards, and single-language accounts (`@dislop_ai` publishes exclusively in English), never word-for-word translations and never mixed inside one page or post.
 
 ### Users
@@ -47,7 +47,7 @@ A dedicated linter for AI slop. It brings together vetted community rules and pr
 ### 全球英文优先与单域名兼容原则
 - **技术、文档与主物料以英文（全球）为第一基准**：地道英文语料检出精度与零误报边界、CLI/MCP/Skill 协议字段、主干英文文档（`*.md`）及默认视觉物料（`og-card.png`、`-en-v2` 动图、`@dislop_ai`）始终优先建设与验收；中文文档（`*.zh-CN.md`）、`zh-*` 专属规则与中文演示物料面向中文场景原生独立编写，不做英译中或中译英套翻。
 - **短中长期节奏统一**：短期同步推进全球注册表/目录上架、中文技术社区快速种子验证与英文旗舰实测发布；中长期坚定以全球英语 Agent 生态标准和国际团队协作工作流为主战场，同时在同一套底座上承接中文免配置网页工作台与办公文档去味需求。
-- **单品牌、单仓库、单域名（`dislop.com`）**：不拆独立子域名或第二套代码库。目标站点路由以根路径 `dislop.com/` 默认提供纯英文静态页（`x-default`），以子路径 `dislop.com/zh/` 提供原生中文静态页（支持按浏览器语言自动引导、一键手动切换与历史 `/en/` `301` 兼容；当前正从 `v0.8.2` 的 `/` + `/en/` 平滑迁移）。
+- **单品牌、单仓库、单域名（`dislop.com`）**：不拆独立子域名或第二套代码库。站点路由以根路径 `dislop.com/` 默认提供纯英文静态页（`x-default`），以子路径 `dislop.com/zh/` 提供原生中文静态页，支持按浏览器语言自动引导、一键手动切换与旧路径 `/en/*` `301` 跳转。
 - **单页单帖严格不混排**：中英文各自使用独立案例、视觉卡片与单语社交账号（官方号 `@dislop_ai` 固定纯英文发布），同一页面或单条帖子内绝不中英混排。
 
 ### 用户
