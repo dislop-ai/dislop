@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: en
 updated: 2026-11-23
-version: 0.8.2
+version: 0.8.3
 ---
 
 # AI Slop Linter vs. AI Detectors vs. Prompt Skills: How to Choose in 2026

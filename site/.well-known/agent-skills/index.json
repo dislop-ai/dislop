@@ -1,13 +1,13 @@
 {
   "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "skills": [
     {
       "name": "dislop",
       "type": "skill-md",
       "description": "Use when drafting or revising text a person will read: README, docs, PR descriptions, release notes, RFCs, postmortems, CLI help/errors, emails, essays, web pages and UI copy (HTML/CSS/JSX), or Word and PowerPoint files. Removes AI-sounding phrasing, chatbot leftovers, placeholders, and template layouts without changing facts. Skip code logic, tests, refactors, commit messages, and configs with no reader-facing text.",
       "url": "https://dislop.com/tools/skill.md",
-      "digest": "sha256:05e8d19d6e925988046b4815f08f4e5eaea877f296a1af5a0f3bbbee598cf415",
+      "digest": "sha256:65017d026691da43d75816bc2aa6299caffb5d7b6355e037b490f5ad1dabb6bf",
       "install": "npx --yes skills add dislop-ai/dislop --skill dislop",
       "references": [
         {

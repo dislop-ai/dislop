@@ -1,7 +1,7 @@
 ---
 content-type: reference-data
 task: pre-release-gate
-version: 0.8.2
+version: 0.8.3
 ---
 
 # Task Bundle: Pre-Release Objective Gate & CI

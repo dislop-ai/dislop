@@ -1,4 +1,4 @@
-# 系统架构说明（`v0.8.2`）
+# 系统架构说明（`v0.8.3`）
 
 [English](./architecture.md) · [产品定义](../PRODUCT.md)
 

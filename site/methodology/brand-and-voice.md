@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 0.8.2
+version: 0.8.3
 ---
 
 # Voice, Copy, and Visual Guide
@@ -46,16 +46,16 @@ We aim for the plain clarity of **ASD-STE100** (Simplified Technical English) in
 3. **Cut every pull-quote closer and roleplay metaphor.** If a line sounds like a poster slogan or a costumed persona (`Pass for press`, `the pen stays in your hand`, `the sheet is set by machine`), delete it or rewrite it flat.
 4. **Start with something concrete.** Open with an actual draft, file, number, or command instead of throat-clearing background.
 5. **State limits plainly.** Unreadable archives and unshipped work (like code AST linting) are marked as skipped or not built yet.
-6. **Keep English and Chinese independent and unmixed.** `dislop.com` and `/awesome/` auto-detect the visitor's browser language (`zh` or `en`) instead of hardcoding one default, with a one-click manual toggle. Chinese and English materials are authored separately for their own audiences—separate copy, examples, banners, and social posts (channels like X can run one independent Chinese post and one independent English post), never word-for-word translations and never mixed inside one page or post. Keep internal architecture tier codes, academic jargon, and research shorthand inside `docs/research/`, never in public copy.
+6. **Keep English and Chinese independent on one domain, never mixed.** `dislop.com` stays on a single domain (targeting native English at the root `/` and native Chinese under `/zh/`, with automatic browser language routing and a one-click manual toggle). Chinese and English materials are authored separately for their own audiences—separate copy, examples, banners, and single-language social accounts or posts (`@dislop_ai` publishes exclusively in English), never word-for-word translations and never mixed inside one page or post. Keep internal architecture tier codes, academic jargon, and research shorthand inside `docs/research/`, never in public copy.
 
 ### Copy Table
 
 | Surface | Avoid (AI-flavored / performative) | Use (plain English) |
 |---|---|---|
 | **Headline / Slogan** | `Your draft, minus the slop.` | `Cutting AI slop is real productivity.` |
-| **Intro copy** | `dislop strikes what can't ship... the pen stays in your hand.` | `dislop marks what looks off locally so you or your agent can fix it, with optional Cloud MCP rewrites.` |
+| **Intro copy** | `dislop strikes what can't ship... the pen stays in your hand.` | `dislop marks what looks off locally so you or your agent can fix it, with optional Cloud MCP self-healing.` |
 | **Clean check** | `Pass for press. 0 findings; protected spans stayed as written.` | `0 issues. Chat wrapper and stock phrasing removed.` |
-| **2nd-order slop** | `Sent back: displacement detected` | `Still flagged (1 issue). Old buzzwords are gone, replaced by a 'Not X, but Y' AI slogan.` |
+| **Swapped slop** | `Sent back: displacement detected` | `Still flagged (1 issue). Old buzzwords are gone, replaced by a 'Not X, but Y' slogan.` |
 | **Directory name** | `Fellow travelers directory` | `Awesome list` / `Awesome Anti-Slop` |
 | **Privacy note** | `Physically locked from outbound requests` | `Runs only in this browser tab. Nothing gets uploaded.` |
 
@@ -76,12 +76,28 @@ Use `--pen` (`#F04438`) on the logo loop and thick drawn strokes in both light a
 
 Two mark styles stay readable without color:
 
-- Red solid underline (`2px solid`): AI delivery artifact (`error`)
-- Blue dashed underline (`1.5px dashed`): cliché or template warning (`warning` / `info`)
+- Red solid underline (`2px solid`, `#FEF3F2` wash): AI delivery artifact (`hard bug` in UI prose, `error` in CLI/JSON badges)
+- Blue dashed underline (`1.5px dashed`, `#EFF4FF` wash): cliché or template warning (`warning` / `info`)
 
 ---
 
-## 4. Seven Checks Before Shipping Copy
+## 4. Automation-Native Style: Specimen Slip + Zero-Glue Docket
+
+When `dislop` publishes automated or semi-automated social cards, benchmark digests, or release posts, free-form persuasive prose is the highest-risk surface for sounding like AI. Rhetorical hooks, transition words (`Moreover`, `Notably`, `In other words`), praise adjectives, and punchline closers all pull automated copy back toward LLM cadence.
+
+Instead of asking a model to "write witty social copy," automated and outward-facing posts use a structural shortcut that leaves almost no room for AI cadence:
+
+1. **70% Verbatim Visual Specimen ("Slip on Stage")**: Frame a `0px`-radius white galley slip (`#FFFFFF`) on the charcoal ink stage (`#14171A`). Show the actual input text, HTML snippet, or slide XML with live `dislop check` marks (`#F04438` *dele* loop on deletable chat wrappers, red solid underline on other `core` artifacts, blue dashed underline on scenario warnings) measured to the exact text span.
+2. **The Dele Mark (`₰`) Is the Only Character**: `dislop` never speaks in first person (`"I"`), never uses a mascot name, and never scolds the user. Dry humor comes strictly from letting an AI's own verbatim text—including `dislop`'s own retired drafts—sit under the *dele* mark without commentary.
+3. **30% Text ("Zero-Glue 3-Slot Docket")**: Keep every automated caption or short post to at most three flat slots, then stop cold with no closing moral:
+   - **Slot 1 (Input / Setup)**: What file, commit, or prompt went in (`30` drafts across `4` upstream `SKILL.md` prompts on `gemini-3.5-flash`).
+   - **Slot 2 (Verbatim Observed Diff / Count)**: Exact surviving strings or counts (`4/4` skills kept `<a href="#">`; `3/4` returned our old three-semicolon pitch verbatim).
+   - **Slot 3 (Mechanism or Command)**: Why it happened or the exact reproducible command (`npx --yes dislop check . --pack auto`), ending immediately with zero summary slogan.
+4. **Hard Lint Bans on Outward Copy**: Zero rhetorical-question openers (`?` in line 1), zero exclamation marks (outside the official Chinese slogan), zero transition glue, zero unbadged constructed examples (constructed fixtures must display an `EXAMPLE` badge; live benchmark runs display commit + task ID), and explicit scoring-bias disclosure before any self-scored pass rate.
+
+---
+
+## 5. Seven Checks Before Shipping Copy
 
 Before merging changes to the website, README, CLI help, or release notes:
 
@@ -93,4 +109,4 @@ Before merging changes to the website, README, CLI help, or release notes:
 6. Are English and Chinese strictly separated (no Chinese in EN examples, no English in ZH examples)?
 7. Does `dislop check <file> --fail-on info` pass with 0 findings, and keep body prose free of `!`, emojis, and `finding(s)` (the official Chinese slogan `去 AI 味才是真正的生产力！` keeps its original `！`)?
 
-The draft machine-readable voice config lives at [docs/brand/voice.json](https://github.com/dislop-ai/dislop/blob/main/docs/brand/voice.json) (`dislop.voice/1`).
+The machine-readable voice config lives at [docs/brand/voice.json](https://github.com/dislop-ai/dislop/blob/main/docs/brand/voice.json) (`dislop.voice/1`, `v1.0.0`).

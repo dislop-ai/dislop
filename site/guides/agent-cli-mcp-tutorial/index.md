@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: zh
 updated: 2026-11-23
-version: 0.8.2
+version: 0.8.3
 ---
 
 # 把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程

@@ -906,8 +906,8 @@ export const PACKS_BY_ID = {
           "pdf"
         ],
         "patterns": [
-          "(?:^|\\n)\\s*(?:Certainly|Sure|Absolutely|Of course|Happy to help|Glad to help)[!,.]?\\s+(?:[Hh]ere(?:'s| is| are)|[Bb]elow is)\\b",
-          "(?:^|\\n)\\s*Here\\s+(?:is|are)\\s+the\\s+(?:revised|updated|polished)\\s+",
+          "(?:^|\\n)\\s*(?:Certainly|Sure|Absolutely|Of course|Happy to help|Glad to help)[!,.]?\\s+(?:[Hh]ere(?:'s|(?:\\s+it)?\\s+is|\\s+are)|[Bb]elow is)\\b",
+          "(?:^|\\n)\\s*Here(?:'s|\\s+is|\\s+are)\\s+(?:a|an|the|your)\\s+(?:revised|updated|polished|cleaned[- ]up|rewritten)\\s+",
           "(?:^|\\n|[.!?]\\s+)\\s*As an AI(?:\\s+(?:language model|assistant))?(?:\\s*,|\\s+(?:I|we|my|here)\\b|\\s*$)",
           "\\bAs an AI (?:language model|assistant)\\b",
           "\\bAs an AI\\s*,\\s*(?:I|we|my)\\b",
@@ -915,7 +915,7 @@ export const PACKS_BY_ID = {
           "\\bFeel free to (?:reach out|let me know|ask) if you (?:need|have) (?:anything|any (?:other |further )?questions)[!.]?",
           "(?:^|\\n)\\s*(?:好的|当然可以|没问题)[，,！!]?\\s*(?:以下|下面)是",
           "(?:^|\\n)\\s*以下是为您(?:整理|撰写|润色|生成|修改)的",
-          "(?:希望这对(?:你|您)有(?:所)?帮助|如果(?:你|您)(?:还有|需要)(?:任何|其他)?(?:问题|帮助)[，,]?请随时告诉我)[！!。.]?",
+          "(?:希望(?:这|以上内容)对(?:你|您)有(?:所)?帮助|如果(?:你|您)(?:还有|需要)(?:任何|其他)?(?:问题|帮助)[，,]?请随时告诉我|如需(?:进一步)?(?:调整|修改)[，,]?请随时(?:告诉我|告知))[！!。.]?",
           "作为一个?\\s*AI(?:\\s*语言模型|\\s*助手)?",
           "\\[oaicite:\\d+\\]",
           "contentReference\\[oaicite:\\d+\\]",

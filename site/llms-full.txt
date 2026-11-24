@@ -1,10 +1,10 @@
 ---
 content-type: reference-data
-version: 0.8.2
+version: 0.8.3
 snapshot: 2026-11-21
 ---
 
-# dislop — Curated Single-Fetch De-Slop Reference (`v0.8.2`)
+# dislop — Curated Single-Fetch De-Slop Reference (`v0.8.3`)
 
 > Cutting AI slop is real productivity. Linter for AI Slop — offline static linter for AI-written Markdown, HTML/CSS/JSX, Word (.docx), and PowerPoint (.pptx).
 

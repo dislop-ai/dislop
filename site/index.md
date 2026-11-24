@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 0.8.2
+version: 0.8.3
 snapshot: 2026-11-21
 ---
 
@@ -22,11 +22,11 @@ A dedicated linter for AI slop. It brings together vetted community rules, corpu
 
 | Target | Formats / Scope | Status |
 |---|---|---|
-| Writing, Specs, RFCs & Copy | `.md`, `.mdx`, `.txt` (EN & ZH, 7 built-in packs, 65 patterns across 6 dimensions) | LIVE `v0.8.2` |
-| Word, PowerPoint & Slides | `.docx`, `.pptx`, landscape `.pdf` (incl. layout monotony, raster decks & type scale) | LIVE `v0.8.2` |
-| Web UI, SVG & Images | `.html`, `.css`, `.jsx`, `.tsx`, `.svg`, `.png`, `.jpg`, `.webp` | LIVE `v0.8.2` |
-| Offline Voice & Pocket ML | `dislop voice` (`dislop.voice/1`) & 14.6 KB `--ml` stealth-vapor scorer | LIVE `v0.8.2` |
-| Optional Local Small Models | `dislop model` hardware-aware advisor (`0.6B` / `1.7B` / `4B`) | LIVE `v0.8.2` |
+| Writing, Specs, RFCs & Copy | `.md`, `.mdx`, `.txt` (EN & ZH, 7 built-in packs, 65 patterns across 6 dimensions) | LIVE `v0.8.3` |
+| Word, PowerPoint & Slides | `.docx`, `.pptx`, landscape `.pdf` (incl. layout monotony, raster decks & type scale) | LIVE `v0.8.3` |
+| Web UI, SVG & Images | `.html`, `.css`, `.jsx`, `.tsx`, `.svg`, `.png`, `.jpg`, `.webp` | LIVE `v0.8.3` |
+| Offline Voice & Pocket ML | `dislop voice` (`dislop.voice/1`) & 14.6 KB `--ml` stealth-vapor scorer | LIVE `v0.8.3` |
+| Optional Local Small Models | `dislop model` hardware-aware advisor (`0.6B` / `1.7B` / `4B`) | LIVE `v0.8.3` |
 | Git Diffs & PRs | `--changed` / `--staged` & SARIF 2.1.0 | LIVE (diff check) · Roadmap (code AST) |
 
 ## Rule Layers
