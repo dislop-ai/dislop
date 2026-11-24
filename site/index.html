@@ -1899,18 +1899,18 @@
 
         <div class="pricing-col">
           <div class="pricing-head">
-            <h3 data-i18n="price.t3Name">Pro · 按量包 · Team（预约）</h3>
+            <h3 data-i18n="price.t3Name">Pro · 按量包 · Team</h3>
             <span class="pricing-amount" data-i18n="price.t3Price">$12/月 · $10 按量</span>
           </div>
           <p class="pricing-sub" data-i18n="price.t3Sub">经常写选 Pro，每额度比按量省 36%；偶尔用买按量包，额度不过期。</p>
           <ul class="pricing-list">
-            <li data-i18n="price.t3F1">Pro（$12/月）：1,500 额度/月（约 $0.008/额度），长文不限字数 + 10 份个人文风</li>
-            <li data-i18n="price.t3F2">按量额度包（$10 / 800 额度）：一次买断，额度不过期，适合偶尔用的人</li>
-            <li data-i18n="price.t3F3">Team（$29/席位/月）：5,000 额度 + 团队共享品牌文风与 PR 审核</li>
+            <li data-i18n="price.t3F1">Pro（$12/月 或 $108/年）：1,500 额度/月（单次最长 50,000 字）+ 20 份云端文风</li>
+            <li data-i18n="price.t3F2">按量额度包（$10 / 800 额度）：一次买断不过期，解锁单次 50,000 字上限</li>
+            <li data-i18n="price.t3F3">Team（$29/席位/月）：每席位 5,000 额度 + 50 份团队共享文风与 PR 审核</li>
             <li data-i18n="price.t3F4">统一调用 Google Gemini 付费版接口，不存草稿，不拿你的稿子训练</li>
           </ul>
-          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
-            <a href="#cloud-waitlist-box" class="ctrl-btn" data-i18n="price.t3Cta">预约开通通知 ↓</a>
+          <div class="quick-actions" id="pricing-paid-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="#cloud-waitlist-box" class="ctrl-btn" id="pricing-t3-cta" data-i18n="price.t3Cta">预约开通通知 ↓</a>
           </div>
         </div>
       </div>
@@ -1951,10 +1951,11 @@
         </div>
 
         <div class="cloud-form-pane" id="cloud-waitlist-box">
-          <h3 class="sub-heading" style="margin:0 0 6px;" data-i18n="cloud.wlTitle">预约 Pro / 按量包 / Team</h3>
-          <p class="cloud-form-desc" data-i18n="cloud.wlDesc">
+          <h3 class="sub-heading" id="cloud-wl-heading" style="margin:0 0 6px;" data-i18n="cloud.wlTitle">预约 Pro / 按量包 / Team</h3>
+          <p class="cloud-form-desc" id="cloud-wl-desc" data-i18n="cloud.wlDesc">
             自助支付还没上线。留下邮箱和想用的方案，上线后通知你。
           </p>
+          <div id="cloud-self-serve-strip" class="quick-actions" style="margin-bottom:10px;" hidden></div>
           <form id="waitlist-form" class="cloud-stack-form">
             <div class="cloud-inline-form">
               <select id="wl-plan-select" class="pack-select" aria-label="选择方案">

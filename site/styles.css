@@ -2429,6 +2429,61 @@ html[lang^="zh"] .proof-line {
   color: var(--mark-error);
 }
 
+.hub-plan-card {
+  border: 1px solid var(--rule);
+  background-color: var(--sheet);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.hub-plan-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.hub-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-ctrl);
+  background-color: var(--inset);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+
+.hub-badge.is-paid {
+  border-color: var(--ok);
+  color: var(--ok);
+  background-color: var(--ok-wash);
+}
+
+.hub-warn-banner {
+  margin: 0 0 8px;
+  padding: 7px 10px;
+  border-left: 3px solid var(--mark-error);
+  background-color: var(--stage);
+  font-size: 0.78rem;
+  color: var(--mark-error);
+}
+
+.hub-sub-heading {
+  margin: 12px 0 6px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.hub-key-limit {
+  max-width: 150px;
+}
+
 .upgrade-box {
   border: 1px solid var(--rule);
   background-color: var(--sheet);

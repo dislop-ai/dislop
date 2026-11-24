@@ -46,6 +46,24 @@
     });
   }
 
+  function hasSignedInHint() {
+    try {
+      if (/(?:^|;\s*)dslp_hint=1(?:;|$)/.test(document.cookie || "")) return true;
+      var saved = window.localStorage.getItem("dislop_cloud_account_v1");
+      if (saved && JSON.parse(saved).token) return true;
+    } catch (_) {
+      // Ignore cookie or storage access errors
+    }
+    return false;
+  }
+
+  if (hasSignedInHint()) {
+    document.querySelectorAll("[data-static-acct]").forEach(function (el) {
+      el.classList.add("is-signed-in");
+      el.textContent = lang === "en" ? "Account · Cloud" : "账号与额度";
+    });
+  }
+
   function copyWithFeedback(btn, text) {
     if (!text || !navigator.clipboard) return;
     var orig = btn.textContent;

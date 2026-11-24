@@ -898,6 +898,25 @@ for (const navRel of [
   assert.ok(navMatch, `${navRel} missing <nav class="nav-links">`);
   const navLinks = navMatch[1].match(/<a\b[^>]*>/g) || [];
   assert.equal(navLinks.length, 6, `${navRel} primary nav should contain 6 links (got ${navLinks.length})`);
+  if (navRel !== "index.html") {
+    assert.ok(navHtml.includes("data-static-acct"), `${navRel} top-controls missing data-static-acct sign-in link`);
+  }
+}
+
+const enHomeHtml = fs.readFileSync(path.join(SITE_DIR, "en", "index.html"), "utf8");
+assert.ok(enHomeHtml.includes('id="pricing"'), "en/index.html missing #pricing section");
+assert.ok(enHomeHtml.includes("50,000 chars/call") && enHomeHtml.includes("20 cloud voice cards"), "en/index.html #pricing missing honest Pro limits");
+for (const sym of [
+  "k.id || k.keyId",
+  "a.id || a.grantId",
+  "it.ts || it.at",
+  "data.verdict?.summary || data.summary",
+  "/api/v1/auth/magic/verify",
+  "/api/v1/billing/checkout",
+  "/api/v1/billing/portal",
+  "/api/v1/account/identities/",
+]) {
+  assert.ok(wbApp.includes(sym), `Expected ${sym} in site/app.js`);
 }
 
 assert.ok(stylesCss.includes("--ink-stage:"), "site/styles.css missing --ink-stage token");

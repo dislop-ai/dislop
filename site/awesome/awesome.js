@@ -18,6 +18,7 @@ const I18N = {
   zh: {
     "page.title": `去 AI 味工具清单 · Awesome Anti-Slop（${TOTAL_COUNT} 条）— dislop`,
     "nav.skip": "跳至正文",
+    "nav.signIn": "登录 · 30 免费额度",
     "nav.brandMeta": "AI 味检查",
     "nav.workbench": "工作台",
     "nav.surfaces": "接入",
@@ -58,6 +59,7 @@ const I18N = {
   en: {
     "page.title": `Awesome Anti-Slop (${TOTAL_COUNT} Entries) — dislop`,
     "nav.skip": "Skip to main content",
+    "nav.signIn": "Sign in · 30 free",
     "nav.brandMeta": "AI slop linter",
     "nav.workbench": "Workbench",
     "nav.surfaces": "Setup",
@@ -338,6 +340,25 @@ function applyLanguage(lang, isUserSwitch = false) {
   if (surfacesNav) surfacesNav.href = `${langPrefix}#surfaces`;
   if (casesNav) casesNav.href = `${rootQuery}#cases`;
   if (footHome) footHome.href = langPrefix;
+  const acctCtrl = document.querySelector("[data-static-acct]");
+  if (acctCtrl) {
+    acctCtrl.href = `${rootQuery}#cloud-token-box`;
+    let signedIn = false;
+    try {
+      signedIn =
+        /(?:^|;\s*)dslp_hint=1(?:;|$)/.test(document.cookie || "") ||
+        Boolean(JSON.parse(safeGetStorage("dislop_cloud_account_v1") || "{}").token);
+    } catch {
+      signedIn = false;
+    }
+    if (signedIn) {
+      acctCtrl.classList.add("is-signed-in");
+      acctCtrl.textContent = lang === "en" ? "Account · Cloud" : "账号与额度";
+    } else {
+      acctCtrl.classList.remove("is-signed-in");
+      acctCtrl.textContent = I18N[lang]["nav.signIn"];
+    }
+  }
   const mainNavEl = document.querySelector("nav.nav-links");
   if (mainNavEl) mainNavEl.setAttribute("aria-label", lang === "zh" ? "主导航" : "Main navigation");
   const langToggleBtn = document.getElementById("lang-toggle");

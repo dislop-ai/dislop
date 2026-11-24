@@ -211,17 +211,17 @@ const I18N = {
     "price.t2F3": "云增强改写（2 额度）：自动改写后复检，核对原稿数字与限定词",
     "price.t2F4": "Word/PPT 原排版去味与个人文风（2–3 额度）：保留样式与修订，云端文风同步给远程 MCP",
     "price.t2Cta": "下方 10 秒验证码登录 ↓",
-    "price.t3Name": "Pro · 按量包 · Team（预约）",
+    "price.t3Name": "Pro · 按量包 · Team",
     "price.t3Price": "$12/月 · $10 按量",
     "price.t3Sub": "经常写选 Pro，每额度比按量省 36%；偶尔用买按量包，额度不过期。",
-    "price.t3F1": "Pro（$12/月）：1,500 额度/月（约 $0.008/额度），长文不限字数 + 10 份个人文风",
-    "price.t3F2": "按量额度包（$10 / 800 额度）：一次买断，额度不过期，适合偶尔用的人",
-    "price.t3F3": "Team（$29/席位/月）：5,000 额度 + 团队共享品牌文风与 PR 审核",
+    "price.t3F1": "Pro（$12/月 或 $108/年）：1,500 额度/月（单次最长 50,000 字）+ 20 份云端文风",
+    "price.t3F2": "按量额度包（$10 / 800 额度）：一次买断不过期，解锁单次 50,000 字上限",
+    "price.t3F3": "Team（$29/席位/月）：每席位 5,000 额度 + 50 份团队共享文风与 PR 审核",
     "price.t3F4": "统一调用 Google Gemini 付费版接口，不存草稿，不拿你的稿子训练",
     "price.t3Cta": "预约开通通知 ↓",
 
     "cloud.tokenTitle": "登录领取每月 30 免费额度 · 管理远程 MCP",
-    "cloud.tokenDesc": "邮箱 6 位验证码登录，免密码免绑卡。登录后可直接在工作台审校与改写 Word/PPT，也能管理 MCP 密钥、已连应用与云端文风（不存草稿，详见底部隐私说明）。",
+    "cloud.tokenDesc": "输入邮箱接收 6 位验证码或一键登录链接，免密码免绑卡。登录后可在工作台审校与改写 Word/PPT，并管理订阅额度、MCP 密钥、已连应用与云端文风（不存草稿，详见底部隐私说明）。",
     "cloud.tokenBtn": "发验证码",
     "cloud.otpVerifyBtn": "验证并登录",
     "cloud.otpChangeBtn": "换个邮箱",
@@ -541,17 +541,17 @@ const I18N = {
     "price.t2F3": "Cloud Rewrite (2 credits): plain rewrite that re-checks rules, numbers, and qualifiers",
     "price.t2F4": "Layout-preserving Word/PPT & voice profiles (2-3 credits): keeps formatting and syncs style to MCP",
     "price.t2Cta": "Sign in below ↓",
-    "price.t3Name": "Pro · Credit Packs · Team (Waitlist)",
+    "price.t3Name": "Pro · Credit Packs · Team",
     "price.t3Price": "$12/mo · $10 PAYGO",
     "price.t3Sub": "If you write often, Pro costs 36% less per credit. If you only need it now and then, credit packs never expire.",
-    "price.t3F1": "Pro ($12/mo): 1,500 monthly credits (~$0.008/cr), unlimited length + 10 voice profiles",
-    "price.t3F2": "PAYGO Pack ($10 / 800 credits): one-time purchase; credits never expire",
-    "price.t3F3": "Team ($29/seat/mo): 5,000 credits, shared brand voice cards, and PR review tooling",
+    "price.t3F1": "Pro ($12/mo or $108/yr): 1,500 credits/mo (up to 50,000 chars/call) + 20 cloud voice cards",
+    "price.t3F2": "PAYGO Pack ($10 / 800 credits): one-time purchase, never expires, unlocks 50,000 chars/call",
+    "price.t3F3": "Team ($29/seat/mo): 5,000 credits/seat + 50 shared brand voice cards & PR review",
     "price.t3F4": "Paid-tier Google Gemini API only—no draft storage and never used for training",
     "price.t3Cta": "Join waitlist ↓",
 
     "cloud.tokenTitle": "Sign in for 30 free credits/mo & Remote MCP",
-    "cloud.tokenDesc": "Passwordless 6-digit email code sign-in, no card required. Review and rewrite text or Word/PPT files, manage API keys, connected MCP apps, and saved voice cards (zero draft storage).",
+    "cloud.tokenDesc": "Sign in with a 6-digit email code or 1-click link—no password or card required. Review and rewrite text or Word/PPT files, and manage plans, MCP keys, connected apps, and voice cards (zero draft storage).",
     "cloud.tokenBtn": "Send code",
     "cloud.otpVerifyBtn": "Verify & sign in",
     "cloud.otpChangeBtn": "Change email",
@@ -3974,10 +3974,16 @@ let cloudSessionState = {
   authenticated: false,
   authMethod: null,
   account: null,
-  methods: { emailOtp: true, google: false, github: false },
+  methods: { emailOtp: true, google: false, github: false, magicLink: true },
+  billing: { enabled: false, portalEnabled: false },
+  pendingLink: null,
 };
-let activeHubTab = "keys";
-let cachedHubData = { keys: null, apps: null, voices: null, usage: null };
+let activeHubTab = "plan";
+let cachedHubData = { keys: null, apps: null, voices: null, usage: null, billingHistory: null };
+
+function resetCachedHubData() {
+  cachedHubData = { keys: null, apps: null, voices: null, usage: null, billingHistory: null };
+}
 
 function captureEntrySource() {
   try {
@@ -4310,6 +4316,11 @@ async function consumePendingWorkbenchIntent() {
   if (!intent || !intent.action || !intent.ts || Date.now() - Number(intent.ts) > 15 * 60_000) {
     return false;
   }
+  if (String(intent.action).startsWith("checkout:")) {
+    pendingCloudAction = intent.action;
+    startPendingCloudContinuation();
+    return true;
+  }
   if (intent.action === "voice_extract" && intent.voiceSamples) {
     const vsInput = document.getElementById("voice-samples-input");
     const voiceDrawer = document.getElementById("voice-drawer");
@@ -4367,8 +4378,16 @@ async function refreshCloudSession() {
       authenticated: Boolean(data.authenticated && data.account),
       authMethod: data.authMethod || null,
       account: data.account || null,
-      methods: data.methods || { emailOtp: true, google: false, github: false },
+      methods: data.methods || { emailOtp: true, google: false, github: false, magicLink: true },
+      billing: data.billing || { enabled: false, portalEnabled: false },
+      pendingLink: data.pendingLink || null,
     };
+    if (cloudSessionState.pendingLink?.email) {
+      const tokenEmailInput = document.getElementById("token-email-input");
+      if (tokenEmailInput && !tokenEmailInput.value.trim()) {
+        tokenEmailInput.value = cloudSessionState.pendingLink.email;
+      }
+    }
     syncCloudOAuthButtons();
     renderCloudAccountState();
     return true;
@@ -4414,10 +4433,170 @@ function startPendingCloudContinuation() {
   pendingCloudAction = null;
   clearPendingWorkbenchIntent();
   if (!act) return;
-  if (act === "voice_extract") {
+  if (String(act).startsWith("checkout:")) {
+    const rawPlan = String(act).slice("checkout:".length) || "pro";
+    startBillingCheckout(rawPlan);
+  } else if (act === "voice_extract") {
     handleVoiceExtractClick();
   } else if (act === "review" || act === "deslop") {
     runCloudAction(act);
+  }
+}
+
+async function startBillingCheckout(planKey = "pro", { seats = 2, triggerBtn = null } = {}) {
+  const isZh = currentLang === "zh";
+  const active = getActiveCloudAccount();
+  if (!active || active.mode !== "session") {
+    openAuthModal({
+      action: `checkout:${planKey}`,
+      reasonMsg: isZh
+        ? "请先用邮箱验证码、Google 或 GitHub 登录，登录后会自动继续开通方案。"
+        : "Sign in first with an email code, Google, or GitHub to continue directly to checkout.",
+    });
+    return;
+  }
+  if (!cloudSessionState.billing?.enabled) {
+    const wlSelect = document.getElementById("wl-plan-select");
+    const wlEmail = document.getElementById("wl-email-input");
+    if (wlSelect) wlSelect.value = planKey === "pro_yearly" ? "pro" : planKey;
+    if (wlEmail && active.email && !wlEmail.value.trim()) wlEmail.value = active.email;
+    document.getElementById("cloud-waitlist-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  if (triggerBtn) triggerBtn.disabled = true;
+  const outBox = document.getElementById("token-output-box");
+  if (outBox) {
+    outBox.hidden = false;
+    outBox.textContent = isZh ? "正在打开 Stripe 安全结账页…" : "Opening secure Stripe Checkout...";
+  }
+  try {
+    const resp = await fetch("/api/v1/billing/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({
+        plan: planKey,
+        seats: planKey === "team" ? Math.max(1, Number(seats) || 2) : 1,
+        lang: isZh ? "zh" : "en",
+        returnPath: "/#cloud-token-box",
+      }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data.url) {
+      if (outBox) {
+        outBox.hidden = false;
+        outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
+      }
+      return;
+    }
+    window.location.assign(data.url);
+  } catch (err) {
+    if (outBox) {
+      outBox.hidden = false;
+      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
+    }
+  } finally {
+    if (triggerBtn) triggerBtn.disabled = false;
+  }
+}
+
+async function openBillingPortal(triggerBtn = null) {
+  const isZh = currentLang === "zh";
+  if (triggerBtn) triggerBtn.disabled = true;
+  const outBox = document.getElementById("token-output-box");
+  try {
+    const resp = await fetch("/api/v1/billing/portal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ returnPath: "/#cloud-token-box" }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data.url) {
+      if (outBox) {
+        outBox.hidden = false;
+        outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
+      }
+      return;
+    }
+    window.location.assign(data.url);
+  } catch (err) {
+    if (outBox) {
+      outBox.hidden = false;
+      outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
+    }
+  } finally {
+    if (triggerBtn) triggerBtn.disabled = false;
+  }
+}
+
+function syncBillingSurfaceUi() {
+  const isZh = currentLang === "zh";
+  const billingLive = Boolean(cloudSessionState.billing?.enabled);
+  const paidActionsEl = document.getElementById("pricing-paid-actions");
+  const wlHeading = document.getElementById("cloud-wl-heading");
+  const wlDesc = document.getElementById("cloud-wl-desc");
+  const selfServeStrip = document.getElementById("cloud-self-serve-strip");
+
+  if (paidActionsEl) {
+    if (billingLive) {
+      paidActionsEl.innerHTML = `
+        <button type="button" class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" data-checkout-plan="pro">${
+          isZh ? "开通 Pro · $12/月" : "Get Pro · $12/mo"
+        }</button>
+        <button type="button" class="ctrl-btn" data-checkout-plan="credits">${
+          isZh ? "买按量包 · $10" : "Buy 800 cr · $10"
+        }</button>`;
+      paidActionsEl.querySelectorAll("[data-checkout-plan]").forEach((btn) => {
+        btn.addEventListener("click", (ev) => {
+          startBillingCheckout(btn.getAttribute("data-checkout-plan") || "pro", { triggerBtn: ev.currentTarget });
+        });
+      });
+    } else {
+      const label = I18N[currentLang]?.["price.t3Cta"] || (isZh ? "预约开通通知 ↓" : "Join waitlist ↓");
+      paidActionsEl.innerHTML = `<a href="#cloud-waitlist-box" class="ctrl-btn" id="pricing-t3-cta" data-i18n="price.t3Cta">${escapeHtmlSafe(label)}</a>`;
+    }
+  }
+
+  if (billingLive) {
+    if (wlHeading) wlHeading.textContent = isZh ? "自助开通 Pro / 按量包 · 团队采购咨询" : "Upgrade to Pro or Credit Pack · Team inquiries";
+    if (wlDesc) {
+      wlDesc.textContent = isZh
+        ? "支持 Stripe 自助结账并实时到账；如需多席位对公发票或团队部署，也可在下方留言。"
+        : "Instant self-serve checkout via Stripe, or leave a note below for multi-seat invoicing.";
+    }
+    if (selfServeStrip) {
+      selfServeStrip.hidden = false;
+      selfServeStrip.innerHTML = `
+        <button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-wl-checkout="pro">${
+          isZh ? "Pro 月付（$12）" : "Pro Monthly ($12)"
+        }</button>
+        <button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="pro_yearly">${
+          isZh ? "Pro 年付（$108·省25%）" : "Pro Annual ($108)"
+        }</button>
+        <button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="credits">${
+          isZh ? "按量 800 额度（$10）" : "800 Credits ($10)"
+        }</button>
+        <button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="team">${
+          isZh ? "Team（$29/席位）" : "Team ($29/seat)"
+        }</button>`;
+      selfServeStrip.querySelectorAll("[data-wl-checkout]").forEach((btn) => {
+        btn.addEventListener("click", (ev) => {
+          startBillingCheckout(btn.getAttribute("data-wl-checkout") || "pro", { triggerBtn: ev.currentTarget });
+        });
+      });
+    }
+  } else {
+    if (wlHeading) wlHeading.textContent = I18N[currentLang]?.["cloud.wlTitle"] || (isZh ? "预约 Pro / 按量包 / Team" : "Join Pro / Credit Pack / Team waitlist");
+    if (wlDesc) {
+      wlDesc.textContent =
+        I18N[currentLang]?.["cloud.wlDesc"] ||
+        (isZh ? "自助支付还没上线。留下邮箱和想用的方案，上线后通知你。" : "Self-serve billing isn't live yet. Leave your email and preferred plan, and we'll notify you when it opens.");
+    }
+    if (selfServeStrip) {
+      selfServeStrip.hidden = true;
+      selfServeStrip.innerHTML = "";
+    }
   }
 }
 
@@ -4430,6 +4609,7 @@ function escapeHtmlSafe(str) {
 }
 
 function renderCloudAccountState() {
+  syncBillingSurfaceUi();
   const active = getActiveCloudAccount();
   const quotaEl = document.getElementById("ai-quota-label");
   const tokenLinkEl = document.getElementById("ai-token-link");
@@ -4487,6 +4667,7 @@ function renderCloudAccountState() {
         btn.disabled = true;
         try {
           if (active.mode === "session") {
+            resetCachedHubData();
             await refreshCloudSession();
           } else {
             const resp = await fetch("/api/v1/account/me", { headers: { Authorization: `Bearer ${active.token}` } });
@@ -4514,7 +4695,7 @@ function renderCloudAccountState() {
           cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
         }
         saveCloudAccount(null);
-        cachedHubData = { keys: null, apps: null, voices: null, usage: null };
+        resetCachedHubData();
         const out = document.getElementById("token-output-box");
         if (out) out.hidden = true;
         renderCloudAccountState();
@@ -4674,11 +4855,15 @@ async function renderAccountHub() {
   }
   const isZh = currentLang === "zh";
   const tabDefs = [
-    { id: "keys", label: isZh ? "MCP 接入与密钥" : "MCP & Keys" },
+    { id: "plan", label: isZh ? "订阅与额度" : "Plan & Quota" },
+    { id: "keys", label: isZh ? "MCP 与密钥" : "MCP & Keys" },
     { id: "apps", label: isZh ? "已连应用" : "Connected Apps" },
     { id: "voices", label: isZh ? "云端文风" : "Voice Cards" },
-    { id: "usage", label: isZh ? "用量与账号" : "Usage & Account" },
+    { id: "security", label: isZh ? "登录与安全" : "Sign-in & Security" },
   ];
+  if (!tabDefs.some((t) => t.id === activeHubTab)) {
+    activeHubTab = "plan";
+  }
 
   hubEl.hidden = false;
   hubEl.innerHTML = `
@@ -4697,13 +4882,168 @@ async function renderAccountHub() {
 
   hubEl.querySelectorAll("[data-hub-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      activeHubTab = btn.getAttribute("data-hub-tab") || "keys";
+      activeHubTab = btn.getAttribute("data-hub-tab") || "plan";
       renderAccountHub();
     });
   });
 
   const bodyEl = document.getElementById("account-hub-body");
   if (!bodyEl) return;
+
+  if (activeHubTab === "plan") {
+    if (!cachedHubData.usage) {
+      const resp = await fetch("/api/v1/account/usage?limit=12", { credentials: "same-origin" }).catch(() => null);
+      const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
+      cachedHubData.usage = Array.isArray(data.items) ? data.items : [];
+    }
+    if (!cachedHubData.billingHistory) {
+      const bResp = await fetch("/api/v1/billing/history", { credentials: "same-origin" }).catch(() => null);
+      const bData = bResp && bResp.ok ? await bResp.json().catch(() => ({})) : {};
+      cachedHubData.billingHistory = Array.isArray(bData.items) ? bData.items : [];
+    }
+    const used = Number(active.monthlyUsed || 0);
+    const quota = Math.max(1, Number(active.monthlyQuota || 30));
+    const pct = Math.min(100, Math.round((used / quota) * 100));
+    const bonus = Math.max(0, Number(active.bonusCredits || 0));
+    const rem = Number(active.totalRemaining ?? Math.max(0, quota - used) + bonus);
+    const planCode = String(active.plan || "free").toLowerCase();
+    const seats = Math.max(1, Number(active.seats || 1));
+    const sub = active.subscription || {};
+    const charCap = Number(active.maxTextChars || (planCode !== "free" || bonus > 0 ? 50000 : 12000)).toLocaleString("en-US");
+    const voiceCap = Number(active.voiceCap || (planCode === "team" ? 50 : planCode === "pro" ? 20 : 3));
+    const billingLive = Boolean(cloudSessionState.billing?.enabled);
+    const periodEndDay = sub.currentPeriodEnd ? String(sub.currentPeriodEnd).slice(0, 10) : "";
+
+    let subStatusHtml = "";
+    if (sub.status === "past_due" || sub.status === "unpaid") {
+      subStatusHtml = `<div class="hub-warn-banner">${
+        isZh
+          ? "最近一期订阅扣款未成功，请打开账单门户更新付款方式，以免订阅额度中断。"
+          : "Subscription payment is past due. Open the Billing Portal to update your payment method."
+      }</div>`;
+    } else if (sub.cancelAtPeriodEnd && periodEndDay) {
+      subStatusHtml = `<p class="hub-section-note">${
+        isZh
+          ? `已设为到期不续订，当前订阅权益将保留至 <code>${escapeHtmlSafe(periodEndDay)}</code>。`
+          : `Set to cancel at period end. Current plan stays active through <code>${escapeHtmlSafe(periodEndDay)}</code>.`
+      }</p>`;
+    } else if (sub.status === "active" && periodEndDay) {
+      subStatusHtml = `<p class="hub-section-note">${
+        isZh
+          ? `订阅生效中 · 下次续期日 <code>${escapeHtmlSafe(periodEndDay)}</code>`
+          : `Active subscription · renews <code>${escapeHtmlSafe(periodEndDay)}</code>`
+      }</p>`;
+    }
+
+    let planActionsHtml = "";
+    if (billingLive) {
+      const upgradeBtns =
+        planCode === "free"
+          ? `
+            <button type="button" class="btn-primary" style="min-height:30px;padding:4px 12px;font-size:0.79rem;" data-hub-checkout="pro">${
+              isZh ? "升级 Pro（$12/月）" : "Upgrade to Pro ($12/mo)"
+            }</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="pro_yearly">${
+              isZh ? "Pro 年付（$108·省25%）" : "Pro Annual ($108/yr)"
+            }</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">${
+              isZh ? "买按量包（$10 / 800 额度）" : "Buy 800 Credits ($10)"
+            }</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="team">${
+              isZh ? "开通 Team（$29/席位）" : "Start Team ($29/seat)"
+            }</button>`
+          : `
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">${
+              isZh ? "加购按量包（$10 / 800 额度）" : "Top up 800 Credits ($10)"
+            }</button>`;
+      const portalBtn =
+        sub.hasCustomerPortal && cloudSessionState.billing?.portalEnabled
+          ? `<button type="button" class="ctrl-btn ctrl-btn-sm" id="hub-open-portal-btn">${
+              isZh ? "管理账单与发票" : "Manage billing & invoices"
+            }</button>`
+          : "";
+      planActionsHtml = `<div class="quick-actions" style="margin-top:8px;">${upgradeBtns}${portalBtn}</div>`;
+    } else {
+      planActionsHtml = `<div class="quick-actions" style="margin-top:8px;">
+        <a href="#cloud-waitlist-box" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;">${
+          isZh ? "预约升级 Pro / 按量包 / Team →" : "Reserve Pro, Credit Pack, or Team →"
+        }</a>
+      </div>`;
+    }
+
+    const usageItems = cachedHubData.usage || [];
+    const billingItems = cachedHubData.billingHistory || [];
+    const billingLedgerHtml =
+      billingItems.length === 0
+        ? ""
+        : `<div class="hub-sub-heading">${isZh ? "账单与充值记录" : "Billing history"}</div>
+           <ul class="hub-list">
+             ${billingItems
+               .slice(0, 6)
+               .map((b) => {
+                 const amt =
+                   typeof b.amountCents === "number" && b.amountCents > 0
+                     ? `$${(b.amountCents / 100).toFixed(2)}`
+                     : "";
+                 const stamp = String(b.ts || "").replace("T", " ").slice(0, 16);
+                 return `<li class="hub-list-row">
+                   <span><strong>${escapeHtmlSafe(b.summary || b.kind || "billing")}</strong>${amt ? ` · <code>${escapeHtmlSafe(amt)}</code>` : ""}</span>
+                   <span style="color:var(--ink-2);">${escapeHtmlSafe(stamp)}</span>
+                 </li>`;
+               })
+               .join("")}
+           </ul>`;
+
+    bodyEl.innerHTML = `
+      <div class="hub-plan-card">
+        <div class="hub-plan-head">
+          <span>
+            <span class="hub-badge ${planCode !== "free" ? "is-paid" : ""}">${escapeHtmlSafe(planCode.toUpperCase())}</span>
+            ${planCode === "team" ? `<span style="font-size:0.78rem;color:var(--ink-2);margin-left:6px;">${seats} ${isZh ? "席位" : "seat(s)"}</span>` : ""}
+          </span>
+          <span style="font-size:0.76rem;color:var(--ink-2);">${
+            isZh
+              ? `单次上限 ${charCap} 字 · 云端文风上限 ${voiceCap} 份`
+              : `Up to ${charCap} chars/call · ${voiceCap} voice cards`
+          }</span>
+        </div>
+        ${subStatusHtml}
+        <div style="font-size:0.8rem;">
+          <strong>${isZh ? `本月已用 ${used} / ${quota} 额度` : `${used} / ${quota} monthly credits used`}</strong>${
+            bonus > 0 ? (isZh ? ` · 按量/永久额度 ${bonus}` : ` · ${bonus} permanent credits`) : ""
+          } (${isZh ? `可用 ${rem}` : `${rem} available`})
+        </div>
+        <div class="hub-quota-bar"><div class="hub-quota-fill ${rem <= 5 ? "is-low" : ""}" style="width:${pct}%"></div></div>
+        ${planActionsHtml}
+      </div>
+      ${billingLedgerHtml}
+      <div class="hub-sub-heading">${isZh ? "近期云端调用明细" : "Recent cloud calls"}</div>
+      <ul class="hub-list">
+        ${
+          usageItems.length === 0
+            ? `<li class="hub-list-row"><span>${isZh ? "本月还没有云端调用记录。" : "No cloud calls recorded yet."}</span></li>`
+            : usageItems
+                .map((it) => {
+                  const rawTs = String(it.ts || it.at || "").replace("T", " ").slice(0, 16);
+                  return `<li class="hub-list-row">
+                    <span><code>${escapeHtmlSafe(it.tool || "cloud")}</code> · -${escapeHtmlSafe(it.credits ?? 0)} ${isZh ? "额度" : "cr"}</span>
+                    <span style="color:var(--ink-2);">${escapeHtmlSafe(rawTs)}</span>
+                  </li>`;
+                })
+                .join("")
+        }
+      </ul>
+    `;
+    bodyEl.querySelectorAll("[data-hub-checkout]").forEach((btn) => {
+      btn.addEventListener("click", (ev) => {
+        startBillingCheckout(btn.getAttribute("data-hub-checkout") || "pro", { triggerBtn: ev.currentTarget });
+      });
+    });
+    document.getElementById("hub-open-portal-btn")?.addEventListener("click", (ev) => {
+      openBillingPortal(ev.currentTarget);
+    });
+    return;
+  }
 
   if (activeHubTab === "keys") {
     if (!cachedHubData.keys) {
@@ -4713,14 +5053,54 @@ async function renderAccountHub() {
     }
     const keys = cachedHubData.keys;
     const mcpUrl = `${window.location.origin}/mcp`;
+    const cliCmd = `claude mcp add --transport http dislop ${mcpUrl}`;
+    const renderKeyRowHtml = (k) => {
+      const keyId = k.id || k.keyId || "";
+      const capMeta = k.monthlyLimit ? ` · ${isZh ? "月限" : "cap"} ${k.monthlyUsed || 0}/${k.monthlyLimit}` : "";
+      const statusMeta = k.revokedAt
+        ? isZh
+          ? "已撤销"
+          : "revoked"
+        : k.lastUsedDay
+          ? `${isZh ? "最近使用" : "last used"} ${k.lastUsedDay}`
+          : isZh
+            ? "未使用"
+            : "unused";
+      return `<li class="hub-list-row">
+        <span><strong>${escapeHtmlSafe(k.name || "MCP Key")}</strong> · <code>${escapeHtmlSafe(k.prefix || "dslp_***")}</code>${escapeHtmlSafe(capMeta)} · ${escapeHtmlSafe(statusMeta)}</span>
+        ${
+          k.revokedAt || !keyId
+            ? ""
+            : `<button type="button" class="ctrl-btn ctrl-btn-sm" data-revoke-key="${escapeHtmlSafe(keyId)}">${isZh ? "撤销" : "Revoke"}</button>`
+        }
+      </li>`;
+    };
+    const wireRevokeKeyBtns = (container) => {
+      container.querySelectorAll("[data-revoke-key]").forEach((rBtn) => {
+        rBtn.addEventListener("click", async () => {
+          const kid = rBtn.getAttribute("data-revoke-key");
+          if (!kid) return;
+          rBtn.disabled = true;
+          await fetch(`/api/v1/account/keys/${encodeURIComponent(kid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
+          cachedHubData.keys = null;
+          renderAccountHub();
+        });
+      });
+    };
+
     bodyEl.innerHTML = `
       <p class="hub-section-note">${
         isZh
           ? `OAuth 2.1 免密钥端点（Claude Code / ChatGPT / Cursor / VS Code）：<code>${escapeHtmlSafe(mcpUrl)}</code>`
           : `Zero-key OAuth 2.1 endpoint (Claude Code / ChatGPT / Cursor / VS Code): <code>${escapeHtmlSafe(mcpUrl)}</code>`
-      } <button type="button" id="hub-copy-mcp-url" class="ctrl-btn ctrl-btn-sm">${isZh ? "复制地址" : "Copy URL"}</button></p>
+      }</p>
+      <div class="quick-actions" style="margin-bottom:8px;">
+        <button type="button" id="hub-copy-mcp-cli" class="ctrl-btn ctrl-btn-sm">${isZh ? "复制 Claude Code 一行接入" : "Copy Claude Code command"}</button>
+        <button type="button" id="hub-copy-mcp-url" class="ctrl-btn ctrl-btn-sm">${isZh ? "复制 MCP 地址" : "Copy MCP URL"}</button>
+      </div>
       <form id="hub-new-key-form" class="cloud-inline-form">
         <input type="text" id="hub-new-key-name" class="cloud-input" maxlength="40" placeholder="${isZh ? "新建密钥备注（如 Cursor / 笔记本）" : "Key label (e.g. Cursor / Laptop)"}">
+        <input type="number" id="hub-new-key-limit" class="cloud-input hub-key-limit" min="1" max="100000" placeholder="${isZh ? "月度限额（选填）" : "Monthly cap (opt)"}">
         <button type="submit" id="hub-new-key-btn" class="btn-primary" style="min-height:32px;padding:4px 12px;font-size:0.79rem;">${isZh ? "生成新密钥" : "Create API key"}</button>
       </form>
       <div id="hub-new-key-out" class="cloud-output-box" hidden></div>
@@ -4728,39 +5108,32 @@ async function renderAccountHub() {
         ${
           keys.length === 0
             ? `<li class="hub-list-row"><span>${isZh ? "暂未创建长期 API 密钥（用 OAuth 直连无需建密钥）。" : "No API keys yet (OAuth clients don't need one)."}</span></li>`
-            : keys
-                .map(
-                  (k) => `<li class="hub-list-row">
-                    <span><strong>${escapeHtmlSafe(k.name || "MCP Key")}</strong> · <code>${escapeHtmlSafe(k.prefix || "dslp_***")}</code> · ${escapeHtmlSafe(
-                    k.revokedAt ? (isZh ? "已撤销" : "revoked") : k.lastUsedDay ? `${isZh ? "最近使用" : "last used"} ${k.lastUsedDay}` : isZh ? "未使用" : "unused"
-                  )}</span>
-                    ${
-                      k.revokedAt
-                        ? ""
-                        : `<button type="button" class="ctrl-btn ctrl-btn-sm" data-revoke-key="${escapeHtmlSafe(k.keyId)}">${isZh ? "撤销" : "Revoke"}</button>`
-                    }
-                  </li>`
-                )
-                .join("")
+            : keys.map(renderKeyRowHtml).join("")
         }
       </ul>
     `;
+    document.getElementById("hub-copy-mcp-cli")?.addEventListener("click", async (ev) => {
+      await copyTextWithFeedback(ev.currentTarget, cliCmd);
+    });
     document.getElementById("hub-copy-mcp-url")?.addEventListener("click", async (ev) => {
       await copyTextWithFeedback(ev.currentTarget, mcpUrl);
     });
     document.getElementById("hub-new-key-form")?.addEventListener("submit", async (ev) => {
       ev.preventDefault();
       const nameInput = document.getElementById("hub-new-key-name");
+      const limitInput = document.getElementById("hub-new-key-limit");
       const outEl = document.getElementById("hub-new-key-out");
       const btn = document.getElementById("hub-new-key-btn");
       const name = String(nameInput?.value || "").trim() || "MCP Key";
+      const rawLimit = Number.parseInt(String(limitInput?.value || "").trim(), 10);
+      const monthlyLimit = Number.isFinite(rawLimit) && rawLimit > 0 ? rawLimit : undefined;
       if (btn) btn.disabled = true;
       try {
         const resp = await fetch("/api/v1/account/keys", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ name }),
+          body: JSON.stringify({ name, ...(monthlyLimit ? { monthlyLimit } : {}) }),
         });
         const data = await resp.json().catch(() => ({}));
         if (!resp.ok || !data.apiKey) {
@@ -4772,6 +5145,7 @@ async function renderAccountHub() {
         }
         cachedHubData.keys = null;
         if (nameInput) nameInput.value = "";
+        if (limitInput) limitInput.value = "";
         const cfgStr = JSON.stringify(data.mcpConfig, null, 2);
         if (outEl) {
           outEl.hidden = false;
@@ -4783,45 +5157,19 @@ async function renderAccountHub() {
             await copyTextWithFeedback(cEv.currentTarget, cfgStr);
           });
         }
-        // Re-fetch keys list without wiping the newly generated key output box
         const kResp = await fetch("/api/v1/account/keys", { credentials: "same-origin" }).catch(() => null);
         const kData = kResp && kResp.ok ? await kResp.json().catch(() => ({})) : {};
         cachedHubData.keys = Array.isArray(kData.keys) ? kData.keys : [];
         const listEl = bodyEl.querySelector(".hub-list");
         if (listEl) {
-          listEl.innerHTML = cachedHubData.keys
-            .map(
-              (k) => `<li class="hub-list-row">
-                <span><strong>${escapeHtmlSafe(k.name || "MCP Key")}</strong> · <code>${escapeHtmlSafe(k.prefix || "dslp_***")}</code></span>
-                ${k.revokedAt ? "" : `<button type="button" class="ctrl-btn ctrl-btn-sm" data-revoke-key="${escapeHtmlSafe(k.keyId)}">${isZh ? "撤销" : "Revoke"}</button>`}
-              </li>`
-            )
-            .join("");
-          listEl.querySelectorAll("[data-revoke-key]").forEach((rBtn) => {
-            rBtn.addEventListener("click", async () => {
-              const kid = rBtn.getAttribute("data-revoke-key");
-              if (!kid) return;
-              rBtn.disabled = true;
-              await fetch(`/api/v1/account/keys/${encodeURIComponent(kid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
-              cachedHubData.keys = null;
-              renderAccountHub();
-            });
-          });
+          listEl.innerHTML = cachedHubData.keys.map(renderKeyRowHtml).join("");
+          wireRevokeKeyBtns(listEl);
         }
       } finally {
         if (btn) btn.disabled = false;
       }
     });
-    bodyEl.querySelectorAll("[data-revoke-key]").forEach((rBtn) => {
-      rBtn.addEventListener("click", async () => {
-        const kid = rBtn.getAttribute("data-revoke-key");
-        if (!kid) return;
-        rBtn.disabled = true;
-        await fetch(`/api/v1/account/keys/${encodeURIComponent(kid)}`, { method: "DELETE", credentials: "same-origin" }).catch(() => {});
-        cachedHubData.keys = null;
-        renderAccountHub();
-      });
-    });
+    wireRevokeKeyBtns(bodyEl);
     return;
   }
 
@@ -4839,12 +5187,19 @@ async function renderAccountHub() {
           apps.length === 0
             ? `<li class="hub-list-row"><span>${isZh ? "暂无已连接的 OAuth 应用。" : "No connected OAuth apps yet."}</span></li>`
             : apps
-                .map(
-                  (a) => `<li class="hub-list-row">
-                    <span><strong>${escapeHtmlSafe(a.clientName || a.clientId || "MCP Client")}</strong> · ${escapeHtmlSafe(String(a.createdAt || "").slice(0, 10))}</span>
-                    <button type="button" class="ctrl-btn ctrl-btn-sm" data-revoke-app="${escapeHtmlSafe(a.grantId)}">${isZh ? "断开授权" : "Disconnect"}</button>
-                  </li>`
-                )
+                .map((a) => {
+                  const appId = a.id || a.grantId || "";
+                  const hostNote = a.redirectHost ? ` · <code>${escapeHtmlSafe(a.redirectHost)}</code>` : "";
+                  const dayNote = a.lastUsedDay || String(a.createdAt || "").slice(0, 10);
+                  return `<li class="hub-list-row">
+                    <span><strong>${escapeHtmlSafe(a.clientName || a.clientId || "MCP Client")}</strong>${hostNote} · ${escapeHtmlSafe(dayNote)}</span>
+                    ${
+                      appId
+                        ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-revoke-app="${escapeHtmlSafe(appId)}">${isZh ? "断开授权" : "Disconnect"}</button>`
+                        : ""
+                    }
+                  </li>`;
+                })
                 .join("")
         }
       </ul>
@@ -4869,8 +5224,13 @@ async function renderAccountHub() {
       cachedHubData.voices = Array.isArray(data.voices) ? data.voices : [];
     }
     const voices = cachedHubData.voices;
+    const voiceCap = Number(active.voiceCap || (active.plan === "team" ? 50 : active.plan === "pro" ? 20 : 3));
     bodyEl.innerHTML = `
-      <p class="hub-section-note">${isZh ? "在工作台提炼的文风会自动存到账号里，你的远程 MCP 改稿也能直接复用。" : "Voice profiles saved in the workbench sync here and are reused by Remote MCP rewrites."}</p>
+      <p class="hub-section-note">${
+        isZh
+          ? `已保存 ${voices.length} / ${voiceCap} 份云端文风。在工作台提炼的文风会自动同步给远程 MCP 改稿复用。`
+          : `${voices.length} / ${voiceCap} cloud voice cards saved. Profiles extracted in the workbench sync automatically to Remote MCP.`
+      }</p>
       <ul class="hub-list">
         ${
           voices.length === 0
@@ -4918,43 +5278,70 @@ async function renderAccountHub() {
     return;
   }
 
-  // Usage & Account tab
-  if (!cachedHubData.usage) {
-    const resp = await fetch("/api/v1/account/usage?limit=15", { credentials: "same-origin" }).catch(() => null);
-    const data = resp && resp.ok ? await resp.json().catch(() => ({})) : {};
-    cachedHubData.usage = Array.isArray(data.items) ? data.items : [];
-  }
-  const used = Number(active.monthlyUsed || 0);
-  const quota = Math.max(1, Number(active.monthlyQuota || 30));
-  const pct = Math.min(100, Math.round((used / quota) * 100));
-  const rem = Number(active.totalRemaining ?? Math.max(0, quota - used));
-  const items = cachedHubData.usage;
+  // Sign-in & Security tab
+  const hasGoogleLinked = Boolean(active.identities?.google);
+  const hasGithubLinked = Boolean(active.identities?.github);
+  const googleServerReady = Boolean(cloudSessionState.methods?.google);
+  const githubServerReady = Boolean(cloudSessionState.methods?.github);
+  const deliverableEmail = active.deliverableEmail !== false;
+
+  const googleRowHtml =
+    hasGoogleLinked || googleServerReady
+      ? `<li class="hub-list-row">
+          <span><strong>Google</strong> · ${hasGoogleLinked ? (isZh ? "已绑定" : "Connected") : isZh ? "未绑定" : "Not connected"}</span>
+          ${
+            hasGoogleLinked
+              ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-unlink-provider="google">${isZh ? "解绑" : "Disconnect"}</button>`
+              : `<a href="/api/v1/auth/google/start?intent=link&return=%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;">${isZh ? "绑定 Google" : "Connect Google"}</a>`
+          }
+        </li>`
+      : "";
+
+  const githubRowHtml =
+    hasGithubLinked || githubServerReady
+      ? `<li class="hub-list-row">
+          <span><strong>GitHub</strong> · ${hasGithubLinked ? (isZh ? "已绑定" : "Connected") : isZh ? "未绑定" : "Not connected"}</span>
+          ${
+            hasGithubLinked
+              ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-unlink-provider="github">${isZh ? "解绑" : "Disconnect"}</button>`
+              : `<a href="/api/v1/auth/github/start?intent=link&return=%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" style="text-decoration:none;">${isZh ? "绑定 GitHub" : "Connect GitHub"}</a>`
+          }
+        </li>`
+      : "";
+
   bodyEl.innerHTML = `
-    <div style="font-size:0.8rem;">
-      <strong>${isZh ? `本月已用 ${used} / ${quota} 额度` : `${used} / ${quota} monthly credits used`}</strong>${
-    active.bonusCredits ? (isZh ? ` · 永久加赠/按量包 ${active.bonusCredits}` : ` · ${active.bonusCredits} bonus credits`) : ""
-  } (${isZh ? `剩余 ${rem}` : `${rem} left`})
-    </div>
-    <div class="hub-quota-bar"><div class="hub-quota-fill ${rem <= 5 ? "is-low" : ""}" style="width:${pct}%"></div></div>
-    <div class="quick-actions" style="margin-bottom:8px;">
+    <p class="hub-section-note">${
+      isZh
+        ? "同一账号可同时绑定邮箱验证码/一键链接、Google 与 GitHub 登录，配额与云端文风自动共享。"
+        : "Link Email code/magic link, Google, and GitHub to the same account so your quota and voice cards stay unified."
+    }</p>
+    <ul class="hub-list">
+      <li class="hub-list-row">
+        <span><strong>${isZh ? "邮箱" : "Email"}</strong> · <code>${escapeHtmlSafe(active.email || "")}</code></span>
+        <span style="color:var(--ink-2);">${
+          deliverableEmail
+            ? isZh
+              ? "可收验证码与一键链接"
+              : "Receives 6-digit codes & links"
+            : isZh
+              ? "隐私代收邮箱（请保留第三方登录）"
+              : "Private noreply address (keep OAuth linked)"
+        }</span>
+      </li>
+      ${googleRowHtml}
+      ${githubRowHtml}
+    </ul>
+    <div id="hub-security-feedback" class="ai-result-meta" style="margin-top:6px;"></div>
+    <div class="quick-actions" style="margin-top:10px;">
       <button type="button" id="hub-logout-all-btn" class="ctrl-btn ctrl-btn-sm">${isZh ? "退出所有设备会话" : "Sign out all devices"}</button>
     </div>
-    <ul class="hub-list">
-      ${
-        items.length === 0
-          ? `<li class="hub-list-row"><span>${isZh ? "本月还没有云端调用记录。" : "No cloud calls recorded yet."}</span></li>`
-          : items
-              .map(
-                (it) => `<li class="hub-list-row">
-                  <span><code>${escapeHtmlSafe(it.tool || "cloud")}</code> · -${escapeHtmlSafe(it.credits ?? 0)} ${isZh ? "额度" : "cr"}</span>
-                  <span style="color:var(--ink-2);">${escapeHtmlSafe(String(it.at || "").replace("T", " ").slice(0, 16))}</span>
-                </li>`
-              )
-              .join("")
-      }
-    </ul>
     <details class="hub-danger-fold">
       <summary>${isZh ? "永久注销账号与全部记录" : "Delete account permanently"}</summary>
+      <p class="hub-section-note" style="margin-top:6px;">${
+        isZh
+          ? "若有生效中的订阅将同步自动退订，所有 API 密钥、OAuth 授权、云端文风与账单记录会立即清除。"
+          : "Any active subscription is canceled immediately, and all API keys, OAuth grants, voice cards, and records are erased."
+      }</p>
       <form id="hub-delete-acct-form" class="cloud-inline-form" style="margin-top:8px;">
         <input type="email" id="hub-delete-confirm-email" class="cloud-input" required placeholder="${escapeHtmlSafe(active.email)}" aria-label="${isZh ? "确认邮箱" : "Confirm email"}">
         <button type="submit" id="hub-delete-acct-btn" class="ctrl-btn ctrl-btn-sm">${isZh ? "确认注销" : "Delete account"}</button>
@@ -4962,12 +5349,38 @@ async function renderAccountHub() {
       <div id="hub-delete-feedback" class="ai-result-meta" style="margin-top:6px;"></div>
     </details>
   `;
+
+  bodyEl.querySelectorAll("[data-unlink-provider]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const provider = btn.getAttribute("data-unlink-provider");
+      const secFb = document.getElementById("hub-security-feedback");
+      if (!provider) return;
+      btn.disabled = true;
+      try {
+        const resp = await fetch(`/api/v1/account/identities/${encodeURIComponent(provider)}`, {
+          method: "DELETE",
+          credentials: "same-origin",
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) {
+          if (secFb) secFb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</span>`;
+          btn.disabled = false;
+          return;
+        }
+        await refreshCloudSession();
+      } catch (err) {
+        if (secFb) secFb.innerHTML = `<span class="ai-error-msg">${escapeHtmlSafe(err.message || "Network error")}</span>`;
+        btn.disabled = false;
+      }
+    });
+  });
+
   document.getElementById("hub-logout-all-btn")?.addEventListener("click", async (ev) => {
     ev.currentTarget.disabled = true;
     await fetch("/api/v1/auth/logout-all", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
     cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
     saveCloudAccount(null);
-    cachedHubData = { keys: null, apps: null, voices: null, usage: null };
+    resetCachedHubData();
     renderCloudAccountState();
   });
   document.getElementById("hub-delete-acct-form")?.addEventListener("submit", async (ev) => {
@@ -4991,7 +5404,7 @@ async function renderAccountHub() {
       }
       cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
       saveCloudAccount(null);
-      cachedHubData = { keys: null, apps: null, voices: null, usage: null };
+      resetCachedHubData();
       renderCloudAccountState();
     } finally {
       if (btn) btn.disabled = false;
@@ -5029,13 +5442,18 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
   }
 
   const act = pendingCloudAction;
+  const isCheckoutAct = typeof act === "string" && act.startsWith("checkout:");
   const titleMap = {
     deslop: isZh ? "登录并立即执行云端改写" : "Sign in & run Cloud Rewrite",
     review: isZh ? "登录并立即执行云端审校" : "Sign in & run Cloud Review",
     voice_extract: isZh ? "登录并提炼个人文风" : "Sign in & extract voice profile",
   };
   if (titleEl) {
-    titleEl.textContent = titleMap[act] || (isZh ? "登录 / 注册 dislop 账号" : "Sign in or join dislop Cloud");
+    titleEl.textContent = isCheckoutAct
+      ? isZh
+        ? "登录并继续开通方案"
+        : "Sign in & continue to checkout"
+      : titleMap[act] || (isZh ? "登录 / 注册 dislop 账号" : "Sign in or join dislop Cloud");
   }
   if (subEl) {
     subEl.textContent = isZh
@@ -5129,6 +5547,9 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
   });
 
   const emailEl = document.getElementById("auth-modal-email");
+  if (emailEl && cloudSessionState.pendingLink?.email && !emailEl.value.trim()) {
+    emailEl.value = cloudSessionState.pendingLink.email;
+  }
   const otpInput = document.getElementById("auth-modal-otp-code");
   const otpStep = document.getElementById("auth-modal-otp-step");
   const sendBtn = document.getElementById("auth-modal-send-btn");
@@ -5339,7 +5760,7 @@ function openInlineCloudKeyPanelFallback(reasonMsg = "") {
         cloudSessionState = { ...cloudSessionState, authenticated: false, authMethod: null, account: null };
       }
       saveCloudAccount(null);
-      cachedHubData = { keys: null, apps: null, voices: null, usage: null };
+      resetCachedHubData();
       renderCloudAccountState();
       panel.hidden = true;
     });
@@ -5361,7 +5782,46 @@ function openQuotaUpgradePanel(message = "") {
   if (!panel) return;
   const isZh = currentLang === "zh";
   const active = getActiveCloudAccount();
+  const billingLive = Boolean(cloudSessionState.billing?.enabled);
   panel.hidden = false;
+
+  if (billingLive) {
+    panel.innerHTML = `
+      <div class="ai-result-head">
+        <span class="ai-result-title">${isZh ? "当前云端额度不足（本地离线检查仍永久免费）" : "Cloud credits used up (local checks stay unlimited)"}</span>
+        <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
+      </div>
+      ${message ? `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>` : ""}
+      <div class="upgrade-box">
+        <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${
+          isZh
+            ? "左侧全部离线规则检查、5 轴节奏体检和命令行（npx dislop check .）依然不限次使用。如需立即补充云端审校额度："
+            : "All local rules, 5-axis telemetry, and CLI checks (npx dislop check .) stay unlimited. To add cloud credits immediately:"
+        }</p>
+        <div class="quick-actions">
+          <button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-inline-checkout="pro">${
+            isZh ? "升级 Pro（$12/月 · 1,500 额度）" : "Upgrade to Pro ($12/mo · 1,500 cr)"
+          }</button>
+          <button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="credits">${
+            isZh ? "买按量包（$10 / 800 额度 · 不过期）" : "Buy 800 Credits ($10 · never expires)"
+          }</button>
+          <button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="team">${
+            isZh ? "Team（$29/席位）" : "Team ($29/seat)"
+          }</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
+      panel.hidden = true;
+    });
+    panel.querySelectorAll("[data-inline-checkout]").forEach((btn) => {
+      btn.addEventListener("click", (ev) => {
+        startBillingCheckout(btn.getAttribute("data-inline-checkout") || "pro", { triggerBtn: ev.currentTarget });
+      });
+    });
+    return;
+  }
+
   panel.innerHTML = `
     <div class="ai-result-head">
       <span class="ai-result-title">${isZh ? "本月云端免费额度已用完（本地离线检查仍永久免费）" : "Monthly cloud credits used up (local checks stay unlimited)"}</span>
@@ -5530,7 +5990,7 @@ async function runOfficeCloudAction(kind) {
     if (kind === "review") {
       const findings = Array.isArray(data.findings) ? data.findings : [];
       const normalized = findings.map((f) => normalizeCloudFindingItem(f, isZh));
-      const summary = data.summary || (isZh ? `共发现 ${normalized.length} 处可改项。` : `Found ${normalized.length} item(s).`);
+      const summary = data.verdict?.summary || data.summary || (isZh ? `共发现 ${normalized.length} 处可改项。` : `Found ${normalized.length} item(s).`);
       const itemsHtml = normalized.length
         ? `<ul class="finding-review-list">${normalized
             .map(
@@ -6945,8 +7405,90 @@ function init() {
   applyI18n(false);
   startHeroProofTimer();
   (async () => {
+    let initialMagicToken = "";
+    let initialBillingState = "";
+    try {
+      const curUrl = new URL(window.location.href);
+      initialMagicToken = String(curUrl.searchParams.get("magic") || "").trim();
+      initialBillingState = String(curUrl.searchParams.get("billing") || "").trim();
+      if (initialMagicToken || initialBillingState) {
+        curUrl.searchParams.delete("magic");
+        curUrl.searchParams.delete("billing");
+        curUrl.searchParams.delete("session_id");
+        window.history.replaceState({}, "", curUrl.pathname + curUrl.search + curUrl.hash);
+      }
+    } catch {
+      initialMagicToken = "";
+      initialBillingState = "";
+    }
+
+    const outBox = document.getElementById("token-output-box");
+    const isZh = currentLang === "zh";
+
+    if (initialMagicToken) {
+      if (outBox) {
+        outBox.hidden = false;
+        outBox.textContent = isZh ? "正在验证一键登录链接…" : "Verifying 1-click sign-in link...";
+      }
+      try {
+        const mResp = await fetch("/api/v1/auth/magic/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            token: initialMagicToken,
+            lang: isZh ? "zh" : "en",
+            source: getEntrySource(),
+          }),
+        });
+        const mData = await mResp.json().catch(() => ({}));
+        if (mResp.ok && mData.account) {
+          cloudSessionState = {
+            ...cloudSessionState,
+            loaded: true,
+            authenticated: true,
+            authMethod: "magic_link",
+            account: mData.account,
+          };
+          if (outBox) {
+            outBox.hidden = false;
+            outBox.textContent = isZh ? "已通过邮件链接登录。" : "Signed in via email link.";
+          }
+        } else if (outBox) {
+          outBox.hidden = false;
+          outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(
+            mData.message || (isZh ? "登录链接已失效，请重新发送验证码。" : "Sign-in link expired. Please request a new code.")
+          )}</p>`;
+        }
+      } catch (err) {
+        if (outBox) {
+          outBox.hidden = false;
+          outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(err.message || "Network error")}</p>`;
+        }
+      }
+    }
+
     await refreshCloudSession();
     await finalizePendingOAuthLinkIfNeeded();
+
+    if (initialBillingState === "success" || initialBillingState === "cancel") {
+      activeHubTab = "plan";
+      resetCachedHubData();
+      renderCloudAccountState();
+      if (outBox) {
+        outBox.hidden = false;
+        outBox.textContent =
+          initialBillingState === "success"
+            ? isZh
+              ? "支付已完成，订阅或按量额度已同步到当前账号（如仍在确认，几秒后点「刷新额度」即可）。"
+              : "Payment complete. Your plan or credit pack is synced to your account (click Refresh in a few seconds if still finalizing)."
+            : isZh
+              ? "已取消本次结账，未产生扣款。"
+              : "Checkout canceled. No charge was made.";
+      }
+      document.getElementById("cloud-token-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
     await consumePendingWorkbenchIntent();
   })();
   handleWorkbenchHash();

@@ -28,6 +28,7 @@ import {
   renderGithubCtrl,
   renderHomeJsonLd,
   renderPrimaryNavLinks,
+  renderStaticAccountCtrl,
 } from "./lib/site_content.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -2107,6 +2108,7 @@ ${renderPrimaryNavLinks({ lang: "zh", depthPrefix: "../", activeNav: "awesome", 
       </nav>
 
       <div class="top-controls">
+        ${renderStaticAccountCtrl({ lang: "zh", depthPrefix: "../", i18nKey: "nav.signIn" })}
         ${renderGithubCtrl({ i18nKey: "nav.github" })}
         <button type="button" id="lang-toggle" class="ctrl-btn" aria-label="Switch to English">EN</button>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>

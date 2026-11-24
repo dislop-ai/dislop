@@ -39,6 +39,14 @@ export function renderGithubCtrl({ i18nKey = "" } = {}) {
   return `<a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl">${GITHUB_MARK_SVG}<span class="gh-ctrl-label"${i18nAttr}>GitHub ★</span></a>`;
 }
 
+export function renderStaticAccountCtrl({ lang, depthPrefix, i18nKey = "" }) {
+  const isEn = lang === "en";
+  const href = isEn ? `${depthPrefix}?lang=en#cloud-token-box` : `${depthPrefix}#cloud-token-box`;
+  const label = isEn ? "Sign in · 30 free" : "登录 · 30 免费额度";
+  const i18nAttr = i18nKey ? ` data-i18n="${escapeHtml(i18nKey)}"` : "";
+  return `<a href="${escapeHtml(href)}" class="ctrl-btn topbar-acct-btn" data-static-acct${i18nAttr}>${label}</a>`;
+}
+
 // The six primary links, identical in order and wording on every page
 export function renderPrimaryNavLinks({ lang, depthPrefix, activeNav = "", ids = {}, withI18n = false }) {
   const isEn = lang === "en";
@@ -826,6 +834,7 @@ ${renderPrimaryNavLinks({ lang, depthPrefix, activeNav })}
       </nav>
 
       <div class="top-controls">
+        ${renderStaticAccountCtrl({ lang, depthPrefix })}
         ${renderGithubCtrl()}
         <a href="${escapeHtml(effectiveSwitchHref)}" class="ctrl-btn" aria-label="${isEn ? "切换为中文" : "Switch to English"}">${isEn ? "中文" : "EN"}</a>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="${isEn ? "Toggle color theme" : "切换浅深色主题"}">${isEn ? "Dark" : "深色"}</button>
@@ -1099,6 +1108,69 @@ ${packRowsHtml}
       </div>
     </section>
 
+    <section id="pricing" class="section-block band-rule" aria-labelledby="en-pricing-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="en-pricing-heading">Local tools stay free; cloud review uses credits</h2>
+          <p class="section-desc">The Skill, CLI, and rules are Apache-2.0 and run offline. Cloud review, rewrites, and remote MCP use credits after sign-in: 30 free credits a month, and the paid model API never trains on your drafts.</p>
+        </div>
+        <a href="https://github.com/dislop-ai/dislop/blob/main/benchmarks/MODEL-COMPARISON.md" target="_blank" rel="noopener">Read 5-model benchmark →</a>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="pricing-col">
+          <div class="pricing-head">
+            <h3>Open Source Local (Skill + CLI)</h3>
+            <span class="pricing-amount">$0 · Forever free</span>
+          </div>
+          <p class="pricing-sub">For drafts that cannot leave your machine: offline setups, private repos, and internal docs. All code and rules are open source.</p>
+          <ul class="pricing-list">
+            <li>Pure-Markdown Agent Skill (no scripts) &amp; local CLI (Apache-2.0)</li>
+            <li>All 7 domain packs (${allRules.length} rules) bundled offline for Markdown, HTML/CSS/SVG, images, DOCX, PPTX &amp; PDF</li>
+            <li>Built-in 5-axis rhythm telemetry, 14.6 KB Pocket ML (<code>--ml</code>) &amp; offline <code>dislop voice</code></li>
+            <li>Zero network during check; developers can also plug in their own model key</li>
+          </ul>
+          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="#surfaces" class="ctrl-btn">Install Skill / CLI ↑</a>
+          </div>
+        </div>
+
+        <div class="pricing-col is-featured">
+          <div class="pricing-head">
+            <h3>Cloud Free (Remote MCP)</h3>
+            <span class="pricing-amount">$0 · 30 credits / mo</span>
+          </div>
+          <p class="pricing-sub">Sign in with a 6-digit email code, 1-click link, Google, or GitHub—no password or card—for the web workbench and Remote MCP.</p>
+          <ul class="pricing-list">
+            <li>Connect <code>https://dislop.com/mcp</code> via zero-config OAuth 2.1 or API keys (up to 12,000 chars/call)</li>
+            <li>Cloud Review (1 credit): catches pitch cadence, filler, and clichés with concrete edits</li>
+            <li>Cloud Rewrite (2 credits): plain rewrite that re-checks rules, numbers, and qualifiers</li>
+            <li>Layout-preserving Word/PPT &amp; voice profiles (2-3 credits): keeps formatting and syncs up to 3 voice cards</li>
+          </ul>
+          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="../?lang=en#cloud-token-box" class="btn-primary" style="min-height:32px;padding:6px 14px;font-size:0.82rem;">Sign in · 30 free credits →</a>
+          </div>
+        </div>
+
+        <div class="pricing-col">
+          <div class="pricing-head">
+            <h3>Pro · Credit Packs · Team</h3>
+            <span class="pricing-amount">$12/mo · $10 PAYGO</span>
+          </div>
+          <p class="pricing-sub">If you write often, Pro costs 36% less per credit. If you only need it occasionally, credit packs never expire.</p>
+          <ul class="pricing-list">
+            <li>Pro ($12/mo or $108/yr): 1,500 credits/mo (up to 50,000 chars/call) + 20 cloud voice cards</li>
+            <li>PAYGO Pack ($10 / 800 credits): one-time purchase, never expires, unlocks 50,000 chars/call</li>
+            <li>Team ($29/seat/mo): 5,000 credits/seat + 50 shared brand voice cards &amp; PR review</li>
+            <li>Paid-tier Google Gemini API only—no draft storage and never used for training</li>
+          </ul>
+          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="../?lang=en#cloud-token-box" class="ctrl-btn">Upgrade or join waitlist →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="awesome" class="section-block band-rule" aria-labelledby="en-awesome-heading">
       <div class="section-header">
         <div>
@@ -1235,6 +1307,7 @@ ${renderPrimaryNavLinks({ lang: "en", depthPrefix: "../../", activeNav: "awesome
       </nav>
 
       <div class="top-controls">
+        ${renderStaticAccountCtrl({ lang: "en", depthPrefix: "../../", i18nKey: "nav.signIn" })}
         ${renderGithubCtrl({ i18nKey: "nav.github" })}
         <button type="button" id="lang-toggle" class="ctrl-btn" aria-label="切换为中文">中文</button>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
