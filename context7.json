@@ -1,0 +1,27 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "dislop",
+  "description": "Linter for AI slop across Markdown docs, HTML/CSS/JSX/SVG web UI, Word (.docx), PowerPoint (.pptx), and PDF slides. Runs via pure-Markdown Agent Skills, offline Node/Python CLI, local stdio MCP, and Remote Cloud MCP.",
+  "folders": ["docs", "skills", "benchmarks", "content/guides"],
+  "excludeFolders": [
+    "site",
+    "tests",
+    "packs",
+    "patterns",
+    "models",
+    "benchmarks/results",
+    "benchmarks/datasets",
+    "docs/research/grammarly-intel",
+    "docs/research/awesome-anti-slop-topology",
+    "docs/research/positive-divergence",
+    "integrations/vscode"
+  ],
+  "excludeFiles": ["CHANGELOG.md"],
+  "rules": [
+    "Run deterministic checks offline first with `npx --yes dislop check <path> --pack auto --format agent` (or `uvx dislop check ...`).",
+    "Verify edited drafts against the original or git HEAD with `npx --yes dislop verify --git HEAD <file> --strict` so no numbers, units, dates, or qualifiers are dropped.",
+    "For Remote MCP without local setup, connect to `https://dislop.com/mcp` (`dislop_check`, `dislop_verify`, and `dislop_rules` require 0 credits and no sign-in).",
+    "Use pure-Markdown Agent Skills via `npx --yes skills add dislop-ai/dislop --skill dislop` (or task-focused `deslop-docs`, `deslop-slides-docx`, `deslop-web-ui`, `deslop-verify`).",
+    "Only audit reader-facing text, web UI markup, and slides; skip pure code logic, unit tests, and lockfiles."
+  ]
+}

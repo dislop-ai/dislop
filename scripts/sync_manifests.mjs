@@ -302,6 +302,12 @@ const targets = [
           description: META.serverDescription,
           version: META.version,
           websiteUrl: META.homepage,
+          icons: [
+            {
+              src: "https://dislop.com/assets/logo.svg",
+              mimeType: "image/svg+xml",
+            },
+          ],
           repository: {
             url: META.repoUrl,
             source: "github",

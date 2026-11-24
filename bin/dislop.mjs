@@ -2184,11 +2184,18 @@ function runMcpServer(packs, patternByRuleId) {
     }));
   }
 
+  const OFFLINE_TOOL_ANNOTATIONS = {
+    readOnlyHint: true,
+    idempotentHint: true,
+    destructiveHint: false,
+    openWorldHint: false,
+  };
   const tools = [
     {
       name: "dislop_check",
       description:
         "Check a draft (`text` or workspace-relative `path`) for AI-generation artifacts, clichés, and template slop across Markdown, HTML/CSS/JSX/SVG, PNG/JPEG/WebP, Word (.docx), PowerPoint (.pptx), and PDF. Edit only the flagged spans using `fixStrategy`, then run `dislop_verify`.",
+      annotations: OFFLINE_TOOL_ANNOTATIONS,
       inputSchema: {
         type: "object",
         properties: {
@@ -2210,6 +2217,7 @@ function runMcpServer(packs, patternByRuleId) {
       name: "dislop_verify",
       description:
         "Verify a revised draft against its original text (or Git baseline for workspace `path`): checks numbers/qualifiers, required `keep` terms, newly introduced AI slop, length bounds, and anti-degradation guardrails (author perspective, cadence, info density, modality).",
+      annotations: OFFLINE_TOOL_ANNOTATIONS,
       inputSchema: {
         type: "object",
         properties: {
@@ -2229,21 +2237,22 @@ function runMcpServer(packs, patternByRuleId) {
     {
       name: "dislop_rules",
       description: "Unified rule lookup: pass `ruleId` to explain a rule, filters (`query`/`pack`/`dimension`) to search, or empty object to list all packs.",
+      annotations: OFFLINE_TOOL_ANNOTATIONS,
       inputSchema: {
         type: "object",
         properties: {
           ruleId: { type: "string", description: "Optional rule ID to explain with before/trap/after examples" },
           query: { type: "string", description: "Optional keyword search query" },
-          pack: { type: "string" },
-          category: { type: "string" },
-          dimension: { type: "string" },
-          family: { type: "string" },
-          modality: { type: "string" },
-          severity: { type: "string", enum: ["error", "warning", "info"] },
-          tier: { type: "string", enum: ["invariant", "taste"] },
-          lang: { type: "string", enum: ["en", "zh"] },
-          includeExemplars: { type: "boolean" },
-          limit: { type: "integer", minimum: 1, maximum: 100 },
+          pack: { type: "string", description: "Filter rules by style pack ID" },
+          category: { type: "string", description: "Filter rules by category identifier" },
+          dimension: { type: "string", description: "Filter pattern bank rules by writing dimension" },
+          family: { type: "string", description: "Filter pattern bank rules by pattern family" },
+          modality: { type: "string", description: "Filter rules by target content modality (text, web, doc, visual)" },
+          severity: { type: "string", enum: ["error", "warning", "info"], description: "Filter rules by severity level" },
+          tier: { type: "string", enum: ["invariant", "taste"], description: "Filter rules by enforcement tier (invariant or taste)" },
+          lang: { type: "string", enum: ["en", "zh"], description: "Optional single-locale filter for rule descriptions and examples" },
+          includeExemplars: { type: "boolean", description: "Include before/trap/after examples in search results (default false)" },
+          limit: { type: "integer", minimum: 1, maximum: 100, description: "Maximum number of matching rules to return (1..100)" },
         },
       },
     },
@@ -2251,6 +2260,7 @@ function runMcpServer(packs, patternByRuleId) {
       name: "dislop_voice_extract",
       description:
         "Extract a deterministic offline `dislop.voice/1` personal style card from 1-15 clean author samples (0 network calls, 0 uploads).",
+      annotations: OFFLINE_TOOL_ANNOTATIONS,
       inputSchema: {
         type: "object",
         properties: {
@@ -2261,7 +2271,7 @@ function runMcpServer(packs, patternByRuleId) {
             maxItems: 15,
             description: "1 to 15 clean sample passages written by the author",
           },
-          lang: { type: "string", enum: ["auto", "en", "zh"] },
+          lang: { type: "string", enum: ["auto", "en", "zh"], description: "Language hint for style extraction (auto, en, or zh)" },
         },
         required: ["samples"],
       },
@@ -2270,6 +2280,7 @@ function runMcpServer(packs, patternByRuleId) {
       name: "dislop_model_score",
       description:
         "Run the bundled zero-dependency 15 KB Pocket ML ensemble (`pocket-slop-v1`) + 5-domain pack router on `text` to detect clean-wordlist stealth AI vapor paragraphs and explain top contributing signals (0 network calls).",
+      annotations: OFFLINE_TOOL_ANNOTATIONS,
       inputSchema: {
         type: "object",
         properties: {
@@ -2283,6 +2294,7 @@ function runMcpServer(packs, patternByRuleId) {
       name: "dislop_model_status",
       description:
         "Inspect bundled models, installed optional model weights, hardware memory budget, and recommended optional local model tier.",
+      annotations: OFFLINE_TOOL_ANNOTATIONS,
       inputSchema: {
         type: "object",
         properties: {},
