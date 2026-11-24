@@ -257,8 +257,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 7338,
-      "approxTokens": 1835,
+      "bytes": 9310,
+      "approxTokens": 2328,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -266,7 +266,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "aea55a5eb5e5755391957ba2ec58ca4cb32ee339184571f0882ac44b6be601c2"
+      "sha256": "1a3054ae49e88de105bad7d2298a3b526c0d4b923e8c23ccd51f1896b03acb9d"
     },
     {
       "id": "methodology-brand-voice",
@@ -297,13 +297,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 10175,
-      "approxTokens": 2544,
+      "bytes": 10432,
+      "approxTokens": 2608,
       "relatedTools": [
         "browser-workbench",
         "cli"
       ],
-      "sha256": "44e096da387fd77f5c0779d8804a1adf7605b3be7be389319c09cb566ee2359e"
+      "sha256": "4b8ab770c3620a6bb2cb1cfc00c4bc9f9202c05fa646b84b1040125227fd1efa"
     },
     {
       "id": "methodology-design-system",
@@ -3415,15 +3415,15 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 15389,
-      "approxTokens": 3847,
+      "bytes": 15751,
+      "approxTokens": 3938,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp",
         "skill"
       ],
-      "sha256": "a0c43eba3cc601b406418db3d5556a4246b0d0d53d3337144fae45edb45931fe"
+      "sha256": "5be4438da67c7c268ba93e9ffb8428c1307b0787831b05fbf5a8343051e2568e"
     }
   ]
 }

@@ -31,6 +31,8 @@ This roadmap tracks what `dislop` ships today, how we expand globally from codin
 
 Full ecosystem research and marketplace ranking live in [docs/research/universal-adaptation-and-marketplace-strategy.zh-CN.md](https://github.com/dislop-ai/dislop/blob/main/docs/research/universal-adaptation-and-marketplace-strategy.zh-CN.md). Tracks are split along clean directory boundaries so contributors can work in parallel.
 
+Prioritization follows the design principle in [PRODUCT.md](./PRODUCT.md): agent-reusable interfaces, verification gates, and format-preserving Office pipelines come ahead of standalone manual-writing plugins.
+
 ### Track A — Public Package Registries & First 6 Marketplace Listings (Now)
 
 Goal: finish account-side publishing so every install command resolves from public registries and get listed on the first marketplaces.
@@ -57,10 +59,10 @@ Goal: ship one zero-dependency Web extension across both major VS Code registrie
 Goal: expand beyond coding agent users to office agent workflows and anyone delivering docs, slides, or reports with AI while keeping reproducible benchmark coverage growing.
 
 - [x] Ship `dislop-bench v2` (112 core detection samples + 154 multi-angle pattern samples at `100.0%` precision/recall, `0.0%` clean FPR, `100.0%` Node/Python parity, 18 end-to-end revision tasks at `18/18` all-clear, and 5-model live cloud comparisons in [benchmarks/REPORT.md](./benchmarks/REPORT.md)) plus the 30-task 4-skill ecosystem benchmark ([benchmarks/ECOSYSTEM-BENCHMARK.md](./benchmarks/ECOSYSTEM-BENCHMARK.md)).
-- [ ] Reuse `src/core.mjs` to publish an offline-first **Obsidian Community Plugin** and a **Raycast Store** extension (`Check Selected Text` / `Clean Clipboard Slop`).
+- [ ] *(Lower priority / deferred)* Reuse `src/core.mjs` for standalone manual-writing extensions (**Obsidian Community Plugin** and **Raycast Store**) once cloud Office round-trip and `dislop_verify_edit` milestones land.
 - [ ] Add longer real-world drafts and multi-slide executive `.pptx` benchmarks, reviewing store installs every two weeks.
 
-**Done when**: `node scripts/run_benchmark.mjs --assert` stays green offline in CI and both Obsidian and Raycast packages pass upstream automated checks.
+**Done when**: `node scripts/run_benchmark.mjs --assert` stays green offline in CI and real-world longform plus multi-slide `.pptx` benchmarks are added; deferred manual-writing plugins are revisited after core Agent and Office cloud milestones land.
 
 ### Track D — `Awesome Anti-Slop` Maintenance & Split Threshold (Ongoing, Parallel)
 

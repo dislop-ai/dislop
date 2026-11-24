@@ -17,7 +17,7 @@
   <a href="./LICENSE">Apache-2.0</a>
 </p>
 
-**Cutting AI slop is real productivity.** `dislop` is a linter for AI slop. It catches AI-sounding text and template layouts in docs, web pages, and slides before you send them. Its rules come from vetted community projects and corpus findings, and the repo keeps a list of 90 related tools.
+**Cutting AI slop is real productivity.** `dislop` is a linter for AI slop. Built to run inside your agent, CLI, and CI, with a browser workbench ready whenever you want to check a draft yourself. It catches AI-sounding text and template layouts in docs, web pages, and slides before you send them. Its rules come from vetted community projects and corpus findings, and the repo keeps a list of 90 related tools.
 
 It comes in three parts:
 

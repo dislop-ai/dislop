@@ -10,7 +10,7 @@ All website copy, `README` files, marketplace manifests, visual assets, and outb
 Cutting AI slop is real productivity.
 
 ### Positioning
-**Linter for AI Slop.** Helps you (and your agent) catch and fix AI-sounding text and template layouts in docs, web pages, and slides before sending.
+**Linter for AI Slop.** Built to run inside your agent, CLI, and CI, with a browser workbench ready whenever you want to check a draft yourself. Catches AI-sounding text and template layouts in docs, web pages, and slides before sending.
 
 ### Global-First Priority & Single-Domain Strategy
 - **English (Global) first across code, docs, and assets**: Rule precision on native English prose/UI/decks, CLI/MCP/Skill schemas, canonical documentation (`*.md`), and primary visual assets (`og-card.png`, `-en-v2` demos, `@dislop_ai`) always come first. Chinese (`*.zh-CN.md`, `zh-*` rules, `-zh-v2` demos) is maintained in lockstep as a native localized counterpart, never the upstream source for machine translation.
@@ -19,7 +19,10 @@ Cutting AI slop is real productivity.
 - **Strict language separation**: English and Chinese materials use their own native examples, banners, social cards, and single-language accounts (`@dislop_ai` publishes exclusively in English), never word-for-word translations and never mixed inside one page or post.
 
 ### Users
-First coding agent users, then office agent users, and finally everyone who delivers work with AI. Their agents are direct users too, and can find and run `dislop` on their own.
+Primary operators are coding agents, office agents, and CI pipelines. Primary customers and decision-makers are the people and teams delivering work with AI: first coding agent users, then office agent users, and finally teams managing shared voice and review gates.
+
+### Design Principle (Internal): Agent-First Interface, Human-Owned Quality
+Every new check, review flow, or verification guard ships first as a deterministic, low-token CLI, MCP, or Skill surface, while the browser workbench and editor extensions expose that same core for human review. Prioritize compact machine output (`--format agent`), exact line spans, low false positives, 2-strike circuit breakers, and fact-preserving verification over decorative dashboards. Ship first where agents look (npm, PyPI, Official MCP Registry, `skills.sh`, editor tool hooks, and CI) before standalone manual paste surfaces. People and teams keep ownership of quality—setting voice bounds, accepting edits, and paying for governance—while public copy avoids the `"Agent-first"` label and names concrete tools and outcomes instead.
 
 ### Product Form
 1. **Skill (open-source, Markdown only)**: Genre-specific writing and UI reference cards with no bundled scripts. Your agent reads the matching card before drafting and can run the CLI afterward to check its work.
@@ -42,7 +45,7 @@ A dedicated linter for AI slop. It brings together vetted community rules and pr
 去 AI 味才是真正的生产力！
 
 ### 定位
-**AI 味检查工具。** 帮你（的 Agent）在文档、网页和 PPT 发出前，挑出并改掉里面的 AI 味。
+**AI 味检查工具。** 默认挂进你的 Agent、终端和 CI 自动自检，也提供网页工作台随时手动排查。帮你和你的 Agent 在文档、网页和 PPT 发出前，挑出并改掉里面的 AI 味。
 
 ### 全球英文优先与单域名兼容原则
 - **技术、文档与主物料以英文（全球）为第一基准**：地道英文语料检出精度与零误报边界、CLI/MCP/Skill 协议字段、主干英文文档（`*.md`）及默认视觉物料（`og-card.png`、`-en-v2` 动图、`@dislop_ai`）始终优先建设与验收；中文文档（`*.zh-CN.md`）、`zh-*` 专属规则与中文演示物料面向中文场景原生独立编写，不做英译中或中译英套翻。
@@ -51,7 +54,10 @@ A dedicated linter for AI slop. It brings together vetted community rules and pr
 - **单页单帖严格不混排**：中英文各自使用独立案例、视觉卡片与单语社交账号（官方号 `@dislop_ai` 固定纯英文发布），同一页面或单条帖子内绝不中英混排。
 
 ### 用户
-第一批是 Coding Agent 用户，第二批是办公 Agent 用户，最后是所有用 AI 交付成果的人；他们的 Agent 也是直接使用者，能自己找到并调用。
+日常高频调用方是 Coding Agent、办公 Agent 与 CI 流水线；真正的服务与买单对象是用 AI 交付成果的人和团队：第一批是 Coding Agent 用户，第二批是办公 Agent 用户，中长期延伸至需要共享文风与交付门禁的团队。
+
+### 内部设计原则：接口按 Agent 优先，质量与买单归属人和团队
+所有新检查、审校与防改坏能力先交付确定性、低 token 的 CLI、MCP 或 Skill 出口，网页工作台和编辑器扩展复用同一底座供人审阅，不做只能手工点按钮的孤岛功能。优先打磨紧凑输出（`--format agent`）、精确行号定位、低误报边界、2 次阻断熔断与事实保真核验，胜过堆砌展示型仪表盘。分发优先覆盖 npm、PyPI、官方 MCP Registry、`skills.sh`、编辑器内置工具与 CI 门禁，再考虑需人工复制粘贴的入口。声纹边界、改稿拍板和团队治理采购始终由人和团队掌握；对外文案不用 `Agent-first` 这类标签词，直接写具体入口和效果。
 
 ### 产品形态
 1. **Skill（开源，纯文档）**：按文体整理的写作与界面避坑参考卡，不带可执行脚本。Agent 动笔前按需读取，写完后可调用 CLI 自检。

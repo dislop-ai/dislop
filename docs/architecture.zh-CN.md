@@ -2,9 +2,11 @@
 
 [English](./architecture.md) · [产品定义](../PRODUCT.md)
 
-`dislop` 是面向文档、网页、SVG、图片与 PPT/PDF 幻灯片的 **AI 味检查工具**，基于统一的规则包清单协议（`schema: "dislop.pack/2"`）。它整合社区核验过的去味规则与语料经验，帮你（的 Agent）在本地挑出并改掉 AI 寒暄与未填占位符、模板套话与反转口号、句式节奏异常，以及网页、SVG、图片与 PPT/PDF 版式模板味；不做通用安全路径扫描、WCAG 无障碍审计或通用 PDF/X 印前检查。
+`dislop` 是面向文档、网页、SVG、图片与 PPT/PDF 幻灯片的 **AI 味检查工具**，基于统一的规则包清单协议（`schema: "dislop.pack/2"`）。默认挂进你的 Agent、终端和 CI 自动自检，也提供网页工作台供人工排查。它整合社区核验过的去味规则与语料经验，在本地挑出并改掉 AI 寒暄与未填占位符、模板套话与反转口号、句式节奏异常，以及网页、SVG、图片与 PPT/PDF 版式模板味；不做通用安全路径扫描、WCAG 无障碍审计或通用 PDF/X 印前检查。
 
 ## 1. 三层产品形态与边界架构
+
+架构原则（与 [PRODUCT.md](../PRODUCT.md) 对齐）：**接口按 Agent 优先，质量与买单归属人和团队**。所有能力先提供确定性、低 token 的 CLI、MCP 或 Skill 协议出口，再由网页工作台与编辑器扩展复用同一底座供人审阅。
 
 ```text
 第 1 层：开源纯文档 Skill 套件（`skills/dislop/SKILL.md` 与 `deslop-docs`、`deslop-slides-docx`、`deslop-web-ui`、`deslop-verify` 及 `./references/*.md`，不含脚本，0 联网）

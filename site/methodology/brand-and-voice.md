@@ -46,13 +46,14 @@ We aim for the plain clarity of **ASD-STE100** (Simplified Technical English) in
 3. **Cut every pull-quote closer and roleplay metaphor.** If a line sounds like a poster slogan or a costumed persona (`Pass for press`, `the pen stays in your hand`, `the sheet is set by machine`), delete it or rewrite it flat.
 4. **Start with something concrete.** Open with an actual draft, file, number, or command instead of throat-clearing background.
 5. **State limits plainly.** Unreadable archives and unshipped work (like code AST linting) are marked as skipped or not built yet.
-6. **Keep English and Chinese independent on one domain, never mixed.** `dislop.com` stays on a single domain: `/` serves native English (`x-default`), `/zh/` serves native Chinese, and legacy `/en/*` paths return a `301` redirect, with automatic first-visit browser language routing and a one-click manual toggle. Chinese and English materials are authored separately for their own audiences—separate copy, examples, banners, and single-language social accounts or posts (`@dislop_ai` publishes exclusively in English), never word-for-word translations and never mixed inside one page or post. Keep internal architecture tier codes, academic jargon, and research shorthand inside `docs/research/`, never in public copy.
+6. **Keep English and Chinese independent on one domain, never mixed.** `dislop.com` stays on a single domain: `/` serves native English (`x-default`), `/zh/` serves native Chinese, and legacy `/en/*` paths return a `301` redirect, with automatic first-visit browser language routing and a one-click manual toggle. Chinese and English materials are authored separately for their own audiences—separate copy, examples, banners, and single-language social accounts or posts (`@dislop_ai` publishes exclusively in English), never word-for-word translations and never mixed inside one page or post. Keep internal architecture tier codes, academic jargon, research shorthand, and internal principle labels such as `Agent-first` inside `docs/research/` and internal specs (`PRODUCT.md`, `AGENTS.md`), never in public copy.
 
 ### Copy Table
 
 | Surface | Avoid (AI-flavored / performative) | Use (plain English) |
 |---|---|---|
 | **Headline / Slogan** | `Your draft, minus the slop.` | `Cutting AI slop is real productivity.` |
+| **Positioning tag** | `Agent-first anti-slop platform` | `Built to run inside your agent, CLI, and CI, with a browser workbench ready whenever you need it.` |
 | **Intro copy** | `dislop strikes what can't ship... the pen stays in your hand.` | `dislop marks what looks off locally so you or your agent can fix it, with optional Cloud MCP rewrites.` |
 | **Clean check** | `Pass for press. 0 findings; protected spans stayed as written.` | `0 issues. Chat wrapper and stock phrasing removed.` |
 | **Swapped slop** | `Sent back: displacement detected` | `Still flagged (1 issue). Old buzzwords are gone, replaced by a 'Not X, but Y' slogan.` |

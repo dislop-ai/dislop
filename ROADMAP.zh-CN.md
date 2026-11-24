@@ -25,6 +25,8 @@
 
 全平台适配调研与渠道分级详见 [docs/research/universal-adaptation-and-marketplace-strategy.zh-CN.md](./docs/research/universal-adaptation-and-marketplace-strategy.zh-CN.md)。各条轨道按目录边界拆开，减少合并冲突。
 
+排期遵循 [PRODUCT.md](./PRODUCT.md) 的内部设计原则：能被 Agent 自动挂载复用的协议接口、防改坏验收门禁与 Office 保排版管线优先，纯人工手写触发的单点插件顺延。
+
 ### 轨道 A — 公共源正式上架与首批 6 大目录提审（当前最优先）
 
 目标：完成账号侧首次发布，把全仓默认安装从 Git 拉取切到毫秒级公共注册中心，并拿下首批官方插件目录展位。
@@ -51,10 +53,10 @@
 目标：从首批 Coding Agent 用户向 WorkBuddy、千问、Claude Cowork 等办公 Agent 用户及日常写方案、周报的人群延伸，并用公开可复现数据持续验证检出率。
 
 - [x] 交付 `dislop-bench v2`（112 份核心检测基准与 154 份多角度反模式基准，精确率 `100.0%`、召回率 `100.0%`、干净原稿误报率 `0.0%`、双端一致率 `100.0%`，18 组端到端改稿评测 `18/18` 全过及 5 模型真实在线对比，见 [benchmarks/REPORT.md](./benchmarks/REPORT.md)）及 30 任务 4 Skill 生态横向评测（[benchmarks/ECOSYSTEM-BENCHMARK.zh-CN.md](./benchmarks/ECOSYSTEM-BENCHMARK.zh-CN.md)）。
-- [ ] 复用纯 JS `src/core.mjs` 打包上架 **Obsidian Community Plugins**（单文件离线检查 + 可选云端改写）与 **Raycast Store**（系统快捷键检查选中文本 / 剪贴板）。
+- [ ] *（低优顺延）* 待云端 Office 保排版与 `dislop_verify_edit` 落地后，再评估复用纯 JS `src/core.mjs` 打包 **Obsidian Community Plugins** 与 **Raycast Store** 等纯手写单点扩展。
 - [ ] 扩充真实长文、多页管理汇报 `.pptx` 与跨模型盲评样本，按双周复盘各商店安装量。
 
-**验收标准**：CI 断网执行 `node scripts/run_benchmark.mjs --assert` 全绿，Obsidian 与 Raycast 扩展通过各自社区仓库机器校验。
+**验收标准**：CI 断网执行 `node scripts/run_benchmark.mjs --assert` 全绿，真实长文与多页 `.pptx` 评测样本补齐；纯手写单点插件待核心 Agent 与 Office 云端能力稳定后再行评估。
 
 ### 轨道 D — `Awesome Anti-Slop` 持续维护与拆仓阈值（并行推进）
 

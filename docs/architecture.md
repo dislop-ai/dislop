@@ -2,9 +2,11 @@
 
 [简体中文](./architecture.zh-CN.md) · [Product Brief](../PRODUCT.md)
 
-`dislop` is a **Linter for AI Slop** built around one shared rule manifest format (`schema: "dislop.pack/2"`). It combines vetted community anti-slop rules and corpus practices to help you (and your agent) catch and fix AI delivery artifacts, prose clichés, fallback slogans, rhythm defects, and template UI, SVG, image, or slide/PDF chrome offline. It does not perform general security scanning, WCAG accessibility auditing, or generic PDF/X print preflight.
+`dislop` is a **Linter for AI Slop** built around one shared rule manifest format (`schema: "dislop.pack/2"`). Built to run inside your agent, CLI, and CI, with a browser workbench for manual review. It combines vetted community anti-slop rules and corpus practices to catch and fix AI delivery artifacts, prose clichés, fallback slogans, rhythm defects, and template UI, SVG, image, or slide/PDF chrome offline. It does not perform general security scanning, WCAG accessibility auditing, or generic PDF/X print preflight.
 
 ## 1. Three-Layer Product Form & Boundaries
+
+Design principle (from [PRODUCT.md](../PRODUCT.md)): **Agent-first interface, human-owned quality**. Every capability exposes a deterministic, low-token CLI, MCP, or Skill surface first; the browser workbench and editor extensions wrap the same core for human review.
 
 ```text
 Layer 1: Open-Source Pure-Markdown Skills (`skills/dislop/SKILL.md` + `deslop-docs`, `deslop-slides-docx`, `deslop-web-ui`, `deslop-verify`, `./references/*.md`, 0 scripts, 0 network)
