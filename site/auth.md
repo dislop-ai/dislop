@@ -6,29 +6,45 @@ snapshot: 2026-11-21
 
 # auth.md
 
-- **Resource Server:** `https://dislop.com/mcp`
-- **Authorization Server:** `https://dislop.com`
+- **Resource Server:** https://dislop.com/mcp
+- **Authorization Server:** https://dislop.com
 
-Connect to `https://dislop.com/mcp` with zero configuration for free checks, or sign in when you need multi-model review, layout-preserving Office cleanup, or visual screenshot audits.
+Connect to https://dislop.com/mcp with zero setup for free checks, or register via OAuth 2.1 when calling multi-model review, layout-preserving Office cleanup, or visual screenshot audits.
 
-## 1. Free Tools Without Sign-In (0 Credits)
+## Step 1 — Free Tools Without Sign-In (0 Credits)
 
-Calling `dislop_check`, `dislop_verify`, or `dislop_rules` on `https://dislop.com/mcp` requires no Bearer token or OAuth flow. These deterministic checks run on the server and return structured `dislop.findings/1` diagnostics immediately.
+Calling `dislop_check`, `dislop_verify`, or `dislop_rules` on https://dislop.com/mcp requires no Bearer token or OAuth registration. These deterministic checks return structured `dislop.findings/1` diagnostics immediately.
 
-## 2. OAuth 2.1 + PKCE S256 (Recommended for Remote MCP Clients)
+## Step 2 — Discover OAuth 2.1 & `agent_auth` Metadata
 
-Paid and account tools (`dislop_review`, `dislop_deslop`, `dislop_office`, `dislop_visual_review`, `dislop_voice_extract`, `dislop_voice_manage`, `dislop_account`) use standard OAuth 2.1 with dynamic client registration and PKCE S256:
+Fetch protected resource and authorization server metadata (including the `agent_auth` block):
 
-- Authorization server metadata: `https://dislop.com/.well-known/oauth-authorization-server`
-- Protected resource metadata (MCP): `https://dislop.com/.well-known/oauth-protected-resource/mcp`
+- Protected resource metadata: https://dislop.com/.well-known/oauth-protected-resource/mcp
+- Authorization server metadata: https://dislop.com/.well-known/oauth-authorization-server
 - Supported scope: `dislop`
 - Free signed-in tier: `30` credits per month (paid-tier Gemini models, zero draft training)
 
-## 3. Personal Bearer Token (`dslp_*`)
+## Step 3 — Dynamic Client Registration & PKCE S256
 
-For scripts or CLI wrappers, sign in at `https://dislop.com/#cloud-token-box` via Google, GitHub, or 6-digit email OTP to create a scoped `dslp_*` token and pass `Authorization: Bearer dslp_...` to `https://dislop.com/mcp`.
+Register a public OAuth client before initiating PKCE `/oauth/authorize` and `/oauth/token`:
 
-## 4. Offline Local Alternative (Zero Network)
+```http
+POST /oauth/register HTTP/1.1
+Host: dislop.com
+Content-Type: application/json
+
+{
+  "client_name": "my-agent-client",
+  "redirect_uris": ["http://127.0.0.1:8788/callback"],
+  "token_endpoint_auth_method": "none"
+}
+```
+
+## Step 4 — Personal Bearer Token (`dslp_*`)
+
+For scripts or CLI wrappers, sign in at https://dislop.com/#cloud-token-box via Google, GitHub, or 6-digit email OTP to create a scoped `dslp_*` token and pass `Authorization: Bearer dslp_...` to https://dislop.com/mcp.
+
+## Step 5 — Offline Local Alternative (Zero Network)
 
 Run the same 7 rule packs and 65 patterns locally with no sign-in or uploads:
 
