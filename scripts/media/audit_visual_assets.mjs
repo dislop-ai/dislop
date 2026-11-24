@@ -456,7 +456,9 @@ JS_AUDIT = r"""(rel) => {
       leftOvershoot: Math.round(leftOvershoot),
       rightOvershoot: Math.round(rightOvershoot),
     });
-    if (leftOvershoot > 14 || rightOvershoot > 14) {
+    const isDele = el.getAttribute('data-dele') === 'true';
+    const rightLimit = isDele ? 46 : 14;
+    if (leftOvershoot > 14 || rightOvershoot > rightLimit) {
       defects.push({
         ruleId: 'svg-annotation-overshoot',
         severity: 'warning',

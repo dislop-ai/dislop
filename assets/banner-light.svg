@@ -3,35 +3,39 @@
   <rect width="1200" height="300" fill="#F6F7F5"/>
   <!-- Architectural 1px galley rails -->
   <line x1="48" y1="0" x2="48" y2="300" stroke="#D5D7D2" stroke-width="1"/>
-  <line x1="620" y1="0" x2="620" y2="300" stroke="#D5D7D2" stroke-width="1"/>
+  <line x1="612" y1="0" x2="612" y2="300" stroke="#D5D7D2" stroke-width="1"/>
   <line x1="1152" y1="0" x2="1152" y2="300" stroke="#D5D7D2" stroke-width="1"/>
   <line x1="0" y1="36" x2="1200" y2="36" stroke="#D5D7D2" stroke-width="1"/>
   <line x1="0" y1="264" x2="1200" y2="264" stroke="#D5D7D2" stroke-width="1"/>
 
-  <!-- Left column: Master Vermilion Mark + Wordmark + Plain Summary -->
-  <g transform="translate(84, 76)">
-    <rect width="56" height="56" rx="10.5" fill="#14171A"/>
-    <line x1="9" y1="33" x2="47" y2="33" stroke="#F4F5F3" stroke-width="4" stroke-linecap="round" stroke-opacity="0.26"/>
-    <path d="M9 33H30C39 33 45.5 26.8 45.5 18.8C45.5 12.6 41.3 8.8 36 8.8C30.5 8.8 26.7 13.1 26.7 19.4C26.7 29.5 34.6 39.8 46.4 44.6" stroke="#F04438" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Left column: Canonical Vermilion Mark + Wordmark + Plain Summary -->
+  <g transform="translate(84, 72)">
+    <g transform="scale(0.875)">
+      <rect width="64" height="64" rx="12" fill="#14171A"/>
+      <line x1="10" y1="38" x2="54" y2="38" stroke="#F4F5F3" stroke-width="4.5" stroke-linecap="round" stroke-opacity="0.26"/>
+      <path d="M10 38H34C44.5 38 52 30.8 52 21.5C52 14.5 47.2 10 41.2 10C34.8 10 30.5 15 30.5 22.2C30.5 33.8 39.5 45.5 53 51" stroke="#F04438" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
     <text x="76" y="43" fill="#14171A" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="46" font-weight="700" letter-spacing="-1.2">dislop</text>
   </g>
 
-  <text x="84" y="176" fill="#14171A" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="23" font-weight="600">Cutting AI slop is real productivity.</text>
-  <text x="84" y="210" fill="#474C55" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">Linter for AI Slop  |  Skill · Plugin · CLI · MCP</text>
+  <text x="84" y="174" fill="#14171A" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24" font-weight="600">Cutting AI slop is real productivity.</text>
+  <text x="84" y="212" fill="#474C55" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">Linter for AI Slop  |  Skill · Plugin · CLI · MCP</text>
 
   <!-- Right column: Pure Anti-Slop Proof Specimen -->
-  <rect x="621" y="37" width="530" height="226" fill="#FFFFFF"/>
-  <text x="652" y="76" fill="#474C55" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">dislop check  ·  1 artifact  ·  1 cliché</text>
+  <rect x="613" y="37" width="538" height="226" rx="0" fill="#FFFFFF"/>
+  <text x="646" y="76" fill="#474C55" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">dislop check  ·  1 hard bug  ·  1 warning</text>
 
-  <!-- Struck AI chat opener -->
-  <text x="652" y="128" font-family="Georgia, 'Times New Roman', serif" font-size="21"><tspan fill="#5E646E">Certainly! Here is:</tspan><tspan fill="#14171A" dx="10">This release is</tspan></text>
-  <line x1="650" y1="121" x2="823" y2="121" stroke="#F04438" stroke-width="2.6" stroke-linecap="round"/>
+  <!-- Struck AI chat opener with dele loop -->
+  <rect x="644" y="102" width="212" height="30" rx="0" fill="#FEF3F2"/>
+  <text x="646" y="125" font-family="Georgia, 'Times New Roman', serif" font-size="21"><tspan fill="#5E646E">Certainly! Here it is:</tspan><tspan fill="#14171A" dx="28">This release is</tspan></text>
+  <path data-dele="true" d="M645 118H842C850 118 857 112 857 105C857 100 853 97 848 97C843 97 840 101 840 106C840 115 847 123 858 127" stroke="#F04438" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
 
   <!-- Dashed blue cliché mark -->
-  <text x="652" y="166" fill="#14171A" font-family="Georgia, 'Times New Roman', serif" font-size="21">not just faster — it's a paradigm shift.</text>
-  <line x1="652" y1="175" x2="998" y2="175" stroke="#1B52B0" stroke-width="2.2" stroke-dasharray="6 4"/>
+  <rect x="644" y="146" width="352" height="28" rx="0" fill="#EFF4FF"/>
+  <text x="646" y="166" fill="#14171A" font-family="Georgia, 'Times New Roman', serif" font-size="21">not just faster — it's a paradigm shift.</text>
+  <line x1="646" y1="175" x2="994" y2="175" stroke="#1B52B0" stroke-width="2.2" stroke-dasharray="6 4"/>
 
   <!-- Legend -->
-  <text x="652" y="216" fill="#B42318" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="600">red: chatbot greeting</text>
-  <text x="864" y="216" fill="#1B52B0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="600">blue: AI slogan frame</text>
+  <text x="646" y="218" fill="#B42318" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600">error: chat wrapper</text>
+  <text x="866" y="218" fill="#1B52B0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600">warn: slogan frame</text>
 </svg>

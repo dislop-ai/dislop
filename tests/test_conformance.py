@@ -1812,6 +1812,65 @@ class ConformanceParityTests(unittest.TestCase):
         self.assertEqual(res_short["lengthCheck"]["status"], "ok")
         self.assertNotIn("over-compressed", {w["code"] for w in res_short["antiDegradation"]["warnings"]})
 
+    def test_v083_verify_revision_and_chatbot_artifact_parity(self) -> None:
+        from dislop.engine import verify_revision
+
+        vr_pairs = [
+            (
+                "Guarantees 99.98% delivery inside 5 seconds.",
+                "Delivers 99.98% of events within 5 seconds.",
+                "preserved",
+            ),
+            (
+                "Caused by a TTL setting of 3600 seconds on the resolver.",
+                "Caused by a 3600-second DNS TTL setting on the resolver.",
+                "preserved",
+            ),
+            (
+                "Migrates 40-million-row archives in 12 minutes.\n- **Scale**: Handles 40 million rows.",
+                "Migrates 40-million-row archives in 12 minutes.",
+                "preserved",
+            ),
+            (
+                "Migrates 40-million-row archives in 12 minutes.\n- **Scale**: Handles 40 million rows.",
+                "Migrates 40-million-row archives in 5 minutes.",
+                "drifted",
+            ),
+        ]
+        js_script = (
+            "import { verifyRevision } from './src/core.mjs';\n"
+            "const pairs = JSON.parse(process.argv[1]);\n"
+            "console.log(JSON.stringify(pairs.map(([b, a]) => verifyRevision(b, a, { modality: 'markdown' }))));\n"
+        )
+        r_js = subprocess.run(
+            ["node", "--input-type=module", "-e", js_script, json.dumps([[b, a] for b, a, _ in vr_pairs])],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        js_out = json.loads(r_js.stdout)
+        for idx, (bef, aft, exp_status) in enumerate(vr_pairs):
+            py_vr = verify_revision(bef, aft, modality="markdown")
+            self.assertEqual(js_out[idx]["status"], exp_status, f"JS status mismatch on pair #{idx}")
+            self.assertEqual(py_vr["status"], exp_status, f"Py status mismatch on pair #{idx}")
+            self.assertEqual(js_out[idx], py_vr, f"JS/Py ledger mismatch on pair #{idx}")
+            if exp_status == "preserved":
+                self.assertEqual(py_vr["retentionRate"], 1)
+
+        chat_samples = [
+            "Certainly! Here it is: Exports finish in up to 12 minutes.\n",
+            "Here's a polished version of your release note: deploys at 14:00 UTC.\n",
+            "希望以上内容对您有所帮助，如需调整请随时告诉我。\n",
+        ]
+        for sample in chat_samples:
+            rn = run_node(["check", "-", "--stdin-filename", "chat.md", "--json"], stdin_text=sample)
+            rp = run_py(["check", "-", "--stdin-filename", "chat.md", "--json"], stdin_text=sample)
+            jn = json.loads(rn.stdout)
+            jp = json.loads(rp.stdout)
+            self.assertEqual([f["ruleId"] for f in jn["findings"]], [f["ruleId"] for f in jp["findings"]])
+            self.assertIn("chatbot-artifact", [f["ruleId"] for f in jn["findings"]])
+
 
 if __name__ == "__main__":
     unittest.main()

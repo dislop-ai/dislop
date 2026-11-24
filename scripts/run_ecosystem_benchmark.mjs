@@ -311,6 +311,7 @@ async function evaluatePassWithOptionalRepair({
 async function main() {
   const args = process.argv.slice(2);
   const offlineSmoke = args.includes("--offline-smoke");
+  const rescoreSaved = args.includes("--rescore-saved");
   const live = args.includes("--live");
   const modelIdx = args.indexOf("--model");
   const modelId = modelIdx !== -1 && args[modelIdx + 1] ? args[modelIdx + 1] : "gemini-3.5-flash";
@@ -324,6 +325,49 @@ async function main() {
   const zhTasks = allTasks.filter((t) => t.lang === "zh");
   if (enTasks.length !== 15 || zhTasks.length !== 15) {
     throw new Error(`Expected 15 EN + 15 ZH tasks, got ${enTasks.length} EN + ${zhTasks.length} ZH`);
+  }
+
+  if (rescoreSaved) {
+    const rawFile = path.join(RESULTS_DIR, "ecosystem-benchmark-raw.json");
+    const existingRaw = JSON.parse(fs.readFileSync(rawFile, "utf8"));
+    const taskMap = new Map(allTasks.map((t) => [t.id, t]));
+    const rescoredArms = {};
+    for (const [armKey, rows] of Object.entries(existingRaw.arms || {})) {
+      rescoredArms[armKey] = rows.map((r) => {
+        const t = taskMap.get(r.taskId);
+        if (!t) throw new Error(`Missing task definition for ${r.taskId}`);
+        return scoreTaskRecord(t, r.output, r);
+      });
+    }
+    const rescoredRaw = {
+      ...existingRaw,
+      rescoredAt: new Date().toISOString(),
+      arms: rescoredArms,
+    };
+    const rescoredSummary = {
+      schema: "dislop.ecosystem-benchmark-summary/1",
+      generatedAt: existingRaw.generatedAt,
+      rescoredAt: rescoredRaw.rescoredAt,
+      model: existingRaw.model,
+      estimatedUsd: existingRaw.estimatedUsd,
+      totalUsage: existingRaw.totalUsage,
+      lengthTruncationCount: (existingRaw.lengthTruncations || []).length,
+      upstreamSkills: existingRaw.upstreamSkills,
+      byArm: Object.fromEntries(Object.entries(rescoredArms).map(([k, rows]) => [k, summarizeRecords(rows)])),
+    };
+    fs.writeFileSync(rawFile, JSON.stringify(rescoredRaw, null, 2) + "\n", "utf8");
+    fs.writeFileSync(
+      path.join(RESULTS_DIR, "ecosystem-benchmark-summary.json"),
+      JSON.stringify(rescoredSummary, null, 2) + "\n",
+      "utf8"
+    );
+    console.log("=== Rescored Saved Ecosystem Benchmark (Offline) ===");
+    for (const [k, s] of Object.entries(rescoredSummary.byArm)) {
+      console.log(
+        `  ${k.padEnd(28)} NoVeto=${s.noVetoCount}/${s.count} (${s.noVetoPct}%)  AllClear=${s.allClearCount}/${s.count} (${s.allClearPct}%)  Comp=${s.avgComposite}  FactRet=${s.avgFactRetentionPct}%  FactDrift=${s.tasksWithFactDrift}  CoreErr=${s.totalCoreErrors}  StylePat=${s.totalStyleAndPatternHits}  PreserveFail=${s.preserveOverEditFailures}/${s.preserveCount}`
+      );
+    }
+    return;
   }
 
   if (offlineSmoke || !live) {

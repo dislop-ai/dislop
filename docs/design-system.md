@@ -42,7 +42,10 @@ All foreground/background text combinations meet or exceed **WCAG 2.2 AA (`4.5:1
 | `--ink-2` | Secondary labels & descriptions | `#474C55` | `8.6 : 1` | `#A6ACB5` | `7.8 : 1` |
 | `--ink-3` | Line numbers & coordinates | `#5E646E` | `6.0 : 1` | `#8C939E` | `5.8 : 1` |
 | `--mark-error` | Hard AI artifact error text & solid underline | `#B42318` | `6.6 : 1` | `#FF7A6B` | `7.0 : 1` |
+| `--mark-error-wash` | Inline span tint behind `error` marks | `#FEF3F2` | — | `rgba(240,68,56,0.14)` | — |
 | `--mark-warn` | Style and template warning text & dashed underline | `#1B52B0` | `7.3 : 1` | `#85B4FF` | `8.5 : 1` |
+| `--mark-warn-wash` | Inline span tint behind `warning` marks | `#EFF4FF` | — | `rgba(133,180,255,0.12)` | — |
+| `--mark-ok` | Clean pass (`0 issues` / `preserved`) status text | `#1E6B47` | `6.4 : 1` | `#6CD49B` | `10.1 : 1` |
 | `--control-border-quiet` | Tier-3 quiet control border (toolbar secondaries, filters, demo controls) | `#888E97` | `3.3 : 1` (`3.1:1` on stage) | `#636A76` | `3.3 : 1` (`3.5:1` on stage) |
 
 ### Charcoal Ink Stage (`--ink-stage`, same in both themes)
@@ -89,4 +92,5 @@ Zero third-party font CDNs (`fonts.googleapis.com`, `unpkg`, `jsdelivr`) are loa
 - **Galley Split (Desktop, `< 1040px` Tablet, `< 820px` Stacked Mobile)**: In the interactive workbench, the manuscript column sits beside a left specimen rail and a right margin notes column; margin notes drop below the manuscript below `1040px`, and the specimen rail collapses into a horizontal strip below `820px`.
 - **Corner Radius & Nesting**: Content cells joined to rails use `0px` radius; pressable controls use `--radius-ctrl: 6px` (`5px` compact) echoing the logo tile's rounded warmth; recessed inputs and code wells use `--radius-input: 4px`. Pill radii (`999px`) and 3-level nested bordered boxes (`box-in-box-in-box`) are banned.
 - **Demo Room**: The six `#demos` clips start as a plain two-column grid, so everything stays visible without scripts. Once the script runs, they become a single-scene stage on the ink surface: a tab row on top (`role="tablist"`, arrow-key support), the clip on the left at `1.35fr`, and the caption with pause / replay / zoom on the right at `0.65fr`.
+- **Social Specimen Cards & Promo Clips ("Slip on Ink Stage")**: Outward-facing social cards (`1600×900` 16:9, `1200×630` Open Graph, `1242×1660` portrait slides) and short promo clips frame a crisp `0px`-radius `--sheet` (`#FFFFFF`) galley slip inside a full-bleed `--ink-stage` (`#14171A`) canvas so white slips never bleed into white timeline backgrounds. Keep specimen prose large enough to read in compressed feeds (`>= 28px` on `1600×900` cards, `>= 42px` on `1242×1660` portrait slides), measure *dele* loops and red/blue underlines from rendered text bounding boxes (`getBBox()`), use only `--mark-ok` (`#1E6B47` on light / `#6CD49B` on dark) for clean pass indicators, and stamp constructed examples with a plain monospace `EXAMPLE` badge.
 - **Zero Dead Controls**: Every `<button>` and `<a>` performs an immediate action or navigates to a live anchor/URL. Standard UI transitions stay `<= 120ms` (with one optional `240–300ms` ease-out pen-stroke draw reserved for check feedback), and all motion disables under `prefers-reduced-motion: reduce`.

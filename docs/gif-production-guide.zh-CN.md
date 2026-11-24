@@ -15,8 +15,8 @@
 | 类别 | 具体令牌与要求 |
 |---|---|
 | 浅色纸面画布 | 外框 `--stage` `#F6F7F5`，主校样栏 `--sheet` `#FFFFFF`，`1px` 分界线 `--rule` `#D5D7D2`，主墨字 `--ink` `#14171A`，辅助说明 `--ink-2` `#474C55`，行号 `--ink-3` `#5E646E` |
-| 深色终端画布 | 主面板 `#15181C`，内槽 `#0A0C0E`，边线 `#2A2F37`，正文 `#ECEEF0`，次级文字 `#A6ACB5` |
-| 语义标线与状态色 | 朱红粗笔画 `--pen` `#F04438`（浅色字 `#B42318` / 深色字 `#FF7A6B`）配 `2px solid` 实线专标 `error` 硬伤；群青 `#1B52B0`（深色 `#85B4FF`）配 `1.5px dashed` 虚线专标 `warning` / `info` 套话提醒；绿色 `#1E6B47`（深色 `#6CD49B`）只用于 `0 findings` 改好通过态 |
+| 深色终端与炭黑墨台 | 终端主面板 `#15181C`（内槽 `#0A0C0E`，边线 `#2A2F37`），社交短片与放映台墨台 `--ink-stage` `#14171A`（页签带 `#1D2127`，边线 `#2D333B`），正文 `#ECEEF0`，次级文字 `#A6ACB5` |
+| 语义标线与状态色 | 朱红粗笔画 `--pen` `#F04438`（浅色字 `#B42318` / 深色字 `#FF7A6B`，底衬 `#FEF3F2`）配删除号或 `2px solid` 实线专标 `error` 硬伤；群青 `#1B52B0`（深色 `#85B4FF`，底衬 `#EFF4FF`）配 `1.5px dashed` 虚线专标 `warning` / `info` 套话提醒；`--mark-ok` `#1E6B47`（深色 `#6CD49B`）只用于 `0 issues` / `preserved` 改好通过态 |
 | 零外域字体 | HTML 渲染模板使用系统字体栈（无衬线 `-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif`，校样衬线 `Georgia, "Noto Serif CJK SC", "Songti SC", serif`，等宽 `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`），严禁请求外部字体 CDN |
 
 ### 动效里不能出现的东西
@@ -33,7 +33,7 @@
 
 ## 2. 六大对外场景规格表（`v2` 清单）
 
-所有场景统一在 [scripts/media/demos.manifest.json](../scripts/media/demos.manifest.json)（`dislop.demos/2`）声明，面向中英文两套受众**严格分开出图**（`-zh-v2` 与 `-en-v2`），中文图里不夹英文例句，英文图里不出现汉字。旧版 `-v1` 成品保留在磁盘上，确保已发布的外链不断裂。
+所有场景统一在 [scripts/media/demos.manifest.json](../scripts/media/demos.manifest.json)（`dislop.demos/2`）声明。英文版（`-en-v2`）作为主仓 `README.md`、全球插件商店与 `@dislop_ai` 的第一基准优先制作与验收，中文版（`-zh-v2`）面向 `README.zh-CN.md` 与 `/zh/` 渠道独立原生出图，中文图里不夹英文例句，英文图里不出现汉字。旧版 `-v1` 成品保留在磁盘上，确保已发布的外链不断裂。
 
 | 场景 Slug | 分辨率 | 帧率 / 时长 | 画面类别 | 体积上限（GIF / WebP / 海报） | 分发位置 |
 |---|---|---|---|---|---|

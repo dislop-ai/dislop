@@ -1,6 +1,6 @@
 {
   "schema": "dislop.visual-dogfood-audit/1",
-  "generatedAt": "2026-11-23T03:58:01.481Z",
+  "generatedAt": "2026-11-24T00:47:10.860Z",
   "layer1": {
     "assets": {
       "assetCount": 61,
@@ -1099,11 +1099,11 @@
               "sampledPixels": 36120,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.022,
-              "highSatRatio": 0.0048,
-              "smoothHighSatRatio": 0.4566,
-              "neutralRatio": 0.9682,
-              "quantizedColors": 49
+              "darkBgRatio": 0.2542,
+              "highSatRatio": 0.0059,
+              "smoothHighSatRatio": 0.1596,
+              "neutralRatio": 0.6989,
+              "quantizedColors": 46
             }
           }
         },
@@ -1128,11 +1128,11 @@
               "sampledPixels": 36120,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0234,
-              "highSatRatio": 0.0028,
-              "smoothHighSatRatio": 0.5941,
-              "neutralRatio": 0.9686,
-              "quantizedColors": 48
+              "darkBgRatio": 0.254,
+              "highSatRatio": 0.0036,
+              "smoothHighSatRatio": 0.8168,
+              "neutralRatio": 0.6937,
+              "quantizedColors": 49
             }
           }
         },
@@ -1241,48 +1241,48 @@
           {
             "kind": "strike",
             "stroke": "#F04438",
-            "label": "Certainly! Here is:",
+            "label": "Certainly! Here it is:",
             "strokeX": [
-              650,
-              823
+              645,
+              858
             ],
             "textX": [
-              652,
-              822
+              646,
+              834
             ],
             "textBBox": {
-              "x": 652,
-              "w": 170,
-              "y": 109,
+              "x": 646,
+              "w": 188,
+              "y": 106,
               "h": 24
             },
-            "leftOvershoot": 2,
-            "rightOvershoot": 1
+            "leftOvershoot": 1,
+            "rightOvershoot": 24
           },
           {
             "kind": "underline",
             "stroke": "#1B52B0",
             "label": "not just faster — it's a paradig",
             "strokeX": [
-              652,
-              998
+              646,
+              994
             ],
             "textX": [
-              652,
-              997
+              646,
+              991
             ],
             "textBBox": {
-              "x": 652,
+              "x": 646,
               "w": 345,
               "y": 147,
               "h": 24
             },
             "leftOvershoot": 0,
-            "rightOvershoot": 1
+            "rightOvershoot": 3
           }
         ],
         "textCount": 9,
-        "rectCount": 3
+        "rectCount": 5
       },
       {
         "file": "assets/banner-dark.svg",
@@ -1298,48 +1298,48 @@
           {
             "kind": "strike",
             "stroke": "#F04438",
-            "label": "Certainly! Here is:",
+            "label": "Certainly! Here it is:",
             "strokeX": [
-              650,
-              823
+              645,
+              858
             ],
             "textX": [
-              652,
-              822
+              646,
+              834
             ],
             "textBBox": {
-              "x": 652,
-              "w": 170,
-              "y": 109,
+              "x": 646,
+              "w": 188,
+              "y": 106,
               "h": 24
             },
-            "leftOvershoot": 2,
-            "rightOvershoot": 1
+            "leftOvershoot": 1,
+            "rightOvershoot": 24
           },
           {
             "kind": "underline",
             "stroke": "#85B4FF",
             "label": "not just faster — it's a paradig",
             "strokeX": [
-              652,
-              998
+              646,
+              994
             ],
             "textX": [
-              652,
-              997
+              646,
+              991
             ],
             "textBBox": {
-              "x": 652,
+              "x": 646,
               "w": 345,
               "y": 147,
               "h": 24
             },
             "leftOvershoot": 0,
-            "rightOvershoot": 1
+            "rightOvershoot": 3
           }
         ],
         "textCount": 9,
-        "rectCount": 3
+        "rectCount": 5
       },
       {
         "file": "assets/banner-zh-light.svg",
@@ -1357,46 +1357,46 @@
             "stroke": "#F04438",
             "label": "好的，以下是修改后：",
             "strokeX": [
-              650,
-              862
+              645,
+              866
             ],
             "textX": [
-              652,
-              862
+              646,
+              856
             ],
             "textBBox": {
-              "x": 652,
+              "x": 646,
               "w": 210,
-              "y": 106,
+              "y": 103,
               "h": 29
             },
-            "leftOvershoot": 2,
-            "rightOvershoot": 0
+            "leftOvershoot": 1,
+            "rightOvershoot": 10
           },
           {
             "kind": "underline",
             "stroke": "#1B52B0",
             "label": "这不是一次升级，而是一场范式革命。",
             "strokeX": [
-              652,
-              1012
+              646,
+              1003
             ],
             "textX": [
-              652,
-              1009
+              646,
+              1003
             ],
             "textBBox": {
-              "x": 652,
+              "x": 646,
               "w": 357,
               "y": 146,
               "h": 29
             },
             "leftOvershoot": 0,
-            "rightOvershoot": 3
+            "rightOvershoot": 0
           }
         ],
         "textCount": 9,
-        "rectCount": 3
+        "rectCount": 5
       },
       {
         "file": "assets/banner-zh-dark.svg",
@@ -1414,46 +1414,46 @@
             "stroke": "#F04438",
             "label": "好的，以下是修改后：",
             "strokeX": [
-              650,
-              862
+              645,
+              866
             ],
             "textX": [
-              652,
-              862
+              646,
+              856
             ],
             "textBBox": {
-              "x": 652,
+              "x": 646,
               "w": 210,
-              "y": 106,
+              "y": 103,
               "h": 29
             },
-            "leftOvershoot": 2,
-            "rightOvershoot": 0
+            "leftOvershoot": 1,
+            "rightOvershoot": 10
           },
           {
             "kind": "underline",
             "stroke": "#85B4FF",
             "label": "这不是一次升级，而是一场范式革命。",
             "strokeX": [
-              652,
-              1012
+              646,
+              1003
             ],
             "textX": [
-              652,
-              1009
+              646,
+              1003
             ],
             "textBBox": {
-              "x": 652,
+              "x": 646,
               "w": 357,
               "y": 146,
               "h": 29
             },
             "leftOvershoot": 0,
-            "rightOvershoot": 3
+            "rightOvershoot": 0
           }
         ],
         "textCount": 9,
-        "rectCount": 3
+        "rectCount": 5
       },
       {
         "file": "assets/og-card.svg",
@@ -1469,41 +1469,41 @@
           {
             "kind": "strike",
             "stroke": "#F04438",
-            "label": "Certainly! Here is",
+            "label": "Certainly! Here is your draft.",
             "strokeX": [
-              114,
-              445
+              112,
+              652
             ],
             "textX": [
               116,
-              443
+              624
             ],
             "textBBox": {
               "x": 116,
-              "w": 327,
-              "y": 207,
-              "h": 48
+              "w": 508,
+              "y": 205,
+              "h": 46
             },
-            "leftOvershoot": 2,
-            "rightOvershoot": 2
+            "leftOvershoot": 4,
+            "rightOvershoot": 28
           },
           {
             "kind": "underline",
             "stroke": "#1B52B0",
             "label": "It's worth noting that",
             "strokeX": [
-              148,
-              401
+              146,
+              408
             ],
             "textX": [
-              148,
-              401
+              146,
+              408
             ],
             "textBBox": {
-              "x": 148,
-              "w": 253,
-              "y": 403,
-              "h": 31
+              "x": 146,
+              "w": 262,
+              "y": 401,
+              "h": 32
             },
             "leftOvershoot": 0,
             "rightOvershoot": 0
@@ -1513,25 +1513,25 @@
             "stroke": "#1B52B0",
             "label": "a game-changer",
             "strokeX": [
-              589,
-              779
+              601,
+              798
             ],
             "textX": [
-              589,
-              779
+              603,
+              800
             ],
             "textBBox": {
-              "x": 589,
-              "w": 190,
-              "y": 403,
-              "h": 31
+              "x": 603,
+              "w": 197,
+              "y": 401,
+              "h": 32
             },
-            "leftOvershoot": 0,
-            "rightOvershoot": 0
+            "leftOvershoot": 2,
+            "rightOvershoot": -2
           }
         ],
         "textCount": 10,
-        "rectCount": 4
+        "rectCount": 7
       },
       {
         "file": "assets/og-card-zh.svg",
@@ -1549,8 +1549,8 @@
             "stroke": "#F04438",
             "label": "好的，以下是为您润色后的版本。",
             "strokeX": [
-              114,
-              688
+              112,
+              702
             ],
             "textX": [
               116,
@@ -1559,78 +1559,78 @@
             "textBBox": {
               "x": 116,
               "w": 570,
-              "y": 204,
+              "y": 201,
               "h": 53
             },
-            "leftOvershoot": 2,
-            "rightOvershoot": 2
+            "leftOvershoot": 4,
+            "rightOvershoot": 16
           },
           {
             "kind": "underline",
             "stroke": "#1B52B0",
             "label": "值得注意的是，",
             "strokeX": [
-              148,
-              304
+              146,
+              306
             ],
             "textX": [
-              148,
-              330
+              146,
+              335
             ],
             "textBBox": {
-              "x": 148,
-              "w": 182,
-              "y": 400,
-              "h": 37
+              "x": 146,
+              "w": 189,
+              "y": 398,
+              "h": 38
             },
             "leftOvershoot": 0,
-            "rightOvershoot": -26
+            "rightOvershoot": -29
           },
           {
             "kind": "underline",
             "stroke": "#1B52B0",
             "label": "抓手",
             "strokeX": [
-              590,
-              642
+              600,
+              654
             ],
             "textX": [
-              590,
-              642
+              605,
+              659
             ],
             "textBBox": {
-              "x": 590,
-              "w": 52,
-              "y": 400,
-              "h": 37
+              "x": 605,
+              "w": 54,
+              "y": 398,
+              "h": 38
             },
-            "leftOvershoot": 0,
-            "rightOvershoot": 0
+            "leftOvershoot": 5,
+            "rightOvershoot": -5
           },
           {
             "kind": "underline",
             "stroke": "#1B52B0",
             "label": "全面赋能",
             "strokeX": [
-              668,
-              772
+              681,
+              788
             ],
             "textX": [
-              668,
-              772
+              686,
+              794
             ],
             "textBBox": {
-              "x": 668,
-              "w": 104,
-              "y": 400,
-              "h": 37
+              "x": 686,
+              "w": 108,
+              "y": 398,
+              "h": 38
             },
-            "leftOvershoot": 0,
-            "rightOvershoot": 0
+            "leftOvershoot": 5,
+            "rightOvershoot": -6
           }
         ],
         "textCount": 12,
-        "rectCount": 4
+        "rectCount": 8
       }
     ]
   },

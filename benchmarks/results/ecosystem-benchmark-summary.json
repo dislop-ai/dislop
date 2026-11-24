@@ -1,6 +1,7 @@
 {
   "schema": "dislop.ecosystem-benchmark-summary/1",
   "generatedAt": "2026-11-23T06:57:35.430Z",
+  "rescoredAt": "2026-11-24T00:32:33.088Z",
   "model": "gemini-3.5-flash",
   "estimatedUsd": 0.18886,
   "totalUsage": {
@@ -97,17 +98,17 @@
     },
     "en::humanizer": {
       "count": 15,
-      "noVetoCount": 13,
-      "noVetoPct": 86.7,
+      "noVetoCount": 14,
+      "noVetoPct": 93.3,
       "noVetoWilson95": [
-        62.1,
-        96.3
+        70.2,
+        98.8
       ],
-      "allClearCount": 11,
-      "allClearPct": 73.3,
-      "avgComposite": 92.9,
-      "avgFactRetentionPct": 97.8,
-      "tasksWithFactDrift": 1,
+      "allClearCount": 12,
+      "allClearPct": 80,
+      "avgComposite": 94.3,
+      "avgFactRetentionPct": 100,
+      "tasksWithFactDrift": 0,
       "totalCoreErrors": 1,
       "totalStyleAndPatternHits": 6,
       "preserveCount": 3,
@@ -133,17 +134,17 @@
     },
     "en::stop_slop": {
       "count": 15,
-      "noVetoCount": 14,
-      "noVetoPct": 93.3,
+      "noVetoCount": 15,
+      "noVetoPct": 100,
       "noVetoWilson95": [
-        70.2,
-        98.8
+        79.6,
+        100
       ],
-      "allClearCount": 10,
-      "allClearPct": 66.7,
-      "avgComposite": 93.9,
-      "avgFactRetentionPct": 99.2,
-      "tasksWithFactDrift": 1,
+      "allClearCount": 11,
+      "allClearPct": 73.3,
+      "avgComposite": 94.9,
+      "avgFactRetentionPct": 100,
+      "tasksWithFactDrift": 0,
       "totalCoreErrors": 2,
       "totalStyleAndPatternHits": 3,
       "preserveCount": 3,
@@ -241,17 +242,17 @@
     },
     "en::dislop_skill_cli": {
       "count": 15,
-      "noVetoCount": 13,
-      "noVetoPct": 86.7,
+      "noVetoCount": 14,
+      "noVetoPct": 93.3,
       "noVetoWilson95": [
-        62.1,
-        96.3
+        70.2,
+        98.8
       ],
-      "allClearCount": 13,
-      "allClearPct": 86.7,
-      "avgComposite": 96.1,
-      "avgFactRetentionPct": 98.7,
-      "tasksWithFactDrift": 1,
+      "allClearCount": 14,
+      "allClearPct": 93.3,
+      "avgComposite": 97.3,
+      "avgFactRetentionPct": 100,
+      "tasksWithFactDrift": 0,
       "totalCoreErrors": 0,
       "totalStyleAndPatternHits": 2,
       "preserveCount": 3,

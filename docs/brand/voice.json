@@ -1,8 +1,8 @@
 {
   "schema": "dislop.voice/1",
   "id": "dislop-self-voice",
-  "version": "0.2.0-draft",
-  "status": "proposal",
+  "version": "1.0.0",
+  "status": "adopted",
   "slogan": {
     "zh": "去 AI 味才是真正的生产力！",
     "en": "Cutting AI slop is real productivity."
@@ -14,6 +14,74 @@
     "source": "original"
   },
   "targetAudience": "Engineers, writers, and teams who edit AI-written drafts, slides, and web pages.",
+  "persona": {
+    "visualMark": "dele (₰, #F04438 on #14171A charcoal ink stage)",
+    "firstPersonAllowed": false,
+    "costumedRoleplayAllowed": false,
+    "witSource": "Show verbatim AI leftovers—including dislop's own retired drafts—under the dele mark without scolding or commentary.",
+    "retiredLabels": [
+      "Pass for press",
+      "Sent back",
+      "The Red Stroke",
+      "the pen stays in your hand",
+      "可以付印",
+      "蓝笔商榷",
+      "同路清单",
+      "红笔批注员",
+      "文字门诊",
+      "笔一直在你手里"
+    ]
+  },
+  "terminology": {
+    "en": {
+      "uiLabels": {
+        "error": "hard bug",
+        "warning": "warning",
+        "pass": "passed",
+        "fail": "rejected",
+        "directory": "Awesome list",
+        "category": "AI slop linter"
+      },
+      "cliBadges": {
+        "error": "error",
+        "warning": "warn",
+        "info": "info"
+      }
+    },
+    "zh": {
+      "uiLabels": {
+        "error": "硬伤",
+        "warning": "提醒",
+        "pass": "通过",
+        "fail": "没通过",
+        "directory": "工具清单",
+        "category": "AI 味检查工具"
+      },
+      "cliBadges": {
+        "error": "硬伤",
+        "warning": "提醒",
+        "info": "提示"
+      }
+    }
+  },
+  "automationDocket": {
+    "styleName": "Specimen Slip + Zero-Glue 3-Slot Docket",
+    "visualRatio": 0.7,
+    "textRatio": 0.3,
+    "slots": [
+      "Slot 1: Concrete input file, commit SHA, or setup",
+      "Slot 2: Verbatim observed string diff or objective count",
+      "Slot 3: Plain mechanism or exact CLI command (stop cold; zero closing moral)"
+    ],
+    "hardBans": [
+      "Rhetorical-question openers (? / ？ in line 1)",
+      "Exclamation marks outside official Chinese slogan",
+      "Discourse glue (Moreover, Furthermore, Notably, 值得注意的是, 换句话说)",
+      "Unbadged constructed examples (must display EXAMPLE / 构造示例)",
+      "Self-scored pass rates without upfront scoring-bias disclosure",
+      "Cross-language mixing inside a single page, card, video, or social account (@dislop_ai stays 100% English)"
+    ]
+  },
   "stylometricTargetBands": {
     "en": {
       "sentenceWordsMean": [10, 17],
@@ -35,7 +103,7 @@
     }
   },
   "stanceAndPerspective": {
-    "defaultPerson": "Talk directly in plain second person ('you') and call the tool 'dislop'. Avoid stiff corporate 'we' and avoid roleplay personas.",
+    "defaultPerson": "Talk directly in plain second person ('you') and call the tool 'dislop'. Avoid stiff corporate 'we', avoid first-person 'I' for the tool, and avoid roleplay personas.",
     "uncertaintyPolicy": "State every inspected part and every skipped part ([SKIP]); never mark unread input as clean.",
     "evidenceRequirement": "Anchor claims to a concrete draft, file, number, or command; quote author numbers and qualifiers verbatim.",
     "rhetoricalGuards": [
@@ -43,7 +111,7 @@
       "Do not bundle three features into one symmetrical semicolon or parallel sentence.",
       "Cut pull-quote mic-drop closers (lines written to look quotable or literary).",
       "Skip copy-editor roleplay metaphors ('Pass for press', 'the pen stays in your hand', 'asks in the margin').",
-      "Author English and Chinese independently for their own audiences (never word-for-word translations) with zero language mixing inside a single page or post."
+      "Author English and Chinese independently on one domain (dislop.com) with zero language mixing inside a single page, card, or post."
     ]
   },
   "positiveSkeletons": [
@@ -66,6 +134,16 @@
         "Name what stays skipped or unbuilt"
       ],
       "antiRepetitionMaxConsecutiveDocs": 2
+    },
+    {
+      "id": "S3-zero-glue-docket",
+      "name": "Input setup, verbatim observation, reproducible command",
+      "sequence": [
+        "Name the exact input file, model, or commit",
+        "Quote the verbatim surviving defect or count",
+        "Give the reproducible command and stop without a summary moral"
+      ],
+      "antiRepetitionMaxConsecutiveDocs": 3
     }
   ],
   "positiveExemplars": [
@@ -73,7 +151,7 @@
       "lang": "en",
       "skeletonId": "S1-plain-problem-and-tool",
       "source": "original",
-      "text": "dislop just marks what looks off so you can edit it yourself, then checks that your numbers and links are still there."
+      "text": "dislop marks what looks off locally so you or your agent can fix it, then checks that your numbers and links stayed intact."
     },
     {
       "lang": "zh",

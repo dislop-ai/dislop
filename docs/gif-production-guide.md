@@ -15,8 +15,8 @@ This guide specifies how `dislop` builds, verifies, and delivers animated demos 
 | Category | Exact tokens and constraints |
 |---|---|
 | Light paper ground | `--stage` `#F6F7F5`, `--sheet` `#FFFFFF`, `1px` hairline `--rule` `#D5D7D2`, `--ink` `#14171A`, `--ink-2` `#474C55`, `--ink-3` `#5E646E` |
-| Dark terminal ground | Frame `#15181C`, well `#0A0C0E`, border `#2A2F37`, ink `#ECEEF0`, muted `#A6ACB5` |
-| Semantic marks | Vermilion `--pen` `#F04438` (`#B42318` text on light / `#FF7A6B` on dark) + `2px solid` line for `core` errors; Cobalt Blue `#1B52B0` (`#85B4FF` on dark) + `1.5px dashed` line for warnings; Green `#1E6B47` (`#6CD49B` on dark) for `0 findings` pass states |
+| Dark terminal & ink stage | Terminal frame `#15181C` (well `#0A0C0E`, border `#2A2F37`), social/demo ink stage `--ink-stage` `#14171A` (elevated `#1D2127`, border `#2D333B`), ink `#ECEEF0`, muted `#A6ACB5` |
+| Semantic marks | Vermilion `--pen` `#F04438` (`#B42318` text on light / `#FF7A6B` on dark, wash `#FEF3F2`) + `2px solid` line or *dele* loop for `core` errors; Cobalt Blue `#1B52B0` (`#85B4FF` on dark, wash `#EFF4FF`) + `1.5px dashed` line for warnings; `--mark-ok` `#1E6B47` (`#6CD49B` on dark) strictly for `0 issues` / `preserved` pass states |
 | Zero external fonts | Render strictly with the system font stack (`sans`, `serif`, `mono`) and zero outbound CDN calls |
 
 ### What never appears in dislop animations
@@ -33,7 +33,7 @@ This guide specifies how `dislop` builds, verifies, and delivers animated demos 
 
 ## 2. Six-Scene Catalog (v2)
 
-All scenes are declared in [scripts/media/demos.manifest.json](../scripts/media/demos.manifest.json) (`dislop.demos/2`) and generated separately in Chinese (`-zh-v2`) and English (`-en-v2`) with zero cross-language mixing.
+All scenes are declared in [scripts/media/demos.manifest.json](../scripts/media/demos.manifest.json) (`dislop.demos/2`). English (`-en-v2`) serves as the primary baseline for global READMEs, editor marketplaces, and `@dislop_ai`, paired with native Chinese (`-zh-v2`) counterparts for `README.zh-CN.md` and `/zh/` surfaces, with zero cross-language mixing.
 
 | Slug | Dimensions | FPS / Length | Profile | Size Budgets (GIF / WebP / Poster) | Primary Surfaces |
 |---|---|---|---|---|---|

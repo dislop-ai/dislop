@@ -5979,7 +5979,7 @@ def query_catalog(entries: list[dict[str, Any]], filters: dict[str, Any] | None 
 _FACT_QUALIFIER_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("min_inc", re.compile(r"^(?:no\s+less\s+than|no\s+fewer\s+than|at\s+least|minimum\s+of|>=|≥)\s*", re.I | re.ASCII)),
     ("min_inc", re.compile(r"^(?:不低于|不少于|不小于|不得低于|不得少于|至少|最少|最低|起码|下限(?:为)?)\s*", re.ASCII)),
-    ("max_inc", re.compile(r"^(?:no\s+more\s+than|up\s+to|at\s+most|within|max(?:imum)?(?:\s+of)?|<=|≤)\s*", re.I | re.ASCII)),
+    ("max_inc", re.compile(r"^(?:no\s+more\s+than|up\s+to|at\s+most|within|inside(?:\s+of)?|max(?:imum)?(?:\s+of)?|<=|≤)\s*", re.I | re.ASCII)),
     ("max_inc", re.compile(r"^(?:不超过|不高于|不大于|不多于|不得超过|不得高于|最多|至多|最高|以内|上限(?:为)?)\s*", re.ASCII)),
     ("max_lt", re.compile(r"^(?:under|below|less\s+than|fewer\s+than|<)\s*", re.I | re.ASCII)),
     ("max_lt", re.compile(r"^(?:低于|小于|少于|不到)\s*", re.ASCII)),
@@ -6071,7 +6071,7 @@ def _canonicalize_numeric_token(token: str) -> str:
     if rest and rest[0] in "$€¥£":
         curr = "cny" if rest[0] == "¥" else rest[0]
         rest = rest[1:].strip()
-    nm = re.match(r"^([0-9]+(?:\.[0-9]+)?)\s*(.*)$", rest)
+    nm = re.match(r"^([0-9]+(?:\.[0-9]+)?)[\s-]*(.*)$", rest)
     if not nm:
         return f"{sign}{curr}{rest.lower()}"
     num_part = nm.group(1)
@@ -6363,10 +6363,10 @@ def extract_protected_facts(text: str, *, modality: str = "markdown", keep_mode:
     _comma_num = r"(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)"
     if keep_mode:
         _dollar_tail = r"(?:\s?[kKmMbB](?![A-Za-z0-9_])|万元|亿元|万|亿)?"
-        _unit_tail = r"(?:(?:x|×)(?![A-Za-z0-9_])|\s?(?:%|requests?/s|req/s|(?:milliseconds?|ms|microseconds?|us|µs|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|weeks?|months?|years?|KB|MB|GB|TB|PB|QPS|TPS|RPS|fps|px|rows?|items?|files?)(?![A-Za-z0-9_])|毫秒|微秒|秒钟|分钟|小时|个月|万元|亿元|万美元|美元|欧元|日元|千瓦时|倍|秒|天|年|万|亿|元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?"
+        _unit_tail = r"(?:(?:x|×)(?![A-Za-z0-9_])|[\s-]?(?:milliseconds?|ms|microseconds?|us|µs|minutes?|mins?|seconds?|secs?|hours?|hrs?|days?|weeks?|months?|years?|KB|MB|GB|TB|PB|QPS|TPS|RPS|fps|px|rows?|items?|files?)(?![A-Za-z0-9_])|\s?(?:%|requests?/s|req/s|s(?![A-Za-z0-9_])|毫秒|微秒|秒钟|分钟|小时|个月|万元|亿元|万美元|美元|欧元|日元|千瓦时|倍|秒|天|年|万|亿|元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?"
     else:
         _dollar_tail = r"(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?"
-        _unit_tail = r"(?:\s?(?:%|(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|个月|倍|秒|分钟|小时|天|年|万|亿|元|美元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?"
+        _unit_tail = r"(?:[\s-]?(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|\s?(?:%|s(?![A-Za-z0-9_])|个月|倍|秒|分钟|小时|天|年|万|亿|元|美元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?"
     num_re = re.compile(
         r"(?<![A-Za-z0-9_])(?:"
         r"v[0-9]+(?:\.[0-9]+){1,3}(?![A-Za-z0-9_.])"
@@ -6466,6 +6466,22 @@ def verify_revision(
                 "canonical": bf["canonical"],
                 "expectedQualifier": bf["qualifier"],
                 "actualQualifier": pool[bare_idx]["qualifier"],
+            })
+            continue
+
+        dup_preserved = None
+        for p in preserved:
+            same_p_kind = p["kind"] in {"number", "qualified-number"} if is_num else p["kind"] == bf["kind"]
+            if same_p_kind and p["canonical"] == bf["canonical"] and (p["qualifier"] or None) == (bf["qualifier"] or None):
+                dup_preserved = p
+                break
+        if dup_preserved is not None:
+            preserved.append({
+                "before": bf["raw"],
+                "after": dup_preserved["after"],
+                "kind": bf["kind"],
+                "canonical": bf["canonical"],
+                "qualifier": bf["qualifier"],
             })
             continue
 

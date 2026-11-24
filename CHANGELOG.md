@@ -4,9 +4,16 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.8.3] - 2026-11-24
 
-- Added `review --interactive-apply` and `apply --review-file … --source-file …` to the Node and Python CLIs. The Vim picker and saved JSON reviews support selective edits to UTF-8 source files.
+### Added
+- **Interactive review apply (`review --interactive-apply`, `apply`)**: Added `review --interactive-apply` and `apply --review-file … --source-file …` to the Node and Python CLIs so the Vim picker and saved JSON reviews can apply selective edits to UTF-8 source files while verifying numeric retention.
+- **Adopted voice profile (`docs/brand/voice.json` `v1.0.0`) & offline benchmark rescorer**: Promoted `dislop.voice/1` to `v1.0.0` (`adopted`) with `persona`, `terminology`, and `automationDocket` guards ("Specimen Slip + Zero-Glue 3-Slot Docket"), and added `--rescore-saved` to `scripts/run_ecosystem_benchmark.mjs`.
+
+### Fixed
+- **`verifyRevision` qualifier, hyphenated-unit, and duplicate-fact parity**: Added `inside` (`inside 5 seconds`) to `max_inc`, normalized hyphenated English compound units (`3600-second`), and treated deduplicated identical `(canonical, qualifier)` facts (`40-million-row`) as preserved across `src/core.mjs` and `src/dislop/engine.py`, eliminating all three English false alarms in the 30-task ecosystem benchmark (`benchmarks/ECOSYSTEM-BENCHMARK*.md`).
+- **Expanded `chatbot-artifact` wrapper detection**: Added `"Certainly! Here it is:"`, `"Here's a polished version of..."`, and `"希望以上内容对您有所帮助，如需调整请随时告诉我。"` to `packs/core/pack.json` with Node/Python parity tests.
+- **Ink-stage Open Graph cards & repository banners**: Refreshed `assets/og-card*.{svg,png}` and `assets/banner-*.svg` around the Charcoal Ink Stage (`#14171A`), canonical `logo.svg` *dele* geometry, and verified palette tokens (`--mark-ok`, `--mark-error-wash`, `--mark-warn-wash`).
 
 ## [0.8.2] - 2026-11-23
 

@@ -4564,7 +4564,7 @@ export function queryCatalog(entries, filters = {}) {
 const FACT_QUALIFIER_PATTERNS = [
   { group: "min_inc", re: /^(?:no\s+less\s+than|no\s+fewer\s+than|at\s+least|minimum\s+of|>=|≥)\s*/i },
   { group: "min_inc", re: /^(?:不低于|不少于|不小于|不得低于|不得少于|至少|最少|最低|起码|下限(?:为)?)\s*/ },
-  { group: "max_inc", re: /^(?:no\s+more\s+than|up\s+to|at\s+most|within|max(?:imum)?(?:\s+of)?|<=|≤)\s*/i },
+  { group: "max_inc", re: /^(?:no\s+more\s+than|up\s+to|at\s+most|within|inside(?:\s+of)?|max(?:imum)?(?:\s+of)?|<=|≤)\s*/i },
   { group: "max_inc", re: /^(?:不超过|不高于|不大于|不多于|不得超过|不得高于|最多|至多|最高|以内|上限(?:为)?)\s*/ },
   { group: "max_lt", re: /^(?:under|below|less\s+than|fewer\s+than|<)\s*/i },
   { group: "max_lt", re: /^(?:低于|小于|少于|不到)\s*/ },
@@ -4656,7 +4656,7 @@ function canonicalizeNumericToken(token) {
     curr = rest[0] === "¥" ? "cny" : rest[0];
     rest = rest.slice(1).trim();
   }
-  const nm = rest.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
+  const nm = rest.match(/^(\d+(?:\.\d+)?)[\s-]*(.*)$/);
   if (!nm) return `${sign}${curr}${rest.toLowerCase()}`;
   const numPart = nm[1];
   const rawUnit = nm[2].trim();
@@ -4977,8 +4977,8 @@ export function extractProtectedFacts(text, { modality = "markdown", keepMode = 
   // 3c. Arabic numbers, units, versions, and bounding qualifiers in visible prose
   cleanScan = maskOccupied();
   const numRe = keepMode
-    ? /(?<![A-Za-z0-9_])(?:v\d+(?:\.\d+){1,3}(?![A-Za-z0-9_.])|\d+(?:\.\d+){2,3}(?![A-Za-z0-9_.])|Q[1-4](?![A-Za-z0-9_])|P(?:50|90|95|99)(?![A-Za-z0-9_])|(?:(?<![A-Za-z0-9_.-])[+-])?[$€¥£]\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万元|亿元|万|亿)?|(?:(?<![A-Za-z0-9_.-])[+-])?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:(?:x|×)(?![A-Za-z0-9_])|\s?(?:%|requests?\/s|req\/s|(?:milliseconds?|ms|microseconds?|us|µs|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|weeks?|months?|years?|KB|MB|GB|TB|PB|QPS|TPS|RPS|fps|px|rows?|items?|files?)(?![A-Za-z0-9_])|毫秒|微秒|秒钟|分钟|小时|个月|万元|亿元|万美元|美元|欧元|日元|千瓦时|倍|秒|天|年|万|亿|元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?)/g
-    : /(?<![A-Za-z0-9_])(?:v\d+(?:\.\d+){1,3}(?![A-Za-z0-9_.])|\d+(?:\.\d+){2,3}(?![A-Za-z0-9_.])|Q[1-4](?![A-Za-z0-9_])|P(?:50|90|95|99)(?![A-Za-z0-9_])|(?:(?<![A-Za-z0-9_.-])[+-])?[$€¥£]\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?|(?:(?<![A-Za-z0-9_.-])[+-])?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?(?:%|(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|s|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|个月|倍|秒|分钟|小时|天|年|万|亿|元|美元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?)/g;
+    ? /(?<![A-Za-z0-9_])(?:v\d+(?:\.\d+){1,3}(?![A-Za-z0-9_.])|\d+(?:\.\d+){2,3}(?![A-Za-z0-9_.])|Q[1-4](?![A-Za-z0-9_])|P(?:50|90|95|99)(?![A-Za-z0-9_])|(?:(?<![A-Za-z0-9_.-])[+-])?[$€¥£]\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万元|亿元|万|亿)?|(?:(?<![A-Za-z0-9_.-])[+-])?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:(?:x|×)(?![A-Za-z0-9_])|[\s-]?(?:milliseconds?|ms|microseconds?|us|µs|minutes?|mins?|seconds?|secs?|hours?|hrs?|days?|weeks?|months?|years?|KB|MB|GB|TB|PB|QPS|TPS|RPS|fps|px|rows?|items?|files?)(?![A-Za-z0-9_])|\s?(?:%|requests?\/s|req\/s|s(?![A-Za-z0-9_])|毫秒|微秒|秒钟|分钟|小时|个月|万元|亿元|万美元|美元|欧元|日元|千瓦时|倍|秒|天|年|万|亿|元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?)/g
+    : /(?<![A-Za-z0-9_])(?:v\d+(?:\.\d+){1,3}(?![A-Za-z0-9_.])|\d+(?:\.\d+){2,3}(?![A-Za-z0-9_.])|Q[1-4](?![A-Za-z0-9_])|P(?:50|90|95|99)(?![A-Za-z0-9_])|(?:(?<![A-Za-z0-9_.-])[+-])?[$€¥£]\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:\s?[kKmMbB](?![A-Za-z0-9_])|万|亿)?|(?:(?<![A-Za-z0-9_.-])[+-])?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:[\s-]?(?:milliseconds?|ms|minutes?|mins?|seconds?|secs?|hours?|hrs?|days?|months?|years?|KB|MB|GB|TB|QPS|TPS|RPS|fps|px|rows?)(?![A-Za-z0-9_])|\s?(?:%|s(?![A-Za-z0-9_])|个月|倍|秒|分钟|小时|天|年|万|亿|元|美元|次|个|条|项|份|页|行|人|家|位|名|台|套|批|种|轮|层|步|篇|章|节))?)/g;
 
   while ((m = numRe.exec(cleanScan)) !== null) {
     const numStart = m.index;
@@ -5063,6 +5063,23 @@ export function verifyRevision(beforeText, afterText, { modality = "markdown", a
         canonical: bf.canonical,
         expectedQualifier: bf.qualifier,
         actualQualifier: pool[bareIdx].qualifier,
+      });
+      continue;
+    }
+
+    const dupPreserved = preserved.find(
+      (p) =>
+        (isNum ? p.kind === "number" || p.kind === "qualified-number" : p.kind === bf.kind) &&
+        p.canonical === bf.canonical &&
+        (p.qualifier || null) === (bf.qualifier || null)
+    );
+    if (dupPreserved) {
+      preserved.push({
+        before: bf.raw,
+        after: dupPreserved.after,
+        kind: bf.kind,
+        canonical: bf.canonical,
+        qualifier: bf.qualifier,
       });
       continue;
     }

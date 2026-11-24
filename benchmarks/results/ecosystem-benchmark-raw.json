@@ -1911,18 +1911,16 @@
         "output": "Integrations drop customer notifications during traffic spikes when naive retry loops overwhelm struggling endpoints. Webhook v2 uses per-tenant queues to handle 40,000 events per second. Automatic circuit breakers and adaptive backoff deliver 99.98% of events within 5 seconds, and dead-letter replay APIs let developers resolve failed batches without manual scripts.",
         "mode": "revision",
         "split": "core",
-        "vetoes": [
-          "V_FACT"
-        ],
-        "passedNoVeto": false,
-        "allClear": false,
+        "vetoes": [],
+        "passedNoVeto": true,
+        "allClear": true,
         "scores": {
           "d1": 35,
           "d2": 20,
-          "d3": 5,
+          "d3": 25,
           "d4": 10,
           "d5": 10,
-          "composite": 80
+          "composite": 100
         },
         "coreErrors": 0,
         "styleFindings": 0,
@@ -1930,10 +1928,8 @@
         "detRuleIds": [],
         "thirdOrderProbes": [],
         "hiddenProbes": [],
-        "factRetentionRate": 0.667,
-        "factIssues": [
-          "qDrop:5 seconds"
-        ],
+        "factRetentionRate": 1,
+        "factIssues": [],
         "langPurityOk": true,
         "overlapStats": {
           "overlap": 0.43,
@@ -3398,18 +3394,16 @@
         "output": "At 14:12 UTC, our on-call team spotted elevated 502 error rates across 3 European edge nodes. Automated alerts had fired within 40 seconds. The team traced the spike to a 3600-second DNS TTL setting left stale during a load-balancer swap. We drained the affected pool, restoring full traffic by 14:38 UTC. Afterward, we lowered the TTL to 60 seconds and added pre-flight checks. We shipped status page updates every 10 minutes and lost no customer records. The event showed the necessity of resilient deployment hygiene.",
         "mode": "revision",
         "split": "core",
-        "vetoes": [
-          "V_FACT"
-        ],
-        "passedNoVeto": false,
-        "allClear": false,
+        "vetoes": [],
+        "passedNoVeto": true,
+        "allClear": true,
         "scores": {
           "d1": 35,
           "d2": 20,
-          "d3": 10,
+          "d3": 25,
           "d4": 10,
           "d5": 10,
-          "composite": 85
+          "composite": 100
         },
         "coreErrors": 0,
         "styleFindings": 0,
@@ -3417,10 +3411,8 @@
         "detRuleIds": [],
         "thirdOrderProbes": [],
         "hiddenProbes": [],
-        "factRetentionRate": 0.875,
-        "factIssues": [
-          "missing:3600 seconds"
-        ],
+        "factRetentionRate": 1,
+        "factIssues": [],
         "langPurityOk": true,
         "overlapStats": {
           "overlap": 0.7,
@@ -7516,18 +7508,16 @@
         "output": "Batch indexing cuts query times on 40-million-row archives from 19 seconds to 1.4 seconds with zero data loss while using less RAM.",
         "mode": "revision",
         "split": "core",
-        "vetoes": [
-          "V_FACT"
-        ],
-        "passedNoVeto": false,
-        "allClear": false,
+        "vetoes": [],
+        "passedNoVeto": true,
+        "allClear": true,
         "scores": {
           "d1": 35,
           "d2": 20,
-          "d3": 8,
+          "d3": 25,
           "d4": 10,
           "d5": 10,
-          "composite": 83
+          "composite": 100
         },
         "coreErrors": 0,
         "styleFindings": 0,
@@ -7535,10 +7525,8 @@
         "detRuleIds": [],
         "thirdOrderProbes": [],
         "hiddenProbes": [],
-        "factRetentionRate": 0.8,
-        "factIssues": [
-          "missing:40"
-        ],
+        "factRetentionRate": 1,
+        "factIssues": [],
         "langPurityOk": true,
         "overlapStats": {
           "overlap": 0.325,
@@ -8835,5 +8823,6 @@
         "pocketProb": 0.0332
       }
     ]
-  }
+  },
+  "rescoredAt": "2026-11-24T00:32:33.088Z"
 }
