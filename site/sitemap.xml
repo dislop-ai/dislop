@@ -5,16 +5,16 @@
     <loc>https://dislop.com/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/" />
   </url>
   <url>
     <loc>https://dislop.com/awesome/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/awesome/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/awesome/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/awesome/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/awesome/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/awesome/" />
   </url>
   <url>
@@ -43,489 +43,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://dislop.com/en/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/awesome/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/awesome/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/awesome/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/awesome/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/feed.xml</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/agent-cli-mcp-tutorial/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/agent-cli-mcp-tutorial/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/agent-cli-mcp-tutorial/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/agent-cli-mcp-tutorial/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/agent-cli-mcp-tutorial/index.md</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/deslop-pptx-docx/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/deslop-pptx-docx/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/deslop-pptx-docx/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/deslop-pptx-docx/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/deslop-pptx-docx/index.md</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/fix-ai-slop-web-ui/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/fix-ai-slop-web-ui/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/fix-ai-slop-web-ui/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/fix-ai-slop-web-ui/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/fix-ai-slop-web-ui/index.md</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/linter-vs-detector-vs-skill/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/linter-vs-detector-vs-skill/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/linter-vs-detector-vs-skill/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/linter-vs-detector-vs-skill/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/linter-vs-detector-vs-skill/index.md</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/remove-ai-slop-writing/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/remove-ai-slop-writing/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/remove-ai-slop-writing/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/remove-ai-slop-writing/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/remove-ai-slop-writing/index.md</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/what-is-ai-slop/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/what-is-ai-slop/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/what-is-ai-slop/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/what-is-ai-slop/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/guides/what-is-ai-slop/index.md</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/bold-lead-list-wall/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/bold-lead-list-wall/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/bold-lead-list-wall/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/bold-lead-list-wall/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/chatbot-artifact/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/chatbot-artifact/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/chatbot-artifact/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/chatbot-artifact/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/comma-chain-runon/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/comma-chain-runon/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/comma-chain-runon/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/comma-chain-runon/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/cooccurrence-slop-cluster/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/cooccurrence-slop-cluster/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/cooccurrence-slop-cluster/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/cooccurrence-slop-cluster/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/en-cliche-lexicon/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/en-cliche-lexicon/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/en-cliche-lexicon/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/en-cliche-lexicon/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/en-essay-moralizing-ending/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/en-essay-moralizing-ending/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/en-essay-moralizing-ending/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/en-essay-moralizing-ending/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/en-throat-clearing-opener/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/en-throat-clearing-opener/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/en-throat-clearing-opener/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/en-throat-clearing-opener/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/eng-pr-diff-parrot/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/eng-pr-diff-parrot/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/eng-pr-diff-parrot/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-pr-diff-parrot/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/eng-shallow-root-cause/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/eng-shallow-root-cause/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/eng-shallow-root-cause/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-shallow-root-cause/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/eng-vague-action-item/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/eng-vague-action-item/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/eng-vague-action-item/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-vague-action-item/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/excessive-em-dash-density/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/excessive-em-dash-density/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/excessive-em-dash-density/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/excessive-em-dash-density/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/image-ai-palette-slop/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/image-ai-palette-slop/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/image-ai-palette-slop/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/image-ai-palette-slop/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/image-ai-workflow-residue/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/image-ai-workflow-residue/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/image-ai-workflow-residue/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/image-ai-workflow-residue/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/literary-narrative-frame/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/literary-narrative-frame/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/literary-narrative-frame/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-narrative-frame/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/literary-negation-pivot/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/literary-negation-pivot/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/literary-negation-pivot/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-negation-pivot/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/literary-rhetorical-qa/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/literary-rhetorical-qa/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/literary-rhetorical-qa/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-rhetorical-qa/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/literary-semicolon-tricolon/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/literary-semicolon-tricolon/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/literary-semicolon-tricolon/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-semicolon-tricolon/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/low-burstiness-vapor/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/low-burstiness-vapor/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/low-burstiness-vapor/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/low-burstiness-vapor/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/markdown-leak/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/markdown-leak/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/markdown-leak/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/markdown-leak/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/narrative-sandwich-frame/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/narrative-sandwich-frame/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/narrative-sandwich-frame/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/narrative-sandwich-frame/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/negation-pivot-frame/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/negation-pivot-frame/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/negation-pivot-frame/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/negation-pivot-frame/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/pdf-visual-layout-slop/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/pdf-visual-layout-slop/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/pdf-visual-layout-slop/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/pdf-visual-layout-slop/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/pptx-layout-monotony/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/pptx-layout-monotony/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/pptx-layout-monotony/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/pptx-layout-monotony/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/reg-unanchored-multiplier/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/reg-unanchored-multiplier/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/reg-unanchored-multiplier/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/reg-unanchored-multiplier/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/reg-unsubstantiated-superlative/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/reg-unsubstantiated-superlative/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/reg-unsubstantiated-superlative/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/reg-unsubstantiated-superlative/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/rhetorical-qa-cadence/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/rhetorical-qa-cadence/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/rhetorical-qa-cadence/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/rhetorical-qa-cadence/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/semicolon-tricolon/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/semicolon-tricolon/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/semicolon-tricolon/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/semicolon-tricolon/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/slide-autofit-shrink/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-autofit-shrink/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-autofit-shrink/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-autofit-shrink/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/slide-bullet-overload/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-bullet-overload/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-bullet-overload/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-bullet-overload/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/slide-process-not-finding-title/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-process-not-finding-title/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-process-not-finding-title/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-process-not-finding-title/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/slide-weak-topic-title/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-weak-topic-title/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-weak-topic-title/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-weak-topic-title/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/slide-word-wall/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-word-wall/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-word-wall/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-word-wall/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/staccato-slogan-run/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/staccato-slogan-run/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/staccato-slogan-run/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/staccato-slogan-run/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/svg-layout-slop/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/svg-layout-slop/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/svg-layout-slop/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/svg-layout-slop/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/template-skeleton-echo/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/template-skeleton-echo/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/template-skeleton-echo/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/template-skeleton-echo/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/ui-ai-gradient/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-ai-gradient/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-ai-gradient/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-ai-gradient/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/ui-box-in-box/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-box-in-box/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-box-in-box/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-box-in-box/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/ui-dead-control/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-dead-control/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-dead-control/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-dead-control/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/ui-emoji-icon-chrome/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-emoji-icon-chrome/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-emoji-icon-chrome/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-emoji-icon-chrome/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/ui-glow-blob-chrome/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-glow-blob-chrome/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-glow-blob-chrome/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-glow-blob-chrome/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/ui-pill-soup/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-pill-soup/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-pill-soup/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-pill-soup/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/ui-prompt-echo-badge/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-prompt-echo-badge/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-prompt-echo-badge/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-prompt-echo-badge/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/ui-template-card-grid/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-template-card-grid/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-template-card-grid/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-template-card-grid/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/unfilled-placeholder/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/unfilled-placeholder/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/unfilled-placeholder/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/unfilled-placeholder/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/unsourced-attribution/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/unsourced-attribution/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/unsourced-attribution/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/unsourced-attribution/" />
-  </url>
-  <url>
-    <loc>https://dislop.com/en/rules/unsourced-statistic/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/unsourced-statistic/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/unsourced-statistic/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/unsourced-statistic/" />
-  </url>
-  <url>
     <loc>https://dislop.com/feed.xml</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.6</priority>
@@ -534,16 +51,16 @@
     <loc>https://dislop.com/guides/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/" />
   </url>
   <url>
     <loc>https://dislop.com/guides/agent-cli-mcp-tutorial/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/agent-cli-mcp-tutorial/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/agent-cli-mcp-tutorial/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/agent-cli-mcp-tutorial/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/agent-cli-mcp-tutorial/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/agent-cli-mcp-tutorial/" />
   </url>
   <url>
@@ -555,8 +72,8 @@
     <loc>https://dislop.com/guides/deslop-pptx-docx/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/deslop-pptx-docx/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/deslop-pptx-docx/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/deslop-pptx-docx/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/deslop-pptx-docx/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/deslop-pptx-docx/" />
   </url>
   <url>
@@ -568,8 +85,8 @@
     <loc>https://dislop.com/guides/fix-ai-slop-web-ui/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/fix-ai-slop-web-ui/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/fix-ai-slop-web-ui/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/fix-ai-slop-web-ui/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/fix-ai-slop-web-ui/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/fix-ai-slop-web-ui/" />
   </url>
   <url>
@@ -581,8 +98,8 @@
     <loc>https://dislop.com/guides/linter-vs-detector-vs-skill/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/linter-vs-detector-vs-skill/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/linter-vs-detector-vs-skill/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/linter-vs-detector-vs-skill/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/linter-vs-detector-vs-skill/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/linter-vs-detector-vs-skill/" />
   </url>
   <url>
@@ -594,8 +111,8 @@
     <loc>https://dislop.com/guides/remove-ai-slop-writing/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/remove-ai-slop-writing/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/remove-ai-slop-writing/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/remove-ai-slop-writing/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/remove-ai-slop-writing/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/remove-ai-slop-writing/" />
   </url>
   <url>
@@ -607,8 +124,8 @@
     <loc>https://dislop.com/guides/what-is-ai-slop/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/what-is-ai-slop/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/what-is-ai-slop/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/what-is-ai-slop/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/what-is-ai-slop/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/what-is-ai-slop/" />
   </url>
   <url>
@@ -720,8 +237,8 @@
     <loc>https://dislop.com/rules/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/" />
   </url>
   <url>
@@ -733,8 +250,8 @@
     <loc>https://dislop.com/rules/bold-lead-list-wall/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/bold-lead-list-wall/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/bold-lead-list-wall/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/bold-lead-list-wall/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/bold-lead-list-wall/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/bold-lead-list-wall/" />
   </url>
   <url>
@@ -746,8 +263,8 @@
     <loc>https://dislop.com/rules/chatbot-artifact/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/chatbot-artifact/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/chatbot-artifact/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/chatbot-artifact/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/chatbot-artifact/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/chatbot-artifact/" />
   </url>
   <url>
@@ -759,8 +276,8 @@
     <loc>https://dislop.com/rules/comma-chain-runon/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/comma-chain-runon/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/comma-chain-runon/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/comma-chain-runon/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/comma-chain-runon/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/comma-chain-runon/" />
   </url>
   <url>
@@ -772,8 +289,8 @@
     <loc>https://dislop.com/rules/cooccurrence-slop-cluster/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/cooccurrence-slop-cluster/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/cooccurrence-slop-cluster/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/cooccurrence-slop-cluster/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/cooccurrence-slop-cluster/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/cooccurrence-slop-cluster/" />
   </url>
   <url>
@@ -785,8 +302,8 @@
     <loc>https://dislop.com/rules/en-cliche-lexicon/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/en-cliche-lexicon/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/en-cliche-lexicon/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/en-cliche-lexicon/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/en-cliche-lexicon/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/en-cliche-lexicon/" />
   </url>
   <url>
@@ -798,8 +315,8 @@
     <loc>https://dislop.com/rules/en-essay-moralizing-ending/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/en-essay-moralizing-ending/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/en-essay-moralizing-ending/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/en-essay-moralizing-ending/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/en-essay-moralizing-ending/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/en-essay-moralizing-ending/" />
   </url>
   <url>
@@ -811,8 +328,8 @@
     <loc>https://dislop.com/rules/en-throat-clearing-opener/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/en-throat-clearing-opener/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/en-throat-clearing-opener/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/en-throat-clearing-opener/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/en-throat-clearing-opener/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/en-throat-clearing-opener/" />
   </url>
   <url>
@@ -824,8 +341,8 @@
     <loc>https://dislop.com/rules/eng-pr-diff-parrot/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/eng-pr-diff-parrot/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/eng-pr-diff-parrot/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/eng-pr-diff-parrot/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/eng-pr-diff-parrot/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-pr-diff-parrot/" />
   </url>
   <url>
@@ -837,8 +354,8 @@
     <loc>https://dislop.com/rules/eng-shallow-root-cause/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/eng-shallow-root-cause/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/eng-shallow-root-cause/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/eng-shallow-root-cause/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/eng-shallow-root-cause/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-shallow-root-cause/" />
   </url>
   <url>
@@ -850,8 +367,8 @@
     <loc>https://dislop.com/rules/eng-vague-action-item/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/eng-vague-action-item/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/eng-vague-action-item/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/eng-vague-action-item/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/eng-vague-action-item/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-vague-action-item/" />
   </url>
   <url>
@@ -863,8 +380,8 @@
     <loc>https://dislop.com/rules/excessive-em-dash-density/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/excessive-em-dash-density/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/excessive-em-dash-density/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/excessive-em-dash-density/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/excessive-em-dash-density/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/excessive-em-dash-density/" />
   </url>
   <url>
@@ -876,8 +393,8 @@
     <loc>https://dislop.com/rules/image-ai-palette-slop/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/image-ai-palette-slop/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/image-ai-palette-slop/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/image-ai-palette-slop/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/image-ai-palette-slop/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/image-ai-palette-slop/" />
   </url>
   <url>
@@ -889,8 +406,8 @@
     <loc>https://dislop.com/rules/image-ai-workflow-residue/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/image-ai-workflow-residue/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/image-ai-workflow-residue/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/image-ai-workflow-residue/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/image-ai-workflow-residue/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/image-ai-workflow-residue/" />
   </url>
   <url>
@@ -902,8 +419,8 @@
     <loc>https://dislop.com/rules/literary-narrative-frame/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/literary-narrative-frame/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/literary-narrative-frame/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/literary-narrative-frame/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/literary-narrative-frame/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-narrative-frame/" />
   </url>
   <url>
@@ -915,8 +432,8 @@
     <loc>https://dislop.com/rules/literary-negation-pivot/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/literary-negation-pivot/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/literary-negation-pivot/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/literary-negation-pivot/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/literary-negation-pivot/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-negation-pivot/" />
   </url>
   <url>
@@ -928,8 +445,8 @@
     <loc>https://dislop.com/rules/literary-rhetorical-qa/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/literary-rhetorical-qa/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/literary-rhetorical-qa/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/literary-rhetorical-qa/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/literary-rhetorical-qa/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-rhetorical-qa/" />
   </url>
   <url>
@@ -941,8 +458,8 @@
     <loc>https://dislop.com/rules/literary-semicolon-tricolon/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/literary-semicolon-tricolon/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/literary-semicolon-tricolon/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/literary-semicolon-tricolon/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/literary-semicolon-tricolon/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-semicolon-tricolon/" />
   </url>
   <url>
@@ -954,8 +471,8 @@
     <loc>https://dislop.com/rules/low-burstiness-vapor/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/low-burstiness-vapor/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/low-burstiness-vapor/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/low-burstiness-vapor/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/low-burstiness-vapor/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/low-burstiness-vapor/" />
   </url>
   <url>
@@ -967,8 +484,8 @@
     <loc>https://dislop.com/rules/markdown-leak/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/markdown-leak/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/markdown-leak/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/markdown-leak/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/markdown-leak/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/markdown-leak/" />
   </url>
   <url>
@@ -980,8 +497,8 @@
     <loc>https://dislop.com/rules/narrative-sandwich-frame/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/narrative-sandwich-frame/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/narrative-sandwich-frame/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/narrative-sandwich-frame/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/narrative-sandwich-frame/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/narrative-sandwich-frame/" />
   </url>
   <url>
@@ -993,8 +510,8 @@
     <loc>https://dislop.com/rules/negation-pivot-frame/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/negation-pivot-frame/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/negation-pivot-frame/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/negation-pivot-frame/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/negation-pivot-frame/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/negation-pivot-frame/" />
   </url>
   <url>
@@ -1006,8 +523,8 @@
     <loc>https://dislop.com/rules/pdf-visual-layout-slop/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/pdf-visual-layout-slop/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/pdf-visual-layout-slop/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/pdf-visual-layout-slop/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/pdf-visual-layout-slop/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/pdf-visual-layout-slop/" />
   </url>
   <url>
@@ -1019,8 +536,8 @@
     <loc>https://dislop.com/rules/pptx-layout-monotony/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/pptx-layout-monotony/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/pptx-layout-monotony/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/pptx-layout-monotony/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/pptx-layout-monotony/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/pptx-layout-monotony/" />
   </url>
   <url>
@@ -1032,8 +549,8 @@
     <loc>https://dislop.com/rules/reg-unanchored-multiplier/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/reg-unanchored-multiplier/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/reg-unanchored-multiplier/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/reg-unanchored-multiplier/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/reg-unanchored-multiplier/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/reg-unanchored-multiplier/" />
   </url>
   <url>
@@ -1045,8 +562,8 @@
     <loc>https://dislop.com/rules/reg-unsubstantiated-superlative/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/reg-unsubstantiated-superlative/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/reg-unsubstantiated-superlative/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/reg-unsubstantiated-superlative/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/reg-unsubstantiated-superlative/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/reg-unsubstantiated-superlative/" />
   </url>
   <url>
@@ -1058,8 +575,8 @@
     <loc>https://dislop.com/rules/rhetorical-qa-cadence/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/rhetorical-qa-cadence/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/rhetorical-qa-cadence/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/rhetorical-qa-cadence/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/rhetorical-qa-cadence/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/rhetorical-qa-cadence/" />
   </url>
   <url>
@@ -1071,8 +588,8 @@
     <loc>https://dislop.com/rules/semicolon-tricolon/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/semicolon-tricolon/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/semicolon-tricolon/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/semicolon-tricolon/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/semicolon-tricolon/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/semicolon-tricolon/" />
   </url>
   <url>
@@ -1084,8 +601,8 @@
     <loc>https://dislop.com/rules/slide-autofit-shrink/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-autofit-shrink/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-autofit-shrink/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-autofit-shrink/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-autofit-shrink/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-autofit-shrink/" />
   </url>
   <url>
@@ -1097,8 +614,8 @@
     <loc>https://dislop.com/rules/slide-bullet-overload/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-bullet-overload/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-bullet-overload/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-bullet-overload/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-bullet-overload/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-bullet-overload/" />
   </url>
   <url>
@@ -1110,8 +627,8 @@
     <loc>https://dislop.com/rules/slide-process-not-finding-title/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-process-not-finding-title/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-process-not-finding-title/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-process-not-finding-title/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-process-not-finding-title/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-process-not-finding-title/" />
   </url>
   <url>
@@ -1123,8 +640,8 @@
     <loc>https://dislop.com/rules/slide-weak-topic-title/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-weak-topic-title/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-weak-topic-title/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-weak-topic-title/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-weak-topic-title/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-weak-topic-title/" />
   </url>
   <url>
@@ -1136,8 +653,8 @@
     <loc>https://dislop.com/rules/slide-word-wall/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/slide-word-wall/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/slide-word-wall/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-word-wall/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-word-wall/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-word-wall/" />
   </url>
   <url>
@@ -1149,8 +666,8 @@
     <loc>https://dislop.com/rules/staccato-slogan-run/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/staccato-slogan-run/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/staccato-slogan-run/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/staccato-slogan-run/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/staccato-slogan-run/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/staccato-slogan-run/" />
   </url>
   <url>
@@ -1162,8 +679,8 @@
     <loc>https://dislop.com/rules/svg-layout-slop/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/svg-layout-slop/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/svg-layout-slop/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/svg-layout-slop/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/svg-layout-slop/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/svg-layout-slop/" />
   </url>
   <url>
@@ -1175,8 +692,8 @@
     <loc>https://dislop.com/rules/template-skeleton-echo/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/template-skeleton-echo/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/template-skeleton-echo/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/template-skeleton-echo/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/template-skeleton-echo/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/template-skeleton-echo/" />
   </url>
   <url>
@@ -1188,8 +705,8 @@
     <loc>https://dislop.com/rules/ui-ai-gradient/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-ai-gradient/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-ai-gradient/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-ai-gradient/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-ai-gradient/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-ai-gradient/" />
   </url>
   <url>
@@ -1201,8 +718,8 @@
     <loc>https://dislop.com/rules/ui-box-in-box/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-box-in-box/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-box-in-box/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-box-in-box/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-box-in-box/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-box-in-box/" />
   </url>
   <url>
@@ -1214,8 +731,8 @@
     <loc>https://dislop.com/rules/ui-dead-control/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-dead-control/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-dead-control/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-dead-control/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-dead-control/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-dead-control/" />
   </url>
   <url>
@@ -1227,8 +744,8 @@
     <loc>https://dislop.com/rules/ui-emoji-icon-chrome/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-emoji-icon-chrome/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-emoji-icon-chrome/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-emoji-icon-chrome/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-emoji-icon-chrome/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-emoji-icon-chrome/" />
   </url>
   <url>
@@ -1240,8 +757,8 @@
     <loc>https://dislop.com/rules/ui-glow-blob-chrome/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-glow-blob-chrome/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-glow-blob-chrome/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-glow-blob-chrome/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-glow-blob-chrome/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-glow-blob-chrome/" />
   </url>
   <url>
@@ -1253,8 +770,8 @@
     <loc>https://dislop.com/rules/ui-pill-soup/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-pill-soup/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-pill-soup/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-pill-soup/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-pill-soup/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-pill-soup/" />
   </url>
   <url>
@@ -1266,8 +783,8 @@
     <loc>https://dislop.com/rules/ui-prompt-echo-badge/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-prompt-echo-badge/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-prompt-echo-badge/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-prompt-echo-badge/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-prompt-echo-badge/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-prompt-echo-badge/" />
   </url>
   <url>
@@ -1279,8 +796,8 @@
     <loc>https://dislop.com/rules/ui-template-card-grid/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-template-card-grid/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-template-card-grid/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-template-card-grid/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-template-card-grid/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-template-card-grid/" />
   </url>
   <url>
@@ -1292,8 +809,8 @@
     <loc>https://dislop.com/rules/unfilled-placeholder/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/unfilled-placeholder/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/unfilled-placeholder/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/unfilled-placeholder/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/unfilled-placeholder/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/unfilled-placeholder/" />
   </url>
   <url>
@@ -1305,8 +822,8 @@
     <loc>https://dislop.com/rules/unsourced-attribution/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/unsourced-attribution/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/unsourced-attribution/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/unsourced-attribution/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/unsourced-attribution/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/unsourced-attribution/" />
   </url>
   <url>
@@ -1318,8 +835,8 @@
     <loc>https://dislop.com/rules/unsourced-statistic/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/unsourced-statistic/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/unsourced-statistic/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/unsourced-statistic/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/unsourced-statistic/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/unsourced-statistic/" />
   </url>
   <url>
@@ -1328,19 +845,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://dislop.com/rules/zh-bureaucratic-padding/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://dislop.com/rules/zh-dev-jargon.md</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/rules/zh-dev-jargon/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://dislop.com/rules/zh-essay-moralizing-ending.md</loc>
@@ -1348,19 +855,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://dislop.com/rules/zh-essay-moralizing-ending/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://dislop.com/rules/zh-exclamation.md</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/rules/zh-exclamation/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://dislop.com/rules/zh-four-char-triad.md</loc>
@@ -1368,29 +865,14 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://dislop.com/rules/zh-four-char-triad/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://dislop.com/rules/zh-halfwidth-punctuation.md</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://dislop.com/rules/zh-halfwidth-punctuation/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://dislop.com/rules/zh-mega-sentence.md</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://dislop.com/rules/zh-mega-sentence/</loc>
-    <lastmod>2026-11-23</lastmod>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://dislop.com/tasks/business-doc.md</loc>
@@ -1476,5 +958,523 @@
     <loc>https://dislop.com/tools/skill.md</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/awesome/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/awesome/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/awesome/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/awesome/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/feed.xml</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/agent-cli-mcp-tutorial/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/agent-cli-mcp-tutorial/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/agent-cli-mcp-tutorial/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/agent-cli-mcp-tutorial/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/agent-cli-mcp-tutorial/index.md</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/deslop-pptx-docx/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/deslop-pptx-docx/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/deslop-pptx-docx/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/deslop-pptx-docx/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/deslop-pptx-docx/index.md</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/fix-ai-slop-web-ui/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/fix-ai-slop-web-ui/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/fix-ai-slop-web-ui/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/fix-ai-slop-web-ui/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/fix-ai-slop-web-ui/index.md</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/linter-vs-detector-vs-skill/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/linter-vs-detector-vs-skill/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/linter-vs-detector-vs-skill/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/linter-vs-detector-vs-skill/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/linter-vs-detector-vs-skill/index.md</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/remove-ai-slop-writing/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/remove-ai-slop-writing/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/remove-ai-slop-writing/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/remove-ai-slop-writing/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/remove-ai-slop-writing/index.md</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/what-is-ai-slop/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/what-is-ai-slop/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/what-is-ai-slop/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/what-is-ai-slop/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/what-is-ai-slop/index.md</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/bold-lead-list-wall/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/bold-lead-list-wall/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/bold-lead-list-wall/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/bold-lead-list-wall/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/chatbot-artifact/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/chatbot-artifact/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/chatbot-artifact/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/chatbot-artifact/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/comma-chain-runon/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/comma-chain-runon/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/comma-chain-runon/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/comma-chain-runon/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/cooccurrence-slop-cluster/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/cooccurrence-slop-cluster/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/cooccurrence-slop-cluster/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/cooccurrence-slop-cluster/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/en-cliche-lexicon/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/en-cliche-lexicon/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/en-cliche-lexicon/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/en-cliche-lexicon/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/en-essay-moralizing-ending/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/en-essay-moralizing-ending/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/en-essay-moralizing-ending/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/en-essay-moralizing-ending/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/en-throat-clearing-opener/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/en-throat-clearing-opener/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/en-throat-clearing-opener/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/en-throat-clearing-opener/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/eng-pr-diff-parrot/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/eng-pr-diff-parrot/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/eng-pr-diff-parrot/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-pr-diff-parrot/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/eng-shallow-root-cause/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/eng-shallow-root-cause/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/eng-shallow-root-cause/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-shallow-root-cause/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/eng-vague-action-item/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/eng-vague-action-item/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/eng-vague-action-item/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-vague-action-item/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/excessive-em-dash-density/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/excessive-em-dash-density/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/excessive-em-dash-density/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/excessive-em-dash-density/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/image-ai-palette-slop/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/image-ai-palette-slop/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/image-ai-palette-slop/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/image-ai-palette-slop/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/image-ai-workflow-residue/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/image-ai-workflow-residue/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/image-ai-workflow-residue/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/image-ai-workflow-residue/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/literary-narrative-frame/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/literary-narrative-frame/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/literary-narrative-frame/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-narrative-frame/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/literary-negation-pivot/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/literary-negation-pivot/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/literary-negation-pivot/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-negation-pivot/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/literary-rhetorical-qa/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/literary-rhetorical-qa/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/literary-rhetorical-qa/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-rhetorical-qa/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/literary-semicolon-tricolon/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/literary-semicolon-tricolon/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/literary-semicolon-tricolon/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/literary-semicolon-tricolon/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/low-burstiness-vapor/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/low-burstiness-vapor/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/low-burstiness-vapor/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/low-burstiness-vapor/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/markdown-leak/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/markdown-leak/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/markdown-leak/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/markdown-leak/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/narrative-sandwich-frame/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/narrative-sandwich-frame/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/narrative-sandwich-frame/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/narrative-sandwich-frame/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/negation-pivot-frame/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/negation-pivot-frame/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/negation-pivot-frame/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/negation-pivot-frame/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/pdf-visual-layout-slop/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/pdf-visual-layout-slop/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/pdf-visual-layout-slop/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/pdf-visual-layout-slop/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/pptx-layout-monotony/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/pptx-layout-monotony/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/pptx-layout-monotony/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/pptx-layout-monotony/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/reg-unanchored-multiplier/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/reg-unanchored-multiplier/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/reg-unanchored-multiplier/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/reg-unanchored-multiplier/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/reg-unsubstantiated-superlative/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/reg-unsubstantiated-superlative/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/reg-unsubstantiated-superlative/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/reg-unsubstantiated-superlative/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/rhetorical-qa-cadence/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/rhetorical-qa-cadence/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/rhetorical-qa-cadence/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/rhetorical-qa-cadence/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/semicolon-tricolon/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/semicolon-tricolon/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/semicolon-tricolon/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/semicolon-tricolon/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/slide-autofit-shrink/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-autofit-shrink/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-autofit-shrink/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-autofit-shrink/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/slide-bullet-overload/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-bullet-overload/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-bullet-overload/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-bullet-overload/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/slide-process-not-finding-title/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-process-not-finding-title/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-process-not-finding-title/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-process-not-finding-title/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/slide-weak-topic-title/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-weak-topic-title/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-weak-topic-title/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-weak-topic-title/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/slide-word-wall/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/slide-word-wall/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/slide-word-wall/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/slide-word-wall/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/staccato-slogan-run/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/staccato-slogan-run/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/staccato-slogan-run/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/staccato-slogan-run/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/svg-layout-slop/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/svg-layout-slop/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/svg-layout-slop/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/svg-layout-slop/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/template-skeleton-echo/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/template-skeleton-echo/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/template-skeleton-echo/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/template-skeleton-echo/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/ui-ai-gradient/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-ai-gradient/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-ai-gradient/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-ai-gradient/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/ui-box-in-box/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-box-in-box/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-box-in-box/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-box-in-box/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/ui-dead-control/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-dead-control/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-dead-control/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-dead-control/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/ui-emoji-icon-chrome/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-emoji-icon-chrome/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-emoji-icon-chrome/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-emoji-icon-chrome/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/ui-glow-blob-chrome/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-glow-blob-chrome/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-glow-blob-chrome/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-glow-blob-chrome/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/ui-pill-soup/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-pill-soup/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-pill-soup/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-pill-soup/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/ui-prompt-echo-badge/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-prompt-echo-badge/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-prompt-echo-badge/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-prompt-echo-badge/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/ui-template-card-grid/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-template-card-grid/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-template-card-grid/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-template-card-grid/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/unfilled-placeholder/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/unfilled-placeholder/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/unfilled-placeholder/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/unfilled-placeholder/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/unsourced-attribution/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/unsourced-attribution/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/unsourced-attribution/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/unsourced-attribution/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/unsourced-statistic/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/rules/unsourced-statistic/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/unsourced-statistic/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/unsourced-statistic/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/zh-bureaucratic-padding/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/zh-dev-jargon/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/zh-essay-moralizing-ending/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/zh-exclamation/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/zh-four-char-triad/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/zh-halfwidth-punctuation/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/rules/zh-mega-sentence/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
   </url>
 </urlset>

@@ -1000,10 +1000,11 @@ function probeStaccatoRun(proseText) {
   const paraRegex = /[^\n]+(?:\n(?!\s*\n)[^\n]+)*/g;
   let pm;
   while ((pm = paraRegex.exec(proseText)) !== null) {
-    const para = pm[0];
+    const rawPara = pm[0];
+    const para = rawPara.replace(/!\[[^\]]*\](?:\([ \t]*|\[[^\]]*\])?/g, (m) => m.replace(/[^\r\n]/g, " "));
     const trimmed = para.trim();
     if (!trimmed) continue;
-    // Skip headings, lists, tables
+    // Skip headings, lists, and tables
     if (/^(?:#{1,6}\s|[-*+]\s|\d+[.)]\s|\|)/.test(trimmed)) continue;
 
     // Collect sentences with offsets inside paragraph using decimal/version-safe boundary checks
@@ -1200,12 +1201,22 @@ const ZH_SUBTLE_MARKERS = [
 ];
 
 const EN_SUBTLE_MARKERS = [
-  "leverages", "leverage", "leveraging", "seamlessly", "streamline", "streamlines",
+  "leverages", "leverage", "leveraging", "seamless", "seamlessly", "streamline", "streamlines",
   "foster", "fostering", "robust", "empowers", "empower", "stakeholders",
   "navigate", "comprehensive", "harnesses", "harness", "elevate", "pivotal",
   "transformative", "transformative outcomes", "pivotal alignment", "transparent alignment",
   "resilience", "synergy", "holistic", "ecosystem", "actionable", "unparalleled",
+  "effortless", "effortlessly", "blazing-fast", "blazing fast", "lightning-fast", "lightning fast",
+  "supercharge", "supercharges", "cutting-edge", "next-gen", "next-generation",
 ];
+
+function normalizeEnMarkerStem(term) {
+  const norm = String(term || "").toLowerCase().replace(/\s+/g, "-");
+  if (norm === "next-generation") return "next-gen";
+  if (norm.endsWith("lessly")) return norm.slice(0, -2);
+  if (norm.endsWith("less")) return norm;
+  return norm.replace(/(?:ing|es|s)$/, "");
+}
 
 const ZH_DISCOURSE_MARKERS = [
   "此外", "与此同时", "不仅如此", "总而言之", "综上所述", "换言之",
@@ -1468,7 +1479,7 @@ function probeCooccurrenceSlopCluster(proseText, rawText) {
       const re = buildAsciiPhraseRegex(term, "i");
       const m = re.exec(lowPara);
       if (m) {
-        const stem = term.replace(/(?:ing|es|s)$/, "");
+        const stem = normalizeEnMarkerStem(term);
         if (!found.has(`en:${stem}`)) {
           found.set(`en:${stem}`, { start: paraBase + m.index, end: paraBase + m.index + m[0].length });
         }
@@ -1526,6 +1537,7 @@ function probeSemicolonTricolon(proseText, rawText) {
 
   for (const para of blocks) {
     const maskedPara = para.text
+      .replace(/&(?:#\d+|#x[0-9a-fA-F]+|[A-Za-z][A-Za-z0-9]{1,24});/g, (m) => " ".repeat(m.length))
       .replace(/\([^)\n]*[;；][^)\n]*\)/g, (m) => " ".repeat(m.length))
       .replace(/（[^）\n]*[;；][^）\n]*）/g, (m) => " ".repeat(m.length))
       .replace(/“[^”\n]*[;；][^”\n]*”/g, (m) => " ".repeat(m.length))
@@ -2967,7 +2979,7 @@ export function auditText(text, { filename = "<memory>", modality = null, pack, 
     } else if (rule.probe === "negation-pivot") {
       rawHits = probeNegationPivot(zoneText, rawForProbes);
     } else if (rule.probe === "staccato-run") {
-      rawHits = probeStaccatoRun(zoneText);
+      rawHits = probeStaccatoRun(zoneText, rawForProbes);
     } else if (rule.probe === "zh-four-char-triad") {
       rawHits = probeZhFourCharTriad(zoneText);
     } else if (rule.probe === "unsourced-attribution") {
@@ -3972,7 +3984,7 @@ export function ruleDocUrl(item, lang = "en") {
   const source = item?.source || "";
   const packId = item?.packId || "";
   const isZh = lang === "zh" || ruleId.startsWith("zh-");
-  const base = isZh ? "https://dislop.com/rules/" : "https://dislop.com/en/rules/";
+  const base = isZh ? "https://dislop.com/zh/rules/" : "https://dislop.com/rules/";
   if (!ruleId || source === "pattern-library" || packId === "pocket-model") {
     return base;
   }

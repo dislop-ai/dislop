@@ -1434,10 +1434,15 @@ def _probe_negation_pivot(prose_text: str, raw_text: str) -> list[dict[str, Any]
     return hits
 
 
-def _probe_staccato_run(prose_text: str) -> list[dict[str, Any]]:
+def _probe_staccato_run(prose_text: str, raw_text: str = "") -> list[dict[str, Any]]:
     hits: list[dict[str, Any]] = []
     for pm in re.finditer(r"[^\n]+(?:\n(?!\s*\n)[^\n]+)*", prose_text):
-        para = pm.group(0)
+        raw_para = pm.group(0)
+        para = re.sub(
+            r"!\[[^\]]*\](?:\([ \t]*|\[[^\]]*\])?",
+            lambda m: re.sub(r"[^\r\n]", " ", m.group(0)),
+            raw_para,
+        )
         trimmed = para.strip()
         if not trimmed or re.match(r"^(?:#{1,6}\s|[-*+]\s|\d+[.)]\s|\|)", trimmed):
             continue
@@ -1616,12 +1621,25 @@ ZH_SUBTLE_MARKERS = [
 ]
 
 EN_SUBTLE_MARKERS = [
-    "leverages", "leverage", "leveraging", "seamlessly", "streamline", "streamlines",
+    "leverages", "leverage", "leveraging", "seamless", "seamlessly", "streamline", "streamlines",
     "foster", "fostering", "robust", "empowers", "empower", "stakeholders",
     "navigate", "comprehensive", "harnesses", "harness", "elevate", "pivotal",
     "transformative", "transformative outcomes", "pivotal alignment", "transparent alignment",
     "resilience", "synergy", "holistic", "ecosystem", "actionable", "unparalleled",
+    "effortless", "effortlessly", "blazing-fast", "blazing fast", "lightning-fast", "lightning fast",
+    "supercharge", "supercharges", "cutting-edge", "next-gen", "next-generation",
 ]
+
+
+def _normalize_en_marker_stem(term: str) -> str:
+    norm = re.sub(r"\s+", "-", str(term or "").lower())
+    if norm == "next-generation":
+        return "next-gen"
+    if norm.endswith("lessly"):
+        return norm[:-2]
+    if norm.endswith("less"):
+        return norm
+    return re.sub(r"(?:ing|es|s)$", "", norm)
 
 ZH_DISCOURSE_MARKERS = [
     "此外", "与此同时", "不仅如此", "总而言之", "综上所述", "换言之",
@@ -1850,7 +1868,7 @@ def _probe_cooccurrence_slop_cluster(prose_text: str, raw_text: str) -> list[dic
         for term in EN_SUBTLE_MARKERS:
             m = _build_ascii_phrase_regex(term, re.I).search(low_para)
             if m:
-                stem = re.sub(r"(?:ing|es|s)$", "", term)
+                stem = _normalize_en_marker_stem(term)
                 key = f"en:{stem}"
                 if key not in found:
                     found[key] = (base + m.start(), base + m.end())
@@ -1909,6 +1927,7 @@ def _probe_semicolon_tricolon(prose_text: str, raw_text: str) -> list[dict[str, 
     ]
     for para in blocks:
         masked = para["text"]
+        masked = re.sub(r"&(?:#\d+|#x[0-9a-fA-F]+|[A-Za-z][A-Za-z0-9]{1,24});", lambda m: " " * len(m.group(0)), masked)
         masked = re.sub(r"\([^)\n]*[;；][^)\n]*\)", lambda m: " " * len(m.group(0)), masked)
         masked = re.sub(r"（[^）\n]*[;；][^）\n]*）", lambda m: " " * len(m.group(0)), masked)
         masked = re.sub(r"“[^”\n]*[;；][^”\n]*”", lambda m: " " * len(m.group(0)), masked)
@@ -3302,7 +3321,7 @@ def audit_text(
         elif probe == "negation-pivot":
             raw_hits = _probe_negation_pivot(zone_text, raw_for_probes)
         elif probe == "staccato-run":
-            raw_hits = _probe_staccato_run(zone_text)
+            raw_hits = _probe_staccato_run(zone_text, raw_for_probes)
         elif probe == "zh-four-char-triad":
             raw_hits = _probe_zh_four_char_triad(zone_text)
         elif probe == "unsourced-attribution":
@@ -5797,7 +5816,7 @@ def rule_doc_url(item: dict[str, Any] | None, lang: str = "en") -> str:
     source = str(obj.get("source") or "")
     pack_id = str(obj.get("packId") or "")
     is_zh = lang == "zh" or rule_id.startswith("zh-")
-    base = "https://dislop.com/rules/" if is_zh else "https://dislop.com/en/rules/"
+    base = "https://dislop.com/zh/rules/" if is_zh else "https://dislop.com/rules/"
     if not rule_id or source == "pattern-library" or pack_id == "pocket-model":
         return base
     return f"{base}{rule_id}/"

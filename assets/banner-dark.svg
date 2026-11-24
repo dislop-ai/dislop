@@ -1,15 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" fill="none" role="img" aria-label="dislop — Cutting AI slop is real productivity.">
   <title>dislop — Cutting AI slop is real productivity.</title>
   <rect width="1200" height="300" fill="#0E1012"/>
-  <!-- Architectural 1px galley rails -->
-  <line x1="48" y1="0" x2="48" y2="300" stroke="#2A2F37" stroke-width="1"/>
-  <line x1="612" y1="0" x2="612" y2="300" stroke="#2A2F37" stroke-width="1"/>
-  <line x1="1152" y1="0" x2="1152" y2="300" stroke="#2A2F37" stroke-width="1"/>
-  <line x1="0" y1="36" x2="1200" y2="36" stroke="#2A2F37" stroke-width="1"/>
-  <line x1="0" y1="264" x2="1200" y2="264" stroke="#2A2F37" stroke-width="1"/>
+  <rect x="600" y="32" width="552" height="236" rx="0" fill="#15181C"/>
+  <rect x="48" y="32" width="1104" height="236" rx="0" stroke="#2A2F37" stroke-width="1"/>
+  <line x1="600" y1="32" x2="600" y2="268" stroke="#2A2F37" stroke-width="1"/>
 
-  <!-- Left column: Canonical Vermilion Mark + Wordmark -->
-  <g transform="translate(84, 72)">
+  <g transform="translate(88, 84)">
     <g transform="scale(0.875)">
       <rect width="64" height="64" rx="12" fill="#1D2127" stroke="#3E4551" stroke-width="1.15"/>
       <line x1="10" y1="38" x2="54" y2="38" stroke="#ECEEF0" stroke-width="4.5" stroke-linecap="round" stroke-opacity="0.28"/>
@@ -17,25 +13,15 @@
     </g>
     <text x="76" y="43" fill="#ECEEF0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="46" font-weight="700" letter-spacing="-1.2">dislop</text>
   </g>
+  <text x="88" y="198" fill="#ECEEF0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="25" font-weight="600">Cutting AI slop is real productivity.</text>
 
-  <text x="84" y="174" fill="#ECEEF0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24" font-weight="600">Cutting AI slop is real productivity.</text>
-  <text x="84" y="212" fill="#A6ACB5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">Linter for AI Slop  |  Skill · Plugin · CLI · MCP</text>
+  <text x="640" y="88" fill="#A6ACB5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16">dislop check  ·  1 hard bug  ·  1 warning</text>
 
-  <!-- Right column: Monotonic raised sheet (#15181C > #0E1012) -->
-  <rect x="613" y="37" width="538" height="226" rx="0" fill="#15181C"/>
-  <text x="646" y="76" fill="#A6ACB5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">dislop check  ·  1 hard bug  ·  1 warning</text>
+  <rect x="637" y="127" width="204" height="30" rx="0" fill="#F04438" fill-opacity="0.14"/>
+  <text x="640" y="150" font-family="Georgia, 'Times New Roman', serif" font-size="22"><tspan fill="#8C939E">Certainly! Here it is:</tspan><tspan fill="#ECEEF0" dx="28">This release is</tspan></text>
+  <path data-dele="true" d="M639 143H833C841 143 848 137 848 130C848 125 844 122 839 122C834 122 831 126 831 131C831 140 838 148 849 152" stroke="#F04438" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- Struck AI chat opener with dele loop -->
-  <rect x="644" y="102" width="212" height="30" rx="0" fill="#F04438" fill-opacity="0.14"/>
-  <text x="646" y="125" font-family="Georgia, 'Times New Roman', serif" font-size="21"><tspan fill="#8C939E">Certainly! Here it is:</tspan><tspan fill="#ECEEF0" dx="28">This release is</tspan></text>
-  <path data-dele="true" d="M645 118H842C850 118 857 112 857 105C857 100 853 97 848 97C843 97 840 101 840 106C840 115 847 123 858 127" stroke="#F04438" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Dashed blue cliché mark -->
-  <rect x="644" y="146" width="352" height="28" rx="0" fill="#85B4FF" fill-opacity="0.12"/>
-  <text x="646" y="166" fill="#ECEEF0" font-family="Georgia, 'Times New Roman', serif" font-size="21">not just faster — it's a paradigm shift.</text>
-  <line x1="646" y1="175" x2="994" y2="175" stroke="#85B4FF" stroke-width="2.2" stroke-dasharray="6 4"/>
-
-  <!-- Legend -->
-  <text x="646" y="218" fill="#FF7A6B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600">error: chat wrapper</text>
-  <text x="866" y="218" fill="#85B4FF" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600">warn: slogan frame</text>
+  <rect x="637" y="180" width="368" height="29" rx="0" fill="#85B4FF" fill-opacity="0.12"/>
+  <text x="640" y="202" fill="#ECEEF0" font-family="Georgia, 'Times New Roman', serif" font-size="22">not just faster — it's a paradigm shift.</text>
+  <line x1="640" y1="212" x2="1002" y2="212" stroke="#85B4FF" stroke-width="2.2" stroke-dasharray="6 4"/>
 </svg>

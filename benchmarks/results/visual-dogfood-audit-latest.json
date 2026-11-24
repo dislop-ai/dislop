@@ -1,6 +1,6 @@
 {
   "schema": "dislop.visual-dogfood-audit/1",
-  "generatedAt": "2026-11-24T00:47:10.860Z",
+  "generatedAt": "2026-11-24T03:31:10.755Z",
   "layer1": {
     "assets": {
       "assetCount": 61,
@@ -56,10 +56,10 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.9144,
-              "highSatRatio": 0.0084,
-              "smoothHighSatRatio": 0,
-              "neutralRatio": 0.0416,
+              "darkBgRatio": 0.9593,
+              "highSatRatio": 0.0059,
+              "smoothHighSatRatio": 0.0255,
+              "neutralRatio": 0.0203,
               "quantizedColors": 55
             }
           }
@@ -78,11 +78,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.9271,
+              "darkBgRatio": 0.9805,
               "highSatRatio": 0,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.0457,
-              "quantizedColors": 39
+              "neutralRatio": 0.0081,
+              "quantizedColors": 28
             }
           }
         },
@@ -113,11 +113,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.9125,
-              "highSatRatio": 0.0072,
+              "darkBgRatio": 0.9564,
+              "highSatRatio": 0.0041,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.0558,
-              "quantizedColors": 51
+              "neutralRatio": 0.0227,
+              "quantizedColors": 52
             }
           }
         },
@@ -135,11 +135,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.9137,
+              "darkBgRatio": 0.9812,
               "highSatRatio": 0,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.0541,
-              "quantizedColors": 41
+              "neutralRatio": 0.0194,
+              "quantizedColors": 26
             }
           }
         },
@@ -213,12 +213,12 @@
             "pixelMetrics": {
               "sampledPixels": 42136,
               "neonPurpleRatio": 0,
-              "neonCyanRatio": 0,
-              "darkBgRatio": 0.9465,
-              "highSatRatio": 0.0106,
-              "smoothHighSatRatio": 0.0045,
-              "neutralRatio": 0.0216,
-              "quantizedColors": 62
+              "neonCyanRatio": 0.0005,
+              "darkBgRatio": 0.9551,
+              "highSatRatio": 0.0066,
+              "smoothHighSatRatio": 0.0072,
+              "neutralRatio": 0.0177,
+              "quantizedColors": 61
             }
           }
         },
@@ -236,11 +236,11 @@
               "sampledPixels": 42136,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.9843,
+              "darkBgRatio": 0.985,
               "highSatRatio": 0.0001,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.0068,
-              "quantizedColors": 33
+              "neutralRatio": 0.0051,
+              "quantizedColors": 36
             }
           }
         },
@@ -315,11 +315,11 @@
               "sampledPixels": 42136,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.9406,
-              "highSatRatio": 0.0136,
-              "smoothHighSatRatio": 0.0035,
-              "neutralRatio": 0.0197,
-              "quantizedColors": 63
+              "darkBgRatio": 0.9508,
+              "highSatRatio": 0.0089,
+              "smoothHighSatRatio": 0.0107,
+              "neutralRatio": 0.0179,
+              "quantizedColors": 60
             }
           }
         },
@@ -337,11 +337,11 @@
               "sampledPixels": 42136,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.9834,
-              "highSatRatio": 0.0001,
-              "smoothHighSatRatio": 0,
-              "neutralRatio": 0.0084,
-              "quantizedColors": 36
+              "darkBgRatio": 0.9828,
+              "highSatRatio": 0.0005,
+              "smoothHighSatRatio": 0.0526,
+              "neutralRatio": 0.0065,
+              "quantizedColors": 40
             }
           }
         },
@@ -372,11 +372,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0027,
-              "highSatRatio": 0.0075,
-              "smoothHighSatRatio": 0.075,
-              "neutralRatio": 0.7671,
-              "quantizedColors": 51
+              "darkBgRatio": 0.0018,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9706,
+              "quantizedColors": 48
             }
           }
         },
@@ -394,11 +394,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0028,
-              "highSatRatio": 0.007,
+              "darkBgRatio": 0.0019,
+              "highSatRatio": 0,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.7784,
-              "quantizedColors": 50
+              "neutralRatio": 0.9926,
+              "quantizedColors": 41
             }
           }
         },
@@ -429,11 +429,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0035,
-              "highSatRatio": 0.0019,
-              "smoothHighSatRatio": 0.3137,
-              "neutralRatio": 0.7881,
-              "quantizedColors": 50
+              "darkBgRatio": 0.0021,
+              "highSatRatio": 0,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.972,
+              "quantizedColors": 40
             }
           }
         },
@@ -451,11 +451,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0037,
-              "highSatRatio": 0.0013,
+              "darkBgRatio": 0.0023,
+              "highSatRatio": 0,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.7986,
-              "quantizedColors": 49
+              "neutralRatio": 0.9923,
+              "quantizedColors": 39
             }
           }
         },
@@ -530,11 +530,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0075,
-              "highSatRatio": 0.004,
-              "smoothHighSatRatio": 0.0187,
-              "neutralRatio": 0.8757,
-              "quantizedColors": 50
+              "darkBgRatio": 0.0094,
+              "highSatRatio": 0.0015,
+              "smoothHighSatRatio": 0.025,
+              "neutralRatio": 0.9364,
+              "quantizedColors": 49
             }
           }
         },
@@ -552,11 +552,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0063,
-              "highSatRatio": 0.0012,
+              "darkBgRatio": 0.011,
+              "highSatRatio": 0,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.8981,
-              "quantizedColors": 40
+              "neutralRatio": 0.9972,
+              "quantizedColors": 34
             }
           }
         },
@@ -631,11 +631,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0087,
-              "highSatRatio": 0.0036,
-              "smoothHighSatRatio": 0.0104,
-              "neutralRatio": 0.8814,
-              "quantizedColors": 51
+              "darkBgRatio": 0.0052,
+              "highSatRatio": 0.0008,
+              "smoothHighSatRatio": 0,
+              "neutralRatio": 0.9491,
+              "quantizedColors": 50
             }
           }
         },
@@ -653,11 +653,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0072,
-              "highSatRatio": 0.0011,
+              "darkBgRatio": 0.0062,
+              "highSatRatio": 0,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.9012,
-              "quantizedColors": 33
+              "neutralRatio": 0.9927,
+              "quantizedColors": 37
             }
           }
         },
@@ -730,13 +730,13 @@
             "frameCount": 1,
             "pixelMetrics": {
               "sampledPixels": 26560,
-              "neonPurpleRatio": 0.0085,
+              "neonPurpleRatio": 0.0089,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.3303,
-              "highSatRatio": 0.0112,
-              "smoothHighSatRatio": 0.1414,
-              "neutralRatio": 0.5261,
-              "quantizedColors": 70
+              "darkBgRatio": 0.3585,
+              "highSatRatio": 0.0064,
+              "smoothHighSatRatio": 0.4438,
+              "neutralRatio": 0.5779,
+              "quantizedColors": 69
             }
           }
         },
@@ -754,11 +754,11 @@
               "sampledPixels": 26560,
               "neonPurpleRatio": 0.0084,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.3303,
-              "highSatRatio": 0.011,
-              "smoothHighSatRatio": 0.2612,
-              "neutralRatio": 0.5354,
-              "quantizedColors": 62
+              "darkBgRatio": 0.3674,
+              "highSatRatio": 0.0048,
+              "smoothHighSatRatio": 0.5197,
+              "neutralRatio": 0.5872,
+              "quantizedColors": 64
             }
           }
         },
@@ -831,13 +831,13 @@
             "frameCount": 1,
             "pixelMetrics": {
               "sampledPixels": 26560,
-              "neonPurpleRatio": 0.008,
+              "neonPurpleRatio": 0.0091,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.3355,
-              "highSatRatio": 0.0052,
-              "smoothHighSatRatio": 0.0432,
-              "neutralRatio": 0.5291,
-              "quantizedColors": 68
+              "darkBgRatio": 0.3653,
+              "highSatRatio": 0.0049,
+              "smoothHighSatRatio": 0.2326,
+              "neutralRatio": 0.5762,
+              "quantizedColors": 64
             }
           }
         },
@@ -853,13 +853,13 @@
             "frameCount": 1,
             "pixelMetrics": {
               "sampledPixels": 26560,
-              "neonPurpleRatio": 0.008,
+              "neonPurpleRatio": 0.0084,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.3355,
-              "highSatRatio": 0.0058,
-              "smoothHighSatRatio": 0.2987,
-              "neutralRatio": 0.5357,
-              "quantizedColors": 66
+              "darkBgRatio": 0.3721,
+              "highSatRatio": 0.0047,
+              "smoothHighSatRatio": 0.376,
+              "neutralRatio": 0.5846,
+              "quantizedColors": 63
             }
           }
         },
@@ -934,11 +934,11 @@
               "sampledPixels": 26080,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.008,
-              "highSatRatio": 0,
+              "darkBgRatio": 0.0067,
+              "highSatRatio": 0.0007,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.9393,
-              "quantizedColors": 44
+              "neutralRatio": 0.963,
+              "quantizedColors": 40
             }
           }
         },
@@ -956,11 +956,11 @@
               "sampledPixels": 26080,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0081,
-              "highSatRatio": 0,
+              "darkBgRatio": 0.0067,
+              "highSatRatio": 0.0007,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.9481,
-              "quantizedColors": 47
+              "neutralRatio": 0.9635,
+              "quantizedColors": 43
             }
           }
         },
@@ -1035,11 +1035,11 @@
               "sampledPixels": 26080,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0052,
-              "highSatRatio": 0,
+              "darkBgRatio": 0.0039,
+              "highSatRatio": 0.0007,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.9602,
-              "quantizedColors": 39
+              "neutralRatio": 0.9748,
+              "quantizedColors": 38
             }
           }
         },
@@ -1057,11 +1057,11 @@
               "sampledPixels": 26080,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.0046,
-              "highSatRatio": 0,
+              "darkBgRatio": 0.0041,
+              "highSatRatio": 0.0007,
               "smoothHighSatRatio": 0,
-              "neutralRatio": 0.9596,
-              "quantizedColors": 42
+              "neutralRatio": 0.9754,
+              "quantizedColors": 43
             }
           }
         },
@@ -1099,11 +1099,11 @@
               "sampledPixels": 36120,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.2542,
-              "highSatRatio": 0.0059,
-              "smoothHighSatRatio": 0.1596,
-              "neutralRatio": 0.6989,
-              "quantizedColors": 46
+              "darkBgRatio": 0.2698,
+              "highSatRatio": 0.0062,
+              "smoothHighSatRatio": 0.1563,
+              "neutralRatio": 0.6888,
+              "quantizedColors": 39
             }
           }
         },
@@ -1128,11 +1128,11 @@
               "sampledPixels": 36120,
               "neonPurpleRatio": 0,
               "neonCyanRatio": 0,
-              "darkBgRatio": 0.254,
-              "highSatRatio": 0.0036,
-              "smoothHighSatRatio": 0.8168,
-              "neutralRatio": 0.6937,
-              "quantizedColors": 49
+              "darkBgRatio": 0.2714,
+              "highSatRatio": 0.0052,
+              "smoothHighSatRatio": 0.6825,
+              "neutralRatio": 0.6904,
+              "quantizedColors": 42
             }
           }
         },
@@ -1243,46 +1243,46 @@
             "stroke": "#F04438",
             "label": "Certainly! Here it is:",
             "strokeX": [
-              645,
-              858
+              639,
+              849
             ],
             "textX": [
-              646,
-              834
+              640,
+              837
             ],
             "textBBox": {
-              "x": 646,
-              "w": 188,
-              "y": 106,
-              "h": 24
+              "x": 640,
+              "w": 197,
+              "y": 130,
+              "h": 25
             },
             "leftOvershoot": 1,
-            "rightOvershoot": 24
+            "rightOvershoot": 12
           },
           {
             "kind": "underline",
             "stroke": "#1B52B0",
             "label": "not just faster — it's a paradig",
             "strokeX": [
-              646,
-              994
+              640,
+              1002
             ],
             "textX": [
-              646,
-              991
+              640,
+              1002
             ],
             "textBBox": {
-              "x": 646,
-              "w": 345,
-              "y": 147,
-              "h": 24
+              "x": 640,
+              "w": 362,
+              "y": 182,
+              "h": 25
             },
             "leftOvershoot": 0,
-            "rightOvershoot": 3
+            "rightOvershoot": 0
           }
         ],
-        "textCount": 9,
-        "rectCount": 5
+        "textCount": 6,
+        "rectCount": 6
       },
       {
         "file": "assets/banner-dark.svg",
@@ -1300,46 +1300,46 @@
             "stroke": "#F04438",
             "label": "Certainly! Here it is:",
             "strokeX": [
-              645,
-              858
+              639,
+              849
             ],
             "textX": [
-              646,
-              834
+              640,
+              837
             ],
             "textBBox": {
-              "x": 646,
-              "w": 188,
-              "y": 106,
-              "h": 24
+              "x": 640,
+              "w": 197,
+              "y": 130,
+              "h": 25
             },
             "leftOvershoot": 1,
-            "rightOvershoot": 24
+            "rightOvershoot": 12
           },
           {
             "kind": "underline",
             "stroke": "#85B4FF",
             "label": "not just faster — it's a paradig",
             "strokeX": [
-              646,
-              994
+              640,
+              1002
             ],
             "textX": [
-              646,
-              991
+              640,
+              1002
             ],
             "textBBox": {
-              "x": 646,
-              "w": 345,
-              "y": 147,
-              "h": 24
+              "x": 640,
+              "w": 362,
+              "y": 182,
+              "h": 25
             },
             "leftOvershoot": 0,
-            "rightOvershoot": 3
+            "rightOvershoot": 0
           }
         ],
-        "textCount": 9,
-        "rectCount": 5
+        "textCount": 6,
+        "rectCount": 6
       },
       {
         "file": "assets/banner-zh-light.svg",
@@ -1357,46 +1357,46 @@
             "stroke": "#F04438",
             "label": "好的，以下是修改后：",
             "strokeX": [
-              645,
-              866
+              639,
+              871
             ],
             "textX": [
-              646,
-              856
+              640,
+              860
             ],
             "textBBox": {
-              "x": 646,
-              "w": 210,
-              "y": 103,
-              "h": 29
+              "x": 640,
+              "w": 220,
+              "y": 127,
+              "h": 30
             },
             "leftOvershoot": 1,
-            "rightOvershoot": 10
+            "rightOvershoot": 11
           },
           {
             "kind": "underline",
             "stroke": "#1B52B0",
             "label": "这不是一次升级，而是一场范式革命。",
             "strokeX": [
-              646,
-              1003
+              640,
+              1014
             ],
             "textX": [
-              646,
-              1003
+              640,
+              1014
             ],
             "textBBox": {
-              "x": 646,
-              "w": 357,
-              "y": 146,
-              "h": 29
+              "x": 640,
+              "w": 374,
+              "y": 179,
+              "h": 30
             },
             "leftOvershoot": 0,
             "rightOvershoot": 0
           }
         ],
-        "textCount": 9,
-        "rectCount": 5
+        "textCount": 6,
+        "rectCount": 6
       },
       {
         "file": "assets/banner-zh-dark.svg",
@@ -1414,46 +1414,46 @@
             "stroke": "#F04438",
             "label": "好的，以下是修改后：",
             "strokeX": [
-              645,
-              866
+              639,
+              871
             ],
             "textX": [
-              646,
-              856
+              640,
+              860
             ],
             "textBBox": {
-              "x": 646,
-              "w": 210,
-              "y": 103,
-              "h": 29
+              "x": 640,
+              "w": 220,
+              "y": 127,
+              "h": 30
             },
             "leftOvershoot": 1,
-            "rightOvershoot": 10
+            "rightOvershoot": 11
           },
           {
             "kind": "underline",
             "stroke": "#85B4FF",
             "label": "这不是一次升级，而是一场范式革命。",
             "strokeX": [
-              646,
-              1003
+              640,
+              1014
             ],
             "textX": [
-              646,
-              1003
+              640,
+              1014
             ],
             "textBBox": {
-              "x": 646,
-              "w": 357,
-              "y": 146,
-              "h": 29
+              "x": 640,
+              "w": 374,
+              "y": 179,
+              "h": 30
             },
             "leftOvershoot": 0,
             "rightOvershoot": 0
           }
         ],
-        "textCount": 9,
-        "rectCount": 5
+        "textCount": 6,
+        "rectCount": 6
       },
       {
         "file": "assets/og-card.svg",
@@ -1471,67 +1471,25 @@
             "stroke": "#F04438",
             "label": "Certainly! Here is your draft.",
             "strokeX": [
-              112,
-              652
+              118,
+              770
             ],
             "textX": [
-              116,
-              624
+              120,
+              745
             ],
             "textBBox": {
-              "x": 116,
-              "w": 508,
-              "y": 205,
-              "h": 46
-            },
-            "leftOvershoot": 4,
-            "rightOvershoot": 28
-          },
-          {
-            "kind": "underline",
-            "stroke": "#1B52B0",
-            "label": "It's worth noting that",
-            "strokeX": [
-              146,
-              408
-            ],
-            "textX": [
-              146,
-              408
-            ],
-            "textBBox": {
-              "x": 146,
-              "w": 262,
-              "y": 401,
-              "h": 32
-            },
-            "leftOvershoot": 0,
-            "rightOvershoot": 0
-          },
-          {
-            "kind": "underline",
-            "stroke": "#1B52B0",
-            "label": "a game-changer",
-            "strokeX": [
-              601,
-              798
-            ],
-            "textX": [
-              603,
-              800
-            ],
-            "textBBox": {
-              "x": 603,
-              "w": 197,
-              "y": 401,
-              "h": 32
+              "x": 120,
+              "w": 625,
+              "y": 243,
+              "h": 48
             },
             "leftOvershoot": 2,
-            "rightOvershoot": -2
+            "rightOvershoot": 25
           }
         ],
-        "textCount": 10,
-        "rectCount": 7
+        "textCount": 5,
+        "rectCount": 4
       },
       {
         "file": "assets/og-card-zh.svg",
@@ -1549,88 +1507,25 @@
             "stroke": "#F04438",
             "label": "好的，以下是为您润色后的版本。",
             "strokeX": [
-              112,
-              702
+              118,
+              744
             ],
             "textX": [
-              116,
-              686
+              120,
+              720
             ],
             "textBBox": {
-              "x": 116,
-              "w": 570,
-              "y": 201,
-              "h": 53
+              "x": 120,
+              "w": 600,
+              "y": 239,
+              "h": 56
             },
-            "leftOvershoot": 4,
-            "rightOvershoot": 16
-          },
-          {
-            "kind": "underline",
-            "stroke": "#1B52B0",
-            "label": "值得注意的是，",
-            "strokeX": [
-              146,
-              306
-            ],
-            "textX": [
-              146,
-              335
-            ],
-            "textBBox": {
-              "x": 146,
-              "w": 189,
-              "y": 398,
-              "h": 38
-            },
-            "leftOvershoot": 0,
-            "rightOvershoot": -29
-          },
-          {
-            "kind": "underline",
-            "stroke": "#1B52B0",
-            "label": "抓手",
-            "strokeX": [
-              600,
-              654
-            ],
-            "textX": [
-              605,
-              659
-            ],
-            "textBBox": {
-              "x": 605,
-              "w": 54,
-              "y": 398,
-              "h": 38
-            },
-            "leftOvershoot": 5,
-            "rightOvershoot": -5
-          },
-          {
-            "kind": "underline",
-            "stroke": "#1B52B0",
-            "label": "全面赋能",
-            "strokeX": [
-              681,
-              788
-            ],
-            "textX": [
-              686,
-              794
-            ],
-            "textBBox": {
-              "x": 686,
-              "w": 108,
-              "y": 398,
-              "h": 38
-            },
-            "leftOvershoot": 5,
-            "rightOvershoot": -6
+            "leftOvershoot": 2,
+            "rightOvershoot": 24
           }
         ],
-        "textCount": 12,
-        "rectCount": 8
+        "textCount": 5,
+        "rectCount": 4
       }
     ]
   },

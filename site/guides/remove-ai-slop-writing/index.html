@@ -1,30 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-static-lang="zh">
+<html lang="en" data-static-lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话 — dislop</title>
-  <meta name="description" content="为什么只禁“抓手”“赋能”会把文章改成“不是 A，而是 B”反转腔，以及如何用四步删除测试写出干净的中文工作文档与长文。">
+  <title>How to Remove AI Slop From Writing Without Triggering Second-Order Clichés — dislop</title>
+  <meta name="description" content="Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="dislop">
   <meta property="og:url" content="https://dislop.com/guides/remove-ai-slop-writing/">
-  <meta property="og:title" content="中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话 — dislop">
-  <meta property="og:description" content="为什么只禁“抓手”“赋能”会把文章改成“不是 A，而是 B”反转腔，以及如何用四步删除测试写出干净的中文工作文档与长文。">
-  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:title" content="How to Remove AI Slop From Writing Without Triggering Second-Order Clichés — dislop">
+  <meta property="og:description" content="Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@dislop_ai">
   <meta name="twitter:creator" content="@dislop_ai">
-  <meta name="twitter:title" content="中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话 — dislop">
-  <meta name="twitter:description" content="为什么只禁“抓手”“赋能”会把文章改成“不是 A，而是 B”反转腔，以及如何用四步删除测试写出干净的中文工作文档与长文。">
-  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta name="twitter:title" content="How to Remove AI Slop From Writing Without Triggering Second-Order Clichés — dislop">
+  <meta name="twitter:description" content="Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
   <link rel="canonical" href="https://dislop.com/guides/remove-ai-slop-writing/">
-  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/guides/remove-ai-slop-writing/">
-  <link rel="alternate" hreflang="en" href="https://dislop.com/en/guides/remove-ai-slop-writing/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/guides/remove-ai-slop-writing/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/remove-ai-slop-writing/">
   <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/remove-ai-slop-writing/">
-  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop 实用指南（中文）">
+  <script src="../../lang-init.js"></script>
+  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop Guides (EN)">
   <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
   <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
   <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
@@ -37,9 +38,9 @@
       "@type": "TechArticle",
       "@id": "https://dislop.com/guides/remove-ai-slop-writing/",
       "url": "https://dislop.com/guides/remove-ai-slop-writing/",
-      "headline": "中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话",
-      "description": "为什么只禁“抓手”“赋能”会把文章改成“不是 A，而是 B”反转腔，以及如何用四步删除测试写出干净的中文工作文档与长文。",
-      "inLanguage": "zh-CN",
+      "headline": "How to Remove AI Slop From Writing Without Triggering Second-Order Clichés",
+      "description": "Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.",
+      "inLanguage": "en",
       "datePublished": "2026-11-23",
       "dateModified": "2026-11-23",
       "author": {
@@ -52,16 +53,18 @@
         "name": "dislop",
         "url": "https://dislop.com/"
       },
-      "image": "https://dislop.com/assets/og-card-zh.png",
+      "image": "https://dislop.com/assets/og-card.png",
       "citation": [
         "https://arxiv.org/abs/2309.05196",
         "https://doi.org/10.1126/sciadv.adn5290",
         "https://arxiv.org/abs/2510.01171",
+        "https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing",
         "https://www.asd-ste100.org/",
-        "https://github.com/op7418/Humanizer-zh",
-        "https://github.com/MrGeDiao/shuorenhua",
-        "https://github.com/hylarucoder/ai-flavor-remover",
-        "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7569AD3A7E05397BE0A0AB82A"
+        "https://digital.gov/guides/plain-language/",
+        "https://www.gov.uk/guidance/style-guide",
+        "https://developers.google.com/tech-writing",
+        "https://github.com/blader/humanizer",
+        "https://github.com/hardikpandya/stop-slop"
       ]
     },
     {
@@ -76,13 +79,13 @@
         {
           "@type": "ListItem",
           "position": 2,
-          "name": "实用指南",
+          "name": "Guides",
           "item": "https://dislop.com/guides/"
         },
         {
           "@type": "ListItem",
           "position": 3,
-          "name": "写作怎么去 AI 味",
+          "name": "Remove AI Slop From Writing",
           "item": "https://dislop.com/guides/remove-ai-slop-writing/"
         }
       ]
@@ -92,26 +95,26 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "为什么用“不要用 AI 味词汇”提示词，改出来还是有股味？",
+          "name": "Why does telling an LLM 'avoid AI clichés' still produce synthetic prose?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "因为大模型习惯在字数和修辞强度上做补偿：一旦你禁止它写抽象黑话，它就会改写成对称反转口号或三个四字词排比，继续维持浮夸语气。"
+            "text": "Post-trained models compensate for banned adjectives by switching to dramatic contrast frames (`Not just X — it's Y`), short staccato three-word bursts, or neat 3-part semicolon sentences."
           }
         },
         {
           "@type": "Question",
-          "name": "技术文档和周报里的“不是……而是……”一定不能用吗？",
+          "name": "Does dislop flag legitimate factual contrasts like 'The bug is not in parser.py, but in loader.py'?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "不是。如果是在纠偏真实事实（例如“报错不在网关，而在配置 `loader.py` 第 42 行”），这是正常陈述；只有先立一个虚稻草人再拔高抽象名词时（比如把工具拔高成某种空洞概念），才属于 AI 套句。"
+            "text": "No. Specific file, number, and mechanism corrections are preserved. The rule targets strawman negation pivots that contrast an empty label with an abstract noun ('Not just a tool — peace of mind')."
           }
         },
         {
           "@type": "Question",
-          "name": "中文标点混用半角符号也算 AI 味吗？",
+          "name": "Do flat banned-word lists cause false positives on technical terms?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "很多大模型训练语料混杂机翻文本，经常在中文句子里夹半角逗号、括号或过多破折号。对照国标 GB/T 15834—2011 统一改成全角中文标点并控制破折号数量，可读性会明显提升。"
+            "text": "Yes. Naive word lists routinely flag real nouns such as Delve (the Go debugger), wool tapestry, or legitimate domain terms. Context-aware rules keep literal nouns intact."
           }
         }
       ]
@@ -121,185 +124,186 @@
   </script>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">跳至正文</a>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="rail-shell">
     <header class="topbar band-rule">
       <a class="brand-lockup" href="../../">
         <img src="../../assets/logo.svg" width="30" height="30" alt="">
         <span class="brand-wordmark">dislop</span>
-        <span class="brand-meta"><span>AI 味检查</span> · <span class="brand-ver">v0.8.3</span></span>
+        <span class="brand-meta"><span>AI slop linter</span> · <span class="brand-ver">v0.8.3</span></span>
       </a>
 
-      <nav class="nav-links" aria-label="主导航">
-        <a href="../../#workbench">工作台</a>
-        <a href="../../#surfaces">接入</a>
-        <a href="../../#cases">案例</a>
-        <a href="../../guides/" aria-current="page">指南</a>
-        <a href="../../rules/">规则</a>
-        <a href="../../awesome/">工具清单</a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../#workbench">Workbench</a>
+        <a href="../../#surfaces">Setup</a>
+        <a href="../../#cases">Cases</a>
+        <a href="../../guides/" aria-current="page">Guides</a>
+        <a href="../../rules/">Rules</a>
+        <a href="../../awesome/">Directory</a>
       </nav>
 
       <div class="top-controls">
-        <a href="../../#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>登录 · 30 免费额度</a>
+        <a href="../../#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>Sign in</a>
         <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label">GitHub ★</span></a>
-        <a href="../../en/guides/remove-ai-slop-writing/" class="ctrl-btn" aria-label="Switch to English">EN</a>
-        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+        <a href="../../zh/guides/remove-ai-slop-writing/" data-lang-switch="zh" class="ctrl-btn" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
       </div>
     </header>
 
     <main id="main-content">
     <section class="section-block">
-      <nav class="breadcrumbs" aria-label="面包屑导航">
-        <a href="../../">dislop</a> / <a href="../">实用指南</a> / <span aria-current="page">写作怎么去 AI 味</span>
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../">dislop</a> / <a href="../">Guides</a> / <span aria-current="page">Remove AI Slop From Writing</span>
       </nav>
 
       <article>
         <header>
-          <h1 class="lead-heading" style="max-width:30ch;">中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话</h1>
+          <h1 class="lead-heading" style="max-width:30ch;">How to Remove AI Slop From Writing Without Triggering Second-Order Clichés</h1>
           <div class="article-meta">
-            <span>写作与改稿</span>
-            <span>更新于 2026-11-23</span>
-            <span>7 分钟阅读</span>
+            <span>Writing &amp; Editing</span>
+            <span>Updated 2026-11-23</span>
+            <span>7 min read</span>
             <a href="./index.md">Markdown</a>
           </div>
           <div class="answer-box">
-            <div class="answer-box-label">先说结论</div>
-            <p>单靠拉黑禁用词会让大模型换上“不是 A，而是 B”、四字排比串、三段分号句和结尾升华金句。把文字写回人话的关键是“删除测试”：每次只动标出来的一小段，只留下有主体、动作、数字或边界的信息。</p>
+            <div class="answer-box-label">In short</div>
+            <p>Banning stock words alone forces LLMs to swap buzzwords for second-order templates like 'Not X, but Y' slogans, three-word staccato chains, and moralizing endings. Replace clichés by running the Deletion Test on flagged spans and re-checking after edits.</p>
           </div>
         </header>
 
         <div class="article-shell">
           <div class="article-prose">
-<p>很多人给 AI 下过一条常见指令：“帮我润色这段话，不要用常见公文黑话，也不要有 AI 味。”结果模型交回来一段字面上看不出敏感词、读起来却像朋友圈海报或发布会演讲稿的文字。</p>
-
-<p>问题出在 <strong>简单禁词表会逼出二阶模板</strong>。Padmakumar &amp; He（ICLR 2024，<a href="https://arxiv.org/abs/2309.05196" target="_blank" rel="noopener">arXiv:2309.05196</a>）和 Doshi &amp; Hauser（<em>Science Advances</em>，2024）的实证研究都说明，经过人类偏好对齐的模型天然倾向于高概率、安全、对称的表达。堵住词面词汇之后，它会立刻退回另一套结构套话。</p>
-
-<h2 id="1-禁词表失效后模型最常换上的-4-种壳">1. 禁词表失效后，模型最常换上的 4 种壳</h2>
-
-<p>对比社区项目 <code>op7418/Humanizer-zh</code>、<code>MrGeDiao/shuorenhua</code> 和 <code>hylarucoder/ai-flavor-remover</code> 总结的中文样本，模型换壳时主要落进下面四类句式：</p>
-
-<div class="table-scroll" tabindex="0"><table><thead><tr><th>问题类型</th><th>表面看着没违规，实际长这样</th><th>为什么还是 AI 味</th></tr></thead><tbody>
-<tr><td><strong>“不是 A，而是 B”反转句</strong></td><td><code>这不是一次架构调整，而是研发效率的跃迁。</code></td><td>否定一个没人质疑的稻草人，再接空洞大词</td></tr>
-<tr><td><strong>四字排比串</strong></td><td><code>具备精准高效、安全可靠、灵活易用的特点。</code></td><td>三个四字形容词凑齐节奏，不交代具体指标</td></tr>
-<tr><td><strong>三段分号推销句</strong></td><td><code>前端校验输入；后端拆进队列；监控追踪超时。</code></td><td>把三个动作绑成工整排比，像广告宣传单</td></tr>
-<tr><td><strong>段尾金句与道德升华</strong></td><td><code>工具只是起点，真正的护城河一直在团队手里。</code></td><td>非要在结尾写一句供人截图的抽象总结</td></tr>
-</tbody></table></div>
-
-<p>另外还有一个中文高频细节：正文里混入英文半角逗号 <code>,</code>、半角括号 <code>()</code> 或一段塞进 5 个以上破折号 <code>——</code>，这通常来自大模型把英文结构直接套进中文。按 <code>GB/T 15834—2011</code> 标点符号规范清理后，页面立刻会清爽很多。</p>
-
-<h2 id="2-怎么用删除测试改回平实人话">2. 怎么用“删除测试”改回平实人话</h2>
-
-<p>参考航空与技术写作规范 <code>ASD-STE100</code> 的原则（一句只说一件事、同一概念不来回换词），我们把改稿拆成四步，每步只动有问题的局部：</p>
-
-<ol>
-<li><strong>先清交付硬伤</strong>：删掉开头的寒暄套话、没填的占位括号和无根据的“研究表明/数据显示”。</li>
-<li><strong>对标出的句子做删除测试</strong>：假设把这半句划掉，读者会少知道哪个事实、动作、人名、时间或边界？</li>
-</ol>
-
-<p>- 如果少不了任何信息，<strong>直接删掉，不要找近义词替换</strong>。 - 如果确实少了关键结果，把抽象词换成具体指标和动作主体。</p>
-
-<ol>
-<li><strong>打破工整排比与固定句首</strong>：如果连续三段都用相同句式开头（例如连续三段“通过……，实现了……”），合并成有因果关系的普通段落；把三段分号句拆成长短交错的平实句子。</li>
-<li><strong>改完再复检一次</strong>：确认没有为了“写得精炼”把旧黑话换成“不是……而是……”或三字短句口号。</li>
-</ol>
-
-<p>看一组实际研发上线文档的改稿过程：</p>
+<p>Ask an LLM to rewrite a draft without stock words like <code>delve</code> or <code>leverage</code>, and it usually drops those tokens right away—then hands back a dramatic slogan instead:</p>
 
 <!-- dislop-quote-start -->
-<pre><code class="language-text">bad:  值得注意的是，本次网关改造以多级熔断为重要抓手，具备安全可靠、精准高效、灵活易用的特性，为高并发业务提供坚实支撑。
-trap: 本次网关改造不是一次简单升级，而是稳定性的底气：安全可靠，高并发无忧。
-good: 本次网关增加了按错误率自动熔断，单节点压测支撑 8,000 QPS，上游超时 2 秒自动降级。</code></pre>
+<pre><code class="language-text">bad:  This isn't just an export script. It's clarity at scale. Fast. Reliable. Unstoppable.</code></pre>
 <!-- dislop-quote-end -->
 
-<figure class="guide-demo" data-demo-card="workbench-live" data-demo-prefix="../../" data-demo-lang="zh" data-demo-ver="v2">
+<p>Empirical studies explain why. Padmakumar &amp; He (ICLR 2024, <a href="https://arxiv.org/abs/2309.05196" target="_blank" rel="noopener">arXiv:2309.05196</a>) and Doshi &amp; Hauser (<em>Science Advances</em>, 2024) showed that RLHF-tuned models compress writing toward high-probability, familiar framing. Blocking surface nouns without changing sentence structure simply displaces the slop one level deeper.</p>
+
+<h2 id="1-where-second-order-slop-hides">1. Where second-order slop hides</h2>
+
+<p>Community skills such as <code>blader/humanizer</code> (71,724 stars) and <code>hardikpandya/stop-slop</code> (19,097 stars), along with <code>WP:AISIGNS</code>, converge on four displacement patterns that appear right after deleting cliché words:</p>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Pattern</th><th>Example that slips past word lists</th><th>What to do instead</th></tr></thead><tbody>
+<tr><td><strong>Negation pivot</strong></td><td><code>&quot;This isn't just a linter — it's delivery confidence.&quot;</code></td><td>Delete the negation setup; state what the tool checks</td></tr>
+<tr><td><strong>Staccato slogan run</strong></td><td><code>&quot;Signals drop. Photos vanish. Audits stall.&quot;</code></td><td>Merge into one plain sentence explaining cause and limit</td></tr>
+<tr><td><strong>3-part semicolon pitch</strong></td><td><code>&quot;Validates on input; queues slow jobs; tracks timeouts.&quot;</code></td><td>Break symmetry into plain clauses with uneven lengths</td></tr>
+<tr><td><strong>Moralizing ending</strong></td><td><code>&quot;Ultimately, tools matter less than the discipline behind them.&quot;</code></td><td>Stop on the final concrete measurement or action</td></tr>
+</tbody></table></div>
+
+<h2 id="2-the-four-step-deletion-test">2. The four-step Deletion Test</h2>
+
+<p>Grounded in plain-writing standards—<code>ASD-STE100</code>, <code>Digital.gov Plain Language</code>, <code>GOV.UK Style Guide</code>, and <code>Google Technical Writing</code>—use this edit loop instead of synonym swapping:</p>
+
+<ol>
+<li><strong>Strip hard leftovers first</strong>: Remove chat greetings, unfilled <code>[TODO]</code> brackets, and unverified claims such as <code>&quot;studies show&quot;</code> without a source.</li>
+<li><strong>Run the Deletion Test on flagged spans</strong>: Ask what concrete actor, mechanism, number, or boundary disappears if the flagged phrase is deleted.</li>
+</ol>
+
+<p>- If nothing disappears, delete the span completely. - If a real claim disappears, replace the abstract adjective with the measured fact.</p>
+
+<ol>
+<li><strong>Vary paragraph openings and sentence length</strong>: If three paragraphs in a row open with the same gerund skeleton (<code>&quot;By standardizing...&quot;</code>, <code>&quot;By automating...&quot;</code>, <code>&quot;By surfacing...&quot;</code>), collapse them into direct active statements.</li>
+<li><strong>Re-check after editing</strong>: Run <code>dislop check</code> again to make sure your cleanup didn't introduce a negation pivot or staccato slogan.</li>
+</ol>
+
+<p>Here is a real edit cycle on a field-sync note:</p>
+
+<!-- dislop-quote-start -->
+<pre><code class="language-text">bad:  Signals drop. Photos vanish. Audits stall. It is worth noting that offline sync is a game-changer that unlocks seamless resilience for 120 inspection photos.
+trap: Offline sync isn't a fallback — it's field resilience for 120 photos.
+good: When cellular coverage drops in basement vaults, offline sync queues up to 120 inspection photos locally until reconnection.</code></pre>
+<!-- dislop-quote-end -->
+
+<figure class="guide-demo" data-demo-card="workbench-live" data-demo-prefix="../../" data-demo-lang="en" data-demo-ver="v2">
           <div class="demo-media">
-            <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcset="../../assets/demos/workbench-live-zh-v2-poster.png" data-demo-poster="workbench-live">
-              <source type="image/webp" srcset="../../assets/demos/workbench-live-zh-v2.webp" data-demo-webp="workbench-live">
-              <img src="../../assets/demos/workbench-live-zh-v2.gif" alt="dislop 浏览器工作台离线对照：依次切换原稿、二阶 AI 腔与改干净版本，实时对齐右侧批注" width="1140" height="640" loading="lazy" decoding="async" data-demo-gif="workbench-live">
-            </picture>
+            <button type="button" class="demo-media-surface" data-demo-toggle="workbench-live" aria-pressed="false" aria-label="Pause animation">
+              <picture>
+                <source media="(prefers-reduced-motion: reduce)" srcset="../../assets/demos/workbench-live-en-v2-poster.png" data-demo-poster="workbench-live">
+                <source type="image/webp" srcset="../../assets/demos/workbench-live-en-v2.webp" data-demo-webp="workbench-live">
+                <img src="../../assets/demos/workbench-live-en-v2.gif" alt="dislop browser workbench checking draft, 2nd-order slop trap, and clean version with 5-axis telemetry" width="1140" height="640" loading="lazy" decoding="async" data-demo-gif="workbench-live">
+              </picture>
+            </button>
           </div>
           <figcaption class="demo-caption">
             <div class="demo-cap-head">
-              <strong class="demo-cap-title">3. 浏览器离线工作台：真机操作实录</strong>
-              <span class="demo-cap-badge">真机实录 · 6.8s</span>
+              <strong class="demo-cap-title">Browser workbench: local check with zero uploads</strong>
             </div>
-            <span class="demo-cap-desc">就是本页上方的工作台。贴稿子、点切规则包、实时对齐右侧行号批注与 5 轴体检，全程在当前标签页完成。</span>
-            <div class="demo-card-actions">
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="workbench-live" aria-pressed="false">定格</button>
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="workbench-live">放大看</button>
-            </div>
+            <span class="demo-cap-desc">Paste a draft on dislop.com to inspect inline marks and margin notes directly in your browser tab.</span>
           </figcaption>
         </figure>
 
-<h2 id="3-长文写作不靠后改靠先换骨架">3. 长文写作不靠后改，靠先换骨架</h2>
+<h2 id="3-better-structures-before-you-draft">3. Better structures before you draft</h2>
 
-<p>除了事后用检查工具把关，动笔前就可以避免所有稿子长成一个模板。Zhang 等人（2025，<a href="https://arxiv.org/abs/2510.01171" target="_blank" rel="noopener">arXiv:2510.01171</a>）提出的 Verbalized Sampling 思路，本质上是打破单一“最像答案”的起手式。写中文工作文稿或随笔时，可以根据文体挑四种具体骨架，而不用默认“背景—意义—优势—展望”四件套：</p>
+<p>If you draft with an agent, pick an explicit structural skeleton upfront instead of letting the model default to <em>&quot;Background -&gt; Benefits -&gt; Conclusion.&quot;</em> Inspired by Verbalized Sampling (<a href="https://arxiv.org/abs/2510.01171" target="_blank" rel="noopener">arXiv:2510.01171</a>), four compact shapes cover most engineering and business writing:</p>
 
-<div class="table-scroll" tabindex="0"><table><thead><tr><th>骨架名称</th><th>行文顺序</th></tr></thead><tbody>
-<tr><td>决策记录</td><td>一句话结论 → 实测样本与指标 → 已知限制 → 下一步负责人与时间</td></tr>
-<tr><td>排障复盘</td><td>异常现象 → 当初误判的原因 → 真实根因 → 改了哪行配置或代码</td></tr>
-<tr><td>产品/技术说明</td><td>能做什么与支持格式 → 明确不做什么 → 常见报错与退出码 → 最小可运行命令</td></tr>
-<tr><td>随笔/现场笔记</td><td>具体时间、地点和实物细节 → 当事人原话或观察 → 停在最后一个具体画面上</td></tr>
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Skeleton</th><th>Sequence</th></tr></thead><tbody>
+<tr><td>Decision Ledger</td><td>1-sentence decision → sample size &amp; metrics → known limitation → owner &amp; date</td></tr>
+<tr><td>Mechanism Teardown</td><td>observed anomaly → wrong initial guess → underlying cause → bounded fix</td></tr>
+<tr><td>Technical Spec</td><td>capability table → explicit non-goals → failure modes &amp; exit codes → minimal command</td></tr>
+<tr><td>Field Note</td><td>time, place, and physical detail → direct quote or observation → stop on the last concrete detail</td></tr>
 </tbody></table></div>
 
-<p>如果想把整套中文规则直接跑在自己手头的 Markdown 或 Word 上，在终端运行：</p>
+<p>Run deterministic prose and cadence checks locally before publishing:</p>
 
-<pre><code class="language-bash">npx --yes dislop check draft.md --pack business-brief --lang zh</code></pre>
-<h2 id="faq">常见问题</h2>
+<pre><code class="language-bash">npx --yes dislop check draft.md --pack business-brief</code></pre>
+<h2 id="faq">Frequently asked questions</h2>
         <div class="faq-list">
           <div class="faq-item">
-            <h3>为什么用“不要用 AI 味词汇”提示词，改出来还是有股味？</h3>
-            <p>因为大模型习惯在字数和修辞强度上做补偿：一旦你禁止它写抽象黑话，它就会改写成对称反转口号或三个四字词排比，继续维持浮夸语气。</p>
+            <h3>Why does telling an LLM 'avoid AI clichés' still produce synthetic prose?</h3>
+            <p>Post-trained models compensate for banned adjectives by switching to dramatic contrast frames (<code>Not just X — it's Y</code>), short staccato three-word bursts, or neat 3-part semicolon sentences.</p>
           </div>
           <div class="faq-item">
-            <h3>技术文档和周报里的“不是……而是……”一定不能用吗？</h3>
-            <p>不是。如果是在纠偏真实事实（例如“报错不在网关，而在配置 <code>loader.py</code> 第 42 行”），这是正常陈述；只有先立一个虚稻草人再拔高抽象名词时（比如把工具拔高成某种空洞概念），才属于 AI 套句。</p>
+            <h3>Does dislop flag legitimate factual contrasts like 'The bug is not in parser.py, but in loader.py'?</h3>
+            <p>No. Specific file, number, and mechanism corrections are preserved. The rule targets strawman negation pivots that contrast an empty label with an abstract noun ('Not just a tool — peace of mind').</p>
           </div>
           <div class="faq-item">
-            <h3>中文标点混用半角符号也算 AI 味吗？</h3>
-            <p>很多大模型训练语料混杂机翻文本，经常在中文句子里夹半角逗号、括号或过多破折号。对照国标 GB/T 15834—2011 统一改成全角中文标点并控制破折号数量，可读性会明显提升。</p>
+            <h3>Do flat banned-word lists cause false positives on technical terms?</h3>
+            <p>Yes. Naive word lists routinely flag real nouns such as Delve (the Go debugger), wool tapestry, or legitimate domain terms. Context-aware rules keep literal nouns intact.</p>
           </div>
         </div>
-<h2 id="related-rules">对应的自动检查规则</h2>
+<h2 id="related-rules">Matching deterministic rules</h2>
 <div class="related-strip">
-<a class="related-link-chip" href="../../rules/zh-bureaucratic-padding/"><code>zh-bureaucratic-padding</code> · 公文黑话与空泛词</a>
-<a class="related-link-chip" href="../../rules/negation-pivot-frame/"><code>negation-pivot-frame</code> · “不是 A，而是 B”套句</a>
-<a class="related-link-chip" href="../../rules/zh-four-char-triad/"><code>zh-four-char-triad</code> · 四字排比串</a>
-<a class="related-link-chip" href="../../rules/semicolon-tricolon/"><code>semicolon-tricolon</code> · 三段对称分号推销句</a>
-<a class="related-link-chip" href="../../rules/zh-essay-moralizing-ending/"><code>zh-essay-moralizing-ending</code> · 段尾说教式升华</a>
-<a class="related-link-chip" href="../../rules/zh-halfwidth-punctuation/"><code>zh-halfwidth-punctuation</code> · 中文里混了半角标点</a>
+<a class="related-link-chip" href="../../rules/en-cliche-lexicon/"><code>en-cliche-lexicon</code> · Stock AI buzzword</a>
+<a class="related-link-chip" href="../../rules/en-throat-clearing-opener/"><code>en-throat-clearing-opener</code> · Throat-clearing opener</a>
+<a class="related-link-chip" href="../../rules/negation-pivot-frame/"><code>negation-pivot-frame</code> · &quot;Not X, but Y&quot; slogan frame</a>
+<a class="related-link-chip" href="../../rules/staccato-slogan-run/"><code>staccato-slogan-run</code> · Staccato slogan chain</a>
+<a class="related-link-chip" href="../../rules/semicolon-tricolon/"><code>semicolon-tricolon</code> · Three-part balanced semicolon pitch</a>
+<a class="related-link-chip" href="../../rules/en-essay-moralizing-ending/"><code>en-essay-moralizing-ending</code> · Moralizing ending</a>
 </div>
-<h2 id="next-guides">延伸阅读</h2>
+<h2 id="next-guides">Next guides</h2>
 <div class="related-strip">
-<a class="related-link-chip" href="../what-is-ai-slop/">什么是 AI 味</a>
-<a class="related-link-chip" href="../deslop-pptx-docx/">PPT 与 Word 去模板味</a>
-<a class="related-link-chip" href="../linter-vs-detector-vs-skill/">去 AI 味工具对比</a>
+<a class="related-link-chip" href="../what-is-ai-slop/">What Is AI Slop?</a>
+<a class="related-link-chip" href="../deslop-pptx-docx/">Clean Up PPTX &amp; DOCX</a>
+<a class="related-link-chip" href="../linter-vs-detector-vs-skill/">Linter vs. Detector vs. Skill</a>
 </div>
-<h2 id="sources">参考与一手出处</h2>
+<h2 id="sources">Verified references</h2>
         <ul>
           <li><a href="https://arxiv.org/abs/2309.05196" target="_blank" rel="noopener">Does Writing with Language Models Reduce Content Diversity? (ICLR 2024)</a> — Feedback-tuned models (RLHF) reduce collective lexical and content diversity compared with unaided human writing.</li>
           <li><a href="https://doi.org/10.1126/sciadv.adn5290" target="_blank" rel="noopener">Generative artificial intelligence enhances creativity but reduces the diversity of novel content (Science Advances 2024)</a> — Controlled short-story experiments showed AI ideas improved individual ratings while making stories across writers significantly more similar to one another.</li>
           <li><a href="https://arxiv.org/abs/2510.01171" target="_blank" rel="noopener">Verbalized Sampling: How to Mitigate Mode Collapse and Unlock LLM Diversity</a> — Prompting models to verbalize a distribution of candidate outputs mitigates RLHF typicality bias without retraining.</li>
+          <li><a href="https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing" target="_blank" rel="noopener">Wikipedia: Signs of AI writing (WP:AISIGNS)</a> — WikiProject AI Cleanup's living taxonomy of AI prose defects: inflated significance, stock vocabulary, rule-of-three lists, negative parallelisms, chatbot wrappers, and formatting artifacts.</li>
           <li><a href="https://www.asd-ste100.org/" target="_blank" rel="noopener">ASD-STE100 Simplified Technical English Specification</a> — Aerospace and technical documentation specification enforcing short active sentences, one instruction per sentence, and consistent naming for the same concept.</li>
-          <li><a href="https://github.com/op7418/Humanizer-zh" target="_blank" rel="noopener">op7418/Humanizer-zh: 中文去 AI 味写作技能</a> — 23,450 星标（2026-11-21 快照）；针对中文写作里的套话、公文腔与翻译腔整理对照清单，适合作为写作前提示参考。</li>
-          <li><a href="https://github.com/MrGeDiao/shuorenhua" target="_blank" rel="noopener">MrGeDiao/shuorenhua: 中文“说人话”去黑话提示规范</a> — 2,726 星标（2026-11-21 快照）；拆解互联网汇报与技术文档里的“抓手”“赋能”“闭环”等黑话，改回直白人话。</li>
-          <li><a href="https://github.com/hylarucoder/ai-flavor-remover" target="_blank" rel="noopener">hylarucoder/ai-flavor-remover: 中文长文与文档去 AI 味规则集</a> — 1,208 星标（2026-11-21 快照）；按中文常见长文结构归纳套路开头、自问自答和道德升华结尾。</li>
-          <li><a href="https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7569AD3A7E05397BE0A0AB82A" target="_blank" rel="noopener">GB/T 15834—2011 标点符号用法（国家标准全文公开系统）</a> — 规定中文正文应使用全角中文标点、控制感叹号与破折号使用边界，为中文文档排查半角标点混用和破折号过密提供客观依据。</li>
+          <li><a href="https://digital.gov/guides/plain-language/" target="_blank" rel="noopener">Digital.gov Plain Language Guide (formerly PlainLanguage.gov)</a> — Federal plain-writing rules: front-load key conclusions, use active voice, replace hidden verbs and filler openings with concrete actors and actions.</li>
+          <li><a href="https://www.gov.uk/guidance/style-guide" target="_blank" rel="noopener">GOV.UK Content and Style Guide</a> — Bans empty corporate padding and buzzwords ('deliver', 'key', 'going forward') in favor of direct user-facing verbs and verifiable dates/numbers.</li>
+          <li><a href="https://developers.google.com/tech-writing" target="_blank" rel="noopener">Google Technical Writing Courses</a> — Engineering writing guidance prioritizing short sentences, clear actors, explicit scope boundaries, and lists/tables over wall-of-text paragraphs.</li>
+          <li><a href="https://github.com/blader/humanizer" target="_blank" rel="noopener">blader/humanizer (Agent Skill based on WP:AISIGNS)</a> — 71,724 stars (2026-11-21 snapshot); translates Wikipedia's Signs of AI Writing into an agent editing skill with voice sample calibration.</li>
+          <li><a href="https://github.com/hardikpandya/stop-slop" target="_blank" rel="noopener">hardikpandya/stop-slop</a> — 19,097 stars (2026-11-21 snapshot); separates banned phrases, structural patterns, and before/after examples with a five-axis rubric.</li>
         </ul>
 <div class="share-action-bar">
-          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../?lang=zh#workbench">去工作台试查 →</a>
-          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">复制引用（PR / 群聊）</button><code id="share-cite-payload" hidden>[中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话](https://dislop.com/guides/remove-ai-slop-writing/) — 为什么只禁“抓手”“赋能”会把文章改成“不是 A，而是 B”反转腔，以及如何用四步删除测试写出干净的中文工作文档与长文。</code>
-          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">投稿翻车样本</a>
-          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub 收藏 ★</a>
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../#workbench">Try in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[How to Remove AI Slop From Writing Without Triggering Second-Order Clichés](https://dislop.com/guides/remove-ai-slop-writing/) — Why flat banned-word lists push LLMs into 'Not X, but Y' slogans and staccato chains, and how to use the four-step Deletion Test instead.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
         </div>
           </div>
-        <aside class="toc-rail" aria-label="本文目录">
-          <h2 class="toc-rail-title">本文目录</h2>
+        <aside class="toc-rail" aria-label="On this page">
+          <h2 class="toc-rail-title">On this page</h2>
           <ol>
-            <li><a href="#1-禁词表失效后模型最常换上的-4-种壳">1. 禁词表失效后，模型最常换上的 4 种壳</a></li>
-            <li><a href="#2-怎么用删除测试改回平实人话">2. 怎么用“删除测试”改回平实人话</a></li>
-            <li><a href="#3-长文写作不靠后改靠先换骨架">3. 长文写作不靠后改，靠先换骨架</a></li>
+            <li><a href="#1-where-second-order-slop-hides">1. Where second-order slop hides</a></li>
+            <li><a href="#2-the-four-step-deletion-test">2. The four-step Deletion Test</a></li>
+            <li><a href="#3-better-structures-before-you-draft">3. Better structures before you draft</a></li>
           </ol>
         </aside>
         </div>
@@ -310,26 +314,26 @@ good: 本次网关增加了按错误率自动熔断，单节点压测支撑 8,00
     <footer class="colophon">
       <div class="colophon-note">
         <a class="colophon-brand" href="../../"><img src="../../assets/logo.svg" width="20" height="20" alt="">dislop</a>
-        <span>这个页面自己也跑过 dislop check site/，0 处问题。</span>
-        <span>给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
+        <span>This site passes dislop check site/ with 0 issues.</span>
+        <span>For agents, start at <a href="../../llms.txt">/llms.txt</a>.</span>
       </div>
-      <nav class="colophon-groups" aria-label="页脚导航">
+      <nav class="colophon-groups" aria-label="Footer">
         <div class="colophon-group">
-          <span class="colophon-group-title">资料</span>
-          <a href="../../guides/">实用指南</a>
-          <a href="../../rules/">全部规则</a>
-          <a href="../../awesome/">工具清单</a>
+          <span class="colophon-group-title">Resources</span>
+          <a href="../../guides/">Guides</a>
+          <a href="../../rules/">All rules</a>
+          <a href="../../awesome/">Awesome list</a>
           <a href="../../llms.txt">llms.txt</a>
         </div>
         <div class="colophon-group">
-          <span class="colophon-group-title">项目</span>
-          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener">路线图</a>
-          <a href="../../methodology/brand-and-voice.md">文案基准</a>
-          <a href="../../methodology/design-system.md">视觉规范</a>
-          <a href="../../privacy.md">隐私与数据边界</a>
+          <span class="colophon-group-title">Project</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.md" target="_blank" rel="noopener">Roadmap</a>
+          <a href="../../methodology/brand-and-voice.md">Voice guide</a>
+          <a href="../../methodology/design-system.md">Design tokens</a>
+          <a href="../../privacy.md">Privacy</a>
         </div>
         <div class="colophon-group">
-          <span class="colophon-group-title">外部链接</span>
+          <span class="colophon-group-title">Elsewhere</span>
           <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
           <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
           <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
@@ -338,15 +342,6 @@ good: 本次网关增加了按错误率自动熔断，单节点压测支撑 8,00
       </nav>
     </footer>
   </div>
-  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
-    <div class="demo-lightbox-head">
-      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
-      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">关闭</button>
-    </div>
-    <div class="demo-lightbox-body">
-      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
-    </div>
-  </dialog>
   <script defer src="../../static-ui.js"></script>
 
 </body>

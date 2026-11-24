@@ -66,7 +66,7 @@ git fetch origin && git merge --ff-only origin/main
 
 - **官网与云端同号（`dislop.com`）**：`scripts/build_site.mjs` 同源生成 `site/`、`/llms.txt`、`/catalog.json`、`/robots.txt` 与 `/sitemap.xml`；闭源云端同步脚本 `sync_core.mjs` 在复制 `src/core.mjs` 与 `packs/` 时会自动把云端 `package.json` 版本号对齐到 `ENGINE_VERSION`，确保 `https://dislop.com/api/health` 与静态站永不分叉。
 - **GitHub 简介、组织主页与看板**：当包数、规则数、模式数或工具数变化时，除了仓库内的 `README*.md`、`ROADMAP*.md` 与 `docs/architecture*.md`（漏改会被 `release:check` 直接拦下），顺手更新仓库简介与 `dislop-ai/.github/profile/README.md`（推送前跑 `dislop check --fail-on info`）。日常任务状态只维护在 GitHub Issues，发版收口时再统一勾选 `ROADMAP*.md` 并关闭到期 Milestone。
-- **官方号（`@dislop_ai`）按价值发声**：不要接死板的“每次打 Tag 自动发推”机器人。补丁修修补补一律静默；只有当新版本带来直观的前后改稿对比、新文件格式支持或基准实测突破时，再由 Agent 按 [文案、表达与视觉基准](./brand-and-voice-guide.zh-CN.md) 拟稿（首句落具体原文或数字，主帖 240 字内不放外链并配对比图卡，1 楼放安装命令与链接，全文过 `dislop check - --fail-on info`），检查发帖间隔后经受控入口发布。
+- **官方号（`@dislop_ai`）保持纯英文按价值发声**：不要接死板的“每次打 Tag 自动发推”机器人。`@dislop_ai` 固定为 100% 纯英文账号（不混发中文帖）；补丁修修补补一律静默，只有当新版本带来直观的前后改稿对比、新文件格式支持或基准实测突破时，再由 Agent 按 [Voice, Copy, and Visual Guide](./brand-and-voice-guide.md) 拟英文稿（首句落具体原文或数字，主帖 240 字符内不放外链并配对比图卡，1 楼放安装命令与 `https://dislop.com/`，全文过 `dislop check - --fail-on info`），检查发帖间隔后经受控入口发布。
 
 ---
 

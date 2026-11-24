@@ -257,8 +257,8 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 5309,
-      "approxTokens": 1327,
+      "bytes": 7451,
+      "approxTokens": 1863,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -266,7 +266,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "1cee84e329e32605df2599751837fd6cf0ecaac505eb657ec9a2ba7606fe83bd"
+      "sha256": "b0bdefa1bcea4d10e5ba534459b768f927f59d94d659c144ab3492d5febae70f"
     },
     {
       "id": "methodology-brand-voice",
@@ -297,13 +297,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 10556,
-      "approxTokens": 2639,
+      "bytes": 10175,
+      "approxTokens": 2544,
       "relatedTools": [
         "browser-workbench",
         "cli"
       ],
-      "sha256": "611d2483823ea13a6cf1af016c67bad8a89e0bd778e88f64f76352461824d47e"
+      "sha256": "77a66b3955d87e91fc2d868c48c7b9c61d99b6c4f485120f337a22405da4f258"
     },
     {
       "id": "methodology-design-system",
@@ -3012,37 +3012,6 @@
       "sha256": "06fff3bcea1415be2192d5e53f242a27fd042842519448f85a441075847c4d2f"
     },
     {
-      "id": "guide-agent-cli-mcp-tutorial-zh",
-      "pillar": "methodology",
-      "kind": "guide",
-      "title": {
-        "en": "Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions",
-        "zh": "把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程"
-      },
-      "path": "/guides/agent-cli-mcp-tutorial/index.md",
-      "modalities": [
-        "markdown",
-        "text",
-        "html",
-        "docx",
-        "pptx"
-      ],
-      "languages": [
-        "zh"
-      ],
-      "packs": [
-        "core"
-      ],
-      "bytes": 6165,
-      "approxTokens": 1541,
-      "relatedTools": [
-        "cli",
-        "skill",
-        "mcp"
-      ],
-      "sha256": "1833059c24b40ceba0a21f5450d536d956660f6a27f03a198cdae68cc4132640"
-    },
-    {
       "id": "guide-agent-cli-mcp-tutorial-en",
       "pillar": "methodology",
       "kind": "guide",
@@ -3050,7 +3019,7 @@
         "en": "Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions",
         "zh": "把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程"
       },
-      "path": "/en/guides/agent-cli-mcp-tutorial/index.md",
+      "path": "/guides/agent-cli-mcp-tutorial/index.md",
       "modalities": [
         "markdown",
         "text",
@@ -3074,14 +3043,14 @@
       "sha256": "59f573d10b943a44815b0cf8e9f885d5af548c188e97c4116741ccd6650325d0"
     },
     {
-      "id": "guide-deslop-pptx-docx-zh",
+      "id": "guide-agent-cli-mcp-tutorial-zh",
       "pillar": "methodology",
       "kind": "guide",
       "title": {
-        "en": "Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)",
-        "zh": "AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程"
+        "en": "Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions",
+        "zh": "把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程"
       },
-      "path": "/guides/deslop-pptx-docx/index.md",
+      "path": "/zh/guides/agent-cli-mcp-tutorial/index.md",
       "modalities": [
         "markdown",
         "text",
@@ -3095,14 +3064,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 7069,
-      "approxTokens": 1767,
+      "bytes": 6165,
+      "approxTokens": 1541,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "72ceefd8ce005fde21b0f8b11898898afece034a443cfaec57040632aedfd7fa"
+      "sha256": "1833059c24b40ceba0a21f5450d536d956660f6a27f03a198cdae68cc4132640"
     },
     {
       "id": "guide-deslop-pptx-docx-en",
@@ -3112,7 +3081,7 @@
         "en": "Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)",
         "zh": "AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程"
       },
-      "path": "/en/guides/deslop-pptx-docx/index.md",
+      "path": "/guides/deslop-pptx-docx/index.md",
       "modalities": [
         "markdown",
         "text",
@@ -3136,14 +3105,14 @@
       "sha256": "4d25fcc75ab92a6e833eba7f33f4380effee7bfb3c729cb7739dde3defe9086f"
     },
     {
-      "id": "guide-fix-ai-slop-web-ui-zh",
+      "id": "guide-deslop-pptx-docx-zh",
       "pillar": "methodology",
       "kind": "guide",
       "title": {
-        "en": "Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons",
-        "zh": "Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮"
+        "en": "Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)",
+        "zh": "AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程"
       },
-      "path": "/guides/fix-ai-slop-web-ui/index.md",
+      "path": "/zh/guides/deslop-pptx-docx/index.md",
       "modalities": [
         "markdown",
         "text",
@@ -3157,14 +3126,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 6562,
-      "approxTokens": 1641,
+      "bytes": 7069,
+      "approxTokens": 1767,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "63236ab1e7d467ce0115dc00c327f7cea59fc76ccc7468b4a3be7ecf7cfe12c0"
+      "sha256": "72ceefd8ce005fde21b0f8b11898898afece034a443cfaec57040632aedfd7fa"
     },
     {
       "id": "guide-fix-ai-slop-web-ui-en",
@@ -3174,7 +3143,7 @@
         "en": "Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons",
         "zh": "Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮"
       },
-      "path": "/en/guides/fix-ai-slop-web-ui/index.md",
+      "path": "/guides/fix-ai-slop-web-ui/index.md",
       "modalities": [
         "markdown",
         "text",
@@ -3198,7 +3167,38 @@
       "sha256": "83e87c66f435ab1df93ce43b297b99cfaa29fe9142178dd76c643f6af030a643"
     },
     {
-      "id": "guide-linter-vs-detector-vs-skill-zh",
+      "id": "guide-fix-ai-slop-web-ui-zh",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons",
+        "zh": "Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮"
+      },
+      "path": "/zh/guides/fix-ai-slop-web-ui/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 6562,
+      "approxTokens": 1641,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "63236ab1e7d467ce0115dc00c327f7cea59fc76ccc7468b4a3be7ecf7cfe12c0"
+    },
+    {
+      "id": "guide-linter-vs-detector-vs-skill-en",
       "pillar": "methodology",
       "kind": "guide",
       "title": {
@@ -3214,60 +3214,29 @@
         "pptx"
       ],
       "languages": [
-        "zh"
+        "en"
       ],
       "packs": [
         "core"
       ],
-      "bytes": 6767,
-      "approxTokens": 1692,
+      "bytes": 6109,
+      "approxTokens": 1527,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "121eadff60f69b94d0d26e609d44620d14471b7f3aa8197b61766e9b012990d4"
+      "sha256": "ca8bfdf9a1a862f3441fefa973aa50d264fd3f0358ea72f8be66b00e516ccaeb"
     },
     {
-      "id": "guide-linter-vs-detector-vs-skill-en",
+      "id": "guide-linter-vs-detector-vs-skill-zh",
       "pillar": "methodology",
       "kind": "guide",
       "title": {
         "en": "AI Slop Linter vs. AI Detectors vs. Prompt Skills: How to Choose in 2026",
         "zh": "去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比"
       },
-      "path": "/en/guides/linter-vs-detector-vs-skill/index.md",
-      "modalities": [
-        "markdown",
-        "text",
-        "html",
-        "docx",
-        "pptx"
-      ],
-      "languages": [
-        "en"
-      ],
-      "packs": [
-        "core"
-      ],
-      "bytes": 6118,
-      "approxTokens": 1530,
-      "relatedTools": [
-        "cli",
-        "skill",
-        "mcp"
-      ],
-      "sha256": "cc6ee7c62242804c969eaaa74cebf53823e70b4d447e3d88893da69b4fdc0654"
-    },
-    {
-      "id": "guide-remove-ai-slop-writing-zh",
-      "pillar": "methodology",
-      "kind": "guide",
-      "title": {
-        "en": "How to Remove AI Slop From Writing Without Triggering Second-Order Clichés",
-        "zh": "中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话"
-      },
-      "path": "/guides/remove-ai-slop-writing/index.md",
+      "path": "/zh/guides/linter-vs-detector-vs-skill/index.md",
       "modalities": [
         "markdown",
         "text",
@@ -3281,14 +3250,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 8226,
-      "approxTokens": 2057,
+      "bytes": 6773,
+      "approxTokens": 1693,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "cf7e17bc758acf16688071924e2a0464a7656ee98d5f138b0591c5dfb4c72773"
+      "sha256": "b6dc4bed3ced40a1852c035f9a19b8bfdb851621a69d08df94c2e2edaf7b797e"
     },
     {
       "id": "guide-remove-ai-slop-writing-en",
@@ -3298,7 +3267,7 @@
         "en": "How to Remove AI Slop From Writing Without Triggering Second-Order Clichés",
         "zh": "中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话"
       },
-      "path": "/en/guides/remove-ai-slop-writing/index.md",
+      "path": "/guides/remove-ai-slop-writing/index.md",
       "modalities": [
         "markdown",
         "text",
@@ -3322,14 +3291,14 @@
       "sha256": "dcdfde69f37cf69a9ec9b70d1bcfa9dc334c29f3043a75c704729a3bfa5afc1e"
     },
     {
-      "id": "guide-what-is-ai-slop-zh",
+      "id": "guide-remove-ai-slop-writing-zh",
       "pillar": "methodology",
       "kind": "guide",
       "title": {
-        "en": "What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks",
-        "zh": "什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱"
+        "en": "How to Remove AI Slop From Writing Without Triggering Second-Order Clichés",
+        "zh": "中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话"
       },
-      "path": "/guides/what-is-ai-slop/index.md",
+      "path": "/zh/guides/remove-ai-slop-writing/index.md",
       "modalities": [
         "markdown",
         "text",
@@ -3343,14 +3312,14 @@
       "packs": [
         "core"
       ],
-      "bytes": 7656,
-      "approxTokens": 1914,
+      "bytes": 8226,
+      "approxTokens": 2057,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "0143647150fe8ff3310c1034a36ebaf99428eb74c1b9f722c0e5e0bfaec0ad69"
+      "sha256": "cf7e17bc758acf16688071924e2a0464a7656ee98d5f138b0591c5dfb4c72773"
     },
     {
       "id": "guide-what-is-ai-slop-en",
@@ -3360,7 +3329,7 @@
         "en": "What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks",
         "zh": "什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱"
       },
-      "path": "/en/guides/what-is-ai-slop/index.md",
+      "path": "/guides/what-is-ai-slop/index.md",
       "modalities": [
         "markdown",
         "text",
@@ -3382,6 +3351,37 @@
         "mcp"
       ],
       "sha256": "0c1efdaa89149a25ef47d7f71b860a9b68549adcbdaa2b96c470ba1c7fb90a05"
+    },
+    {
+      "id": "guide-what-is-ai-slop-zh",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks",
+        "zh": "什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱"
+      },
+      "path": "/zh/guides/what-is-ai-slop/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 7656,
+      "approxTokens": 1914,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "0143647150fe8ff3310c1034a36ebaf99428eb74c1b9f722c0e5e0bfaec0ad69"
     },
     {
       "id": "roadmap-en",
@@ -3415,15 +3415,15 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 14638,
-      "approxTokens": 3660,
+      "bytes": 14689,
+      "approxTokens": 3672,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp",
         "skill"
       ],
-      "sha256": "67b73d47a001721e357a5f4127ae6aecc757d787240dee5d64f03f16dce6f2c1"
+      "sha256": "a8214c59b60cd8449e8747aa2eb8ab232cf0343c14350289b8605f81f8ad8a0a"
     }
   ]
 }

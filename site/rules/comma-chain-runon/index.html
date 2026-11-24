@@ -1,30 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-static-lang="zh">
+<html lang="en" data-static-lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>五连逗号一逗到底长句 (comma-chain-runon) — dislop</title>
-  <meta name="description" content="五连逗号一逗到底长句: 单句内连续串接 5 个及以上逗号分句，节奏平铺拖沓。">
+  <title>Five-comma run-on chain (comma-chain-runon) — dislop</title>
+  <meta name="description" content="Five-comma run-on chain: Single sentence chains 5+ comma clauses in breathless LLM cadence.">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="dislop">
   <meta property="og:url" content="https://dislop.com/rules/comma-chain-runon/">
-  <meta property="og:title" content="五连逗号一逗到底长句 (comma-chain-runon) — dislop">
-  <meta property="og:description" content="五连逗号一逗到底长句: 单句内连续串接 5 个及以上逗号分句，节奏平铺拖沓。">
-  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:title" content="Five-comma run-on chain (comma-chain-runon) — dislop">
+  <meta property="og:description" content="Five-comma run-on chain: Single sentence chains 5+ comma clauses in breathless LLM cadence.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@dislop_ai">
   <meta name="twitter:creator" content="@dislop_ai">
-  <meta name="twitter:title" content="五连逗号一逗到底长句 (comma-chain-runon) — dislop">
-  <meta name="twitter:description" content="五连逗号一逗到底长句: 单句内连续串接 5 个及以上逗号分句，节奏平铺拖沓。">
-  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta name="twitter:title" content="Five-comma run-on chain (comma-chain-runon) — dislop">
+  <meta name="twitter:description" content="Five-comma run-on chain: Single sentence chains 5+ comma clauses in breathless LLM cadence.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
   <link rel="canonical" href="https://dislop.com/rules/comma-chain-runon/">
-  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/comma-chain-runon/">
-  <link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/comma-chain-runon/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/rules/comma-chain-runon/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/comma-chain-runon/">
   <link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/comma-chain-runon/">
-  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop 实用指南（中文）">
+  <script src="../../lang-init.js"></script>
+  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop Guides (EN)">
   <link rel="alternate" type="text/markdown" href="../../rules/comma-chain-runon.md" title="Markdown Mirror">
   <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
   <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
@@ -37,9 +38,9 @@
       "@type": "TechArticle",
       "@id": "https://dislop.com/rules/comma-chain-runon/",
       "url": "https://dislop.com/rules/comma-chain-runon/",
-      "headline": "五连逗号一逗到底长句 (comma-chain-runon)",
-      "description": "拆成 2 到 3 句主干清晰的短句，顺手删掉凑排比的空分句。",
-      "inLanguage": "zh-CN",
+      "headline": "Five-comma run-on chain (comma-chain-runon)",
+      "description": "Split into 2–3 shorter sentences with a clear main verb in each, and drop redundant parallel clauses.",
+      "inLanguage": "en",
       "dateModified": "2026-11-23",
       "author": {
         "@type": "Organization",
@@ -59,7 +60,7 @@
         {
           "@type": "ListItem",
           "position": 2,
-          "name": "规则百科",
+          "name": "Rules",
           "item": "https://dislop.com/rules/"
         },
         {
@@ -75,97 +76,97 @@
   </script>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">跳至正文</a>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="rail-shell">
     <header class="topbar band-rule">
       <a class="brand-lockup" href="../../">
         <img src="../../assets/logo.svg" width="30" height="30" alt="">
         <span class="brand-wordmark">dislop</span>
-        <span class="brand-meta"><span>AI 味检查</span> · <span class="brand-ver">v0.8.3</span></span>
+        <span class="brand-meta"><span>AI slop linter</span> · <span class="brand-ver">v0.8.3</span></span>
       </a>
 
-      <nav class="nav-links" aria-label="主导航">
-        <a href="../../#workbench">工作台</a>
-        <a href="../../#surfaces">接入</a>
-        <a href="../../#cases">案例</a>
-        <a href="../../guides/">指南</a>
-        <a href="../../rules/" aria-current="page">规则</a>
-        <a href="../../awesome/">工具清单</a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../#workbench">Workbench</a>
+        <a href="../../#surfaces">Setup</a>
+        <a href="../../#cases">Cases</a>
+        <a href="../../guides/">Guides</a>
+        <a href="../../rules/" aria-current="page">Rules</a>
+        <a href="../../awesome/">Directory</a>
       </nav>
 
       <div class="top-controls">
-        <a href="../../#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>登录 · 30 免费额度</a>
+        <a href="../../#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>Sign in</a>
         <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label">GitHub ★</span></a>
-        <a href="../../en/rules/comma-chain-runon/" class="ctrl-btn" aria-label="Switch to English">EN</a>
-        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+        <a href="../../zh/rules/comma-chain-runon/" data-lang-switch="zh" class="ctrl-btn" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
       </div>
     </header>
 
     <main id="main-content">
     <section class="section-block">
-      <nav class="breadcrumbs" aria-label="面包屑导航">
-        <a href="../../">dislop</a> / <a href="../">规则百科</a> / <span aria-current="page"><code>comma-chain-runon</code></span>
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../">dislop</a> / <a href="../">Rules</a> / <span aria-current="page"><code>comma-chain-runon</code></span>
       </nav>
 
       <article class="article-prose">
         <header>
-          <h1 class="lead-heading" style="max-width:28ch;">五连逗号一逗到底长句</h1>
+          <h1 class="lead-heading" style="max-width:28ch;">Five-comma run-on chain</h1>
           <div class="article-meta">
             <span><code>comma-chain-runon</code></span>
-            <span>工作文档 (<code>business-brief</code>)</span>
-            <span class="sev-tag sev-info">轻提示</span>
+            <span>Business Brief &amp; Technical Proposal (<code>business-brief</code>)</span>
+            <span class="sev-tag sev-info">info</span>
             <span><code>markdown, text, html, docx</code></span>
-            <a href="../../rules/comma-chain-runon.md">Markdown 规则卡</a>
+            <a href="../../rules/comma-chain-runon.md">Markdown card</a>
           </div>
           <div class="answer-box">
-            <div class="answer-box-label">判断方法</div>
-            <p>拆成 2 到 3 句主干清晰的短句，顺手删掉凑排比的空分句。</p>
+            <div class="answer-box-label">How to judge</div>
+            <p>Split into 2–3 shorter sentences with a clear main verb in each, and drop redundant parallel clauses.</p>
           </div>
         </header>
 
-        <h2>这条规则查什么</h2>
-        <p>单句内连续串接 5 个及以上逗号分句，节奏平铺拖沓。</p>
+        <h2>What this rule catches</h2>
+        <p>Single sentence chains 5+ comma clauses in breathless LLM cadence.</p>
 
-        <h2>原句与改法对照</h2>
+        <h2>Before and after examples</h2>
 <!-- dislop-quote-start -->
         <div class="rule-contrast-grid">
           <div class="rule-contrast-cell is-bad">
-            <div class="rule-contrast-label">原句（会标出问题）</div>
-            <pre><code>通过建立跨部门沟通机制，明确周二评审与周五发版节点，优化内部评审流程，加强文档沉淀管理，完善接口超时预警体系，同步推进自动化落地，我们让团队交付过程更稳。</code></pre>
+            <div class="rule-contrast-label">Original (flagged)</div>
+            <pre><code>By aligning cross-team priorities, defining milestone gates, refining review checklists, centralizing runbooks, expanding alert coverage, and automating rollbacks, we improved release stability.</code></pre>
           </div>
           <div class="rule-contrast-cell is-trap">
-            <div class="rule-contrast-label">换了种 AI 味</div>
-            <pre><code>建机制。明节点。优评审。强沉淀。</code></pre>
+            <div class="rule-contrast-label">Still sounds like AI</div>
+            <pre><code>Align teams. Define gates. Automate rollbacks.</code></pre>
           </div>
           <div class="rule-contrast-cell is-good">
-            <div class="rule-contrast-label">改干净的版本</div>
-            <pre><code>我们固定了周二评审和周五发版两个节点，并补齐了接口超时预警和自动化检查，交付过程稳定多了。</code></pre>
+            <div class="rule-contrast-label">Clean version</div>
+            <pre><code>Fixing Tuesday design reviews and wiring HTTP 5xx auto-rollback cut post-release hotfixes by 40% this quarter.</code></pre>
           </div>
         </div>
         <!-- dislop-quote-end -->
-<p class="rule-note"><strong>改法要点：</strong> 千分位数字逗号（如 1,200、4,800）会自动排除，不计入分句逗号。</p>
+<p class="rule-note"><strong>Edit note:</strong> Numeric thousands separators like 1,200 or 4,800 are excluded before counting commas.</p>
 
-        <h2>命令行单独查看或检查</h2>
+        <h2>Run locally via CLI</h2>
         <pre><code>npx --yes dislop explain comma-chain-runon
 npx --yes dislop check . --pack business-brief</code></pre>
 
         
-        <h2>同场景其他规则（business-brief）</h2>
+        <h2>Other rules in business-brief</h2>
 <div class="related-strip">
-<a class="related-link-chip" href="../en-throat-clearing-opener/"><code>en-throat-clearing-opener</code> · 英文铺垫开场白</a>
-<a class="related-link-chip" href="../en-cliche-lexicon/"><code>en-cliche-lexicon</code> · 英文高频套词</a>
-<a class="related-link-chip" href="../zh-bureaucratic-padding/"><code>zh-bureaucratic-padding</code> · 公文黑话与空泛词</a>
-<a class="related-link-chip" href="../negation-pivot-frame/"><code>negation-pivot-frame</code> · “不是 A，而是 B”套句</a>
-<a class="related-link-chip" href="../staccato-slogan-run/"><code>staccato-slogan-run</code> · 英文短句口号连发</a>
-<a class="related-link-chip" href="../zh-four-char-triad/"><code>zh-four-char-triad</code> · 四字排比串</a>
-<a class="related-link-chip" href="../unsourced-attribution/"><code>unsourced-attribution</code> · 没写明出处的“研究表明”</a>
-<a class="related-link-chip" href="../bold-lead-list-wall/"><code>bold-lead-list-wall</code> · 满屏“加粗词 + 冒号”清单</a>
+<a class="related-link-chip" href="../en-throat-clearing-opener/"><code>en-throat-clearing-opener</code> · Throat-clearing opener</a>
+<a class="related-link-chip" href="../en-cliche-lexicon/"><code>en-cliche-lexicon</code> · Stock AI buzzword</a>
+<a class="related-link-chip" href="../negation-pivot-frame/"><code>negation-pivot-frame</code> · &quot;Not X, but Y&quot; slogan frame</a>
+<a class="related-link-chip" href="../staccato-slogan-run/"><code>staccato-slogan-run</code> · Staccato slogan chain</a>
+<a class="related-link-chip" href="../unsourced-attribution/"><code>unsourced-attribution</code> · Unsourced claim</a>
+<a class="related-link-chip" href="../bold-lead-list-wall/"><code>bold-lead-list-wall</code> · Bold-lead bullet wall</a>
+<a class="related-link-chip" href="../cooccurrence-slop-cluster/"><code>cooccurrence-slop-cluster</code> · Buzzword cluster in fact-free paragraph</a>
+<a class="related-link-chip" href="../semicolon-tricolon/"><code>semicolon-tricolon</code> · Three-part balanced semicolon pitch</a>
 </div>
         <div class="share-action-bar">
-          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../?lang=zh#try=comma-chain-runon">在工作台试试这条规则 →</a>
-          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">复制引用（PR / 群聊）</button><code id="share-cite-payload" hidden>[`comma-chain-runon`](https://dislop.com/rules/comma-chain-runon/)：单句内连续串接 5 个及以上逗号分句，节奏平铺拖沓。</code>
-          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">投稿翻车样本</a>
-          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub 收藏 ★</a>
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../#try=comma-chain-runon">Try this rule in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[`comma-chain-runon`](https://dislop.com/rules/comma-chain-runon/): Single sentence chains 5+ comma clauses in breathless LLM cadence.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
         </div>
       </article>
     </section>
@@ -174,26 +175,26 @@ npx --yes dislop check . --pack business-brief</code></pre>
     <footer class="colophon">
       <div class="colophon-note">
         <a class="colophon-brand" href="../../"><img src="../../assets/logo.svg" width="20" height="20" alt="">dislop</a>
-        <span>这个页面自己也跑过 dislop check site/，0 处问题。</span>
-        <span>给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
+        <span>This site passes dislop check site/ with 0 issues.</span>
+        <span>For agents, start at <a href="../../llms.txt">/llms.txt</a>.</span>
       </div>
-      <nav class="colophon-groups" aria-label="页脚导航">
+      <nav class="colophon-groups" aria-label="Footer">
         <div class="colophon-group">
-          <span class="colophon-group-title">资料</span>
-          <a href="../../guides/">实用指南</a>
-          <a href="../../rules/">全部规则</a>
-          <a href="../../awesome/">工具清单</a>
+          <span class="colophon-group-title">Resources</span>
+          <a href="../../guides/">Guides</a>
+          <a href="../../rules/">All rules</a>
+          <a href="../../awesome/">Awesome list</a>
           <a href="../../llms.txt">llms.txt</a>
         </div>
         <div class="colophon-group">
-          <span class="colophon-group-title">项目</span>
-          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener">路线图</a>
-          <a href="../../methodology/brand-and-voice.md">文案基准</a>
-          <a href="../../methodology/design-system.md">视觉规范</a>
-          <a href="../../privacy.md">隐私与数据边界</a>
+          <span class="colophon-group-title">Project</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.md" target="_blank" rel="noopener">Roadmap</a>
+          <a href="../../methodology/brand-and-voice.md">Voice guide</a>
+          <a href="../../methodology/design-system.md">Design tokens</a>
+          <a href="../../privacy.md">Privacy</a>
         </div>
         <div class="colophon-group">
-          <span class="colophon-group-title">外部链接</span>
+          <span class="colophon-group-title">Elsewhere</span>
           <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
           <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
           <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
@@ -202,15 +203,6 @@ npx --yes dislop check . --pack business-brief</code></pre>
       </nav>
     </footer>
   </div>
-  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
-    <div class="demo-lightbox-head">
-      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
-      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">关闭</button>
-    </div>
-    <div class="demo-lightbox-body">
-      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
-    </div>
-  </dialog>
   <script defer src="../../static-ui.js"></script>
 
 </body>

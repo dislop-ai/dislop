@@ -4,6 +4,13 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.4] - 2026-11-24
+
+### Changed
+- **Native English root (`dislop.com/`) and full interactive `/zh/`**: Switched `site/index.html` at `/` (`x-default`) to native English with `assets/og-card.png`, compiled the full interactive Chinese workbench and guide/rule directories under `/zh/` (`assets/og-card-zh.png`), emitted script-free redirect stubs for legacy `/en/*` and `/rules/zh-*/` routes, and preserved URL query parameters and hash fragments across language switches.
+- **English-default CLI output & narrowed SaaS prose rules**: Defaulted `bin/dislop.mjs` and `src/dislop/cli.py` diagnostic output to English (`--lang en`, with `--lang zh` available explicitly) and refined `en-throat-clearing-opener`, `en-cliche-lexicon`, and `staccato-slogan-run` across `packs/business-brief/pack.json`, `src/core.mjs`, and `src/dislop/engine.py` to catch SaaS README hype while avoiding false positives on conditional instructions, literal physical directions, and Markdown badge rows.
+- **Zero-chrome demo suite & crisp Open Graph / banner SVGs**: Re-rendered all 12 bilingual `20fps` GIF/WebP product demos (`assets/demos/*-v2.*`) without bottom progress bars, player buttons, duration pills, or modal lightboxes (keeping WCAG 2.2.2 click-to-pause and `prefers-reduced-motion` static posters), and simplified `assets/og-card*.{svg,png}`, `assets/banner-*.svg`, and `docs/{brand-and-voice-guide,design-system,gif-production-guide}*.md`.
+
 ## [0.8.3] - 2026-11-24
 
 ### Added

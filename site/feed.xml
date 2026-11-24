@@ -1,50 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>dislop 实用指南（中文）</title>
+  <title>dislop Guides (EN)</title>
   <link href="https://dislop.com/feed.xml" rel="self"/>
   <link href="https://dislop.com/guides/"/>
   <updated>2026-11-23T00:00:00Z</updated>
   <id>https://dislop.com/feed.xml</id>
   <entry>
-    <title>把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程</title>
+    <title>Adding an AI Slop Linter to Claude Code, Codex, Cursor, and GitHub Actions</title>
     <link href="https://dislop.com/guides/agent-cli-mcp-tutorial/"/>
     <id>https://dislop.com/guides/agent-cli-mcp-tutorial/</id>
     <updated>2026-11-23T00:00:00Z</updated>
-    <summary>防 AI 味最好分两步：写前挂上纯文档 Skill 让 Agent 少写套话，写完跑离线 `dislop check` 在本地或 Git PR 里做确定性拦截；如果是 Claude Cowork、WorkBuddy 等不方便装本机环境的办公 Agent，直接连 `https://dislop.com/mcp`。</summary>
+    <summary>The cleanest anti-slop setup splits prevention from verification: load the pure-Markdown Skill before drafting so agents avoid stock templates, then run the offline `dislop check` CLI locally or on `--changed` PR lines. For office agents without local shells, connect `https://dislop.com/mcp`.</summary>
   </entry>
   <entry>
-    <title>AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程</title>
+    <title>Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)</title>
     <link href="https://dislop.com/guides/deslop-pptx-docx/"/>
     <id>https://dislop.com/guides/deslop-pptx-docx/</id>
     <updated>2026-11-23T00:00:00Z</updated>
-    <summary>AI 做的 PPT 和 Word 最常出五种毛病：直接贴进文档没渲染的 `**加粗**` 星号、单页超过 280 字的字墙、6 条以上同级要点、文字框自动缩到看不清，以及“概述”“关于……的分析”这类没给结论的标题。用本地工具直接解包检查 XML 结构，比肉眼翻快得多。</summary>
+    <summary>AI-generated Office deliverables break in five predictable ways: pasted `**bold**` Markdown asterisks, 120+ word slide walls, &gt;6 bullets per slide, shrunk `normAutofit` fonts below 80%, and vague titles like &apos;Overview&apos; or &apos;Analysis of Q3 Retention&apos;. Inspect the OOXML and PDF text layers deterministically before sending.</summary>
   </entry>
   <entry>
-    <title>Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮</title>
+    <title>Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons</title>
     <link href="https://dislop.com/guides/fix-ai-slop-web-ui/"/>
     <id>https://dislop.com/guides/fix-ai-slop-web-ui/</id>
     <updated>2026-11-23T00:00:00Z</updated>
-    <summary>AI 写的网页一眼像模板，主要是因为“紫粉霓虹渐变 + 满屏胶囊标签 + 框套框 + 假窗口三点 + 点不动的 href=\&quot;#\&quot; 按钮”。改回干净工程界面的做法是用 1px 细线网格、单色字体层次和确定性静态检查。</summary>
+    <summary>AI-generated web UIs look interchangeable when they fall back on purple-pink gradients, pill-badge walls, 3-level nested cards, fake macOS window dots, and dead href=&apos;#&apos; buttons. Replace template chrome with 1px structural grids, clear type hierarchy, and deterministic HTML/CSS linting.</summary>
   </entry>
   <entry>
-    <title>去 AI 味工具怎么选：确定性检查器、AI 检测器与写作 Skill 对比</title>
+    <title>AI Slop Linter vs. AI Detectors vs. Prompt Skills: How to Choose in 2026</title>
     <link href="https://dislop.com/guides/linter-vs-detector-vs-skill/"/>
     <id>https://dislop.com/guides/linter-vs-detector-vs-skill/</id>
     <updated>2026-11-23T00:00:00Z</updated>
-    <summary>概率型 AI 检测器只能告诉你“疑似度 82%”，却不指明哪句有问题；纯写作 Skill 能提前压住套话，但模型写嗨了还是会漏；确定性检查器（如 Vale、dislop）负责在发稿前按行标出硬伤和句式模板，三者分工不同、不能互相替代。</summary>
+    <summary>Probabilistic AI detectors only output a guess percentage without telling you what to fix; Markdown skills improve first drafts but slip under long contexts; deterministic linters (Vale, dislop) give repeatable, line-level pass/fail gates across CI, web UI, and slides. Use skills upfront and linters at the gate.</summary>
   </entry>
   <entry>
-    <title>中文写作怎么去 AI 味：别用禁词表，用删除测试避开二阶套话</title>
+    <title>How to Remove AI Slop From Writing Without Triggering Second-Order Clichés</title>
     <link href="https://dislop.com/guides/remove-ai-slop-writing/"/>
     <id>https://dislop.com/guides/remove-ai-slop-writing/</id>
     <updated>2026-11-23T00:00:00Z</updated>
-    <summary>单靠拉黑禁用词会让大模型换上“不是 A，而是 B”、四字排比串、三段分号句和结尾升华金句。把文字写回人话的关键是“删除测试”：每次只动标出来的一小段，只留下有主体、动作、数字或边界的信息。</summary>
+    <summary>Banning stock words alone forces LLMs to swap buzzwords for second-order templates like &apos;Not X, but Y&apos; slogans, three-word staccato chains, and moralizing endings. Replace clichés by running the Deletion Test on flagged spans and re-checking after edits.</summary>
   </entry>
   <entry>
-    <title>什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱</title>
+    <title>What Is AI Slop? A 2026 Field Guide Across Prose, Web UI, and Slide Decks</title>
     <link href="https://dislop.com/guides/what-is-ai-slop/"/>
     <id>https://dislop.com/guides/what-is-ai-slop/</id>
     <updated>2026-11-23T00:00:00Z</updated>
-    <summary>AI 味（AI slop）指大模型按训练统计均值批量吐出的低信息密度内容，不仅包括抽象公文黑话和开头寒暄，还包括删掉套词后冒出来的反转句式、紫粉渐变网页模板，以及挤满字墙的 PPT。</summary>
+    <summary>AI slop is unreviewed, low-signal machine output driven by statistical averaging. Beyond banned words like &apos;delve&apos; and &apos;tapestry&apos;, it shows up as &apos;Not X, but Y&apos; contrast slogans, purple-pink SaaS web templates, dense PowerPoint word walls, and stray chatbot greetings.</summary>
   </entry>
 </feed>

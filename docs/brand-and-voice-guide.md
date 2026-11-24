@@ -41,14 +41,14 @@ We aim for the plain clarity of **ASD-STE100** (Simplified Technical English) in
 3. **Cut every pull-quote closer and roleplay metaphor.** If a line sounds like a poster slogan or a costumed persona (`Pass for press`, `the pen stays in your hand`, `the sheet is set by machine`), delete it or rewrite it flat.
 4. **Start with something concrete.** Open with an actual draft, file, number, or command instead of throat-clearing background.
 5. **State limits plainly.** Unreadable archives and unshipped work (like code AST linting) are marked as skipped or not built yet.
-6. **Keep English and Chinese independent on one domain, never mixed.** `dislop.com` stays on a single domain (targeting native English at the root `/` and native Chinese under `/zh/`, with automatic browser language routing and a one-click manual toggle). Chinese and English materials are authored separately for their own audiences—separate copy, examples, banners, and single-language social accounts or posts (`@dislop_ai` publishes exclusively in English), never word-for-word translations and never mixed inside one page or post. Keep internal architecture tier codes, academic jargon, and research shorthand inside `docs/research/`, never in public copy.
+6. **Keep English and Chinese independent on one domain, never mixed.** `dislop.com` stays on a single domain: `/` serves native English (`x-default`), `/zh/` serves native Chinese, and legacy `/en/*` paths return a `301` redirect, with automatic first-visit browser language routing and a one-click manual toggle. Chinese and English materials are authored separately for their own audiences—separate copy, examples, banners, and single-language social accounts or posts (`@dislop_ai` publishes exclusively in English), never word-for-word translations and never mixed inside one page or post. Keep internal architecture tier codes, academic jargon, and research shorthand inside `docs/research/`, never in public copy.
 
 ### Copy Table
 
 | Surface | Avoid (AI-flavored / performative) | Use (plain English) |
 |---|---|---|
 | **Headline / Slogan** | `Your draft, minus the slop.` | `Cutting AI slop is real productivity.` |
-| **Intro copy** | `dislop strikes what can't ship... the pen stays in your hand.` | `dislop marks what looks off locally so you or your agent can fix it, with optional Cloud MCP self-healing.` |
+| **Intro copy** | `dislop strikes what can't ship... the pen stays in your hand.` | `dislop marks what looks off locally so you or your agent can fix it, with optional Cloud MCP rewrites.` |
 | **Clean check** | `Pass for press. 0 findings; protected spans stayed as written.` | `0 issues. Chat wrapper and stock phrasing removed.` |
 | **Swapped slop** | `Sent back: displacement detected` | `Still flagged (1 issue). Old buzzwords are gone, replaced by a 'Not X, but Y' slogan.` |
 | **Directory name** | `Fellow travelers directory` | `Awesome list` / `Awesome Anti-Slop` |
@@ -76,19 +76,16 @@ Two mark styles stay readable without color:
 
 ---
 
-## 4. Automation-Native Style: Specimen Slip + Zero-Glue Docket
+## 4. Automated Posts and Cards
 
-When `dislop` publishes automated or semi-automated social cards, benchmark digests, or release posts, free-form persuasive prose is the highest-risk surface for sounding like AI. Rhetorical hooks, transition words (`Moreover`, `Notably`, `In other words`), praise adjectives, and punchline closers all pull automated copy back toward LLM cadence.
+When `dislop` publishes automated social cards, benchmark summaries, or release notes, free-form persuasive copy is the fastest way to sound like AI again. Rhetorical hooks, transition glue (`Moreover`, `Notably`, `In other words`), hype adjectives, and summary closers pull automated posts right back into LLM cadence.
 
-Instead of asking a model to "write witty social copy," automated and outward-facing posts use a structural shortcut that leaves almost no room for AI cadence:
+Keep automated cards and captions plain:
 
-1. **70% Verbatim Visual Specimen ("Slip on Stage")**: Frame a `0px`-radius white galley slip (`#FFFFFF`) on the charcoal ink stage (`#14171A`). Show the actual input text, HTML snippet, or slide XML with live `dislop check` marks (`#F04438` *dele* loop on deletable chat wrappers, red solid underline on other `core` artifacts, blue dashed underline on scenario warnings) measured to the exact text span.
-2. **The Dele Mark (`₰`) Is the Only Character**: `dislop` never speaks in first person (`"I"`), never uses a mascot name, and never scolds the user. Dry humor comes strictly from letting an AI's own verbatim text—including `dislop`'s own retired drafts—sit under the *dele* mark without commentary.
-3. **30% Text ("Zero-Glue 3-Slot Docket")**: Keep every automated caption or short post to at most three flat slots, then stop cold with no closing moral:
-   - **Slot 1 (Input / Setup)**: What file, commit, or prompt went in (`30` drafts across `4` upstream `SKILL.md` prompts on `gemini-3.5-flash`).
-   - **Slot 2 (Verbatim Observed Diff / Count)**: Exact surviving strings or counts (`4/4` skills kept `<a href="#">`; `3/4` returned our old three-semicolon pitch verbatim).
-   - **Slot 3 (Mechanism or Command)**: Why it happened or the exact reproducible command (`npx --yes dislop check . --pack auto`), ending immediately with zero summary slogan.
-4. **Hard Lint Bans on Outward Copy**: Zero rhetorical-question openers (`?` in line 1), zero exclamation marks (outside the official Chinese slogan), zero transition glue, zero unbadged constructed examples (constructed fixtures must display an `EXAMPLE` badge; live benchmark runs display commit + task ID), and explicit scoring-bias disclosure before any self-scored pass rate.
+1. **Show the verbatim text with its marks**: Frame a crisp `0px`-radius white sheet (`#FFFFFF`) on the dark charcoal stage (`#14171A`). Render the real input prose, HTML snippet, or slide XML with live `dislop check` marks (`#F04438` *dele* loop on deletable chat wrappers, solid red underline on other `core` hard bugs, dashed blue underline on style warnings) measured directly to the text span.
+2. **Keep the dele mark (`₰`) as the only visual signature**: `dislop` never speaks in first person (`"I"`), never uses a mascot, and never scolds the reader. Any dry humor comes from letting verbatim AI leftovers—including `dislop`'s own retired drafts—sit under the *dele* mark without commentary.
+3. **State what went in, what came out, and the command—then stop**: Name the concrete input file, commit, or setup (`30` drafts across `4` upstream `SKILL.md` prompts on `gemini-3.5-flash`). Give the verbatim surviving defect or count (`4/4` standalone runs left dead `href="#"` in HTML). Give the plain reason or reproducible command (`npx --yes dislop check . --pack auto`), and end there without a closing moral.
+4. **Hard bans on outward copy**: No rhetorical-question openers (`?` in line 1), no exclamation hype (outside the official Chinese slogan), no transition glue, an explicit `EXAMPLE` badge on every constructed snippet (live benchmark cards cite commit + task ID instead), and an upfront self-scoring note whenever citing pass rates scored with `dislop`'s own rules.
 
 ---
 

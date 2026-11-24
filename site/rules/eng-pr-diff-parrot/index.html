@@ -1,30 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-static-lang="zh">
+<html lang="en" data-static-lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>空泛的 AI 提交摘要壳 (eng-pr-diff-parrot) — dislop</title>
-  <meta name="description" content="空泛的 AI 提交摘要壳: 空泛的 AI 提交摘要只重复“通过优化提升可维护性”，未说明具体修掉的缺陷、边界条件或单号。">
+  <title>Empty AI PR diff summary (eng-pr-diff-parrot) — dislop</title>
+  <meta name="description" content="Empty AI PR diff summary: Generic AI PR summary parrots file changes without stating the concrete bug, constraint, or metric.">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="dislop">
   <meta property="og:url" content="https://dislop.com/rules/eng-pr-diff-parrot/">
-  <meta property="og:title" content="空泛的 AI 提交摘要壳 (eng-pr-diff-parrot) — dislop">
-  <meta property="og:description" content="空泛的 AI 提交摘要壳: 空泛的 AI 提交摘要只重复“通过优化提升可维护性”，未说明具体修掉的缺陷、边界条件或单号。">
-  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:title" content="Empty AI PR diff summary (eng-pr-diff-parrot) — dislop">
+  <meta property="og:description" content="Empty AI PR diff summary: Generic AI PR summary parrots file changes without stating the concrete bug, constraint, or metric.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@dislop_ai">
   <meta name="twitter:creator" content="@dislop_ai">
-  <meta name="twitter:title" content="空泛的 AI 提交摘要壳 (eng-pr-diff-parrot) — dislop">
-  <meta name="twitter:description" content="空泛的 AI 提交摘要壳: 空泛的 AI 提交摘要只重复“通过优化提升可维护性”，未说明具体修掉的缺陷、边界条件或单号。">
-  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta name="twitter:title" content="Empty AI PR diff summary (eng-pr-diff-parrot) — dislop">
+  <meta name="twitter:description" content="Empty AI PR diff summary: Generic AI PR summary parrots file changes without stating the concrete bug, constraint, or metric.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
   <link rel="canonical" href="https://dislop.com/rules/eng-pr-diff-parrot/">
-  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/eng-pr-diff-parrot/">
-  <link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/eng-pr-diff-parrot/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/rules/eng-pr-diff-parrot/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/eng-pr-diff-parrot/">
   <link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/eng-pr-diff-parrot/">
-  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop 实用指南（中文）">
+  <script src="../../lang-init.js"></script>
+  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop Guides (EN)">
   <link rel="alternate" type="text/markdown" href="../../rules/eng-pr-diff-parrot.md" title="Markdown Mirror">
   <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
   <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
@@ -37,9 +38,9 @@
       "@type": "TechArticle",
       "@id": "https://dislop.com/rules/eng-pr-diff-parrot/",
       "url": "https://dislop.com/rules/eng-pr-diff-parrot/",
-      "headline": "空泛的 AI 提交摘要壳 (eng-pr-diff-parrot)",
-      "description": "删掉套话壳，直接写出关联问题单、改动前后的具体行为差异及验证方法。",
-      "inLanguage": "zh-CN",
+      "headline": "Empty AI PR diff summary (eng-pr-diff-parrot)",
+      "description": "Replace the wrapper sentence with why the change was needed, what breaks without it, and how it was verified.",
+      "inLanguage": "en",
       "dateModified": "2026-11-23",
       "author": {
         "@type": "Organization",
@@ -59,7 +60,7 @@
         {
           "@type": "ListItem",
           "position": 2,
-          "name": "规则百科",
+          "name": "Rules",
           "item": "https://dislop.com/rules/"
         },
         {
@@ -75,94 +76,94 @@
   </script>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">跳至正文</a>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="rail-shell">
     <header class="topbar band-rule">
       <a class="brand-lockup" href="../../">
         <img src="../../assets/logo.svg" width="30" height="30" alt="">
         <span class="brand-wordmark">dislop</span>
-        <span class="brand-meta"><span>AI 味检查</span> · <span class="brand-ver">v0.8.3</span></span>
+        <span class="brand-meta"><span>AI slop linter</span> · <span class="brand-ver">v0.8.3</span></span>
       </a>
 
-      <nav class="nav-links" aria-label="主导航">
-        <a href="../../#workbench">工作台</a>
-        <a href="../../#surfaces">接入</a>
-        <a href="../../#cases">案例</a>
-        <a href="../../guides/">指南</a>
-        <a href="../../rules/" aria-current="page">规则</a>
-        <a href="../../awesome/">工具清单</a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../#workbench">Workbench</a>
+        <a href="../../#surfaces">Setup</a>
+        <a href="../../#cases">Cases</a>
+        <a href="../../guides/">Guides</a>
+        <a href="../../rules/" aria-current="page">Rules</a>
+        <a href="../../awesome/">Directory</a>
       </nav>
 
       <div class="top-controls">
-        <a href="../../#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>登录 · 30 免费额度</a>
+        <a href="../../#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>Sign in</a>
         <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label">GitHub ★</span></a>
-        <a href="../../en/rules/eng-pr-diff-parrot/" class="ctrl-btn" aria-label="Switch to English">EN</a>
-        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+        <a href="../../zh/rules/eng-pr-diff-parrot/" data-lang-switch="zh" class="ctrl-btn" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
       </div>
     </header>
 
     <main id="main-content">
     <section class="section-block">
-      <nav class="breadcrumbs" aria-label="面包屑导航">
-        <a href="../../">dislop</a> / <a href="../">规则百科</a> / <span aria-current="page"><code>eng-pr-diff-parrot</code></span>
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../">dislop</a> / <a href="../">Rules</a> / <span aria-current="page"><code>eng-pr-diff-parrot</code></span>
       </nav>
 
       <article class="article-prose">
         <header>
-          <h1 class="lead-heading" style="max-width:28ch;">空泛的 AI 提交摘要壳</h1>
+          <h1 class="lead-heading" style="max-width:28ch;">Empty AI PR diff summary</h1>
           <div class="article-meta">
             <span><code>eng-pr-diff-parrot</code></span>
-            <span>研发文档与复盘 (<code>engineering-spec</code>)</span>
-            <span class="sev-tag sev-warning">提醒</span>
+            <span>Engineering RFC, PR &amp; Postmortem (<code>engineering-spec</code>)</span>
+            <span class="sev-tag sev-warning">warning</span>
             <span><code>markdown, text</code></span>
-            <a href="../../rules/eng-pr-diff-parrot.md">Markdown 规则卡</a>
+            <a href="../../rules/eng-pr-diff-parrot.md">Markdown card</a>
           </div>
           <div class="answer-box">
-            <div class="answer-box-label">判断方法</div>
-            <p>删掉套话壳，直接写出关联问题单、改动前后的具体行为差异及验证方法。</p>
+            <div class="answer-box-label">How to judge</div>
+            <p>Replace the wrapper sentence with why the change was needed, what breaks without it, and how it was verified.</p>
           </div>
         </header>
 
-        <h2>这条规则查什么</h2>
-        <p>空泛的 AI 提交摘要只重复“通过优化提升可维护性”，未说明具体修掉的缺陷、边界条件或单号。</p>
+        <h2>What this rule catches</h2>
+        <p>Generic AI PR summary parrots file changes without stating the concrete bug, constraint, or metric.</p>
 
-        <h2>原句与改法对照</h2>
+        <h2>Before and after examples</h2>
 <!-- dislop-quote-start -->
         <div class="rule-contrast-grid">
           <div class="rule-contrast-cell is-bad">
-            <div class="rule-contrast-label">原句（会标出问题）</div>
-            <pre><code>本次 PR 旨在通过重构连接池管理逻辑进一步提升系统的稳定性与可维护性。</code></pre>
+            <div class="rule-contrast-label">Original (flagged)</div>
+            <pre><code>This PR updates the retry middleware to ensure a more seamless and resilient developer experience</code></pre>
           </div>
           <div class="rule-contrast-cell is-trap">
-            <div class="rule-contrast-label">换了种 AI 味</div>
-            <pre><code>这不是一次普通的代码重构，而是连接池稳定性的底层重塑。</code></pre>
+            <div class="rule-contrast-label">Still sounds like AI</div>
+            <pre><code>This isn't a minor retry tweak — it's rock-solid resilience.</code></pre>
           </div>
           <div class="rule-contrast-cell is-good">
-            <div class="rule-contrast-label">改干净的版本</div>
-            <pre><code>修复连接池重连分支未释放旧句柄导致的连接泄漏，避免长运行后连接耗尽。</code></pre>
+            <div class="rule-contrast-label">Clean version</div>
+            <pre><code>Fixes #412: cap exponential backoff at 8s when upstream returns HTTP 503.</code></pre>
           </div>
         </div>
         <!-- dislop-quote-end -->
-<p class="rule-note"><strong>改法要点：</strong> 点明具体的泄漏触发分支与直接后果，不写空泛的稳定性套话。</p>
+<p class="rule-note"><strong>Edit note:</strong> Name the concrete leak trigger and consequence instead of generic stability claims.</p>
 
-        <h2>命令行单独查看或检查</h2>
+        <h2>Run locally via CLI</h2>
         <pre><code>npx --yes dislop explain eng-pr-diff-parrot
 npx --yes dislop check . --pack engineering-spec</code></pre>
 
-        <h2>相关教程</h2>
+        <h2>Related guides</h2>
 <div class="related-strip">
-<a class="related-link-chip" href="../../guides/agent-cli-mcp-tutorial/">Agent 与 CI 接入教程</a>
+<a class="related-link-chip" href="../../guides/agent-cli-mcp-tutorial/">Agent, CLI &amp; CI Setup</a>
 </div>
-        <h2>同场景其他规则（engineering-spec）</h2>
+        <h2>Other rules in engineering-spec</h2>
 <div class="related-strip">
-<a class="related-link-chip" href="../eng-shallow-root-cause/"><code>eng-shallow-root-cause</code> · 复盘止步于“人为失误”</a>
-<a class="related-link-chip" href="../eng-vague-action-item/"><code>eng-vague-action-item</code> · 无指标无负责人的改进项</a>
+<a class="related-link-chip" href="../eng-shallow-root-cause/"><code>eng-shallow-root-cause</code> · Stop-thinking 'human error' root cause</a>
+<a class="related-link-chip" href="../eng-vague-action-item/"><code>eng-vague-action-item</code> · Unowned wishful action item</a>
 </div>
         <div class="share-action-bar">
-          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../?lang=zh#try=eng-pr-diff-parrot">在工作台试试这条规则 →</a>
-          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">复制引用（PR / 群聊）</button><code id="share-cite-payload" hidden>[`eng-pr-diff-parrot`](https://dislop.com/rules/eng-pr-diff-parrot/)：空泛的 AI 提交摘要只重复“通过优化提升可维护性”，未说明具体修掉的缺陷、边界条件或单号。</code>
-          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">投稿翻车样本</a>
-          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub 收藏 ★</a>
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../#try=eng-pr-diff-parrot">Try this rule in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[`eng-pr-diff-parrot`](https://dislop.com/rules/eng-pr-diff-parrot/): Generic AI PR summary parrots file changes without stating the concrete bug, constraint, or metric.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
         </div>
       </article>
     </section>
@@ -171,26 +172,26 @@ npx --yes dislop check . --pack engineering-spec</code></pre>
     <footer class="colophon">
       <div class="colophon-note">
         <a class="colophon-brand" href="../../"><img src="../../assets/logo.svg" width="20" height="20" alt="">dislop</a>
-        <span>这个页面自己也跑过 dislop check site/，0 处问题。</span>
-        <span>给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
+        <span>This site passes dislop check site/ with 0 issues.</span>
+        <span>For agents, start at <a href="../../llms.txt">/llms.txt</a>.</span>
       </div>
-      <nav class="colophon-groups" aria-label="页脚导航">
+      <nav class="colophon-groups" aria-label="Footer">
         <div class="colophon-group">
-          <span class="colophon-group-title">资料</span>
-          <a href="../../guides/">实用指南</a>
-          <a href="../../rules/">全部规则</a>
-          <a href="../../awesome/">工具清单</a>
+          <span class="colophon-group-title">Resources</span>
+          <a href="../../guides/">Guides</a>
+          <a href="../../rules/">All rules</a>
+          <a href="../../awesome/">Awesome list</a>
           <a href="../../llms.txt">llms.txt</a>
         </div>
         <div class="colophon-group">
-          <span class="colophon-group-title">项目</span>
-          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener">路线图</a>
-          <a href="../../methodology/brand-and-voice.md">文案基准</a>
-          <a href="../../methodology/design-system.md">视觉规范</a>
-          <a href="../../privacy.md">隐私与数据边界</a>
+          <span class="colophon-group-title">Project</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.md" target="_blank" rel="noopener">Roadmap</a>
+          <a href="../../methodology/brand-and-voice.md">Voice guide</a>
+          <a href="../../methodology/design-system.md">Design tokens</a>
+          <a href="../../privacy.md">Privacy</a>
         </div>
         <div class="colophon-group">
-          <span class="colophon-group-title">外部链接</span>
+          <span class="colophon-group-title">Elsewhere</span>
           <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
           <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
           <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
@@ -199,15 +200,6 @@ npx --yes dislop check . --pack engineering-spec</code></pre>
       </nav>
     </footer>
   </div>
-  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
-    <div class="demo-lightbox-head">
-      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
-      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">关闭</button>
-    </div>
-    <div class="demo-lightbox-body">
-      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
-    </div>
-  </dialog>
   <script defer src="../../static-ui.js"></script>
 
 </body>

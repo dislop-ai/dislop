@@ -1,10 +1,42 @@
-# dislop 产品定义（Product Brief）
+# dislop Product Brief
 
-官网、`README`、插件描述与对外触达文案均从本文件派生。表达细则见 [docs/brand-and-voice-guide.zh-CN.md](./docs/brand-and-voice-guide.zh-CN.md)。
+All website copy, `README` files, marketplace manifests, visual assets, and outbound materials derive from this document. Voice and visual rules live in [docs/brand-and-voice-guide.md](./docs/brand-and-voice-guide.md) ([简体中文](./docs/brand-and-voice-guide.zh-CN.md)).
 
 ---
 
-## 中文
+## English (Primary / Global Baseline)
+
+### Slogan
+Cutting AI slop is real productivity.
+
+### Positioning
+**Linter for AI Slop.** Helps you (and your agent) catch and fix AI-sounding text and template layouts in docs, web pages, and slides before sending.
+
+### Global-First Priority & Single-Domain Strategy
+- **English (Global) first across code, docs, and assets**: Rule precision on native English prose/UI/decks, CLI/MCP/Skill schemas, canonical documentation (`*.md`), and primary visual assets (`og-card.png`, `-en-v2` demos, `@dislop_ai`) always come first. Chinese (`*.zh-CN.md`, `zh-*` rules, `-zh-v2` demos) is maintained in lockstep as a native localized counterpart, never the upstream source for machine translation.
+- **Strategic horizon**: Short-term rollout pairs global package/MCP/skill registries and flagship English benchmarks with fast community seed validation; medium-to-long-term growth focuses on winning the default pre-flight slot across global Agent ecosystems and international team workflows, while serving localized office document cleanup as a complementary track on the same engine.
+- **One brand, one repository, one domain (`dislop.com`)**: Never split into separate regional subdomains or separate codebases. The target URL layout serves native English at the root `dislop.com/` (`x-default`) and native Chinese under `dislop.com/zh/`, with automatic browser language routing, a one-click manual toggle, and `301` compatibility for `/en/` (migrating from the `v0.8.2` `/` + `/en/` layout).
+- **Strict language separation**: English and Chinese materials use their own native examples, banners, social cards, and single-language accounts (`@dislop_ai` publishes exclusively in English), never word-for-word translations and never mixed inside one page or post.
+
+### Users
+First coding agent users, then office agent users, and finally everyone who delivers work with AI. Their agents are direct users too, and can find and run `dislop` on their own.
+
+### Product Form
+1. **Skill (open-source, Markdown only)**: Genre-specific writing and UI reference cards with no bundled scripts. Your agent reads the matching card before drafting and can run the CLI afterward to check its work.
+2. **CLI & Local Plugins (open-source, local)**: Zero-dependency local checker that flags AI leftovers and stock templates across docs, web UI, Word, and PowerPoint in terminals, editors, Git hooks, and CI. Developers can also plug in their own model API key for deeper review.
+3. **Official MCP & Web Workbench (cloud service)**: Sign in to connect office or coding agents to the remote MCP with no local setup, or use the web workbench directly. The cloud service runs multi-model review by genre, returns structured issues and edit guidance for your local agent to apply in context, and handles Word and PowerPoint files while keeping their layout.
+
+### Selling Points
+1. **Curated community work**: Combines vetted open-source rules, corpus findings, and an indexed 90-tool directory across docs, web UI, Word, and PowerPoint, without hunting down scattered prompts.
+2. **Broad host and scenario fit**: Ships domain packs for engineering, business, UI, and decks across Skill, Plugin, CLI, and Cloud MCP, connecting to major agents and editors in one command.
+3. **Local, offline, private**: The CLI and local plugins run on your machine with zero uploads, keeping private drafts and source code local.
+
+### One-Sentence Pitch
+A dedicated linter for AI slop. It brings together vetted community rules and practices to help your agent find and fix AI slop in docs, web UI, and slides. Connects to major agents and editors in one command and can run completely offline.
+
+---
+
+## 中文（独立原生适配）
 
 ### Slogan
 去 AI 味才是真正的生产力！
@@ -12,9 +44,11 @@
 ### 定位
 **AI 味检查工具。** 帮你（的 Agent）在文档、网页和 PPT 发出前，挑出并改掉里面的 AI 味。
 
-### 中英文与多语种原则
-- 网站（`dislop.com`、`/guides/`、`/rules/` 与 `/awesome/`）根据访问者浏览器语言自动默认中文或英文，不写死单一语种，并保留一键手动切换。
-- 中英文各自面向独立受众做原生表达、原生案例和原生视觉物料，不做逐字翻译；X 等同时覆盖中英文读者的渠道，可分别发布独立中文帖与独立英文帖，单条内容严格不混排。
+### 全球英文优先与单域名兼容原则
+- **技术、文档与主物料以英文（全球）为第一基准**：地道英文语料检出精度与零误报边界、CLI/MCP/Skill 协议字段、主干英文文档（`*.md`）及默认视觉物料（`og-card.png`、`-en-v2` 动图、`@dislop_ai`）始终优先建设与验收；中文文档（`*.zh-CN.md`）、`zh-*` 专属规则与中文演示物料面向中文场景原生独立编写，不做英译中或中译英套翻。
+- **短中长期节奏统一**：短期同步推进全球注册表/目录上架、中文技术社区快速种子验证与英文旗舰实测发布；中长期坚定以全球英语 Agent 生态标准和国际团队协作工作流为主战场，同时在同一套底座上承接中文免配置网页工作台与办公文档去味需求。
+- **单品牌、单仓库、单域名（`dislop.com`）**：不拆独立子域名或第二套代码库。目标站点路由以根路径 `dislop.com/` 默认提供纯英文静态页（`x-default`），以子路径 `dislop.com/zh/` 提供原生中文静态页（支持按浏览器语言自动引导、一键手动切换与历史 `/en/` `301` 兼容；当前正从 `v0.8.2` 的 `/` + `/en/` 平滑迁移）。
+- **单页单帖严格不混排**：中英文各自使用独立案例、视觉卡片与单语社交账号（官方号 `@dislop_ai` 固定纯英文发布），同一页面或单条帖子内绝不中英混排。
 
 ### 用户
 第一批是 Coding Agent 用户，第二批是办公 Agent 用户，最后是所有用 AI 交付成果的人；他们的 Agent 也是直接使用者，能自己找到并调用。
@@ -31,33 +65,3 @@
 
 ### 一句话介绍
 专用的 AI 味检查工具。整合社区验证过的去味规则与经验，帮你和你的 Agent 发现并改掉文档、网页和 PPT 里的 AI 味。一行命令接入主流 Agent 与编辑器，可纯本地离线运行。
-
----
-
-## English
-
-### Slogan
-Cutting AI slop is real productivity.
-
-### Positioning
-**Linter for AI Slop.** Helps you (and your agent) catch and fix AI-sounding text and template layouts in docs, web pages, and slides before sending.
-
-### Bilingual & Market Independence
-- `dislop.com`, `/guides/`, `/rules/`, and `/awesome/` auto-detect the visitor's browser language (`zh` or `en`) instead of hardcoding one default, with a one-click manual toggle.
-- Chinese and English materials are authored independently for their own audiences—separate examples, banners, social cards, and posts rather than word-for-word translations. Bilingual channels like X can run separate native Chinese and native English posts without mixing languages inside a single post.
-
-### Users
-First coding agent users, then office agent users, and finally everyone who delivers work with AI. Their agents are direct users too, and can find and run dislop on their own.
-
-### Product Form
-1. **Skill (open-source, Markdown only)**: Genre-specific writing and UI reference cards with no bundled scripts. Your agent reads the matching card before drafting and can run the CLI afterward to check its work.
-2. **CLI & Local Plugins (open-source, local)**: Zero-dependency local checker that flags AI leftovers and stock templates across docs, web UI, Word, and PowerPoint in terminals, editors, Git hooks, and CI. Developers can also plug in their own model API key for deeper review.
-3. **Official MCP & Web Workbench (cloud service)**: Sign in to connect office or coding agents to the remote MCP with no local setup, or use the web workbench directly. The cloud service runs multi-model review by genre, returns structured issues and edit guidance for your local agent to apply in context, and handles Word and PowerPoint files while keeping their layout.
-
-### Selling Points
-1. **Curated community work**: Combines vetted open-source rules, corpus findings, and an indexed tool directory across docs, web UI, Word, and PowerPoint, without hunting down scattered prompts.
-2. **Broad host and scenario fit**: Ships domain packs for engineering, business, UI, and decks across Skill, Plugin, CLI, and Cloud MCP, connecting to major agents and editors in one command.
-3. **Local, offline, private**: The CLI and local plugins run on your machine with zero uploads, keeping private drafts and source code local.
-
-### One-Sentence Pitch
-A dedicated linter for AI slop. It brings together vetted community rules and practices to help your agent find and fix AI slop in docs, web UI, and slides. Connects to major agents and editors in one command and can run completely offline.

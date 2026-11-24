@@ -41,8 +41,8 @@ export function renderGithubCtrl({ i18nKey = "" } = {}) {
 
 export function renderStaticAccountCtrl({ lang, depthPrefix, i18nKey = "" }) {
   const isEn = lang === "en";
-  const href = isEn ? `${depthPrefix}?lang=en#cloud-token-box` : `${depthPrefix}#cloud-token-box`;
-  const label = isEn ? "Sign in · 30 free" : "登录 · 30 免费额度";
+  const href = isEn ? `${depthPrefix}#cloud-token-box` : `${depthPrefix}zh/#cloud-token-box`;
+  const label = isEn ? "Sign in" : "登录";
   const i18nAttr = i18nKey ? ` data-i18n="${escapeHtml(i18nKey)}"` : "";
   return `<a href="${escapeHtml(href)}" class="ctrl-btn topbar-acct-btn" data-static-acct${i18nAttr}>${label}</a>`;
 }
@@ -54,20 +54,20 @@ export function renderPrimaryNavLinks({ lang, depthPrefix, activeNav = "", ids =
   const cur = (key) => (activeNav === key ? ' aria-current="page"' : "");
   const items = isEn
     ? [
-        ["workbench", `${depthPrefix}?lang=en#workbench`, "Workbench"],
-        ["surfaces", `${depthPrefix}en/#surfaces`, "Setup"],
-        ["cases", `${depthPrefix}?lang=en#cases`, "Cases"],
-        ["guides", `${depthPrefix}en/guides/`, "Guides"],
-        ["rules", `${depthPrefix}en/rules/`, "Rules"],
-        ["awesome", `${depthPrefix}en/awesome/`, "Directory"],
+        ["workbench", `${depthPrefix}#workbench`, "Workbench"],
+        ["surfaces", `${depthPrefix}#surfaces`, "Setup"],
+        ["cases", `${depthPrefix}#cases`, "Cases"],
+        ["guides", `${depthPrefix}guides/`, "Guides"],
+        ["rules", `${depthPrefix}rules/`, "Rules"],
+        ["awesome", `${depthPrefix}awesome/`, "Directory"],
       ]
     : [
-        ["workbench", `${depthPrefix}#workbench`, "工作台"],
-        ["surfaces", `${depthPrefix}#surfaces`, "接入"],
-        ["cases", `${depthPrefix}#cases`, "案例"],
-        ["guides", `${depthPrefix}guides/`, "指南"],
-        ["rules", `${depthPrefix}rules/`, "规则"],
-        ["awesome", `${depthPrefix}awesome/`, "工具清单"],
+        ["workbench", `${depthPrefix}zh/#workbench`, "工作台"],
+        ["surfaces", `${depthPrefix}zh/#surfaces`, "接入"],
+        ["cases", `${depthPrefix}zh/#cases`, "案例"],
+        ["guides", `${depthPrefix}zh/guides/`, "指南"],
+        ["rules", `${depthPrefix}zh/rules/`, "规则"],
+        ["awesome", `${depthPrefix}zh/awesome/`, "工具清单"],
       ];
   return items
     .map(([key, href, label]) => {
@@ -88,7 +88,6 @@ export function renderDemoFigureHtml({
   depthPrefix = "./",
   cardClass = "demo-card",
   altOverride = "",
-  withReplay = false,
   withId = false,
   stripIndex = false,
 }) {
@@ -101,30 +100,25 @@ export function renderDemoFigureHtml({
   const posterSrc = `${depthPrefix}assets/demos/${slug}-${lang}-${version}-poster.png`;
   const webpSrc = `${depthPrefix}assets/demos/${slug}-${lang}-${version}.webp`;
   const gifSrc = `${depthPrefix}assets/demos/${slug}-${lang}-${version}.gif`;
-  const pauseTxt = isEn ? "Pause" : "定格";
-  const zoomTxt = isEn ? "Zoom" : "放大看";
-  const replayTxt = isEn ? "Replay" : "重播";
+  const pauseAria = isEn ? "Pause animation" : "暂停画面";
   const rawTitle = meta.title || slug;
   const title = stripIndex ? rawTitle.replace(/^\d+\.\s+/, "") : rawTitle;
   const idAttr = withId ? ` id="demo-card-${escapeHtml(slug)}"` : "";
   return `<figure class="${escapeHtml(cardClass)}"${idAttr} data-demo-card="${escapeHtml(slug)}" data-demo-prefix="${escapeHtml(depthPrefix)}" data-demo-lang="${escapeHtml(lang)}" data-demo-ver="${escapeHtml(version)}">
           <div class="demo-media">
-            <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcset="${escapeHtml(posterSrc)}" data-demo-poster="${escapeHtml(slug)}">
-              <source type="image/webp" srcset="${escapeHtml(webpSrc)}" data-demo-webp="${escapeHtml(slug)}">
-              <img src="${escapeHtml(gifSrc)}" alt="${escapeHtml(alt)}" width="${Number(scene.width)}" height="${Number(scene.height)}" loading="lazy" decoding="async" data-demo-gif="${escapeHtml(slug)}">
-            </picture>
+            <button type="button" class="demo-media-surface" data-demo-toggle="${escapeHtml(slug)}" aria-pressed="false" aria-label="${escapeHtml(pauseAria)}">
+              <picture>
+                <source media="(prefers-reduced-motion: reduce)" srcset="${escapeHtml(posterSrc)}" data-demo-poster="${escapeHtml(slug)}">
+                <source type="image/webp" srcset="${escapeHtml(webpSrc)}" data-demo-webp="${escapeHtml(slug)}">
+                <img src="${escapeHtml(gifSrc)}" alt="${escapeHtml(alt)}" width="${Number(scene.width)}" height="${Number(scene.height)}" loading="lazy" decoding="async" data-demo-gif="${escapeHtml(slug)}">
+              </picture>
+            </button>
           </div>
           <figcaption class="demo-caption">
             <div class="demo-cap-head">
               <strong class="demo-cap-title">${escapeHtml(title)}</strong>
-              ${meta.badge ? `<span class="demo-cap-badge">${escapeHtml(meta.badge)}</span>` : ""}
             </div>
             ${meta.desc ? `<span class="demo-cap-desc">${escapeHtml(meta.desc)}</span>` : ""}
-            <div class="demo-card-actions">
-              <button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-toggle="${escapeHtml(slug)}" aria-pressed="false">${pauseTxt}</button>
-              ${withReplay ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-replay="${escapeHtml(slug)}">${replayTxt}</button>\n              ` : ""}<button type="button" class="ctrl-btn ctrl-btn-sm" data-demo-zoom="${escapeHtml(slug)}">${zoomTxt}</button>
-            </div>
           </figcaption>
         </figure>`;
 }
@@ -544,7 +538,7 @@ export function renderMarkdownToHtml(mdBody, opts = {}) {
 
 export function renderHomeJsonLd({ lang, baseUrl, version, ruleCount, awesomeCount, guideCount }) {
   const isEn = lang === "en";
-  const pageUrl = isEn ? `${baseUrl}/en/` : `${baseUrl}/`;
+  const pageUrl = isEn ? `${baseUrl}/` : `${baseUrl}/zh/`;
   return renderJsonLdScript([
     {
       "@type": "Organization",
@@ -647,8 +641,8 @@ export function renderHomeJsonLd({ lang, baseUrl, version, ruleCount, awesomeCou
 
 export function renderAwesomeJsonLd({ lang, baseUrl, entries }) {
   const isEn = lang === "en";
-  const pageUrl = isEn ? `${baseUrl}/en/awesome/` : `${baseUrl}/awesome/`;
-  const homeUrl = isEn ? `${baseUrl}/en/` : `${baseUrl}/`;
+  const pageUrl = isEn ? `${baseUrl}/awesome/` : `${baseUrl}/zh/awesome/`;
+  const homeUrl = isEn ? `${baseUrl}/` : `${baseUrl}/zh/`;
   return renderJsonLdScript([
     {
       "@type": "CollectionPage",
@@ -686,17 +680,17 @@ export function renderAwesomeTriageHtml({ lang, depthPrefix }) {
         <div class="awesome-triage-cell">
           <h2 data-i18n="triage.h1">Catch hard bugs locally or in CI</h2>
           <p data-i18n="triage.p1">Start with deterministic linters (dislop, Vale, textlint) that flag exact lines with zero LLM calls.</p>
-          <a href="${depthPrefix}en/guides/linter-vs-detector-vs-skill/" id="triage-link-1" data-i18n="triage.a1">Compare linters vs. skills →</a>
+          <a href="${depthPrefix}guides/linter-vs-detector-vs-skill/" id="triage-link-1" data-i18n="triage.a1">Compare linters vs. skills →</a>
         </div>
         <div class="awesome-triage-cell">
           <h2 data-i18n="triage.h2">Steer your agent before it drafts</h2>
           <p data-i18n="triage.p2">Load a Markdown Skill such as Humanizer or stop-slop into your agent, then verify the final draft locally.</p>
-          <a href="${depthPrefix}en/guides/remove-ai-slop-writing/" id="triage-link-2" data-i18n="triage.a2">Read the writing guide →</a>
+          <a href="${depthPrefix}guides/remove-ai-slop-writing/" id="triage-link-2" data-i18n="triage.a2">Read the writing guide →</a>
         </div>
         <div class="awesome-triage-cell">
           <h2 data-i18n="triage.h3">Clean up template web UI and slides</h2>
           <p data-i18n="triage.p3">Pair frontend-design or Impeccable with dislop UI and PPTX rules to strip gradients, dead links, and word walls.</p>
-          <a href="${depthPrefix}en/guides/fix-ai-slop-web-ui/" id="triage-link-3" data-i18n="triage.a3">Read the web UI guide →</a>
+          <a href="${depthPrefix}guides/fix-ai-slop-web-ui/" id="triage-link-3" data-i18n="triage.a3">Read the web UI guide →</a>
         </div>
       </div>`;
   }
@@ -704,17 +698,17 @@ export function renderAwesomeTriageHtml({ lang, depthPrefix }) {
         <div class="awesome-triage-cell">
           <h2 data-i18n="triage.h1">想在本地或 CI 里自动拦截硬伤</h2>
           <p data-i18n="triage.p1">优先用确定性检查工具（dislop、Vale、textlint），按规则直出精确行号，不花模型额度。</p>
-          <a href="${depthPrefix}guides/linter-vs-detector-vs-skill/" id="triage-link-1" data-i18n="triage.a1">看检查器与检测器对比 →</a>
+          <a href="${depthPrefix}zh/guides/linter-vs-detector-vs-skill/" id="triage-link-1" data-i18n="triage.a1">看检查器与检测器对比 →</a>
         </div>
         <div class="awesome-triage-cell">
           <h2 data-i18n="triage.h2">想让 Agent 动笔前先避开套话</h2>
           <p data-i18n="triage.p2">在编码或写作工具里挂载 Humanizer-zh、stop-slop 等纯文档 Skill，写完再跑一遍本地检查。</p>
-          <a href="${depthPrefix}guides/remove-ai-slop-writing/" id="triage-link-2" data-i18n="triage.a2">看中文写作去味指南 →</a>
+          <a href="${depthPrefix}zh/guides/remove-ai-slop-writing/" id="triage-link-2" data-i18n="triage.a2">看中文写作去味指南 →</a>
         </div>
         <div class="awesome-triage-cell">
           <h2 data-i18n="triage.h3">要排查网页模板味或 PPT 排版</h2>
           <p data-i18n="triage.p3">把 frontend-design、Impeccable 和 dislop 网页/PPT 规则配在一起，清掉紫粉渐变、空链接和字墙。</p>
-          <a href="${depthPrefix}guides/fix-ai-slop-web-ui/" id="triage-link-3" data-i18n="triage.a3">看前端与 PPT 排查教程 →</a>
+          <a href="${depthPrefix}zh/guides/fix-ai-slop-web-ui/" id="triage-link-3" data-i18n="triage.a3">看前端与 PPT 排查教程 →</a>
         </div>
       </div>`;
 }
@@ -757,6 +751,24 @@ export function renderColophon({ lang, depthPrefix, homeHref, guidesHref, rulesH
     </footer>`;
 }
 
+export function renderRedirectStubHtml({ targetUrl, targetRelHref, title = "Moved — dislop" }) {
+  return `<!DOCTYPE html>
+<html lang="en" data-redirect-stub="1">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, follow">
+  <meta http-equiv="refresh" content="0; url=${escapeHtml(targetRelHref)}">
+  <link rel="canonical" href="${escapeHtml(targetUrl)}">
+  <title>${escapeHtml(title)}</title>
+</head>
+<body>
+  <p>This page moved to <a href="${escapeHtml(targetRelHref)}">${escapeHtml(targetUrl)}</a>.</p>
+</body>
+</html>
+`;
+}
+
 function renderStaticShell({
   lang,
   baseUrl,
@@ -775,23 +787,25 @@ function renderStaticShell({
   extraScripts = [],
 }) {
   const isEn = lang === "en";
-  const homeHref = isEn ? `${depthPrefix}en/` : `${depthPrefix}`;
-  const guidesHref = isEn ? `${depthPrefix}en/guides/` : `${depthPrefix}guides/`;
-  const awesomeHref = isEn ? `${depthPrefix}en/awesome/` : `${depthPrefix}awesome/`;
-  const rulesHref = isEn ? `${depthPrefix}en/rules/` : `${depthPrefix}rules/`;
-  const switchHref = altPath ? (altPath.startsWith("/") ? `${depthPrefix}${altPath.slice(1)}` : altPath) : `${depthPrefix}en/rules/`;
+  const homeHref = isEn ? `${depthPrefix}` : `${depthPrefix}zh/`;
+  const guidesHref = isEn ? `${depthPrefix}guides/` : `${depthPrefix}zh/guides/`;
+  const awesomeHref = isEn ? `${depthPrefix}awesome/` : `${depthPrefix}zh/awesome/`;
+  const rulesHref = isEn ? `${depthPrefix}rules/` : `${depthPrefix}zh/rules/`;
+  const switchHref = altPath
+    ? altPath === "/"
+      ? `${depthPrefix}`
+      : altPath.startsWith("/")
+        ? `${depthPrefix}${altPath.slice(1)}`
+        : altPath
+    : `${depthPrefix}rules/`;
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
   const zhUrl = isEn ? (altPath ? `${baseUrl}${altPath}` : canonicalUrl) : canonicalUrl;
   const enUrl = isEn ? canonicalUrl : (altPath ? `${baseUrl}${altPath}` : canonicalUrl);
 
   const langAttr = isEn ? "en" : "zh-CN";
   const altLinkHtml = altPath
-    ? isEn
-      ? `  <link rel="alternate" hreflang="zh-Hans" href="${escapeHtml(zhUrl)}">\n  <link rel="alternate" hreflang="en" href="${escapeHtml(enUrl)}">\n  <link rel="alternate" hreflang="x-default" href="${escapeHtml(zhUrl)}">`
-      : `  <link rel="alternate" hreflang="zh-Hans" href="${escapeHtml(zhUrl)}">\n  <link rel="alternate" hreflang="en" href="${escapeHtml(enUrl)}">\n  <link rel="alternate" hreflang="x-default" href="${escapeHtml(zhUrl)}">`
+    ? `  <link rel="alternate" hreflang="en" href="${escapeHtml(enUrl)}">\n  <link rel="alternate" hreflang="zh-Hans" href="${escapeHtml(zhUrl)}">\n  <link rel="alternate" hreflang="x-default" href="${escapeHtml(enUrl)}">`
     : `  <link rel="alternate" hreflang="zh-Hans" href="${escapeHtml(canonicalUrl)}">\n  <link rel="alternate" hreflang="x-default" href="${escapeHtml(canonicalUrl)}">`;
-  const effectiveSwitchHref =
-    isEn && altPath === "/" ? `${depthPrefix}?lang=zh` : (altPath ? switchHref : `${depthPrefix}en/rules/`);
 
   return `<!DOCTYPE html>
 <html lang="${langAttr}" data-static-lang="${lang}">
@@ -817,6 +831,7 @@ function renderStaticShell({
   <meta name="twitter:image" content="${baseUrl}/assets/${ogImage}">
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
 ${altLinkHtml}
+  <script src="${depthPrefix}lang-init.js"></script>
   <link rel="alternate" type="application/atom+xml" href="${depthPrefix}${feedPath}" title="${isEn ? "dislop Guides (EN)" : "dislop 实用指南（中文）"}">
 ${mdAltHref ? `  <link rel="alternate" type="text/markdown" href="${escapeHtml(mdAltHref)}" title="Markdown Mirror">\n` : ""}  <link rel="alternate" type="text/plain" href="${depthPrefix}llms.txt" title="LLMs Resource Index">
   <link rel="icon" type="image/svg+xml" href="${depthPrefix}assets/logo.svg">
@@ -836,7 +851,7 @@ ${renderPrimaryNavLinks({ lang, depthPrefix, activeNav })}
       <div class="top-controls">
         ${renderStaticAccountCtrl({ lang, depthPrefix })}
         ${renderGithubCtrl()}
-        <a href="${escapeHtml(effectiveSwitchHref)}" class="ctrl-btn" aria-label="${isEn ? "切换为中文" : "Switch to English"}">${isEn ? "中文" : "EN"}</a>
+        <a href="${escapeHtml(switchHref)}" data-lang-switch="${isEn ? "zh" : "en"}" class="ctrl-btn" aria-label="${isEn ? "切换为中文" : "Switch to English"}">${isEn ? "中文" : "EN"}</a>
         <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="${isEn ? "Toggle color theme" : "切换浅深色主题"}">${isEn ? "Dark" : "深色"}</button>
       </div>
     </header>
@@ -847,15 +862,6 @@ ${mainHtml}
 
 ${renderColophon({ lang, depthPrefix, homeHref, guidesHref, rulesHref, awesomeHref })}
   </div>
-  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
-    <div class="demo-lightbox-head">
-      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
-      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">${isEn ? "Close" : "关闭"}</button>
-    </div>
-    <div class="demo-lightbox-body">
-      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
-    </div>
-  </dialog>
   <script defer src="${depthPrefix}static-ui.js"></script>
 ${extraScripts.map((s) => `  <script type="module" src="${s}"></script>`).join("\n")}
 </body>
@@ -864,15 +870,6 @@ ${extraScripts.map((s) => `  <script type="module" src="${s}"></script>`).join("
 }
 
 const HERO_PEN_PATH = "M4 26H314C321.9 26 327.5 20.6 327.5 13.6C327.5 8.4 323.9 5 319.4 5C314.6 5 311.4 8.75 311.4 14.15C311.4 22.85 318.1 31.6 328.3 35.8";
-const AGENT_MARK_PATH = "M2.2 14H12.3C16.7 14 19.8 10.9 19.8 7C19.8 4.1 17.8 2.2 15.3 2.2C12.6 2.2 10.8 4.3 10.8 7.3C10.8 12.2 14.6 17.1 20.3 19.4";
-const EN_DEMO_TAB_LABELS = {
-  "proof-cycle": "3-state proof",
-  "cli-check": "CLI gate",
-  "workbench-live": "Workbench",
-  "ui-slop": "Web UI",
-  "deck-office": "PPTX & DOCX",
-  "agent-workflow": "Agent + CI",
-};
 
 export function renderHeroPenSvg() {
   return `<svg class="hero-pen-svg" viewBox="0 0 340 40" preserveAspectRatio="none" focusable="false">
@@ -880,350 +877,7 @@ export function renderHeroPenSvg() {
               </svg>`;
 }
 
-export function buildEnglishHomeHtml({ baseUrl, version, snapshotDate, packsById, allRules, radarData, guides }) {
-  const detCount = radarData.entries.filter((e) => e.hasDeterministicCheck).length;
-  const packOrder = ["core", "business-brief", "engineering-spec", "regulated-comms", "literary-essay", "deck-and-ui", "executive-deck"];
-  const scenes = loadDemosManifest().scenes || [];
-  const demoTabsHtml = scenes
-    .map((scene, idx) => {
-      const slug = escapeHtml(scene.slug);
-      const label = escapeHtml(EN_DEMO_TAB_LABELS[scene.slug] || scene.slug);
-      return `          <button type="button" class="demo-tab" role="tab" id="demo-tab-${slug}" aria-selected="${idx === 0 ? "true" : "false"}" aria-controls="demo-card-${slug}"${idx === 0 ? "" : ' tabindex="-1"'} data-demo-select="${slug}">${label}</button>`;
-    })
-    .join("\n");
-  const demoCardsHtml = scenes
-    .map((scene) =>
-      renderDemoFigureHtml({ scene, lang: "en", depthPrefix: "../", cardClass: "demo-card", withReplay: true, withId: true, stripIndex: true })
-    )
-    .join("\n\n");
-  const guideItemsHtml = guides
-    .map(({ en }) => {
-      const m = en.meta;
-      return `        <a class="guide-index-item" href="./guides/${escapeHtml(m.slug)}/" data-guide-slug="${escapeHtml(m.slug)}">
-          <span class="guide-index-cat">${escapeHtml(m.category)} · ${escapeHtml(String(m.readingMinutes || 5))} min</span>
-          <strong class="guide-index-title">${escapeHtml(m.title)}</strong>
-          <span class="guide-index-desc">${escapeHtml(m.description)}</span>
-        </a>`;
-    })
-    .join("\n");
-
-  const packRowsHtml = packOrder
-    .map((pid) => {
-      const p = packsById[pid];
-      if (!p) return "";
-      const cnt = (p.rules || []).length;
-      return `            <tr>
-              <td><code>${escapeHtml(pid)}</code></td>
-              <td><strong>${escapeHtml(p.name.en)}</strong></td>
-              <td>${escapeHtml(p.summary.en)}</td>
-              <td style="white-space:nowrap;">${cnt} rules</td>
-            </tr>`;
-    })
-    .join("\n");
-
-  const promptText =
-    "Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.";
-
-  const mainHtml = `    <section id="top" class="band-rule">
-      <div class="lead-band band-rule">
-        <div class="lead-copy">
-          <div>
-            <!-- dislop-quote-start -->
-            <div class="hero-strike-wrap" aria-hidden="true">
-              <del class="hero-strike">Certainly! Here is your polished draft.</del>
-              ${renderHeroPenSvg()}
-            </div>
-            <!-- dislop-quote-end -->
-            <h1 class="lead-heading">Cutting AI slop is real productivity.</h1>
-            <p class="lead-sub">A dedicated linter for AI slop. Flags leftover chat greetings, filler phrases, 'Not X, but Y' slogans, and stock template UI across docs, web pages, Word, and PowerPoint before you ship. Connects in one command and runs offline by default.</p>
-          </div>
-
-          <div class="hero-cta-row">
-            <a href="../?lang=en#workbench" class="btn-primary">Try it in the workbench →</a>
-            <a href="#surfaces" class="ctrl-btn">Add to your agent or editor</a>
-          </div>
-
-          <div class="hero-cli-inline hero-agent-card ink-stage">
-            <div class="hero-agent-head">
-              <svg class="hero-agent-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${AGENT_MARK_PATH}"/></svg>
-              <span class="hero-cli-label">Agent prompt · auto-setup</span>
-            </div>
-            <div class="cmd-box is-prompt">
-              <code id="en-hero-prompt">${escapeHtml(promptText)}</code>
-              <button type="button" class="ctrl-btn is-ink-primary" data-copy-target="en-hero-prompt">Copy for agent</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="hero-proof" aria-label="Three-state editing example">
-          <div class="hero-proof-head">
-            <div class="mode-tabs" role="tablist" aria-label="Switch example version" data-en-hero-tabs hidden>
-              <button type="button" role="tab" id="en-hero-tab-bad" class="ctrl-btn is-active" aria-selected="true" aria-controls="en-hero-panel-bad" data-en-hero-state="bad">Original</button>
-              <button type="button" role="tab" id="en-hero-tab-trap" class="ctrl-btn" aria-selected="false" aria-controls="en-hero-panel-trap" tabindex="-1" data-en-hero-state="trap">Still sounds like AI</button>
-              <button type="button" role="tab" id="en-hero-tab-good" class="ctrl-btn" aria-selected="false" aria-controls="en-hero-panel-good" tabindex="-1" data-en-hero-state="good">Cleaned up</button>
-            </div>
-          </div>
-          <div class="hero-slip">
-            <div class="hero-slip-head" aria-hidden="true"><span>launch-note.md</span><span>business-brief</span></div>
-            <!-- dislop-quote-start -->
-            <div class="hero-proof-panel" id="en-hero-panel-bad" role="tabpanel" aria-labelledby="en-hero-tab-bad" data-en-hero-panel="bad">
-              <p class="hero-panel-label">Original</p>
-              <div class="hero-proof-stage"><span class="mark-span mark-error">Certainly! Here is</span> the launch note. <span class="mark-span mark-warn">It's worth noting that</span> CSV exports are a <span class="mark-span mark-warn">game-changer</span>, finishing in up to 12 minutes for workspaces above 500,000 rows.</div>
-              <ul class="hero-proof-notes">
-                <li><span class="hero-note-dot is-error"></span><span><strong>Red: </strong>Stray chat reply on line one. Delete it.</span></li>
-                <li><span class="hero-note-dot is-warn"></span><span><strong>Blue: </strong>Filler opener and hype noun ('game-changer'). Say what changed instead.</span></li>
-              </ul>
-            </div>
-            <div class="hero-proof-panel" id="en-hero-panel-trap" role="tabpanel" aria-labelledby="en-hero-tab-trap" data-en-hero-panel="trap">
-              <p class="hero-panel-label">Still sounds like AI</p>
-              <div class="hero-proof-stage">CSV exports finish in up to 12 minutes for workspaces above 500,000 rows. <span class="mark-span mark-warn">This isn't just an upgrade — it's a new standard</span>.</div>
-              <div class="hero-proof-verdict is-rejected">Rejected: the buzzwords are gone, but a 'Not X, but Y' slogan took their place.</div>
-            </div>
-            <div class="hero-proof-panel" id="en-hero-panel-good" role="tabpanel" aria-labelledby="en-hero-tab-good" data-en-hero-panel="good">
-              <p class="hero-panel-label">Cleaned up</p>
-              <div class="hero-proof-stage">CSV exports finish in up to 12 minutes for workspaces above 500,000 rows.</div>
-              <div class="hero-proof-verdict">0 issues. Chat wrapper and stock phrasing removed.</div>
-            </div>
-            <!-- dislop-quote-end -->
-          </div>
-          <div class="hero-proof-foot">
-            <span>Same rule engine in the browser and the CLI</span>
-            <a href="../?lang=en#workbench">Test your own draft →</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="marks-strip" aria-label="Core capabilities">
-        <div class="mark-pillar">
-          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Community rules and tools in one place</h2></div>
-          <p class="mark-pillar-desc">Bundles ${allRules.length} rules, 12 extended pattern checks, and ${radarData.entries.length} curated anti-slop tools for docs, web UI, Word, and PowerPoint.</p>
-        </div>
-        <div class="mark-pillar">
-          <div class="mark-pillar-head"><h2 class="mark-pillar-title">One command into agents and editors</h2></div>
-          <p class="mark-pillar-desc">Works with Codex, Claude Code, Cursor, WorkBuddy, and GitHub Actions, in the terminal, the editor, or CI.</p>
-        </div>
-        <div class="mark-pillar">
-          <div class="mark-pillar-head"><h2 class="mark-pillar-title">Drafts stay on your machine</h2></div>
-          <p class="mark-pillar-desc">The Skill and CLI run offline with zero uploads. Switch the workbench or remote MCP to cloud mode when you want multi-model review.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="surfaces" class="section-block band-rule" aria-labelledby="en-surfaces-heading">
-      <div class="surfaces-split">
-        <div class="surfaces-intro">
-          <h2 class="section-title" id="en-surfaces-heading">Three ways to run dislop: Skill, local CLI, and Cloud MCP</h2>
-          <p class="section-desc">Pick the one that matches your tools. Each comes with a copy-ready config.</p>
-          <ol class="setup-ledger">
-            <li>
-              <h3>Markdown-only Agent Skill</h3>
-              <p>Writing and UI reference cards by genre, with no bundled scripts. Install it in Claude Code, Codex, Cursor, or Antigravity so the agent reads it before drafting and runs the local CLI afterward.</p>
-            </li>
-            <li>
-              <h3>Open-source local CLI and plugins</h3>
-              <p>Zero dependencies, under 250 KB, with all 7 scenario packs built in. Checks docs, Word, PowerPoint, and Git diffs offline in terminals, editors, and CI. You can also plug in your own model key.</p>
-            </li>
-            <li>
-              <h3>Official Cloud MCP &amp; web workbench</h3>
-              <p>Connect from Claude Cowork, WorkBuddy, Qwen, or your editor. Sign in for 30 free credits a month and get multi-model review by genre with concrete edits.</p>
-              <span class="setup-ledger-url">https://dislop.com/mcp</span>
-            </li>
-            <li class="is-agent-note">
-              <h3>Let your agent set it up</h3>
-              <p>Send dislop.com/llms.txt to your agent. It picks the Skill, CLI, or remote MCP, installs it, and runs a first check on your files.</p>
-            </li>
-          </ol>
-          <a href="./guides/agent-cli-mcp-tutorial/" class="surfaces-more">Full setup tutorial →</a>
-        </div>
-
-        <div class="code-panel ink-stage" id="cli-mcp">
-          <div class="code-panel-head">
-            <span class="terminal-title">quick-start.sh</span>
-            <a href="../tools/index.md" class="terminal-link">tools/index.md</a>
-          </div>
-<pre class="terminal-plain"><span class="term-comment"># Markdown-only Agent Skill (no scripts)</span>
-npx skills add dislop-ai/dislop
-
-<span class="term-comment"># Offline CLI, Node or Python, all 7 packs, zero network</span>
-npx --yes dislop check .
-uvx dislop check .
-
-<span class="term-comment"># Pull request gate on changed lines only</span>
-npx --yes dislop check --changed origin/main --format github
-
-<span class="term-comment"># Official Cloud MCP endpoint</span>
-https://dislop.com/mcp</pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="demos" class="section-block band-rule" aria-labelledby="en-demos-heading">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" id="en-demos-heading">Six short clips: prose, CLI, workbench, web UI, decks, and agent CI</h2>
-          <p class="section-desc">Each clip runs about 7 seconds and is recorded offline from the real rules. Pick a scene, then pause, replay, or zoom in.</p>
-        </div>
-        <a href="https://github.com/dislop-ai/dislop/blob/main/docs/gif-production-guide.md" target="_blank" rel="noopener">Animation &amp; GIF guide →</a>
-      </div>
-      <div class="demo-stage" data-demo-stage>
-        <div class="demo-stage-rail" role="tablist" aria-label="Choose a demo scene" hidden>
-${demoTabsHtml}
-        </div>
-        <div class="demos-grid">
-${demoCardsHtml}
-        </div>
-      </div>
-    </section>
-
-    <section id="guides-home" class="section-block band-rule" aria-labelledby="en-guides-heading">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" id="en-guides-heading">Six field guides: writing, web UI, decks, and setup</h2>
-          <p class="section-desc">Each guide comes with copy-ready commands and before/after examples, grounded in public sources and real repository checks.</p>
-        </div>
-        <a href="./guides/">All guides →</a>
-      </div>
-      <div class="guides-index">
-${guideItemsHtml}
-      </div>
-    </section>
-
-    <section id="rules" class="section-block band-rule" aria-labelledby="en-rules-heading">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" id="en-rules-heading">${allRules.length} built-in rules across 7 scenario packs</h2>
-          <p class="section-desc">Each rule pairs a deterministic probe with a check question and before / still-AI / clean examples.</p>
-        </div>
-        <a href="./rules/">Browse English &amp; shared rules →</a>
-      </div>
-      <div class="table-scroll" tabindex="0" role="region" aria-label="Scenario packs">
-        <table class="matrix-table">
-          <thead>
-            <tr><th>Pack ID</th><th>Name</th><th>What it catches</th><th>Rules</th></tr>
-          </thead>
-          <tbody>
-${packRowsHtml}
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="pricing" class="section-block band-rule" aria-labelledby="en-pricing-heading">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" id="en-pricing-heading">Local tools stay free; cloud review uses credits</h2>
-          <p class="section-desc">The Skill, CLI, and rules are Apache-2.0 and run offline. Cloud review, rewrites, and remote MCP use credits after sign-in: 30 free credits a month, and the paid model API never trains on your drafts.</p>
-        </div>
-        <a href="https://github.com/dislop-ai/dislop/blob/main/benchmarks/MODEL-COMPARISON.md" target="_blank" rel="noopener">Read 5-model benchmark →</a>
-      </div>
-
-      <div class="pricing-grid">
-        <div class="pricing-col">
-          <div class="pricing-head">
-            <h3>Open Source Local (Skill + CLI)</h3>
-            <span class="pricing-amount">$0 · Forever free</span>
-          </div>
-          <p class="pricing-sub">For drafts that cannot leave your machine: offline setups, private repos, and internal docs. All code and rules are open source.</p>
-          <ul class="pricing-list">
-            <li>Pure-Markdown Agent Skill (no scripts) &amp; local CLI (Apache-2.0)</li>
-            <li>All 7 domain packs (${allRules.length} rules) bundled offline for Markdown, HTML/CSS/SVG, images, DOCX, PPTX &amp; PDF</li>
-            <li>Built-in 5-axis rhythm telemetry, 14.6 KB Pocket ML (<code>--ml</code>) &amp; offline <code>dislop voice</code></li>
-            <li>Zero network during check; developers can also plug in their own model key</li>
-          </ul>
-          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
-            <a href="#surfaces" class="ctrl-btn">Install Skill / CLI ↑</a>
-          </div>
-        </div>
-
-        <div class="pricing-col is-featured">
-          <div class="pricing-head">
-            <h3>Cloud Free (Remote MCP)</h3>
-            <span class="pricing-amount">$0 · 30 credits / mo</span>
-          </div>
-          <p class="pricing-sub">Sign in with a 6-digit email code, 1-click link, Google, or GitHub—no password or card—for the web workbench and Remote MCP.</p>
-          <ul class="pricing-list">
-            <li>Connect <code>https://dislop.com/mcp</code> via zero-config OAuth 2.1 or API keys (up to 12,000 chars/call)</li>
-            <li>Cloud Review (1 credit): catches pitch cadence, filler, and clichés with concrete edits</li>
-            <li>Cloud Rewrite (2 credits): plain rewrite that re-checks rules, numbers, and qualifiers</li>
-            <li>Layout-preserving Word/PPT &amp; voice profiles (2-3 credits): keeps formatting and syncs up to 3 voice cards</li>
-          </ul>
-          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
-            <a href="../?lang=en#cloud-token-box" class="btn-primary" style="min-height:32px;padding:6px 14px;font-size:0.82rem;">Sign in · 30 free credits →</a>
-          </div>
-        </div>
-
-        <div class="pricing-col">
-          <div class="pricing-head">
-            <h3>Pro · Credit Packs · Team</h3>
-            <span class="pricing-amount">$12/mo · $10 PAYGO</span>
-          </div>
-          <p class="pricing-sub">If you write often, Pro costs 36% less per credit. If you only need it occasionally, credit packs never expire.</p>
-          <ul class="pricing-list">
-            <li>Pro ($12/mo or $108/yr): 1,500 credits/mo (up to 50,000 chars/call) + 20 cloud voice cards</li>
-            <li>PAYGO Pack ($10 / 800 credits): one-time purchase, never expires, unlocks 50,000 chars/call</li>
-            <li>Team ($29/seat/mo): 5,000 credits/seat + 50 shared brand voice cards &amp; PR review</li>
-            <li>Paid-tier Google Gemini API only—no draft storage and never used for training</li>
-          </ul>
-          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
-            <a href="../?lang=en#cloud-token-box" class="ctrl-btn">Upgrade or join waitlist →</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="awesome" class="section-block band-rule" aria-labelledby="en-awesome-heading">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title" id="en-awesome-heading">Awesome Anti-Slop: checked tools, guides, and papers</h2>
-          <p class="section-desc">${radarData.entries.length} linters, writing skills, UI rules, PR policies, and papers, checked on ${escapeHtml(snapshotDate)}. ${detCount} of them run automated checks.</p>
-        </div>
-        <a href="./awesome/">Open the filterable list →</a>
-      </div>
-    </section>
-
-    <section id="faq" class="section-block" aria-labelledby="en-faq-heading">
-      <h2 class="section-title" id="en-faq-heading">Common questions</h2>
-      <div class="faq-list">
-        <div class="faq-item">
-          <h3>Does dislop upload my drafts when checking locally?</h3>
-          <p>No. The pure-Markdown Skill, local CLI, editor plugins, and the default browser workbench run offline with zero uploads. Only explicit Cloud MCP or signed-in cloud buttons call our paid Google Gemini API tier without storing drafts.</p>
-        </div>
-        <div class="faq-item">
-          <h3>How is dislop different from an AI text detector?</h3>
-          <p>Probabilistic detectors give a single guess percentage without saying what to fix. dislop flags exact lines—leftover chat greetings, unfilled placeholders, second-order slogans, AI gradients, and dense PPTX slides—with edit checks.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Which coding and office agents can connect to dislop?</h3>
-          <p>Claude Code, Codex, Cursor, Windsurf, Antigravity, GitHub Actions, and any client supporting Agent Skills or Streamable HTTP MCP at <code>https://dislop.com/mcp</code>.</p>
-        </div>
-      </div>
-    </section>`;
-
-  return renderStaticShell({
-    lang: "en",
-    baseUrl,
-    depthPrefix: "../",
-    title: "dislop — Cutting AI slop is real productivity.",
-    description: `Dedicated linter for AI slop in docs, web UI, Word, and PowerPoint. ${allRules.length} built-in rules, ${radarData.entries.length} curated tools, and offline CLI/Skill.`,
-    canonicalPath: "/en/",
-    altPath: "/",
-    ogImage: "og-card.png",
-    jsonLdScript: renderHomeJsonLd({
-      lang: "en",
-      baseUrl,
-      version,
-      ruleCount: allRules.length,
-      awesomeCount: radarData.entries.length,
-      guideCount: guides.length,
-    }),
-    feedPath: "en/feed.xml",
-    mdAltHref: "../index.md",
-    activeNav: "home",
-    mainHtml,
-  });
-}
-
-// Stable IDs on the /awesome/ masthead so site/awesome/awesome.js can retarget links on a language switch
+// Stable IDs on the /awesome/ and /zh/awesome/ mastheads so site/awesome/awesome.js can retarget links
 export const AWESOME_NAV_IDS = {
   workbench: "awesome-home-link",
   surfaces: "awesome-surfaces-link",
@@ -1232,128 +886,167 @@ export const AWESOME_NAV_IDS = {
   rules: "awesome-rules-link",
 };
 
-export function buildEnglishAwesomeHtml({ baseUrl, snapshotDate, radarData, githubSectionMeta }) {
+export function buildAwesomePageHtml({ lang, baseUrl, version = PACKAGE_VERSION, snapshotDate, radarData, githubSectionMeta }) {
+  const isEn = lang === "en";
+  const depthPrefix = isEn ? "../" : "../../";
+  const homeHref = isEn ? "../" : "../";
+  const canonicalUrl = isEn ? `${baseUrl}/awesome/` : `${baseUrl}/zh/awesome/`;
+  const mdHref = isEn ? "./index.md" : "../../awesome/index.md";
+  const jsonHref = isEn ? "./index.json" : "../../awesome/index.json";
+  const feedHref = "../feed.xml";
+  const awesomeJsSrc = isEn ? "./awesome.js" : "../../awesome/awesome.js";
+  const ghHref = isEn
+    ? "https://github.com/dislop-ai/dislop/tree/main/awesome"
+    : "https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md";
+
   const sectionOptions = [
-    `<option value="all">All topics (${radarData.entries.length})</option>`,
+    isEn
+      ? `<option value="all">All topics (${radarData.entries.length})</option>`
+      : `<option value="all">全部类别（${radarData.entries.length}）</option>`,
     ...githubSectionMeta.map((sec) => {
       const cnt = radarData.entries.filter((e) => e.section === sec.id).length;
-      return `<option value="${sec.id}">${escapeHtml(sec.headingEn)} (${cnt})</option>`;
+      return isEn
+        ? `<option value="${sec.id}">${escapeHtml(sec.headingEn)} (${cnt})</option>`
+        : `<option value="${sec.id}">${escapeHtml(sec.headingZh)}（${cnt}）</option>`;
     }),
   ].join("\n          ");
 
   const rowsHtml = radarData.entries
     .map((e) => {
       const secObj = githubSectionMeta.find((s) => s.id === e.section);
-      const secLabel = secObj ? secObj.headingEn : e.section;
+      const secLabel = secObj ? (isEn ? secObj.headingEn : secObj.headingZh) : e.section;
       const isContrast = e.section === "contrast-and-detection";
-      const displayName = e.nameEn || e.name;
-      const displaySummary = e.summaryEn || e.summary;
+      const displayName = isEn ? e.nameEn || e.name : e.name;
+      const displaySummary = isEn ? e.summaryEn || e.summary : e.summary;
       const metaParts = [];
       if (typeof e.stars === "number") metaParts.push(`${e.stars.toLocaleString("en-US")}★`);
       if (e.pushedAt) metaParts.push(e.pushedAt);
       if (e.license && e.license !== "NOASSERTION") metaParts.push(e.license);
-      if (e.archived) metaParts.push("archived");
+      if (e.archived) metaParts.push(isEn ? "archived" : "已归档");
+      const detBadge = e.hasDeterministicCheck
+        ? isEn
+          ? ' · <span style="color:var(--ink-2);font-weight:600;">automated check</span>'
+          : ' · <span style="color:var(--ink-2);font-weight:600;">自动检查</span>'
+        : "";
       return `<tr>
               <td><a href="${escapeHtml(e.url)}" target="_blank" rel="noopener"><strong>${escapeHtml(displayName)}</strong></a>${
         e.repo ? `<div style="font-family:var(--font-mono);font-size:0.73rem;color:var(--ink-3);margin-top:2px;">${escapeHtml(e.repo)}</div>` : ""
-      }<div style="font-size:0.74rem;color:${isContrast ? "var(--mark-error)" : "var(--ink-3)"};margin-top:4px;">${escapeHtml(secLabel)}${e.hasDeterministicCheck ? ' · <span style="color:var(--ink-2);font-weight:600;">automated check</span>' : ""}</div></td>
+      }<div style="font-size:0.74rem;color:${isContrast ? "var(--mark-error)" : "var(--ink-3)"};margin-top:4px;">${escapeHtml(secLabel)}${detBadge}</div></td>
               <td>${escapeHtml(displaySummary)}</td>
               <td style="font-family:var(--font-mono);font-size:0.74rem;white-space:nowrap;text-align:right;">${escapeHtml(metaParts.join(" · ") || "—")}</td>
             </tr>`;
     })
     .join("\n");
 
-  const triageHtml = renderAwesomeTriageHtml({ lang: "en", depthPrefix: "../../" });
+  const triageHtml = renderAwesomeTriageHtml({ lang, depthPrefix });
+  const titleText = isEn
+    ? `Awesome Anti-Slop (${radarData.entries.length} Entries) — dislop`
+    : `去 AI 味工具清单 · Awesome Anti-Slop（${radarData.entries.length} 条）— dislop`;
+  const descText = isEn
+    ? `${radarData.entries.length} verified anti-slop tools, deterministic linters, writing guides, UI design rules, and papers in English and Chinese. Filter offline in this tab.`
+    : `去 AI 味才是真正的生产力！整理了 ${radarData.entries.length} 个中英文去 AI 味工具、检查器、写作规范、网页设计指南和论文，链接和仓库信息已核验，可在网页里筛选。`;
+  const ogTitle = isEn
+    ? `Awesome Anti-Slop (${radarData.entries.length} Entries) — dislop`
+    : `Awesome Anti-Slop — ${radarData.entries.length} 个去 AI 味工具与资料`;
+  const ogDesc = isEn
+    ? "Curated directory of anti-slop linters, writing skills, UI rules, PR policies, and research papers."
+    : "去 AI 味才是真正的生产力！中英文去 AI 味工具、检查器、写作与设计规范、代码 PR 治理和论文清单，可在网页里筛选。";
+  const ogImg = isEn ? "og-card.png" : "og-card-zh.png";
 
   return `<!DOCTYPE html>
-<html lang="en" data-static-lang="en">
+<html lang="${isEn ? "en" : "zh-CN"}" data-static-lang="${lang}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <script src="../../lang-init.js"></script>
-  <title>Awesome Anti-Slop (${radarData.entries.length} Entries) — dislop</title>
-  <meta name="description" content="${radarData.entries.length} verified anti-slop tools, deterministic linters, writing guides, UI design rules, and papers in English and Chinese. Filter offline in this tab.">
+  <title>${escapeHtml(titleText)}</title>
+  <meta name="description" content="${escapeHtml(descText)}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="dislop">
-  <meta property="og:url" content="${baseUrl}/en/awesome/">
-  <meta property="og:title" content="Awesome Anti-Slop (${radarData.entries.length} Entries) — dislop">
-  <meta property="og:description" content="Curated directory of anti-slop linters, writing skills, UI rules, PR policies, and research papers.">
-  <meta property="og:image" content="${baseUrl}/assets/og-card.png">
+  <meta property="og:url" content="${canonicalUrl}">
+  <meta property="og:title" content="${escapeHtml(ogTitle)}">
+  <meta property="og:description" content="${escapeHtml(ogDesc)}">
+  <meta property="og:image" content="${baseUrl}/assets/${ogImg}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@dislop_ai">
-  <meta name="twitter:title" content="Awesome Anti-Slop (${radarData.entries.length} Entries) — dislop">
-  <meta name="twitter:description" content="Curated directory of anti-slop linters, writing skills, UI rules, PR policies, and research papers.">
-  <meta name="twitter:image" content="${baseUrl}/assets/og-card.png">
-  <link rel="canonical" href="${baseUrl}/en/awesome/">
-  <link rel="alternate" hreflang="zh-Hans" href="${baseUrl}/awesome/">
-  <link rel="alternate" hreflang="en" href="${baseUrl}/en/awesome/">
+  <meta name="twitter:title" content="${escapeHtml(ogTitle)}">
+  <meta name="twitter:description" content="${escapeHtml(ogDesc)}">
+  <meta name="twitter:image" content="${baseUrl}/assets/${ogImg}">
+  <link rel="canonical" href="${canonicalUrl}">
+  <link rel="alternate" hreflang="en" href="${baseUrl}/awesome/">
+  <link rel="alternate" hreflang="zh-Hans" href="${baseUrl}/zh/awesome/">
   <link rel="alternate" hreflang="x-default" href="${baseUrl}/awesome/">
-  <link rel="alternate" type="text/markdown" href="../../awesome/index.md" title="Awesome Anti-Slop Markdown Directory">
-  <link rel="alternate" type="application/json" href="../../awesome/index.json" title="Awesome Anti-Slop JSON (${radarData.schema})">
-  <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
-  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
-  <link rel="stylesheet" href="../../styles.css">
-${renderAwesomeJsonLd({ lang: "en", baseUrl, entries: radarData.entries })}
+  <script src="${depthPrefix}lang-init.js"></script>
+  <link rel="alternate" type="application/atom+xml" href="${feedHref}" title="${isEn ? "dislop Guides (EN)" : "dislop 实用指南（中文）"}">
+  <link rel="alternate" type="text/markdown" href="${mdHref}" title="Awesome Anti-Slop Markdown Directory">
+  <link rel="alternate" type="application/json" href="${jsonHref}" title="Awesome Anti-Slop JSON (${radarData.schema})">
+  <link rel="alternate" type="text/plain" href="${depthPrefix}llms.txt" title="LLMs Resource Index">
+  <link rel="icon" type="image/svg+xml" href="${depthPrefix}assets/logo.svg">
+  <link rel="stylesheet" href="${depthPrefix}styles.css">
+${renderAwesomeJsonLd({ lang, baseUrl, entries: radarData.entries })}
 </head>
 <body>
-  <a class="skip-link" href="#main-content" data-i18n="nav.skip">Skip to main content</a>
+  <a class="skip-link" href="#main-content" data-i18n="nav.skip">${isEn ? "Skip to main content" : "跳至正文"}</a>
   <div class="rail-shell">
     <header class="topbar band-rule">
-      ${renderBrandLockup({ lang: "en", depthPrefix: "../../", homeHref: "../", metaI18nKey: "nav.brandMeta" })}
+      ${renderBrandLockup({ lang, depthPrefix, homeHref, version, metaI18nKey: "nav.brandMeta" })}
 
-      <nav class="nav-links" aria-label="Main navigation">
-${renderPrimaryNavLinks({ lang: "en", depthPrefix: "../../", activeNav: "awesome", ids: AWESOME_NAV_IDS, withI18n: true })}
+      <nav class="nav-links" aria-label="${isEn ? "Main navigation" : "主导航"}">
+${renderPrimaryNavLinks({ lang, depthPrefix, activeNav: "awesome", ids: AWESOME_NAV_IDS, withI18n: true })}
       </nav>
 
       <div class="top-controls">
-        ${renderStaticAccountCtrl({ lang: "en", depthPrefix: "../../", i18nKey: "nav.signIn" })}
+        ${renderStaticAccountCtrl({ lang, depthPrefix, i18nKey: "nav.signIn" })}
         ${renderGithubCtrl({ i18nKey: "nav.github" })}
-        <button type="button" id="lang-toggle" class="ctrl-btn" aria-label="切换为中文">中文</button>
-        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+        <button type="button" id="lang-toggle" class="ctrl-btn" aria-label="${isEn ? "切换为中文" : "Switch to English"}">${isEn ? "中文" : "EN"}</button>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="${isEn ? "Toggle color theme" : "切换浅深色主题"}">${isEn ? "Dark" : "深色"}</button>
       </div>
     </header>
 
     <main id="main-content">
     <section class="section-block band-rule">
-      <h1 class="lead-heading" style="max-width:24ch;" data-i18n="awesome.heading">Awesome Anti-Slop</h1>
+      <h1 class="lead-heading" style="max-width:24ch;" data-i18n="awesome.heading">${isEn ? "Awesome Anti-Slop" : "去 AI 味工具清单"}</h1>
       <p class="section-desc" data-i18n="awesome.sub">
-        ${radarData.entries.length} tools, linters, style guides, UI rules, and papers in English and Chinese, including established projects like Vale and Impeccable. Filter by topic or show only automated tools. Links and GitHub snapshots checked on ${snapshotDate}.
+        ${isEn
+          ? `${radarData.entries.length} tools, linters, style guides, UI rules, and papers in English and Chinese, including established projects like Vale and Impeccable. Filter by topic or show only automated tools. Links and GitHub snapshots checked on ${snapshotDate}.`
+          : `一共整理了 ${radarData.entries.length} 个中英文工具、检查器、写作规范、网页设计指南和论文，包括 Vale、Impeccable 这类常用项目。可以按类别找，也可以只看能自动检查的工具。链接和 GitHub 状态核验于 ${snapshotDate}。`}
       </p>
       <div class="page-export-strip">
-        <span data-i18n="awesome.exportLabel">For agents and scripts:</span>
-        <a href="../../awesome/index.json">index.json</a>
-        <a href="../../awesome/index.md">index.md</a>
-        <a href="https://github.com/dislop-ai/dislop/tree/main/awesome" target="_blank" rel="noopener" id="awesome-gh-nav">GitHub</a>
+        <span data-i18n="awesome.exportLabel">${isEn ? "For agents and scripts:" : "给 Agent 或脚本读："}</span>
+        <a href="${jsonHref}">index.json</a>
+        <a href="${mdHref}">index.md</a>
+        <a href="${ghHref}" target="_blank" rel="noopener" id="awesome-gh-nav">GitHub</a>
       </div>
 
 ${triageHtml}
 
       <div class="catalog-controls" style="margin-top:24px;">
-        <input type="search" id="awesome-search" class="search-input" placeholder="Search name, repo, or what it does..." aria-label="Search directory">
-        <select id="awesome-section" class="filter-select" aria-label="Filter by topic">
+        <input type="search" id="awesome-search" class="search-input" placeholder="${isEn ? "Search name, repo, or what it does..." : "搜项目名、仓库或用途…"}" aria-label="${isEn ? "Search directory" : "搜索工具清单"}">
+        <select id="awesome-section" class="filter-select" aria-label="${isEn ? "Filter by topic" : "按类别筛选"}">
           ${sectionOptions}
         </select>
-        <select id="awesome-locale" class="filter-select" aria-label="Filter by locale">
-          <option value="all" data-i18n="awesome.allLocales">All locales</option>
+        <select id="awesome-locale" class="filter-select" aria-label="${isEn ? "Filter by locale" : "按语种筛选"}">
+          <option value="all" data-i18n="awesome.allLocales">${isEn ? "All locales" : "全部语种"}</option>
           ${radarData.taxonomy.locales.map((l) => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join("")}
         </select>
-        <button type="button" id="awesome-det-btn" class="ctrl-btn" aria-pressed="false" data-i18n="awesome.detOnly">Automated checks only</button>
-        <button type="button" id="awesome-reset-btn" class="ctrl-btn" data-i18n="awesome.reset">Reset</button>
+        <button type="button" id="awesome-det-btn" class="ctrl-btn" aria-pressed="false" data-i18n="awesome.detOnly">${isEn ? "Automated checks only" : "只看能自动检查"}</button>
+        <button type="button" id="awesome-reset-btn" class="ctrl-btn" data-i18n="awesome.reset">${isEn ? "Reset" : "重置"}</button>
       </div>
 
       <div class="filter-bar" style="margin-top:10px;">
-        <span class="catalog-count" id="awesome-count" aria-live="polite">${radarData.entries.length} / ${radarData.entries.length} entries</span>
-        <span style="font-size:0.78rem;color:var(--ink-3);" data-i18n="awesome.snapNote">Checked ${snapshotDate} · Filters offline in this tab</span>
+        <span class="catalog-count" id="awesome-count" aria-live="polite">${radarData.entries.length} / ${radarData.entries.length} ${isEn ? "entries" : "条"}</span>
+        <span style="font-size:0.78rem;color:var(--ink-3);" data-i18n="awesome.snapNote">${isEn ? `Checked ${snapshotDate} · Filters offline in this tab` : `核验日期 ${snapshotDate} · 标签页内筛选`}</span>
       </div>
 
-      <div class="table-scroll" tabindex="0" role="region" aria-label="Awesome Anti-Slop table">
+      <div class="table-scroll" tabindex="0" role="region" aria-label="${isEn ? "Awesome Anti-Slop table" : "工具清单表格"}">
         <table class="radar-table">
           <thead>
             <tr>
-              <th data-i18n="awesome.colName">Project &amp; topic</th>
-              <th data-i18n="awesome.colSummary">What it does</th>
-              <th style="text-align:right;" data-i18n="awesome.colMeta">Stars · last push</th>
+              <th data-i18n="awesome.colName">${isEn ? "Project &amp; topic" : "项目与类别"}</th>
+              <th data-i18n="awesome.colSummary">${isEn ? "What it does" : "做什么的"}</th>
+              <th style="text-align:right;" data-i18n="awesome.colMeta">${isEn ? "Stars · last push" : "星标 · 最近更新"}</th>
             </tr>
           </thead>
           <tbody id="awesome-tbody">
@@ -1363,27 +1056,29 @@ ${rowsHtml}
       </div>
 
       <div class="contrast-notice" data-i18n="awesome.contrastNote">
-        Note: Contrast Watch lists probabilistic AI-text detectors and bypass tools for reference only. dislop flags AI slop in writing and design; it is not for evading disclosure policies.
+        ${isEn
+          ? "Note: Contrast Watch lists probabilistic AI-text detectors and bypass tools for reference only. dislop flags AI slop in writing and design; it is not for evading disclosure policies."
+          : "说明：「检测与规避研究（仅供对照）」收录概率型 AI 文本检测器和规避工具，只作对照参考。dislop 只清理文案和设计里的 AI 味，不用于规避披露规则。"}
       </div>
     </section>
     </main>
 
     <footer class="colophon">
       <div>
-        <span data-i18n="footer.snapshot">Checked ${snapshotDate} · Runs offline with no outbound requests</span>
+        <span data-i18n="footer.snapshot">${isEn ? `Checked ${snapshotDate} · Runs offline with no outbound requests` : `核验日期：${snapshotDate} · 离线运行，不发外网请求`}</span>
       </div>
       <div class="colophon-links">
-        <a href="../" id="awesome-foot-home" data-i18n="footer.home">Back to dislop</a>
-        <a href="../../awesome/index.json" data-i18n="footer.json">JSON</a>
-        <a href="../../awesome/index.md">Markdown</a>
-        <a href="../../llms.txt">llms.txt</a>
-        <a href="https://github.com/dislop-ai/dislop/tree/main/awesome" target="_blank" rel="noopener" id="awesome-gh-foot">GitHub</a>
+        <a href="${homeHref}" id="awesome-foot-home" data-i18n="footer.home">${isEn ? "Back to dislop" : "返回首页"}</a>
+        <a href="${jsonHref}" data-i18n="footer.json">${isEn ? "JSON" : "JSON 数据"}</a>
+        <a href="${mdHref}">Markdown</a>
+        <a href="${depthPrefix}llms.txt">llms.txt</a>
+        <a href="${ghHref}" target="_blank" rel="noopener" id="awesome-gh-foot">GitHub</a>
         <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
       </div>
     </footer>
   </div>
 
-  <script type="module" src="../../awesome/awesome.js"></script>
+  <script type="module" src="${awesomeJsSrc}"></script>
 </body>
 </html>
 `;
@@ -1420,10 +1115,10 @@ export function buildGuidesAndRulesPages({
     fs.writeFileSync(fullPath, content, "utf8");
   }
 
-  // 1. Guides Index (/guides/ & /en/guides/)
-  for (const lang of ["zh", "en"]) {
+  // 1. Guides Index (/guides/ = EN, /zh/guides/ = ZH)
+  for (const lang of ["en", "zh"]) {
     const isEn = lang === "en";
-    const depthPrefix = isEn ? "../../" : "../";
+    const depthPrefix = isEn ? "../" : "../../";
     const cardsHtml = guides
       .map((pair) => {
         const g = pair[lang].meta;
@@ -1438,21 +1133,21 @@ export function buildGuidesAndRulesPages({
 
     const mainHtml = `    <section class="section-block">
       <nav class="breadcrumbs" aria-label="${isEn ? "Breadcrumb" : "面包屑导航"}">
-        <a href="${isEn ? "../" : "../"}">dislop</a> / <span aria-current="page">${isEn ? "Guides" : "实用指南"}</span>
+        <a href="../">dislop</a> / <span aria-current="page">${isEn ? "Guides" : "实用指南"}</span>
       </nav>
       <h1 class="lead-heading" style="max-width:26ch;">${isEn ? "Anti-slop guides &amp; tutorials" : "去 AI 味实用指南与教程"}</h1>
       <p class="section-desc">
         ${isEn
-          ? "Six field guides covering prose, web UI, PowerPoint decks, agent setups, and linter selection—each grounded in verifiable sources and runnable commands."
-          : "覆盖文稿写作、前端界面、PPT 与 Word 排版、Agent 接入和工具选型的 6 篇实操教程。每篇都带正反句对照、可直接运行的命令和一手出处。"}
+          ? "Field guides covering prose, web UI, PowerPoint decks, agent setups, and linter selection—each grounded in verifiable sources and runnable commands."
+          : "覆盖文稿写作、前端界面、PPT 与 Word 排版、Agent 接入和工具选型的实操教程。每篇都带正反句对照、可直接运行的命令和一手出处。"}
       </p>
       <div class="guide-grid">
 ${cardsHtml}
       </div>
     </section>`;
 
-    const pageUrl = isEn ? `${baseUrl}/en/guides/` : `${baseUrl}/guides/`;
-    const homeUrl = isEn ? `${baseUrl}/en/` : `${baseUrl}/`;
+    const pageUrl = isEn ? `${baseUrl}/guides/` : `${baseUrl}/zh/guides/`;
+    const homeUrl = isEn ? `${baseUrl}/` : `${baseUrl}/zh/`;
     const jsonLd = renderJsonLdScript([
       {
         "@type": "CollectionPage",
@@ -1481,7 +1176,7 @@ ${cardsHtml}
     ]);
 
     writeHtml(
-      isEn ? "en/guides/index.html" : "guides/index.html",
+      isEn ? "guides/index.html" : "zh/guides/index.html",
       renderStaticShell({
         lang,
         baseUrl,
@@ -1490,24 +1185,24 @@ ${cardsHtml}
         description: isEn
           ? "Practical guides to catch and fix AI slop in prose, web UI, PowerPoint decks, and coding agent workflows."
           : "覆盖中文写作、前端页面、Word/PPT 排版与 Claude Code / Codex / Cursor 接入的去 AI 味实用教程。",
-        canonicalPath: isEn ? "/en/guides/" : "/guides/",
-        altPath: isEn ? "/guides/" : "/en/guides/",
+        canonicalPath: isEn ? "/guides/" : "/zh/guides/",
+        altPath: isEn ? "/zh/guides/" : "/guides/",
         ogImage: isEn ? "og-card.png" : "og-card-zh.png",
         jsonLdScript: jsonLd,
-        feedPath: isEn ? "en/feed.xml" : "feed.xml",
+        feedPath: isEn ? "feed.xml" : "zh/feed.xml",
         activeNav: "guides",
         mainHtml,
       })
     );
   }
-  htmlSitemapPairs.push({ zh: "/guides/", en: "/en/guides/", prio: "0.9" });
+  htmlSitemapPairs.push({ en: "/guides/", zh: "/zh/guides/", prio: "0.9" });
 
-  // 2. Individual Guide Articles (/guides/<slug>/ & /en/guides/<slug>/)
+  // 2. Individual Guide Articles (/guides/<slug>/ = EN, /zh/guides/<slug>/ = ZH)
   const guidePairBySlug = new Map(guides.map((p) => [p.slug, p]));
   for (const pair of guides) {
-    for (const lang of ["zh", "en"]) {
+    for (const lang of ["en", "zh"]) {
       const isEn = lang === "en";
-      const depthPrefix = isEn ? "../../../" : "../../";
+      const depthPrefix = isEn ? "../../" : "../../../";
       const g = pair[lang];
       const m = g.meta;
       const { html: bodyHtml, toc } = renderMarkdownToHtml(g.body, { lang, depthPrefix });
@@ -1540,7 +1235,8 @@ ${faqList
         .map((rid) => {
           const rMeta = ruleUiMeta[rid];
           const rTitle = isEn ? (rMeta?.title?.en || rid) : (rMeta?.title?.zh || rid);
-          return `<a class="related-link-chip" href="${depthPrefix}${isEn ? "en/" : ""}rules/${escapeHtml(rid)}/"><code>${escapeHtml(rid)}</code> · ${escapeHtml(rTitle)}</a>`;
+          const ruleLangPrefix = !isEn || rMeta?.lang === "zh" ? "zh/" : "";
+          return `<a class="related-link-chip" href="${depthPrefix}${ruleLangPrefix}rules/${escapeHtml(rid)}/"><code>${escapeHtml(rid)}</code> · ${escapeHtml(rTitle)}</a>`;
         })
         .join("\n");
 
@@ -1563,18 +1259,18 @@ ${sourceObjs
         </ul>`
         : "";
 
-      const pageUrl = `${baseUrl}${isEn ? `/en/guides/${m.slug}/` : `/guides/${m.slug}/`}`;
+      const pageUrl = `${baseUrl}${isEn ? `/guides/${m.slug}/` : `/zh/guides/${m.slug}/`}`;
       const citeLine = `[${m.title}](${pageUrl}) — ${m.description}`;
       const actionBarHtml = renderShareActionBar({
         isEn,
-        tryHref: `${depthPrefix}?lang=${lang}#workbench`,
+        tryHref: `${depthPrefix}${isEn ? "" : "zh/"}#workbench`,
         tryLabel: isEn ? "Try in workbench →" : "去工作台试查 →",
         citeMarkdown: citeLine,
       });
 
       const mainHtml = `    <section class="section-block">
       <nav class="breadcrumbs" aria-label="${isEn ? "Breadcrumb" : "面包屑导航"}">
-        <a href="${depthPrefix}${isEn ? "en/" : ""}">dislop</a> / <a href="../">${isEn ? "Guides" : "实用指南"}</a> / <span aria-current="page">${escapeHtml(m.navTitle)}</span>
+        <a href="${depthPrefix}${isEn ? "" : "zh/"}">dislop</a> / <a href="../">${isEn ? "Guides" : "实用指南"}</a> / <span aria-current="page">${escapeHtml(m.navTitle)}</span>
       </nav>
 
       <article>
@@ -1587,7 +1283,7 @@ ${sourceObjs
             <a href="./index.md">Markdown</a>
           </div>
           <div class="answer-box">
-            <div class="answer-box-label">${isEn ? "DIRECT ANSWER" : "先说结论"}</div>
+            <div class="answer-box-label">${isEn ? "In short" : "先说结论"}</div>
             <p>${renderInlineMd(m.summary || m.description)}</p>
           </div>
         </header>
@@ -1605,8 +1301,8 @@ ${tocHtml}
         </div>
       </article>
     </section>`;
-      const guidesUrl = `${baseUrl}${isEn ? "/en/guides/" : "/guides/"}`;
-      const homeUrl = `${baseUrl}${isEn ? "/en/" : "/"}`;
+      const guidesUrl = `${baseUrl}${isEn ? "/guides/" : "/zh/guides/"}`;
+      const homeUrl = `${baseUrl}${isEn ? "/" : "/zh/"}`;
       const graph = [
         {
           "@type": "TechArticle",
@@ -1642,7 +1338,7 @@ ${tocHtml}
         });
       }
 
-      const relDir = isEn ? `en/guides/${m.slug}` : `guides/${m.slug}`;
+      const relDir = isEn ? `guides/${m.slug}` : `zh/guides/${m.slug}`;
       writeHtml(
         `${relDir}/index.html`,
         renderStaticShell({
@@ -1652,11 +1348,11 @@ ${tocHtml}
           title: `${m.title} — dislop`,
           description: m.description,
           canonicalPath: `/${relDir}/`,
-          altPath: isEn ? `/guides/${m.slug}/` : `/en/guides/${m.slug}/`,
+          altPath: isEn ? `/zh/guides/${m.slug}/` : `/guides/${m.slug}/`,
           ogType: "article",
           ogImage: isEn ? "og-card.png" : "og-card-zh.png",
           jsonLdScript: renderJsonLdScript(graph),
-          feedPath: isEn ? "en/feed.xml" : "feed.xml",
+          feedPath: isEn ? "feed.xml" : "zh/feed.xml",
           mdAltHref: "./index.md",
           activeNav: "guides",
           mainHtml,
@@ -1684,13 +1380,13 @@ ${tocHtml}
         content: `---\ncontent-type: reference-data\nlang: ${lang}\nupdated: ${m.updated}\nversion: ${version}\n---\n\n# ${m.title}\n\n> ${m.summary || m.description}\n\n${g.body}${faqMd}${sourceText}\n`,
       });
     }
-    htmlSitemapPairs.push({ zh: `/guides/${pair.slug}/`, en: `/en/guides/${pair.slug}/`, prio: "0.8" });
+    htmlSitemapPairs.push({ en: `/guides/${pair.slug}/`, zh: `/zh/guides/${pair.slug}/`, prio: "0.8" });
   }
 
-  // 3. Rules Directory Index (/rules/ & /en/rules/)
-  for (const lang of ["zh", "en"]) {
+  // 3. Rules Directory Index (/rules/ = EN, /zh/rules/ = ZH)
+  for (const lang of ["en", "zh"]) {
     const isEn = lang === "en";
-    const depthPrefix = isEn ? "../../" : "../";
+    const depthPrefix = isEn ? "../" : "../../";
     const visibleRulesCount = allRules.filter(({ rule: r }) => !isEn || ruleUiMeta[r.id]?.lang !== "zh").length;
     const packSections = packOrder
       .map((pid) => {
@@ -1737,19 +1433,19 @@ ${rows}
 
     const mainHtml = `    <section class="section-block band-rule">
       <nav class="breadcrumbs" aria-label="${isEn ? "Breadcrumb" : "面包屑导航"}">
-        <a href="${isEn ? "../" : "../"}">dislop</a> / <span aria-current="page">${isEn ? "Rules" : "规则百科"}</span>
+        <a href="../">dislop</a> / <span aria-current="page">${isEn ? "Rules" : "规则百科"}</span>
       </nav>
-      <h1 class="lead-heading" style="max-width:26ch;">${isEn ? `All ${visibleRulesCount} English &amp; cross-language rules` : `全部 ${allRules.length} 条内置去 AI 味规则`}</h1>
+      <h1 class="lead-heading" style="max-width:26ch;">${isEn ? "English and cross-language rules" : "内置去 AI 味规则明细"}</h1>
       <p class="section-desc">
         ${isEn
-          ? `${visibleRulesCount} deterministic rules ship inside the offline CLI and browser workbench across ${packOrder.length} scenario packs, each with a Deletion Test question and Before / Fallback / Clean examples.`
+          ? `${visibleRulesCount} deterministic rules ship inside the offline CLI and browser workbench across ${packOrder.length} scenario packs, each with a check question and before / still-AI / clean examples.`
           : `7 套场景包一共内置 ${allRules.length} 条规则，CLI、插件和浏览器工作台都离线自带。点开任意一条都能看判断方法、正反句对照和命令行用法。`}
       </p>
     </section>
 ${packSections}`;
 
-    const pageUrl = isEn ? `${baseUrl}/en/rules/` : `${baseUrl}/rules/`;
-    const homeUrl = isEn ? `${baseUrl}/en/` : `${baseUrl}/`;
+    const pageUrl = isEn ? `${baseUrl}/rules/` : `${baseUrl}/zh/rules/`;
+    const homeUrl = isEn ? `${baseUrl}/` : `${baseUrl}/zh/`;
     const jsonLd = renderJsonLdScript([
       {
         "@type": "CollectionPage",
@@ -1768,7 +1464,7 @@ ${packSections}`;
     ]);
 
     writeHtml(
-      isEn ? "en/rules/index.html" : "rules/index.html",
+      isEn ? "rules/index.html" : "zh/rules/index.html",
       renderStaticShell({
         lang,
         baseUrl,
@@ -1777,31 +1473,28 @@ ${packSections}`;
         description: isEn
           ? `Reference index of ${visibleRulesCount} deterministic anti-slop rules across 7 packs with check questions and clean rewrite examples.`
           : `全部 ${allRules.length} 条去 AI 味内置规则的中文说明、判断方法与原句改写对照。`,
-        canonicalPath: isEn ? "/en/rules/" : "/rules/",
-        altPath: isEn ? "/rules/" : "/en/rules/",
+        canonicalPath: isEn ? "/rules/" : "/zh/rules/",
+        altPath: isEn ? "/zh/rules/" : "/rules/",
         ogImage: isEn ? "og-card.png" : "og-card-zh.png",
         jsonLdScript: jsonLd,
-        feedPath: isEn ? "en/feed.xml" : "feed.xml",
+        feedPath: isEn ? "feed.xml" : "zh/feed.xml",
         activeNav: "rules",
         mainHtml,
       })
     );
   }
-  htmlSitemapPairs.push({ zh: "/rules/", en: "/en/rules/", prio: "0.8" });
+  htmlSitemapPairs.push({ en: "/rules/", zh: "/zh/rules/", prio: "0.8" });
 
-  // 4. Individual Rule Detail HTML Pages (/rules/<id>/ & /en/rules/<id>/)
+  // 4. Individual Rule Detail HTML Pages (/rules/<id>/ = EN, /zh/rules/<id>/ = ZH)
   for (const { packId, pack, rule: r } of allRules) {
     const uiMeta = ruleUiMeta[r.id] || { lang: "both", title: { zh: r.id, en: r.id } };
     const isZhOnlyRule = uiMeta.lang === "zh";
-    if (isZhOnlyRule) {
-      fs.rmSync(path.join(siteDir, "en", "rules", r.id), { recursive: true, force: true });
-    }
     const matchingGuides = guides.filter((p) => (p.en.meta.relatedRules || []).includes(r.id));
-    const targetLangs = isZhOnlyRule ? ["zh"] : ["zh", "en"];
+    const targetLangs = isZhOnlyRule ? ["zh"] : ["en", "zh"];
 
     for (const lang of targetLangs) {
       const isEn = lang === "en";
-      const depthPrefix = isEn ? "../../../" : "../../";
+      const depthPrefix = isEn ? "../../" : "../../../";
       const siblingRules = (pack.rules || [])
         .filter((sr) => sr.id !== r.id && (!isEn || ruleUiMeta[sr.id]?.lang !== "zh"))
         .slice(0, 8);
@@ -1819,7 +1512,7 @@ ${packSections}`;
             <pre><code>${escapeHtml(sanitizePublicExemplar(ex.bad))}</code></pre>
           </div>
 ${ex.trap ? `          <div class="rule-contrast-cell is-trap">
-            <div class="rule-contrast-label">${isEn ? "Fallback trap (still sounds like AI)" : "换了种 AI 味"}</div>
+            <div class="rule-contrast-label">${isEn ? "Still sounds like AI" : "换了种 AI 味"}</div>
             <pre><code>${escapeHtml(sanitizePublicExemplar(ex.trap))}</code></pre>
           </div>\n` : ""}          <div class="rule-contrast-cell is-good">
             <div class="rule-contrast-label">${isEn ? "Clean version" : "改干净的版本"}</div>
@@ -1839,7 +1532,7 @@ ${ex.trap ? `          <div class="rule-contrast-cell is-trap">
       const guideLinksHtml = matchingGuides
         .map((p) => {
           const gm = p[lang].meta;
-          return `<a class="related-link-chip" href="${depthPrefix}${isEn ? "en/" : ""}guides/${escapeHtml(gm.slug)}/">${escapeHtml(gm.navTitle)}</a>`;
+          return `<a class="related-link-chip" href="${depthPrefix}${isEn ? "" : "zh/"}guides/${escapeHtml(gm.slug)}/">${escapeHtml(gm.navTitle)}</a>`;
         })
         .join("\n");
 
@@ -1850,14 +1543,15 @@ ${ex.trap ? `          <div class="rule-contrast-cell is-trap">
 
       const textModalities = new Set(["markdown", "text", "html", "css", "jsx", "svg"]);
       const canTryRule = Boolean(r.exemplar && (r.modalities || []).some((m) => textModalities.has(m)));
-      const pageUrl = `${baseUrl}${isEn ? `/en/rules/${r.id}/` : `/rules/${r.id}/`}`;
+      const pageUrl = `${baseUrl}${isEn ? `/rules/${r.id}/` : `/zh/rules/${r.id}/`}`;
       const cleanOneLineMsg = msg.replace(/\s+/g, " ").trim();
       const citeLine = isEn
         ? `[\`${r.id}\`](${pageUrl}): ${cleanOneLineMsg}`
         : `[\`${r.id}\`](${pageUrl})：${cleanOneLineMsg}`;
+      const homeBaseHref = `${depthPrefix}${isEn ? "" : "zh/"}`;
       const actionBarHtml = renderShareActionBar({
         isEn,
-        tryHref: canTryRule ? `${depthPrefix}?lang=${lang}#try=${encodeURIComponent(r.id)}` : `${depthPrefix}?lang=${lang}#workbench`,
+        tryHref: canTryRule ? `${homeBaseHref}#try=${encodeURIComponent(r.id)}` : `${homeBaseHref}#workbench`,
         tryLabel: canTryRule
           ? (isEn ? "Try this rule in workbench →" : "在工作台试试这条规则 →")
           : (isEn ? "Open workbench →" : "打开在线工作台 →"),
@@ -1871,7 +1565,7 @@ ${ex.trap ? `          <div class="rule-contrast-cell is-trap">
         : (r.severity === "error" ? "硬伤" : r.severity === "warning" ? "提醒" : "轻提示");
       const mainHtml = `    <section class="section-block">
       <nav class="breadcrumbs" aria-label="${isEn ? "Breadcrumb" : "面包屑导航"}">
-        <a href="${depthPrefix}${isEn ? "en/" : ""}">dislop</a> / <a href="../">${isEn ? "Rules" : "规则百科"}</a> / <span aria-current="page"><code>${escapeHtml(r.id)}</code></span>
+        <a href="${homeBaseHref}">dislop</a> / <a href="../">${isEn ? "Rules" : "规则百科"}</a> / <span aria-current="page"><code>${escapeHtml(r.id)}</code></span>
       </nav>
 
       <article class="article-prose">
@@ -1904,8 +1598,8 @@ npx --yes dislop check . --pack ${escapeHtml(packId)}</code></pre>
         ${actionBarHtml}
       </article>
     </section>`;
-      const rulesIndexUrl = `${baseUrl}${isEn ? "/en/rules/" : "/rules/"}`;
-      const homeUrl = `${baseUrl}${isEn ? "/en/" : "/"}`;
+      const rulesIndexUrl = `${baseUrl}${isEn ? "/rules/" : "/zh/rules/"}`;
+      const homeUrl = `${baseUrl}${isEn ? "/" : "/zh/"}`;
       const jsonLd = renderJsonLdScript([
         {
           "@type": "TechArticle",
@@ -1927,7 +1621,7 @@ npx --yes dislop check . --pack ${escapeHtml(packId)}</code></pre>
         },
       ]);
 
-      const relDir = isEn ? `en/rules/${r.id}` : `rules/${r.id}`;
+      const relDir = isEn ? `rules/${r.id}` : `zh/rules/${r.id}`;
       writeHtml(
         `${relDir}/index.html`,
         renderStaticShell({
@@ -1937,11 +1631,11 @@ npx --yes dislop check . --pack ${escapeHtml(packId)}</code></pre>
           title: `${rTitle} (${r.id}) — dislop`,
           description: `${rTitle}: ${msg}`,
           canonicalPath: `/${relDir}/`,
-          altPath: isZhOnlyRule ? null : (isEn ? `/rules/${r.id}/` : `/en/rules/${r.id}/`),
+          altPath: isZhOnlyRule ? null : (isEn ? `/zh/rules/${r.id}/` : `/rules/${r.id}/`),
           ogType: "article",
           ogImage: isEn ? "og-card.png" : "og-card-zh.png",
           jsonLdScript: jsonLd,
-          feedPath: isEn ? "en/feed.xml" : "feed.xml",
+          feedPath: isEn ? "feed.xml" : "zh/feed.xml",
           mdAltHref: mdCardHref,
           activeNav: "rules",
           mainHtml,
@@ -1949,13 +1643,73 @@ npx --yes dislop check . --pack ${escapeHtml(packId)}</code></pre>
       );
     }
     if (isZhOnlyRule) {
-      standaloneHtmlUrls.push([`${baseUrl}/rules/${r.id}/`, "0.7"]);
+      standaloneHtmlUrls.push([`${baseUrl}/zh/rules/${r.id}/`, "0.7"]);
+      writeHtml(
+        `rules/${r.id}/index.html`,
+        renderRedirectStubHtml({
+          targetUrl: `${baseUrl}/zh/rules/${r.id}/`,
+          targetRelHref: `../../zh/rules/${r.id}/`,
+          title: `${uiMeta.title?.zh || r.id} (${r.id}) — dislop`,
+        })
+      );
     } else {
-      htmlSitemapPairs.push({ zh: `/rules/${r.id}/`, en: `/en/rules/${r.id}/`, prio: "0.7" });
+      htmlSitemapPairs.push({ en: `/rules/${r.id}/`, zh: `/zh/rules/${r.id}/`, prio: "0.7" });
+      writeHtml(
+        `en/rules/${r.id}/index.html`,
+        renderRedirectStubHtml({
+          targetUrl: `${baseUrl}/rules/${r.id}/`,
+          targetRelHref: `../../../rules/${r.id}/`,
+          title: `${uiMeta.title?.en || r.id} (${r.id}) — dislop`,
+        })
+      );
     }
   }
 
-  // 5. Bilingual Atom Feeds (/feed.xml & /en/feed.xml)
+  // 5. Legacy /en/** static redirect stubs (complementing Nginx 301 rules for local/static servers)
+  writeHtml(
+    "en/index.html",
+    renderRedirectStubHtml({
+      targetUrl: `${baseUrl}/`,
+      targetRelHref: "../",
+      title: "dislop — Moved to /",
+    })
+  );
+  writeHtml(
+    "en/awesome/index.html",
+    renderRedirectStubHtml({
+      targetUrl: `${baseUrl}/awesome/`,
+      targetRelHref: "../../awesome/",
+      title: "Awesome Anti-Slop — Moved to /awesome/",
+    })
+  );
+  writeHtml(
+    "en/guides/index.html",
+    renderRedirectStubHtml({
+      targetUrl: `${baseUrl}/guides/`,
+      targetRelHref: "../../guides/",
+      title: "Guides — Moved to /guides/",
+    })
+  );
+  for (const pair of guides) {
+    writeHtml(
+      `en/guides/${pair.slug}/index.html`,
+      renderRedirectStubHtml({
+        targetUrl: `${baseUrl}/guides/${pair.slug}/`,
+        targetRelHref: `../../../guides/${pair.slug}/`,
+        title: `${pair.en.meta.title} — Moved`,
+      })
+    );
+  }
+  writeHtml(
+    "en/rules/index.html",
+    renderRedirectStubHtml({
+      targetUrl: `${baseUrl}/rules/`,
+      targetRelHref: "../../rules/",
+      title: "Rules — Moved to /rules/",
+    })
+  );
+
+  // 6. Bilingual Atom Feeds (/feed.xml = EN, /zh/feed.xml = ZH)
   function escapeXml(str) {
     return String(str ?? "")
       .replace(/&/g, "&amp;")
@@ -1965,14 +1719,14 @@ npx --yes dislop check . --pack ${escapeHtml(packId)}</code></pre>
       .replace(/'/g, "&apos;");
   }
 
-  for (const lang of ["zh", "en"]) {
+  for (const lang of ["en", "zh"]) {
     const isEn = lang === "en";
-    const feedUrl = `${baseUrl}${isEn ? "/en/feed.xml" : "/feed.xml"}`;
-    const guidesUrl = `${baseUrl}${isEn ? "/en/guides/" : "/guides/"}`;
+    const feedUrl = `${baseUrl}${isEn ? "/feed.xml" : "/zh/feed.xml"}`;
+    const guidesUrl = `${baseUrl}${isEn ? "/guides/" : "/zh/guides/"}`;
     const entriesXml = guides
       .map((pair) => {
         const m = pair[lang].meta;
-        const entryUrl = `${baseUrl}${isEn ? `/en/guides/${m.slug}/` : `/guides/${m.slug}/`}`;
+        const entryUrl = `${baseUrl}${isEn ? `/guides/${m.slug}/` : `/zh/guides/${m.slug}/`}`;
         return `  <entry>
     <title>${escapeXml(m.title)}</title>
     <link href="${escapeXml(entryUrl)}"/>
@@ -1993,7 +1747,7 @@ npx --yes dislop check . --pack ${escapeHtml(packId)}</code></pre>
 ${entriesXml}
 </feed>
 `;
-    writeHtml(isEn ? "en/feed.xml" : "feed.xml", feedXml);
+    writeHtml(isEn ? "feed.xml" : "zh/feed.xml", feedXml);
   }
 
   return { htmlSitemapPairs, standaloneHtmlUrls };

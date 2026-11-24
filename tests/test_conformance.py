@@ -588,18 +588,18 @@ class ConformanceParityTests(unittest.TestCase):
             rp_gh = run_py(["check", "--format", "github", "--stdin-filename", gh_fn, "-"], stdin_text="Certainly! Here is a draft.\n")
             self.assertEqual(rn_gh.stdout, rp_gh.stdout)
             self.assertIn("file=Release%2CNotes%3Av1%25draft.md,line=1,col=1,title=chatbot-artifact::", rn_gh.stdout)
-            self.assertIn("https://dislop.com/en/rules/chatbot-artifact/", rn_gh.stdout)
+            self.assertIn("https://dislop.com/rules/chatbot-artifact/", rn_gh.stdout)
 
             rn_gh_zh = run_node(["check", "--lang", "zh", "--format", "github", "--stdin-filename", gh_fn, "-"], stdin_text="Certainly! Here is a draft.\n")
             rp_gh_zh = run_py(["check", "--lang", "zh", "--format", "github", "--stdin-filename", gh_fn, "-"], stdin_text="Certainly! Here is a draft.\n")
             self.assertEqual(rn_gh_zh.stdout, rp_gh_zh.stdout)
-            self.assertIn("https://dislop.com/rules/chatbot-artifact/", rn_gh_zh.stdout)
+            self.assertIn("https://dislop.com/zh/rules/chatbot-artifact/", rn_gh_zh.stdout)
 
             rn_sarif_en = json.loads(run_node(["check", "--format", "sarif", "--stdin-filename", "draft.md", "-"], stdin_text="Certainly! Here is a draft.\n").stdout)
             rp_sarif_en = json.loads(run_py(["check", "--format", "sarif", "--stdin-filename", "draft.md", "-"], stdin_text="Certainly! Here is a draft.\n").stdout)
             self.assertEqual(rn_sarif_en, rp_sarif_en)
             en_rule_uris = {r["id"]: r["helpUri"] for r in rn_sarif_en["runs"][0]["tool"]["driver"]["rules"]}
-            self.assertEqual(en_rule_uris.get("chatbot-artifact"), "https://dislop.com/en/rules/chatbot-artifact/")
+            self.assertEqual(en_rule_uris.get("chatbot-artifact"), "https://dislop.com/rules/chatbot-artifact/")
 
             rn_sarif_zh_rule = json.loads(
                 run_node(["check", "--pack", "business-brief", "--lang", "en", "--format", "sarif", "--stdin-filename", "note.md", "-"], stdin_text="我们要以数据治理为抓手，持续赋能门店运营。\n").stdout
@@ -609,14 +609,21 @@ class ConformanceParityTests(unittest.TestCase):
             )
             self.assertEqual(rn_sarif_zh_rule, rp_sarif_zh_rule)
             zh_rule_uris = {r["id"]: r["helpUri"] for r in rn_sarif_zh_rule["runs"][0]["tool"]["driver"]["rules"]}
-            self.assertEqual(zh_rule_uris.get("zh-bureaucratic-padding"), "https://dislop.com/rules/zh-bureaucratic-padding/")
+            self.assertEqual(zh_rule_uris.get("zh-bureaucratic-padding"), "https://dislop.com/zh/rules/zh-bureaucratic-padding/")
 
             cat_n = json.loads(run_node(["catalog", "--json"]).stdout)
             cat_p = json.loads(run_py(["catalog", "--json"]).stdout)
             self.assertEqual(cat_n, cat_p)
             anchors = {e["id"]: e["anchorUrl"] for e in cat_n["items"]}
-            self.assertEqual(anchors.get("chatbot-artifact"), "https://dislop.com/en/rules/chatbot-artifact/")
-            self.assertEqual(anchors.get("zh-bureaucratic-padding"), "https://dislop.com/rules/zh-bureaucratic-padding/")
+            self.assertEqual(anchors.get("chatbot-artifact"), "https://dislop.com/rules/chatbot-artifact/")
+            self.assertEqual(anchors.get("zh-bureaucratic-padding"), "https://dislop.com/zh/rules/zh-bureaucratic-padding/")
+
+            # 4b. HTML entity `&nbsp;` semicolon guard + Markdown badge-row staccato guard parity
+            entity_sample = "Fast2kB &nbsp;&bull;&nbsp; Simple API &nbsp;&bull;&nbsp; Immutable plugins.\n[![CI](https://example.com/a.svg)](https://example.com). [![npm](https://example.com/b.svg)](https://example.com). [![MIT](https://example.com/c.svg)](https://example.com).\n"
+            rn_ent = json.loads(run_node(["check", "--pack", "business-brief", "--lang", "en", "--json", "-"], stdin_text=entity_sample).stdout)
+            rp_ent = json.loads(run_py(["check", "--pack", "business-brief", "--lang", "en", "--json", "-"], stdin_text=entity_sample).stdout)
+            self.assertEqual(rn_ent["findings"], [])
+            self.assertEqual(rp_ent["findings"], [])
 
             # 5. `explain pocket-stealth-vapor` parity & `README.md --pack auto --ml` 0 findings
             ex_n = json.loads(run_node(["explain", "pocket-stealth-vapor", "--json"]).stdout)
@@ -1870,6 +1877,19 @@ class ConformanceParityTests(unittest.TestCase):
             jp = json.loads(rp.stdout)
             self.assertEqual([f["ruleId"] for f in jn["findings"]], [f["ruleId"] for f in jp["findings"]])
             self.assertIn("chatbot-artifact", [f["ruleId"] for f in jn["findings"]])
+
+        # Inline image must not suppress staccato-slogan-run outside the image, while pure badge walls stay clean
+        img_staccato = "![Diagram](a.png) Zero config. Instant checks. Built for scale.\n"
+        rn_st = json.loads(run_node(["check", "-", "--stdin-filename", "doc.md", "--pack", "business-brief", "--json"], stdin_text=img_staccato).stdout)
+        rp_st = json.loads(run_py(["check", "-", "--stdin-filename", "doc.md", "--pack", "business-brief", "--json"], stdin_text=img_staccato).stdout)
+        self.assertEqual([f["ruleId"] for f in rn_st["findings"]], [f["ruleId"] for f in rp_st["findings"]])
+        self.assertIn("staccato-slogan-run", [f["ruleId"] for f in rn_st["findings"]])
+
+        badge_wall = "![npm version.](https://a.test/1) ![pypi release.](https://a.test/2) ![ci status.](https://a.test/3)\n"
+        rn_bw = json.loads(run_node(["check", "-", "--stdin-filename", "doc.md", "--pack", "business-brief", "--json"], stdin_text=badge_wall).stdout)
+        rp_bw = json.loads(run_py(["check", "-", "--stdin-filename", "doc.md", "--pack", "business-brief", "--json"], stdin_text=badge_wall).stdout)
+        self.assertEqual(rn_bw["findings"], [])
+        self.assertEqual(rp_bw["findings"], [])
 
 
 if __name__ == "__main__":

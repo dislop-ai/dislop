@@ -2,7 +2,7 @@
 
 [简体中文](./gif-production-guide.zh-CN.md)
 
-This guide specifies how `dislop` builds, verifies, and delivers animated demos across `dislop.com`, `/en/`, `/guides/`, GitHub READMEs, editor marketplaces, and social posts. Visual tokens live in [design-system.md](./design-system.md), copy rules in [brand-and-voice-guide.md](./brand-and-voice-guide.md), and measured encoder data in [gif-encoding-experiments-2026.zh-CN.md](./research/gif-encoding-experiments-2026.zh-CN.md).
+This guide specifies how `dislop` builds, verifies, and delivers animated demos across `dislop.com` (`/`), `/zh/`, `/guides/`, GitHub READMEs, editor marketplaces, and social posts. Visual tokens live in [design-system.md](./design-system.md), copy rules in [brand-and-voice-guide.md](./brand-and-voice-guide.md), and measured encoder data in [gif-encoding-experiments-2026.zh-CN.md](./research/gif-encoding-experiments-2026.zh-CN.md).
 
 ---
 
@@ -26,23 +26,24 @@ This guide specifies how `dislop` builds, verifies, and delivers animated demos 
 | Purple-pink neon gradients, glow orbs, glassmorphism | First-wave AI SaaS template pattern flagged by `dislop` itself | Flat paper `#FFFFFF` / `#F6F7F5` with `1px solid #D5D7D2` rails |
 | Corner chapter kickers (`01 / INTRO`) or fake macOS window dots | Decorative clutter that eats copy space | Single-row header bar with filename, pack, and exit code |
 | Character-by-character typewriter + blinking cursor | Forces viewers to wait for fake typing | Crisp `180–260ms` `ease-out` reveals and instant line cascades |
-| Bouncy `scale(0)` springs or continuous wobble | Looks noisy and inflates frame-diff payload | Short `ease-out` transitions; hold final clean state `>= 1.8s` |
+| Bouncy `scale(0)` springs, continuous wobble, or drift shimmer | Looks noisy, causes H.264 serif shimmer, and inflates frame-diff payload | Short `ease-out` transitions; hold final clean state `>= 1.8s` |
+| Progress bars, duration badges, or player button chrome | Distracts from specimen text and adds fake UI chrome | Zero progress bars and zero visible player buttons; click media surface itself to pause |
 | Invented rule IDs, fake CLI output, or made-up metrics | Breaks factual grounding | Ground CLI and PPTX scenes directly from `node bin/dislop.mjs check` |
 
 ---
 
 ## 2. Six-Scene Catalog (v2)
 
-All scenes are declared in [scripts/media/demos.manifest.json](../scripts/media/demos.manifest.json) (`dislop.demos/2`). English (`-en-v2`) serves as the primary baseline for global READMEs, editor marketplaces, and `@dislop_ai`, paired with native Chinese (`-zh-v2`) counterparts for `README.zh-CN.md` and `/zh/` surfaces, with zero cross-language mixing.
+All scenes are declared in [scripts/media/demos.manifest.json](../scripts/media/demos.manifest.json) (`dislop.demos/2`). English (`-en-v2`) serves as the primary baseline for `dislop.com` (`/`), global READMEs, editor marketplaces, and `@dislop_ai`, paired with native Chinese (`-zh-v2`) counterparts for `/zh/` and `README.zh-CN.md` surfaces, with zero cross-language mixing.
 
 | Slug | Dimensions | FPS / Length | Profile | Size Budgets (GIF / WebP / Poster) | Primary Surfaces |
 |---|---|---|---|---|---|
-| `proof-cycle` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `450 / 240 / 45 KB` | Homepage, `/en/`, README, VS Code Marketplace, Guides |
-| `cli-check` | `920×460` | `15 fps` / `6.4s` | `dark-terminal` | `350 / 200 / 45 KB` | Homepage, `/en/`, README, Agent/CI guide |
-| `workbench-live` | `1140×640` | `12 fps` / `6.8s` | `live-dom` | `550 / 300 / 65 KB` | Homepage, `/en/`, README, Writing guide |
-| `ui-slop` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `480 / 260 / 50 KB` | Homepage, `/en/`, README, Web UI guide |
-| `deck-office` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `480 / 260 / 50 KB` | Homepage, `/en/`, README, PPTX/DOCX guide |
-| `agent-workflow` | `960×500` | `16 fps` / `6.8s` | `dark-terminal` | `420 / 240 / 50 KB` | Homepage, `/en/`, README, Antigravity plugin, Agent/CI guide |
+| `proof-cycle` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `450 / 240 / 45 KB` | `/`, `/zh/`, README, VS Code Marketplace, Guides |
+| `cli-check` | `920×460` | `15 fps` / `6.4s` | `dark-terminal` | `350 / 200 / 45 KB` | `/`, `/zh/`, README, Agent/CI guide |
+| `workbench-live` | `1140×640` | `12 fps` / `6.8s` | `live-dom` | `550 / 300 / 65 KB` | `/`, `/zh/`, README, Writing guide |
+| `ui-slop` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `480 / 260 / 50 KB` | `/`, `/zh/`, README, Web UI guide |
+| `deck-office` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `480 / 260 / 50 KB` | `/`, `/zh/`, README, PPTX/DOCX guide |
+| `agent-workflow` | `960×500` | `16 fps` / `6.8s` | `dark-terminal` | `420 / 240 / 50 KB` | `/`, `/zh/`, README, Antigravity plugin, Agent/CI guide |
 
 Legacy `-v1.gif` and `-v1-poster.png` files stay in `assets/demos/` so existing external URLs never break.
 
@@ -70,13 +71,13 @@ python3 scripts/media/render_gifs.py --social-dir /tmp/dislop-social
 
 Measured results in `encoder-benchmark-latest.json` show that **lossless animated WebP (`img2webp -loop 0 -lossless -m 4`)** achieves `99.9 dB` lossless clarity and `100.0%` white-paper background purity at sizes matching or beating lossy WebP (`35–198 KB` across flat-paper and terminal scenes), while `dither=none` 96-color GIF keeps GitHub READMEs and legacy clients speckle-free (`100.0%` purity).
 
-Every web surface (`site/index.html`, `site/en/index.html`, and compiled `/guides/` pages) serves a three-tier `<picture>` element:
+Every web surface (`site/index.html` at `/`, `site/zh/index.html` at `/zh/`, and compiled `/guides/` and `/zh/guides/` pages) serves a three-tier `<picture>` element:
 
 1. `<source media="(prefers-reduced-motion: reduce)" srcset="...-poster.png">` — instant static frame for reduced-motion users.
 2. `<source type="image/webp" srcset="...webp">` — lossless animated WebP for modern browsers.
 3. `<img src="...gif" loading="lazy" decoding="async">` — universal GIF fallback.
 
-Interactive cards also include client-side **Pause** (poster swap), **Replay**, and **Zoom** (`<dialog>` lightbox) controls.
+Animations have zero progress bars, zero duration badges, and zero visible player button chrome. On interactive web pages, clicking the media surface itself (`<button aria-pressed>`) pauses the animation to its static poster for WCAG 2.2.2, and `prefers-reduced-motion` serves the static poster automatically.
 
 ---
 

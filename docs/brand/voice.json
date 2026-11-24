@@ -65,20 +65,18 @@
     }
   },
   "automationDocket": {
-    "styleName": "Specimen Slip + Zero-Glue 3-Slot Docket",
-    "visualRatio": 0.7,
-    "textRatio": 0.3,
+    "styleName": "specimen-and-note",
     "slots": [
-      "Slot 1: Concrete input file, commit SHA, or setup",
-      "Slot 2: Verbatim observed string diff or objective count",
-      "Slot 3: Plain mechanism or exact CLI command (stop cold; zero closing moral)"
+      "Concrete input file, commit SHA, or setup",
+      "Verbatim observed string diff or objective count",
+      "Plain mechanism or exact CLI command (stop immediately; zero closing moral)"
     ],
     "hardBans": [
       "Rhetorical-question openers (? / ？ in line 1)",
       "Exclamation marks outside official Chinese slogan",
       "Discourse glue (Moreover, Furthermore, Notably, 值得注意的是, 换句话说)",
       "Unbadged constructed examples (must display EXAMPLE / 构造示例)",
-      "Self-scored pass rates without upfront scoring-bias disclosure",
+      "Self-scored pass rates without upfront self-scoring note",
       "Cross-language mixing inside a single page, card, video, or social account (@dislop_ai stays 100% English)"
     ]
   },

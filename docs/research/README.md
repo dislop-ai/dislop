@@ -1,10 +1,10 @@
-# Research & Proposals Index (`2026-11`)
+# 调研与设计档案索引（`2026-11`）
 
-本目录保存围绕 `dislop` 开展的一手生态调研、数据快照与远期设计草案。对外最新口径请直接看：
+本目录保存围绕 `dislop` 开展的一手生态调研、数据快照与远期设计草案。对外最新口径统一遵循 [PRODUCT.md](../../PRODUCT.md) 的**全球英文优先（English/Global-First）**基准：
 
-- 品牌人格与表达基准：[brand-and-voice-guide.zh-CN.md](../brand-and-voice-guide.zh-CN.md)（[English](../brand-and-voice-guide.md)）
-- 路线图与协作计划：[ROADMAP.zh-CN.md](../../ROADMAP.zh-CN.md)（[English](../../ROADMAP.md)）
-- 90 条工具清单：[awesome/README.zh-CN.md](../../awesome/README.zh-CN.md)（[English](../../awesome/README.md) · 在线筛选 `https://dislop.com/awesome/`）
+- 品牌表达与视觉指南：[brand-and-voice-guide.md](../brand-and-voice-guide.md)（[简体中文](../brand-and-voice-guide.zh-CN.md)）
+- 路线图与协作计划：[ROADMAP.md](../../ROADMAP.md)（[简体中文](../../ROADMAP.zh-CN.md)）
+- 90 条工具清单：[awesome/README.md](../../awesome/README.md)（[简体中文](../../awesome/README.zh-CN.md) · 在线筛选 `https://dislop.com/en/awesome/`）
 
 > 所有 GitHub 星标、最近推送日期与链接状态均于 **2026-11-21** 通过 GitHub API 与 HTTP 请求核验；SEO / GEO 内容资料库于 **2026-11-23** 核验补齐。本目录全部 Markdown 文档均需通过 Node 与 Python 双端 `dislop check docs/research --fail-on info` 零命中自审。
 

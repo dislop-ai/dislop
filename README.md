@@ -7,9 +7,9 @@
 
 <p align="center">
   <a href="./README.zh-CN.md">简体中文</a> ·
-  <a href="https://dislop.com">Try it at dislop.com</a> ·
-  <a href="https://dislop.com/en/guides/">Guides</a> ·
-  <a href="https://dislop.com/en/rules/">Rule Catalog</a> ·
+  <a href="https://dislop.com/">Try it at dislop.com</a> ·
+  <a href="https://dislop.com/guides/">Guides</a> ·
+  <a href="https://dislop.com/rules/">Rule Catalog</a> ·
   <a href="./awesome/README.md">Awesome Anti-Slop</a> ·
   <a href="https://www.npmjs.com/package/dislop">npm</a> ·
   <a href="https://pypi.org/project/dislop/">PyPI</a> ·
@@ -47,7 +47,7 @@ If you rewrite it into a second-order AI slogan (`This isn't just an upgrade —
 
 It inspects Markdown, plain text, HTML/CSS/JSX/SVG, PNG/JPEG/WebP/GIF images, Word (`.docx`), PowerPoint (`.pptx`), and PDF slides (`.pdf`). The open-source CLI and local plugins run offline with zero uploads, bundling all **7 built-in packs (`53` rules)** and extended structural checks. Zero hits only means no known pattern matched—it does not prove deep content quality.
 
-For hosted review, sign in at [dislop.com](https://dislop.com) or connect Official Cloud MCP (`https://dislop.com/mcp`): `dislop_review` returns structured issues and edit guidance for your local agent to revise in project context.
+For hosted review, sign in at [dislop.com](https://dislop.com/) or connect Official Cloud MCP (`https://dislop.com/mcp`): `dislop_review` returns structured issues and edit guidance for your local agent to revise in project context.
 
 ## Quick start
 
@@ -152,9 +152,9 @@ Both the Node.js CLI (`bin/dislop.mjs`) and the Python CLI (`src/dislop/`) run w
 
 Beyond the CLI, this repository compiles into a full reference library at `dislop.com`:
 
-- **[Rule Catalog (53 rules)](https://dislop.com/en/rules/)**: Every built-in rule with its Deletion Test question, Before / Fallback / Clean examples, and one-line citation links for PR reviews.
-- **[Practical Guides](https://dislop.com/en/guides/)**: [What is AI slop](https://dislop.com/en/guides/what-is-ai-slop/) · [Remove AI slop from writing](https://dislop.com/en/guides/remove-ai-slop-writing/) · [Fix AI slop in web UI](https://dislop.com/en/guides/fix-ai-slop-web-ui/) · [Clean up PPTX & DOCX](https://dislop.com/en/guides/deslop-pptx-docx/) · [Agent, CLI & CI setup](https://dislop.com/en/guides/agent-cli-mcp-tutorial/) · [Linter vs. detector vs. skill](https://dislop.com/en/guides/linter-vs-detector-vs-skill/).
-- **[Awesome Anti-Slop (90 tools)](./awesome/README.md)** ([Chinese edition](./awesome/README.zh-CN.md) · [Interactive web filter](https://dislop.com/en/awesome/)): Verified linters, writing skills, UI rules, PR policies, and papers ([index.json](https://dislop.com/awesome/index.json) · [index.md](https://dislop.com/awesome/index.md)).
+- **[Rule Catalog (53 rules)](https://dislop.com/rules/)**: Every built-in rule with its Deletion Test question, Before / Fallback / Clean examples, and one-line citation links for PR reviews.
+- **[Practical Guides](https://dislop.com/guides/)**: [What is AI slop](https://dislop.com/guides/what-is-ai-slop/) · [Remove AI slop from writing](https://dislop.com/guides/remove-ai-slop-writing/) · [Fix AI slop in web UI](https://dislop.com/guides/fix-ai-slop-web-ui/) · [Clean up PPTX & DOCX](https://dislop.com/guides/deslop-pptx-docx/) · [Agent, CLI & CI setup](https://dislop.com/guides/agent-cli-mcp-tutorial/) · [Linter vs. detector vs. skill](https://dislop.com/guides/linter-vs-detector-vs-skill/).
+- **[Awesome Anti-Slop (90 tools)](./awesome/README.md)** ([Chinese edition](./awesome/README.zh-CN.md) · [Interactive web filter](https://dislop.com/awesome/)): Verified linters, writing skills, UI rules, PR policies, and papers ([index.json](https://dislop.com/awesome/index.json) · [index.md](https://dislop.com/awesome/index.md)).
 - **Submit a sample**: Found a classic AI-slop phrase, template card, or messy slide? [Submit a redacted sample](https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml) so it can inform future fixtures.
 
 ## Use it across agents, editors, and CI
@@ -234,7 +234,7 @@ dislop check .
 ### Open-Source Local (`Skill` + `CLI`) vs. Official Cloud (`dislop.com/mcp`)
 
 - **Open Source (`dislop-ai/dislop`, Apache-2.0)**: Pure-Markdown `SKILL.md` + local `./references/*.md` (no bundled scripts), zero-dependency Node/Python CLI (`check`, `patterns`, `voice`, `explain`, `packs`, `catalog`, `resources`), all 7 built-in packs (`53` rules) + 65-pattern catalog (`patterns/`), bundled `14.6 KB` gzip (`49.0 KB` raw) Pocket ML ensemble (`models/pocket-slop-v1.json`, `< 0.5 ms`, `100.0%` F1 / `0.0%` Clean FPR on `stealth-vapor-v1`), `Awesome Anti-Slop`, and `dislop-bench v2` + `visual-design-v1`. `check` / `patterns` / `voice` make `0` network calls so private drafts never leave your machine (existing `--mcp` and optional local-model modules stay in-repo during real-world evaluation).
-- **Official Cloud MCP & Web Workbench (`https://dislop.com/mcp`, `https://dislop.com/?lang=en#pricing`)**: Closed-source hosted backend calling paid-tier Google Gemini endpoints that do not train on your text (no draft storage or text logging; see [privacy.md](https://dislop.com/privacy.md)). Deterministic `dislop_check`, `dislop_verify`, and `dislop_rules` run at 0 credits without login; OAuth 2.1 or a free key unlocks **30 monthly credits** for `dislop_review` (1 credit), `dislop_deslop` (2 credits), `dislop_office` (2–3 credits), `dislop_visual_review` (2 credits), and `dislop_voice_extract` (2 credits, `dislop.voice/1`), with early-access waitlists for Pro (`$12/mo`, 1,500 credits), PAYGO (`$10 / 800 credits`), and Team (`$29/seat/mo`).
+- **Official Cloud MCP & Web Workbench (`https://dislop.com/mcp`, `https://dislop.com/#pricing`)**: Closed-source hosted backend calling paid-tier Google Gemini endpoints that do not train on your text (no draft storage or text logging; see [privacy.md](https://dislop.com/privacy.md)). Deterministic `dislop_check`, `dislop_verify`, and `dislop_rules` run at 0 credits without login; OAuth 2.1 or a free key unlocks **30 monthly credits** for `dislop_review` (1 credit), `dislop_deslop` (2 credits), `dislop_office` (2–3 credits), `dislop_visual_review` (2 credits), and `dislop_voice_extract` (2 credits, `dislop.voice/1`), with early-access waitlists for Pro (`$12/mo`, 1,500 credits), PAYGO (`$10 / 800 credits`), and Team (`$29/seat/mo`).
 
 ## Anti-slop benchmark (`dislop-bench v2`)
 

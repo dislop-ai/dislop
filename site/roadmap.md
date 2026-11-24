@@ -8,13 +8,13 @@ snapshot: 2026-11-21
 
 [简体中文](./roadmap.zh-CN.md) · [Product Brief](./PRODUCT.md)
 
-Last updated: `2026-11-24` · Current baseline: `v0.8.3` (`dislop.com` live)
+Last updated: `2026-11-24` · Current baseline: `v0.8.3` (`dislop.com` live · English/Global-first baseline)
 
-This roadmap tracks what `dislop` ships today, how we expand from coding agent users to office agent users (Claude Cowork, WorkBuddy, Qwen) and everyone delivering work with AI, and the open design questions we want to decide together. To pick up a track, push back on a rule threshold, or propose a new idea, start a thread in [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) or claim an [Issue](https://github.com/dislop-ai/dislop/issues).
+This roadmap tracks what `dislop` ships today, how we expand globally from coding agent users to office agent users (Claude Cowork, ChatGPT, Notion AI, etc.) and everyone delivering work with AI, and the open design questions we want to decide together. To pick up a track, push back on a rule threshold, or propose a new idea, start a thread in [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) or claim an [Issue](https://github.com/dislop-ai/dislop/issues).
 
 ---
 
-## 1. Where We Are (`v0.8.0` Shipped)
+## 1. Where We Are (`v0.8.3` Shipped)
 
 | Area | Shipped today | Key files |
 |---|---|---|

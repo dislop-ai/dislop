@@ -2,7 +2,7 @@
   "use strict";
 
   var html = document.documentElement;
-  var lang = html.getAttribute("data-static-lang") === "en" ? "en" : "zh";
+  var lang = html.getAttribute("data-static-lang") === "zh" ? "zh" : "en";
   var themeToggle = document.getElementById("theme-toggle");
 
   function getSavedTheme() {
@@ -46,6 +46,48 @@
     });
   }
 
+  document.querySelectorAll("[data-lang-switch]").forEach(function (el) {
+    var baseHref = el.getAttribute("href") || "";
+    function buildStatefulHref() {
+      if (!baseHref) return baseHref;
+      try {
+        var target = el.getAttribute("data-lang-switch");
+        var u = new URL(baseHref, window.location.href);
+        var curParams = new URLSearchParams(window.location.search || "");
+        if (curParams.has("lang") && (target === "en" || target === "zh")) {
+          curParams.set("lang", target);
+        }
+        var qs = curParams.toString();
+        u.search = qs ? "?" + qs : "";
+        if (window.location.hash) {
+          u.hash = window.location.hash;
+        }
+        return u.pathname + u.search + u.hash;
+      } catch (_) {
+        return baseHref;
+      }
+    }
+    function syncHref() {
+      var nextHref = buildStatefulHref();
+      if (nextHref) el.setAttribute("href", nextHref);
+    }
+    function persistTarget() {
+      syncHref();
+      var target = el.getAttribute("data-lang-switch");
+      if (target === "en" || target === "zh") {
+        try {
+          window.localStorage.setItem("dislop-lang", target);
+        } catch (_) {
+          // Ignore storage failures
+        }
+      }
+    }
+    syncHref();
+    window.addEventListener("hashchange", syncHref);
+    el.addEventListener("click", persistTarget);
+    el.addEventListener("auxclick", persistTarget);
+  });
+
   function hasSignedInHint() {
     try {
       if (/(?:^|;\s*)dslp_hint=1(?:;|$)/.test(document.cookie || "")) return true;
@@ -60,7 +102,7 @@
   if (hasSignedInHint()) {
     document.querySelectorAll("[data-static-acct]").forEach(function (el) {
       el.classList.add("is-signed-in");
-      el.textContent = lang === "en" ? "Account · Cloud" : "账号与额度";
+      el.textContent = lang === "en" ? "Account" : "账号";
     });
   }
 
@@ -108,7 +150,16 @@
     if (webp) webp.srcset = paused ? base + "-poster.png" : base + ".webp";
     if (img) img.src = paused ? base + "-poster.png" : base + ".gif";
     btn.setAttribute("aria-pressed", String(paused));
-    btn.textContent = paused ? (lang === "en" ? "Play" : "播放") : (lang === "en" ? "Pause" : "定格");
+    btn.setAttribute(
+      "aria-label",
+      paused
+        ? lang === "en"
+          ? "Resume animation"
+          : "继续播放"
+        : lang === "en"
+          ? "Pause animation"
+          : "暂停画面"
+    );
   }
 
   document.querySelectorAll("[data-demo-toggle]").forEach(function (btn) {
@@ -119,31 +170,6 @@
     });
   });
 
-  document.querySelectorAll("[data-demo-replay]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var slug = btn.getAttribute("data-demo-replay");
-      var card = btn.closest("[data-demo-card]");
-      if (!slug || !card) return;
-      var prefix = card.getAttribute("data-demo-prefix") || "./";
-      var cardLang = card.getAttribute("data-demo-lang") || lang;
-      var ver = card.getAttribute("data-demo-ver") || "v2";
-      var base = prefix + "assets/demos/" + slug + "-" + cardLang + "-" + ver;
-      var bust = "?r=" + Date.now();
-      var poster = card.querySelector('source[data-demo-poster="' + slug + '"]');
-      var webp = card.querySelector('source[data-demo-webp="' + slug + '"]');
-      var img = card.querySelector('img[data-demo-gif="' + slug + '"]');
-      var toggle = card.querySelector('[data-demo-toggle="' + slug + '"]');
-      if (poster) poster.media = "not all";
-      if (webp) webp.srcset = base + ".webp" + bust;
-      if (img) img.src = base + ".gif" + bust;
-      if (toggle) {
-        toggle.setAttribute("aria-pressed", "false");
-        toggle.textContent = lang === "en" ? "Pause" : "定格";
-      }
-    });
-  });
-
-  // Tab sets: the dark-room demo stage and the /en/ hero proof share one small helper
   function wireTabs(rail, attr, onSelect) {
     var tabs = Array.prototype.slice.call(rail.querySelectorAll("[" + attr + "]"));
     if (!tabs.length) return null;
@@ -174,9 +200,10 @@
       e.preventDefault();
       select(tabs[next].getAttribute(attr), true);
     });
-    var initial = tabs.filter(function (t) {
-      return t.getAttribute("aria-selected") === "true";
-    })[0] || tabs[0];
+    var initial =
+      tabs.filter(function (t) {
+        return t.getAttribute("aria-selected") === "true";
+      })[0] || tabs[0];
     select(initial.getAttribute(attr), false);
     return tabs;
   }
@@ -202,48 +229,5 @@
       demoStage.classList.add("is-stage-ready");
       demoGrid.classList.add("is-stage-ready");
     }
-  }
-
-  var heroRail = document.querySelector("[data-en-hero-tabs]");
-  if (heroRail) {
-    var heroPanels = Array.prototype.slice.call(document.querySelectorAll("[data-en-hero-panel]"));
-    var heroTabs = wireTabs(heroRail, "data-en-hero-state", function (state) {
-      heroPanels.forEach(function (panel) {
-        panel.hidden = panel.getAttribute("data-en-hero-panel") !== state;
-      });
-    });
-    if (heroTabs) {
-      heroRail.hidden = false;
-      document.documentElement.classList.add("has-en-hero-tabs");
-    }
-  }
-
-  var lightbox = document.getElementById("demo-lightbox");
-  var lightboxTitle = document.getElementById("demo-lightbox-title");
-  var lightboxImg = document.getElementById("demo-lightbox-img");
-  document.querySelectorAll("[data-demo-zoom]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var slug = btn.getAttribute("data-demo-zoom");
-      var card = btn.closest("[data-demo-card]");
-      if (!slug || !card || !lightbox || !lightboxImg) return;
-      var prefix = card.getAttribute("data-demo-prefix") || "./";
-      var cardLang = card.getAttribute("data-demo-lang") || lang;
-      var ver = card.getAttribute("data-demo-ver") || "v2";
-      var titleEl = card.querySelector(".demo-cap-title");
-      var imgEl = card.querySelector("img");
-      if (lightboxTitle) lightboxTitle.textContent = titleEl ? titleEl.textContent : slug;
-      lightboxImg.src = prefix + "assets/demos/" + slug + "-" + cardLang + "-" + ver + ".webp";
-      lightboxImg.alt = imgEl ? imgEl.alt : slug;
-      if (typeof lightbox.showModal === "function") lightbox.showModal();
-    });
-  });
-  var closeBtn = document.getElementById("demo-lightbox-close");
-  if (closeBtn && lightbox) {
-    closeBtn.addEventListener("click", function () {
-      lightbox.close();
-    });
-    lightbox.addEventListener("click", function (e) {
-      if (e.target === lightbox) lightbox.close();
-    });
   }
 })();

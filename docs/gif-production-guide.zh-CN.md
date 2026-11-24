@@ -26,29 +26,32 @@
 | 紫粉霓虹渐变、弥散发光阴影、玻璃拟态 | 属于第一代生成式 AI 默认模板，违背 `dislop` 自身去模板规范 | 纯色纸面 `#FFFFFF` / `#F6F7F5` 配 `1px solid #D5D7D2` 标尺线 |
 | 角落小标、`01 / INTRO` 章节号、macOS 红黄绿三点装饰 | 属于 AI 幻灯片常见页面边角料，挤占正文读数空间 | 顶部只留一条 `1px` 细栏放文件名、规则计数或退出码 |
 | 逐字打字机 + 闪烁光标大段敲字 | 拖慢读稿节奏，强迫观众等模型假装打字 | 原文整段 180ms 利落入画，把动画时间留给红蓝标线和改写对比 |
-| `scale(0)` 弹跳、夸张弹簧过冲、全程晃动元素 | 显得轻浮，还会导致 GIF 帧差变大、体积飙升 | 位移与透明度只用 `180–280ms` `ease-out`，其余时间画面保持完全静止 |
+| `scale(0)` 弹跳、夸张弹簧过冲、全程微移漂浮 | 显得轻浮，在 H.264 下导致衬线抖动，还会推高 GIF 体积 | 位移与透明度只用 `180–280ms` `ease-out`，阅读停顿期画面完全静止 |
+| 底部/顶部进度条、时长角标、外露播放按钮栏 | 干扰读稿视线，叠加多余界面外框 | 零进度条、零时长角标、零外露播放按钮栏；点击画面本身定格静态海报 |
 | 伪造规则 ID、虚构终端输出或编造数字 | 违背实测与诚实边界 | 每次改词先跑真实 `node bin/dislop.mjs check` 核对规则名、行列号与指标 |
 
 ---
 
 ## 2. 六大对外场景规格表（`v2` 清单）
 
-所有场景统一在 [scripts/media/demos.manifest.json](../scripts/media/demos.manifest.json)（`dislop.demos/2`）声明。英文版（`-en-v2`）作为主仓 `README.md`、全球插件商店与 `@dislop_ai` 的第一基准优先制作与验收，中文版（`-zh-v2`）面向 `README.zh-CN.md` 与 `/zh/` 渠道独立原生出图，中文图里不夹英文例句，英文图里不出现汉字。旧版 `-v1` 成品保留在磁盘上，确保已发布的外链不断裂。
+所有场景统一在 [scripts/media/demos.manifest.json](../scripts/media/demos.manifest.json)（`dislop.demos/2`）声明。英文版（`-en-v2`）作为官网根路径 `/`、主仓 `README.md`、全球插件商店与 `@dislop_ai` 的第一基准优先制作与验收，中文版（`-zh-v2`）面向 `/zh/` 与 `README.zh-CN.md` 渠道独立原生出图，中文图里不夹英文例句，英文图里不出现汉字。旧版 `-v1` 成品保留在磁盘上，确保已发布的外链不断裂。
 
 | 场景 Slug | 分辨率 | 帧率 / 时长 | 画面类别 | 体积上限（GIF / WebP / 海报） | 分发位置 |
 |---|---|---|---|---|---|
-| `proof-cycle` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `450 / 240 / 45 KB` | 首页、`/en/`、README、VS Code 市场、指南 |
-| `cli-check` | `920×460` | `15 fps` / `6.4s` | `dark-terminal` | `350 / 200 / 45 KB` | 首页、`/en/`、README、Agent/CI 教程 |
-| `workbench-live` | `1140×640` | `12 fps` / `6.8s` | `live-dom` | `550 / 300 / 65 KB` | 首页、`/en/`、README、中文/英文写作指南 |
-| `ui-slop` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `480 / 260 / 50 KB` | 首页、`/en/`、README、前端去模板指南 |
-| `deck-office` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `480 / 260 / 50 KB` | 首页、`/en/`、README、PPT/Word 排查指南 |
-| `agent-workflow` | `960×500` | `16 fps` / `6.8s` | `dark-terminal` | `420 / 240 / 50 KB` | 首页、`/en/`、README、Antigravity 插件、Agent/CI 教程 |
+| `proof-cycle` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `450 / 240 / 45 KB` | `/`、`/zh/`、README、VS Code 市场、指南 |
+| `cli-check` | `920×460` | `15 fps` / `6.4s` | `dark-terminal` | `350 / 200 / 45 KB` | `/`、`/zh/`、README、Agent/CI 教程 |
+| `workbench-live` | `1140×640` | `12 fps` / `6.8s` | `live-dom` | `550 / 300 / 65 KB` | `/`、`/zh/`、README、中文/英文写作指南 |
+| `ui-slop` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `480 / 260 / 50 KB` | `/`、`/zh/`、README、前端去模板指南 |
+| `deck-office` | `960×500` | `16 fps` / `6.8s` | `flat-paper` | `480 / 260 / 50 KB` | `/`、`/zh/`、README、PPT/Word 排查指南 |
+| `agent-workflow` | `960×500` | `16 fps` / `6.8s` | `dark-terminal` | `420 / 240 / 50 KB` | `/`、`/zh/`、README、Antigravity 插件、Agent/CI 教程 |
 
-每个场景同时输出三份同源静态资源，在官网与指南页通过 `<picture>` 渐进式分发：
+每个场景同时输出三份同源静态资源，在官网（`/` 与 `/zh/`）和指南页通过 `<picture>` 渐进式分发：
 
 1. `<source media="(prefers-reduced-motion: reduce)" srcset="...-poster.png">` — 系统开启减弱动效时直接显示静态高清帧；
 2. `<source type="image/webp" srcset="...webp">` — 现代浏览器优先加载无损动态 WebP（纯纸面场景 `100.0%` 背景纯净度、零色阶噪点）；
 3. `<img src="...gif" loading="lazy" decoding="async">` — 兼容 GitHub README、插件市场与旧环境。
+
+所有动画均保持零进度条、零时长角标与零外露播放按钮栏；在交互网页上，点击画面本身（`<button aria-pressed>`）即可切换为静态海报以符合 WCAG 2.2.2，开启 `prefers-reduced-motion` 时自动直出静态海报。
 
 ---
 
@@ -92,15 +95,15 @@ python3 scripts/media/render_gifs.py --social-dir /tmp/dislop-social
 | G2 | 真实引擎零编造 | 脚本在渲染期直接调用 `node bin/dislop.mjs check` 提取规则 ID、行列号与退出码，`verify_demos.py` 复跑验真 |
 | G3 | 体积与纸面纯净度 | 平面场景解码帧外框纸白 `#FFFFFF` / `#F6F7F5` 纯净度 `>= 99.0%`；单文件严格低于清单体积上限 |
 | G4 | 终态留停可读性 | GIF 末尾 `>= 1.5s` 帧差保持稳定（平均像素差 `<= 1.0`），让读者有时间读完通过结论 |
-| G5 | 中英严格隔离与降级 | 中文页只引 `-zh-v2`，英文页与编辑器市场只引 `-en-v2`；英文元数据零汉字；网页端全部支持定格、重播与放大查看 |
+| G5 | 中英严格隔离与降级 | 中文页只引 `-zh-v2`，英文页与编辑器市场只引 `-en-v2`；英文元数据零汉字；网页端零进度条与外露播放按钮，点击画面切换静态海报且支持减弱动效直出静态帧 |
 
 ---
 
 ## 5. 图床与托管架构约定
 
-公开物料里的动画同时服务 `dislop.com` 官网、`/guides/` 指南、GitHub README 与外部插件市场（如 VS Code Marketplace 要求绝对 HTTPS GIF 地址），按四条规矩管理：
+公开物料里的动画同时服务 `dislop.com` 官网（`/` 与 `/zh/`）、`/guides/` 指南、GitHub README 与外部插件市场（如 VS Code Marketplace 要求绝对 HTTPS GIF 地址），按四条规矩管理：
 
 1. **源码入仓，成品按规模分治**。核心 6 场景 12 组资源（`assets/demos/*-v2.{gif,webp}` 与 `*-poster.png`）保留在仓内以便 CI 校验与离线构建；`package.json` 的 `files` 与 `pyproject.toml` 均只收录 `assets/logo.svg`，对 npm tarball 与 PyPI Wheel 体积增量为 **0 字节**。
 2. **官网同源直出**。构建时 `scripts/build_site.mjs` 将 `.gif`、`.webp` 与 `.png` 同步至 `site/assets/demos/`，保持 `CSP: img-src 'self' data:` 零放宽，不引入第三方图床追踪。
 3. **版本化文件名配长期不可变缓存**。所有上线图片采用 `-v1`、`-v2` 不可变命名，覆盖更新时递增版本号。静态站点服务器对 `/assets/demos/*` 下发 `Cache-Control: public, max-age=31536000, immutable`。
-4. **指南文章零样板嵌入**。在 `content/guides/*.md` 里只需写 `![说明文字](demo:<slug>)`，编译脚本自动按文章语种拼出带静态海报、WebP、GIF、定格与放大控件的完整 `<figure>` 节点。
+4. **指南文章零样板嵌入**。在 `content/guides/*.md` 里只需写 `![说明文字](demo:<slug>)`，编译脚本自动按文章语种拼出带静态海报、WebP、GIF 与点击画面定格支持的完整 `<figure>` 节点。

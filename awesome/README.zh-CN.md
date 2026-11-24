@@ -7,8 +7,8 @@
 
 <p align="center">
   <a href="./README.md">English</a> ·
-  <a href="https://dislop.com/awesome/">在线筛选</a> ·
-  <a href="https://dislop.com/#workbench">试查一段稿子</a> ·
+  <a href="https://dislop.com/zh/awesome/">在线筛选</a> ·
+  <a href="https://dislop.com/zh/#workbench">试查一段稿子</a> ·
   <a href="https://dislop.com/awesome/index.json">JSON 数据</a> ·
   <a href="../README.zh-CN.md">返回 dislop 主仓</a>
 </p>
@@ -19,7 +19,7 @@
 
 所有链接、GitHub 星标和最近更新时间都在 `2026-11-21` 核过一遍。其中 20 个可以在本地跑自动检查，不依赖大模型。AI 文本检测器和规避工具单独放在最下面的[检测与规避研究](#检测与规避研究仅供对照)，只作对照参考。
 
-想离线搜索筛选，可以打开 [dislop.com/awesome](https://dislop.com/awesome/)。想给 Agent 读，直接用 [index.json](https://dislop.com/awesome/index.json) 或 [index.md](https://dislop.com/awesome/index.md)。补充新条目请看[提交新条目](#提交新条目)。
+想离线搜索筛选，可以打开 [dislop.com/zh/awesome](https://dislop.com/zh/awesome/)。想给 Agent 读，直接用 [index.json](https://dislop.com/awesome/index.json) 或 [index.md](https://dislop.com/awesome/index.md)。补充新条目请看[提交新条目](#提交新条目)。
 
 ## 目录
 

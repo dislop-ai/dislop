@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-Automated G0-G5 QA gate verifier for dislop animated demo assets (v2).
+Automated G0-G6 QA gate verifier for dislop animated demo assets (v2).
 
 Checks every scene x language declared in scripts/media/demos.manifest.json:
   G0: Valid GIF89a + NETSCAPE2.0 infinite loop, valid WebP ANIM, valid PNG poster, non-blank frame 0
   G1: Exact pixel dimensions match manifest across .gif, .webp, and -poster.png
   G2: Live `node bin/dislop.mjs check` parity on canonical ZH & EN demo inputs
   G3: File size budgets strictly met; flat-paper GIFs achieve >= 99.0% background purity on margins
-  G4: End-state stability (>= 1.5s hold at end of GIF with mean pixel diff < 1.0)
-  G5: Strict bilingual isolation on manifest copy (zero CJK in EN metadata)
+  G4: End-state stability (>= 1.5s hold at end of GIF with mean pixel diff <= 1.0)
+  G5: Strict bilingual isolation & clean badge metadata (zero CJK in EN, zero duration clutter)
+  G6: Explicit anti-progress-bar pixel gate (bottom strip of every frame has zero creeping red bar)
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ from PIL import Image, ImageChops, ImageSequence
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = Path(__file__).resolve().parent / "demos.manifest.json"
 CJK_RE = re.compile(r"[\u4e00-\u9fff]")
+DURATION_BADGE_RE = re.compile(r"\b\d+(?:\.\d+)?s\b", re.IGNORECASE)
 
 
 def verify_live_cli() -> list[str]:
@@ -42,7 +44,7 @@ def verify_live_cli() -> list[str]:
             "zh-s2",
             "zh",
             "business-brief",
-            "这不是一次普通升级，而是结算架构的效率跃迁，性能实现数倍提升。",
+            "本次上线将结算队列改为分级处理，故障恢复时间最多 45 秒。这不是一次普通升级，而是结算架构的效率跃迁。",
             0,
             {"negation-pivot-frame"},
         ),
@@ -58,7 +60,7 @@ def verify_live_cli() -> list[str]:
             "en-s1",
             "en",
             "business-brief",
-            "Certainly! Here is the launch note. It's worth noting that exports are a game-changer, finishing in up to 12 minutes for workspaces above 500,000 rows.",
+            "Certainly! Here is the launch note. It's worth noting that CSV exports are a game-changer: they finish in up to 12 minutes for workspaces above 500,000 rows.",
             1,
             {"chatbot-artifact", "en-throat-clearing-opener", "en-cliche-lexicon"},
         ),
@@ -66,7 +68,7 @@ def verify_live_cli() -> list[str]:
             "en-s2",
             "en",
             "business-brief",
-            "This isn't just an upgrade — it's a new standard.",
+            "CSV exports finish in up to 12 minutes for workspaces above 500,000 rows. This isn't just an upgrade — it's a new standard.",
             0,
             {"negation-pivot-frame"},
         ),
@@ -74,7 +76,7 @@ def verify_live_cli() -> list[str]:
             "en-s3",
             "en",
             "business-brief",
-            "Exports now finish in up to 12 minutes for workspaces above 500,000 rows.",
+            "CSV exports finish in up to 12 minutes for workspaces above 500,000 rows.",
             0,
             set(),
         ),
@@ -84,7 +86,18 @@ def verify_live_cli() -> list[str]:
             fp = Path(td) / f"{label}.md"
             fp.write_text(text, encoding="utf-8")
             res = subprocess.run(
-                ["node", str(ROOT / "bin" / "dislop.mjs"), "check", str(fp), "--pack", pack, "--lang", lang, "--format", "json"],
+                [
+                    "node",
+                    str(ROOT / "bin" / "dislop.mjs"),
+                    "check",
+                    str(fp),
+                    "--pack",
+                    pack,
+                    "--lang",
+                    lang,
+                    "--format",
+                    "json",
+                ],
                 capture_output=True,
                 text=True,
             )
@@ -113,6 +126,69 @@ def check_paper_margin_purity(frame: Image.Image) -> float:
     return (clean / total * 100.0) if total else 100.0
 
 
+def red_band_stats(im: Image.Image, y0: int, y1: int) -> tuple[int, int]:
+    """Return (red_pixel_count, max_contiguous_horizontal_red_run) in [y0, y1)."""
+    w, h = im.size
+    band = im.crop((0, max(0, y0), w, min(h, y1))).convert("RGB")
+    b = band.tobytes()
+    reds = 0
+    max_contig = 0
+    cur_contig = 0
+    px_idx = 0
+    for i in range(0, len(b), 3):
+        if px_idx % w == 0:
+            cur_contig = 0
+        r, g, bl = b[i], b[i + 1], b[i + 2]
+        if r >= 180 and g <= 105 and bl <= 105 and (r - max(g, bl)) >= 75:
+            reds += 1
+            cur_contig += 1
+            if cur_contig > max_contig:
+                max_contig = cur_contig
+        else:
+            cur_contig = 0
+        px_idx += 1
+    return reds, max_contig
+
+
+def verify_no_progress_bar(base: str, frames: list[Image.Image], poster: Image.Image) -> list[str]:
+    """G6: Reject any horizontal red bar in the bottom strip or creeping red progress growth near bottom."""
+    errs: list[str] = []
+    if not frames:
+        return errs
+    _, h = frames[0].size
+
+    # 1. Bottom 24px strip must have zero horizontal red progress bars (allowing 3px vertical card borders / 14px dash icons)
+    _, poster_contig = red_band_stats(poster, h - 24, h)
+    if poster_contig > 28:
+        errs.append(f"G6 [{base}]: poster bottom 24px strip has contiguous horizontal red bar of {poster_contig}px (expected <= 28)")
+
+    strip_contig = [red_band_stats(f, h - 24, h)[1] for f in frames]
+    max_strip_contig = max(strip_contig)
+    if max_strip_contig > 28:
+        worst_idx = strip_contig.index(max_strip_contig)
+        errs.append(
+            f"G6 [{base}]: frame {worst_idx} bottom 24px strip has contiguous horizontal red bar of {max_strip_contig}px (no progress bar allowed)"
+        )
+
+    # 2. Deeper bottom 64px band must never exhibit monotonic creeping red growth across frames
+    band_reds = [red_band_stats(f, h - 64, h)[0] for f in frames]
+    inc_steps = sum(1 for i in range(1, len(band_reds)) if band_reds[i] > band_reds[i - 1] + 8)
+    max_run = 0
+    cur_run = 0
+    for i in range(1, len(band_reds)):
+        if band_reds[i] > band_reds[i - 1] + 8:
+            cur_run += 1
+            max_run = max(max_run, cur_run)
+        elif band_reds[i] < band_reds[i - 1] - 8:
+            cur_run = 0
+    if max_run >= 4 or (len(band_reds) >= 8 and inc_steps >= max(4, int(len(band_reds) * 0.35))):
+        errs.append(
+            f"G6 [{base}]: detected creeping red progress bar in bottom 64px band "
+            f"(inc_steps={inc_steps}, max_run={max_run}, max_red={max(band_reds)})"
+        )
+    return errs
+
+
 def main() -> int:
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     version = manifest["version"]
@@ -129,14 +205,19 @@ def main() -> int:
         fps = int(spec["fps"])
         budgets = spec["budgets"]
 
-        # G5: bilingual manifest isolation
+        # G5: bilingual manifest isolation & clean badges
         en_meta = spec["en"]
         for k in ("title", "desc", "alt", "badge"):
             if CJK_RE.search(en_meta.get(k, "")):
                 errors.append(f"G5 [{slug}.en.{k}]: contains unexpected CJK text")
+        for lang_key in ("zh", "en"):
+            badge_val = spec[lang_key].get("badge", "")
+            if DURATION_BADGE_RE.search(badge_val):
+                errors.append(f"G5 [{slug}.{lang_key}.badge]: contains duration clutter ({badge_val!r})")
 
         for lang in ("zh", "en"):
             checked += 1
+            before_errs = len(errors)
             base = f"{slug}-{lang}-{version}"
             gif_path = assets_dir / f"{base}.gif"
             webp_path = assets_dir / f"{base}.webp"
@@ -181,7 +262,7 @@ def main() -> int:
             if poster_im.size != (w, h):
                 errors.append(f"G1 [{base}]: Poster size {poster_im.size} != ({w}, {h})")
 
-            # G0/G3/G4: inspect GIF frames & end-state hold
+            # G0/G3/G4/G6: inspect GIF frames, anti-progress-bar, & end-state hold
             frames = []
             durations = []
             for f in ImageSequence.Iterator(gif_im):
@@ -192,7 +273,7 @@ def main() -> int:
                 errors.append(f"G0 [{base}]: GIF has 0 frames")
                 continue
 
-            # Non-blank frame 0 check: standard deviation / pixel range
+            # Non-blank frame 0 check
             ext = frames[0].getextrema()
             if all(lo == hi for lo, hi in ext):
                 errors.append(f"G0 [{base}]: frame 0 is completely solid/blank")
@@ -201,6 +282,9 @@ def main() -> int:
                 purity = check_paper_margin_purity(frames[0])
                 if purity < 99.0:
                     errors.append(f"G3 [{base}]: flat-paper margin purity {purity:.2f}% < 99.0%")
+
+            # G6: zero creeping red progress bar in bottom strip
+            errors.extend(verify_no_progress_bar(base, frames, poster_im))
 
             # G4: end-state hold >= 1.5s
             tail_ms = 0
@@ -216,9 +300,10 @@ def main() -> int:
             if tail_ms < 1500:
                 errors.append(f"G4 [{base}]: end-state hold {tail_ms} ms < 1500 ms")
 
+            tag = "pass" if len(errors) == before_errs else "FAIL"
             print(
-                f"  [pass] {base}: {w}x{h}, gif={gif_kb:.1f}KB, webp={webp_kb:.1f}KB, "
-                f"poster={poster_kb:.1f}KB, tail={tail_ms}ms"
+                f"  [{tag}] {base}: {w}x{h}, gif={gif_kb:.1f}KB ({len(frames)}f), "
+                f"webp={webp_kb:.1f}KB, poster={poster_kb:.1f}KB, tail={tail_ms}ms"
             )
 
     if errors:
@@ -227,7 +312,7 @@ def main() -> int:
             print("  -", e, file=sys.stderr)
         return 1
 
-    print(f"\nAll G0-G5 gates passed across {checked} demo assets.")
+    print(f"\nAll G0-G6 gates passed across {checked} demo assets.")
     return 0
 
 

@@ -17,6 +17,18 @@ import { analyzeDocumentWithPocketModels, predictPackWithPocketRouter, setPocket
 import { parseBrowserImageBuffer, parseBrowserPdfBuffer, readBrowserZipXmlEntries } from "./engine/binary-browser.mjs";
 import { PACKS_BY_ID, RULE_UI_META } from "./engine/packs-data.mjs";
 
+const SITE_ROOT_PATH = (() => {
+  try {
+    return new URL("./", import.meta.url).pathname;
+  } catch {
+    return "/";
+  }
+})();
+
+function siteAssetUrl(rel) {
+  return `${SITE_ROOT_PATH}${String(rel || "").replace(/^\.?\//, "")}`;
+}
+
 let pocketModelReady = false;
 let pocketModelPromise = null;
 function ensurePocketModelLoaded() {
@@ -41,7 +53,7 @@ const I18N = {
   zh: {
     "page.title": "dislop — 去 AI 味才是真正的生产力！",
     "nav.skip": "跳至正文",
-    "nav.signIn": "登录 · 30 免费额度",
+    "nav.signIn": "登录",
     "nav.cases": "案例",
     "nav.workbench": "工作台",
     "nav.surfaces": "接入",
@@ -69,56 +81,30 @@ const I18N = {
     "hp.tabBad": "原稿",
     "hp.tabTrap": "换了种 AI 味",
     "hp.tabGood": "改干净了",
-    "hp.pauseBtn": "暂停演示",
-    "hp.playBtn": "自动演示",
     "hp.meta": "用同一个检查引擎实时跑的",
-    "hp.openWb": "在下面工作台打开 →",
+    "hp.openWb": "在下面工作台打开 ↓",
 
-    "m1.title": "社区规则与工具一处拿全",
-    "m1.desc": "内置 53 条规则和 12 个扩展句式检查，另收录 90 条精选去味工具，覆盖文档、网页和 Word/PPT。",
-    "m2.title": "一行命令接进 Agent 与编辑器",
-    "m2.desc": "支持 Codex、Claude Code、Cursor、WorkBuddy 与 GitHub Actions，终端、编辑器和 CI 直接跑。",
-    "m3.title": "文稿默认留在本地",
-    "m3.desc": "Skill 与 CLI 纯本地离线运行，零上传。切到工作台或远程 MCP 的云端模式，再做多模型深层审校。",
-
-    "cases.title": "三组前后对照：删了热词还像 AI 的写法",
+    "cases.title": "删掉热词之后，哪些写法读着还像 AI",
     "cases.desc":
-      "删掉“抓手”“赋能”这类热词之后，模型常换成“不是 A，而是 B”的反转口号，或者写出检查报 0 处问题、读起来仍像推销稿的句子。三组都能在工作台里直接试。",
+      "删掉“抓手”“赋能”这类热词之后，模型常换成“不是 A，而是 B”的反转口号，或者写出检查报 0 处问题、读起来仍像推销稿的句子。每组都能在工作台里直接试。",
     "cases.readAll": "看全部对照案例（.md）→",
 
-    "demos.title": "6 个真实场景：文字、网页、PPT 与 Agent 门禁",
-    "demos.desc":
-      "每段 7 秒左右，用真实规则离线录制。选一个场景，可以定格、重播或放大看。",
-    "demos.guideLink": "动画与 GIF 制作规范 →",
-    "demos.tab1": "三步改稿对照",
+    "demos.title": "命令行、网页、PPT 与 PR 门禁实录",
+    "demos.desc": "用同一套规则离线录制，点击画面可定格查看细节。",
     "demos.tab2": "命令行门禁",
-    "demos.tab3": "工作台实录",
     "demos.tab4": "网页去模板",
     "demos.tab5": "Word / PPT",
     "demos.tab6": "Agent + CI",
-    "demos.c1Title": "同一段话的三个版本：防改过头换成反转口号",
-    "demos.c1Badge": "3 步对照 · 6.8s",
-    "demos.c1Desc": "先用红实线划掉开头寒暄，再用蓝虚线抓出“不是……而是……”反转口号，最后只留动作和 45 秒真实指标。",
     "demos.c2Title": "命令行门禁：Node 与 Python 结果一致",
-    "demos.c2Badge": "CLI 离线 · 6.4s",
     "demos.c2Desc": "本地跑 dislop check --profile，硬伤直接返回退出码 1 卡住 CI，顺带输出句长起伏与具体度体检。",
-    "demos.c3Title": "浏览器离线工作台：真机操作实录",
-    "demos.c3Badge": "真机实录 · 6.8s",
-    "demos.c3Desc": "就是本页上方的工作台。贴稿子、点切规则包、实时对齐右侧行号批注与 5 轴体检，全程在当前标签页完成。",
     "demos.c4Title": "网页与组件：清掉默认紫粉模板和死按钮",
-    "demos.c4Badge": "网页去模板 · 6.8s",
     "demos.c4Desc": "直接扫 HTML/CSS/JSX 里的渐变标题、装饰徽章、胶囊堆叠和 href=\"#\" 假按钮，退回干净可用的界面。",
     "demos.c5Title": "Word / PPT 检查：揪出裸星号、字墙和过程标题",
-    "demos.c5Badge": "PPTX 实检 · 6.8s",
     "demos.c5Desc": "直接解包 .pptx 检查未渲染的 **加粗** 符号、单页字墙、68% 自动缩字与空泛标题，改回结论先行的干净页。",
     "demos.c6Title": "编码 Agent + CI 闭环：写前读 Skill，提交前过门禁",
-    "demos.c6Badge": "Agent 闭环 · 6.8s",
     "demos.c6Desc": "Agent 先读取纯文档 SKILL.md，再用 --changed origin/main 拦下 PR 寒暄与复读 diff，修完复检确认数字零丢失。",
-    "demos.pause": "定格",
-    "demos.play": "播放",
-    "demos.replay": "重播",
-    "demos.zoom": "放大看",
-    "demos.close": "关闭",
+    "demos.pause": "暂停画面",
+    "demos.play": "继续播放",
 
     "wb.heading": "工作台",
     "wb.subhint": "粘贴文字，或把文档 / 网页 / PPT / PDF / 图片拖进稿纸",
@@ -173,7 +159,7 @@ const I18N = {
     "legend.error": "红实线：硬伤",
     "legend.warn": "蓝虚线：提醒（套话与模板味）",
 
-    "surf.title": "三种接入方式：Skill、本地 CLI 和云端 MCP",
+    "surf.title": "接入方式：纯文档 Skill、本地 CLI 与云端 MCP",
     "surf.desc":
       "按你手上的工具选一种，每种都有能直接复制的配置。",
     "surf.readTools": "完整接入文档（.md）→",
@@ -261,14 +247,14 @@ const I18N = {
     "awesome.browseBtn": "打开在线筛选 →",
     "awesome.ghBtn": "GitHub 中文版",
     "awesome.shareBtn": "复制清单推荐语",
-    "awesome.posTitle": "31 个非模板排版与字体参考",
+    "awesome.posTitle": "非模板排版与字体参考",
     "awesome.posDesc": "印刷、字体厂和独立出版站点，做网页或排版前可以拿来对照。",
     "awesome.posAll": "看全部参考（.md）→",
     "stat.entries": "条资料",
     "stat.sections": "个分类",
     "stat.det": "个可自动检查",
     "stat.zh": "条中文 / 多语种",
-    "guides.title": "6 篇实用指南：写作、网页、PPT 与接入",
+    "guides.title": "写作、网页、PPT 与工程接入指南",
     "guides.desc": "每篇都带可复制的命令和前后对照，按手上的活挑一篇读。",
     "guides.all": "全部指南 →",
     "guides.g1Cat": "写作与改稿 · 7 分钟",
@@ -325,7 +311,7 @@ const I18N = {
     "status.partialVoice": "本地与云端均可用",
     "status.notYet": "还没上线（原型阶段）",
 
-    "rules.title": "全部 53 条内置规则明细（7 套场景包）",
+    "rules.title": "内置规则明细与在线筛选",
     "rules.desc": "平时不需要背规则，直接交给 Agent 或贴进工作台就行。想逐条查判断依据、看正反例或者点「试试 ↑」加载单条规则时，展开下面这张表。",
     "rules.readCases": "单文件拉取全部规则（llms-full.txt）→",
     "rules.foldTitle": "展开查看内置规则明细与在线筛选",
@@ -371,7 +357,7 @@ const I18N = {
   en: {
     "page.title": "dislop — Cutting AI slop is real productivity.",
     "nav.skip": "Skip to main content",
-    "nav.signIn": "Sign in · 30 free",
+    "nav.signIn": "Sign in",
     "nav.cases": "Cases",
     "nav.workbench": "Workbench",
     "nav.surfaces": "Setup",
@@ -399,56 +385,30 @@ const I18N = {
     "hp.tabBad": "Original",
     "hp.tabTrap": "Still sounds like AI",
     "hp.tabGood": "Cleaned up",
-    "hp.pauseBtn": "Pause",
-    "hp.playBtn": "Auto-play",
     "hp.meta": "Running live on the same linter engine",
     "hp.openWb": "Open in workbench ↓",
 
-    "m1.title": "Community rules and tools in one place",
-    "m1.desc": "Bundles 53 rules, 12 extended pattern checks, and 90 curated anti-slop tools for docs, web UI, Word, and PowerPoint.",
-    "m2.title": "One command into agents and editors",
-    "m2.desc": "Works with Codex, Claude Code, Cursor, WorkBuddy, and GitHub Actions, in the terminal, the editor, or CI.",
-    "m3.title": "Drafts stay on your machine",
-    "m3.desc": "The Skill and CLI run offline with zero uploads. Switch the workbench or remote MCP to cloud mode when you want multi-model review.",
-
-    "cases.title": "Three before/after cases where cutting buzzwords was not enough",
+    "cases.title": "Where cutting buzzwords still leaves AI cadence",
     "cases.desc":
       "After the buzzwords go, models often fall back on 'Not X, but Y' slogans or pitch cadence that passes basic checks with 0 issues. Each case loads straight into the workbench.",
     "cases.readAll": "All contrast cases (.md) →",
 
-    "demos.title": "Six short clips: prose, CLI, workbench, web UI, decks, and agent CI",
-    "demos.desc":
-      "Each clip runs about 7 seconds and is recorded offline from the real rules. Pick a scene, then pause, replay, or zoom in.",
-    "demos.guideLink": "Animation & GIF guide →",
-    "demos.tab1": "3-state proof",
+    "demos.title": "Recorded from real files, HTML, decks, and CI",
+    "demos.desc": "Recorded offline from the same rule engine. Click any clip to pause on a frame.",
     "demos.tab2": "CLI gate",
-    "demos.tab3": "Workbench",
     "demos.tab4": "Web UI",
     "demos.tab5": "PPTX & DOCX",
     "demos.tab6": "Agent + CI",
-    "demos.c1Title": "Three states of one note: catching 2nd-order slop",
-    "demos.c1Badge": "3-state proof · 6.8s",
-    "demos.c1Desc": "Strikes the leftover chat greeting in red, catches the 'Not X, but Y' slogan in blue, and ends clean at 12 minutes and 500,000 rows.",
     "demos.c2Title": "Offline CLI gate: Node & Python parity",
-    "demos.c2Badge": "Offline CLI · 6.4s",
     "demos.c2Desc": "Runs dislop check --profile locally: core artifacts exit 1 to block CI while rhythm and concreteness telemetry prints inline.",
-    "demos.c3Title": "Zero-upload browser workbench in action",
-    "demos.c3Badge": "Live DOM · 6.8s",
-    "demos.c3Desc": "Live capture of the workbench above: toggle between draft, 2nd-order slop, and clean copy with 5-axis telemetry.",
     "demos.c4Title": "Web UI audit: strip gradients & dead controls",
-    "demos.c4Badge": "UI audit · 6.8s",
     "demos.c4Desc": "Flags indigo-purple gradients, prompt-echo badges, pill walls, and dead href='#' buttons before switching to a 1px paper sheet.",
     "demos.c5Title": "PPTX & DOCX audit: catch walls & shrunk text",
-    "demos.c5Badge": "PPTX audit · 6.8s",
     "demos.c5Desc": "Unpacks .pptx slides locally to flag raw **markdown** leaks, word walls, 68% autofit shrink, and process titles.",
     "demos.c6Title": "Coding agent + CI loop: Skill, diff gate & re-check",
-    "demos.c6Badge": "Agent loop · 6.8s",
     "demos.c6Desc": "Agent reads pure-Markdown SKILL.md, gates changed PR lines with exit 1, and re-checks the clean edit to confirm metrics stay intact.",
-    "demos.pause": "Pause",
-    "demos.play": "Play",
-    "demos.replay": "Replay",
-    "demos.zoom": "Zoom",
-    "demos.close": "Close",
+    "demos.pause": "Pause animation",
+    "demos.play": "Resume animation",
 
     "wb.heading": "Workbench",
     "wb.subhint": "Paste text or drop a Markdown, HTML, SVG, Office, PDF, or image file",
@@ -503,7 +463,7 @@ const I18N = {
     "legend.error": "Red solid: hard bug",
     "legend.warn": "Blue dashed: warning (cliché / template)",
 
-    "surf.title": "Three ways to run dislop: Skill, local CLI, and Cloud MCP",
+    "surf.title": "Run dislop as a Skill, local CLI, or Cloud MCP",
     "surf.desc":
       "Pick the one that matches your tools. Each comes with a copy-ready config.",
     "surf.readTools": "Full setup guide (.md) →",
@@ -591,14 +551,14 @@ const I18N = {
     "awesome.browseBtn": "Open the filterable list →",
     "awesome.ghBtn": "View on GitHub",
     "awesome.shareBtn": "Copy list blurb",
-    "awesome.posTitle": "31 typography and editorial layout references",
+    "awesome.posTitle": "Typography and layout references outside AI templates",
     "awesome.posDesc": "Print, type foundry, and independent publishing sites to study before you lay out a page.",
     "awesome.posAll": "All references (.md) →",
     "stat.entries": "entries",
     "stat.sections": "topics",
     "stat.det": "automated tools",
     "stat.zh": "zh / multilingual",
-    "guides.title": "Six field guides: writing, web UI, decks, and setup",
+    "guides.title": "Practical guides for prose, web UI, decks, and CI",
     "guides.desc": "Each guide comes with copy-ready commands and before/after examples.",
     "guides.all": "All guides →",
     "guides.g1Cat": "Writing & Editing · 7 min",
@@ -645,7 +605,7 @@ const I18N = {
     "cov.r2Name": "Word & PowerPoint",
     "cov.r2Scope": "Raw Markdown asterisks pasted from chat, prose clichés, crowded slides, > 6 bullets, shrunk autofit text, process-label headlines, and 4+ monotonous bullet slides.",
     "cov.r4Name": "Web pages & components",
-    "cov.r4Scope": "Dead href='#' placeholder links, unexplained disabled buttons, purple-pink AI gradients, pill walls, 3-level nested boxes, and 'AI-Powered' prompt-echo badges.",
+    "cov.r4Scope": "Dead href='#' placeholder links, unexplained disabled buttons, purple-pink AI gradients, pill walls, 3-level nested boxes, and prompt-echo badges.",
     "cov.r5Name": "Git diffs & PRs",
     "cov.r5Scope": "Checks only modified lines for chat wrappers, placeholders, prose clichés, and UI template slop, with GitHub annotations and SARIF output. Code AST linting is not built.",
     "cov.r6Name": "Personal style, Pocket ML & Cloud Review",
@@ -655,7 +615,7 @@ const I18N = {
     "status.partialVoice": "Live offline & cloud",
     "status.notYet": "Not shipped (prototype)",
 
-    "rules.title": "All 53 built-in rules (7 scenario packs)",
+    "rules.title": "Built-in rules across 7 scenario packs",
     "rules.desc": "You don't need to memorize rules—just hand dislop to your agent or paste into the workbench. Expand the table below whenever you want exact rule details or to test a single rule.",
     "rules.readCases": "Single-file rule digest (llms-full.txt) →",
     "rules.foldTitle": "Expand built-in rules and filter online",
@@ -711,8 +671,8 @@ const HERO_PROOF_BY_LANG = {
     trap: "队列分级已经落地，故障恢复时间最多 45 秒。这不是一次简单的升级，而是一场效率革命。",
     good: "这次改造给队列分了级，一线运维团队的故障恢复时间最多 45 秒。",
     badNotes: [
-      { kind: "error", label: "红实线：", text: "开头留着 AI 寒暄，删掉就行。" },
-      { kind: "warn", label: "蓝虚线：", text: "“值得注意的是”“抓手”“全面赋能”都是空话，可以直接说做了什么。" },
+      { kind: "error", label: "硬伤：", text: "开头留着 AI 寒暄，删掉就行。" },
+      { kind: "warn", label: "提醒：", text: "“值得注意的是”“抓手”“全面赋能”都是空话，可以直接说做了什么。" },
     ],
     trapVerdict: "没通过：旧套词删掉了，但换上了“不是……而是……”这种二阶 AI 腔。",
     goodVerdict: "0 处问题。寒暄和空话都清掉了，句子直接说清改动和结果。",
@@ -721,12 +681,12 @@ const HERO_PROOF_BY_LANG = {
     filename: "launch-note.md",
     modality: "markdown",
     pack: "business-brief",
-    bad: "Certainly! Here is the launch note. It's worth noting that CSV exports are a game-changer, finishing in up to 12 minutes for workspaces above 500,000 rows.",
+    bad: "Certainly! Here is the launch note. It's worth noting that CSV exports are a game-changer: they finish in up to 12 minutes for workspaces above 500,000 rows.",
     trap: "CSV exports finish in up to 12 minutes for workspaces above 500,000 rows. This isn't just an upgrade — it's a new standard.",
     good: "CSV exports finish in up to 12 minutes for workspaces above 500,000 rows.",
     badNotes: [
-      { kind: "error", label: "Red: ", text: "Stray chat reply on line one. Delete it." },
-      { kind: "warn", label: "Blue: ", text: "Filler opener and hype noun ('game-changer'). Say what changed instead." },
+      { kind: "error", label: "Hard bug: ", text: "Stray chat reply on line one. Delete it." },
+      { kind: "warn", label: "Warning: ", text: "Filler opener and hype noun ('game-changer'). Say what changed instead." },
     ],
     trapVerdict: "Rejected: the buzzwords are gone, but a 'Not X, but Y' slogan took their place.",
     goodVerdict: "0 issues. Chat wrapper and stock phrasing removed.",
@@ -1167,7 +1127,7 @@ const CASES_BY_LANG = {
         "原稿：好的，以下是 Q4 结算引擎升级说明。值得注意的是，本次以异步化为核心抓手，全面赋能商户体验。峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，一致性达 99.99%。",
         "换了种 AI 味：这绝非一次普通升级，而是结算架构的效率跃迁，性能实现数倍提升。",
         "改干净：Q4 结算引擎改为全链路异步化后，峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，数据一致性 99.99%。",
-        "在线试查与一键去味：https://dislop.com/#workbench",
+        "在线试查与一键去味：https://dislop.com/zh/#workbench",
       ].join("\n"),
     },
     {
@@ -1187,13 +1147,13 @@ const CASES_BY_LANG = {
         },
       ],
       note: "毛病不在单个词，在于“三段对称分号推销句 + 假装老校对 + 段尾金句收尾”。这就是为什么单靠脚本标红线不够，必须把写作规矩一起写进 Skill 和 Plugin。",
-      linkHref: "./methodology/brand-and-voice.md",
+      linkHref: "/methodology/brand-and-voice.md",
       linkLabel: "看完整复盘 →",
       shareLabel: "复制这段分享",
       shareText: [
         "为什么有时候把“赋能”“抓手”删完了，读起来还是满屏 AI 味？",
         "我们拿自己上一版官网首屏做了次复盘：工具检查报 0 处问题，但三段对称分号推销句 + 校对戏服 + 段尾“笔一直在你手里”金句收尾，一眼还是 AI 写的。",
-        "完整前后对照与去 AI 味方法：https://dislop.com/#cases",
+        "完整前后对照与去 AI 味方法：https://dislop.com/zh/#cases",
       ].join("\n"),
     },
     {
@@ -1218,7 +1178,7 @@ const CASES_BY_LANG = {
       shareLabel: "复制这段分享",
       shareText: [
         "AI 写的网页和 PPT 常见老三样：紫粉渐变标题、AI 强力驱动徽章、点不动的 href=\"#\" 空链接，还有单页塞满 300 字的 PPT。",
-        "dislop 可以在浏览器或命令行直接离线挑出这些模板味：https://dislop.com/#cases",
+        "dislop 可以在浏览器或命令行直接离线挑出这些模板味：https://dislop.com/zh/#cases",
       ].join("\n"),
     },
   ],
@@ -1272,7 +1232,7 @@ const CASES_BY_LANG = {
         },
       ],
       note: "Zero buzzwords triggered a rule, yet the 3-part semicolon pitch, editor roleplay, and pull-quote closer still screamed AI. That's why we put plain writing rules into SKILL.md and the Plugin alongside the linter.",
-      linkHref: "./methodology/brand-and-voice.md",
+      linkHref: "/methodology/brand-and-voice.md",
       linkLabel: "Read full autopsy →",
       shareLabel: "Copy to share",
       shareText: [
@@ -1311,9 +1271,9 @@ const CASES_BY_LANG = {
 
 const SHARE_BLURBS_BY_LANG = {
   zh: {
-    site: "去 AI 味才是真正的生产力！分享一个专用 AI 味检查工具 dislop：整合了 90 条精选去味工具和社区规则，帮你（的 Agent）在文档、网页和 PPT 发出前挑出并改掉 AI 味，一行命令接进 Codex / Claude Code / Cursor / WorkBuddy 等，支持纯本地离线运行。官网：https://dislop.com GitHub：https://github.com/dislop-ai/dislop",
-    awesome: "去 AI 味才是真正的生产力！整理了一份 90 条去 AI 味工具与资料清单（Awesome Anti-Slop），涵盖中英文写作规范、Vale / Impeccable 等自动检查器、网页设计规则、PR 治理和论文，支持在线筛选也提供给 Agent 读的 JSON：https://dislop.com/awesome/ （GitHub：https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md）",
-    cases: "https://dislop.com/#cases",
+    site: "去 AI 味才是真正的生产力！分享一个专用 AI 味检查工具 dislop：整合了 90 条精选去味工具和社区规则，帮你（的 Agent）在文档、网页和 PPT 发出前挑出并改掉 AI 味，一行命令接进 Codex / Claude Code / Cursor / WorkBuddy 等，支持纯本地离线运行。官网：https://dislop.com/zh/ GitHub：https://github.com/dislop-ai/dislop",
+    awesome: "去 AI 味才是真正的生产力！整理了一份 90 条去 AI 味工具与资料清单（Awesome Anti-Slop），涵盖中英文写作规范、Vale / Impeccable 等自动检查器、网页设计规则、PR 治理和论文，支持在线筛选也提供给 Agent 读的 JSON：https://dislop.com/zh/awesome/ （GitHub：https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md）",
+    cases: "https://dislop.com/zh/#cases",
   },
   en: {
     site: "Cutting AI slop is real productivity. Check out dislop — a dedicated linter for AI slop with vetted community rules and 90 curated tools across docs, web UI, and slides. Connects to Codex, Claude Code, Cursor, and office agents in one command and runs offline: https://dislop.com (GitHub: https://github.com/dislop-ai/dislop)",
@@ -1514,22 +1474,13 @@ function safeSetStorage(key, value) {
   }
 }
 
+const LANG_SWITCH_DRAFT_KEY = "dislop_lang_switch_draft_v1";
+
 function detectInitialLang() {
-  if (typeof window.__DISLOP_RESOLVE_LANG__ === "function") {
-    let intlLocale = "";
-    try {
-      intlLocale = Intl.DateTimeFormat().resolvedOptions().locale || "";
-    } catch {
-      intlLocale = "";
-    }
-    return window.__DISLOP_RESOLVE_LANG__({
-      search: window.location ? window.location.search : "",
-      stored: safeGetStorage("dislop-lang"),
-      languages: window.navigator?.languages,
-      language: window.navigator?.language || "",
-      intlLocale,
-    });
-  }
+  const staticLang =
+    typeof document !== "undefined" && document.documentElement
+      ? document.documentElement.getAttribute("data-static-lang")
+      : "";
   try {
     const param = new URLSearchParams(window.location.search).get("lang");
     if (param) {
@@ -1540,23 +1491,7 @@ function detectInitialLang() {
   } catch {
     // ignore URL parsing errors
   }
-  const stored = safeGetStorage("dislop-lang");
-  if (stored === "en" || stored === "zh") return stored;
-  const nav = window.navigator || {};
-  const list = Array.isArray(nav.languages) && nav.languages.length > 0 ? nav.languages : nav.language ? [nav.language] : [];
-  for (const raw of list) {
-    const tag = String(raw || "").trim().toLowerCase();
-    if (/^zh\b/.test(tag)) return "zh";
-    if (/^en\b/.test(tag)) return "en";
-  }
-  if (list.length > 0) return "en";
-  try {
-    const intlLocale = Intl.DateTimeFormat().resolvedOptions().locale || "";
-    if (/^zh\b/i.test(intlLocale)) return "zh";
-  } catch {
-    // ignore Intl error
-  }
-  return "en";
+  return staticLang === "zh" ? "zh" : "en";
 }
 
 let currentLang = detectInitialLang();
@@ -1566,8 +1501,6 @@ const prefersReducedMotion =
   typeof window !== "undefined" &&
   window.matchMedia &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-let heroProofAutoplay = !prefersReducedMotion;
-let heroProofTimer = null;
 const pausedDemoSlugs = new Set();
 let activeSpecimenIdx = 0;
 let activeSpecimen = SPECIMENS_BY_LANG[currentLang][0];
@@ -1870,29 +1803,9 @@ function renderHeroProof() {
       slipEl.setAttribute("aria-labelledby", btn.id);
     }
   });
-  updateHeroAutoplayButton();
 }
 
-function updateHeroAutoplayButton() {
-  const dict = I18N[currentLang] || I18N.zh;
-  const btn = document.getElementById("hp-autoplay-btn");
-  if (btn) {
-    btn.setAttribute("aria-pressed", String(heroProofAutoplay));
-    btn.textContent = heroProofAutoplay ? dict["hp.pauseBtn"] : dict["hp.playBtn"];
-  }
-  const bar = document.getElementById("hero-proof-progress-bar");
-  if (bar) {
-    const pct = heroProofState === "bad" ? "33.3%" : heroProofState === "trap" ? "66.6%" : "100%";
-    bar.style.transition = prefersReducedMotion ? "none" : "width 240ms ease-out";
-    bar.style.width = pct;
-  }
-}
-
-function setHeroProofState(nextState, fromAuto = false) {
-  if (!fromAuto) {
-    heroProofAutoplay = false;
-    stopHeroProofTimer();
-  }
+function setHeroProofState(nextState) {
   heroProofState = nextState;
   const stageEl = document.getElementById("hero-proof-stage");
   if (stageEl && !prefersReducedMotion) {
@@ -1904,24 +1817,6 @@ function setHeroProofState(nextState, fromAuto = false) {
   } else {
     renderHeroProof();
   }
-}
-
-function stopHeroProofTimer() {
-  if (heroProofTimer) {
-    window.clearInterval(heroProofTimer);
-    heroProofTimer = null;
-  }
-}
-
-function startHeroProofTimer() {
-  stopHeroProofTimer();
-  if (!heroProofAutoplay || prefersReducedMotion) return;
-  const order = ["bad", "trap", "good"];
-  heroProofTimer = window.setInterval(() => {
-    const idx = order.indexOf(heroProofState);
-    const next = order[(idx + 1) % order.length];
-    setHeroProofState(next, true);
-  }, 3200);
 }
 
 // ---------- Workbench Renderers ----------
@@ -2610,8 +2505,8 @@ function renderWorkbench() {
     const langTag = currentLang === "zh" ? "zh" : "en";
     scenarioHintEl.innerHTML =
       currentLang === "zh"
-        ? `<span><strong>当前策略 · ${escapeHtml(strategy.label[langTag])}</strong>：重点删 ${escapeHtml(strategy.cut[langTag])}</span><span><strong>保护</strong>：${escapeHtml(strategy.protect[langTag])}</span><span><strong>防改偏</strong>：${escapeHtml(strategy.avoid[langTag])}</span>`
-        : `<span><strong>Strategy · ${escapeHtml(strategy.label[langTag])}</strong>: Cut ${escapeHtml(strategy.cut[langTag])}</span><span><strong>Protect</strong>: ${escapeHtml(strategy.protect[langTag])}</span><span><strong>Avoid</strong>: ${escapeHtml(strategy.avoid[langTag])}</span>`;
+        ? `<span><strong>当前策略 · ${escapeHtml(strategy.label[langTag])}</strong>：${escapeHtml(strategy.cut[langTag])}</span><span><strong>保护</strong>：${escapeHtml(strategy.protect[langTag])}</span><span><strong>防改偏</strong>：${escapeHtml(strategy.avoid[langTag])}</span>`
+        : `<span><strong>Strategy · ${escapeHtml(strategy.label[langTag])}</strong>: ${escapeHtml(strategy.cut[langTag])}</span><span><strong>Protect</strong>: ${escapeHtml(strategy.protect[langTag])}</span><span><strong>Avoid</strong>: ${escapeHtml(strategy.avoid[langTag])}</span>`;
   }
 
   setViewMode(viewMode);
@@ -2844,7 +2739,7 @@ function renderWorkbench() {
 
     const hasDocPage = Boolean(RULE_UI_META[f.ruleId]) && !f.isPatternProbe;
     const footerLinkHtml = hasDocPage
-      ? `<a href="#rule-${escapeHtml(f.ruleId)}">${escapeHtml(f.ruleId)}</a> · <a href="./rules/${escapeHtml(f.ruleId)}.md">.md</a>`
+      ? `<a href="#rule-${escapeHtml(f.ruleId)}">${escapeHtml(f.ruleId)}</a> · <a href="${escapeHtml(siteAssetUrl(`rules/${f.ruleId}.md`))}">.md</a>`
       : `<span>${currentLang === "zh" ? "扩展文风探针" : "Extended style probe"} · ${escapeHtml(f.ruleId)}</span>`;
 
     cards.push(`<article class="note-card ${sevCls}${focusedCls}" data-note-idx="${idx}">
@@ -3367,7 +3262,7 @@ function renderRulesTable() {
                   }</button>`
                 : ""
             }
-            <a class="rule-md-link" href="./rules/${escapeHtml(r.id)}.md">.md</a>
+            <a class="rule-md-link" href="${escapeHtml(siteAssetUrl(`rules/${r.id}.md`))}">.md</a>
           </div>
         </td>
         <td class="rule-pack-cell"><span class="rule-pack-name">${escapeHtml(packLabel)}</span><span class="sev-tag ${sevCls}" style="font-size:0.75rem;">${escapeHtml(sevLabel)}</span></td>
@@ -3746,23 +3641,23 @@ function applyI18n(isUserSwitch = false) {
   document.querySelectorAll("source[data-demo-poster]").forEach((srcEl) => {
     const slug = srcEl.getAttribute("data-demo-poster");
     if (!slug) return;
-    srcEl.srcset = `./assets/demos/${slug}-${currentLang}-v2-poster.png`;
+    srcEl.srcset = siteAssetUrl(`assets/demos/${slug}-${currentLang}-v2-poster.png`);
   });
   document.querySelectorAll("source[data-demo-webp]").forEach((srcEl) => {
     const slug = srcEl.getAttribute("data-demo-webp");
     if (!slug) return;
     const isPaused = pausedDemoSlugs.has(slug);
     srcEl.srcset = isPaused
-      ? `./assets/demos/${slug}-${currentLang}-v2-poster.png`
-      : `./assets/demos/${slug}-${currentLang}-v2.webp`;
+      ? siteAssetUrl(`assets/demos/${slug}-${currentLang}-v2-poster.png`)
+      : siteAssetUrl(`assets/demos/${slug}-${currentLang}-v2.webp`);
   });
   document.querySelectorAll("img[data-demo-gif]").forEach((imgEl) => {
     const slug = imgEl.getAttribute("data-demo-gif");
     if (!slug) return;
     const isPaused = pausedDemoSlugs.has(slug);
     imgEl.src = isPaused
-      ? `./assets/demos/${slug}-${currentLang}-v2-poster.png`
-      : `./assets/demos/${slug}-${currentLang}-v2.gif`;
+      ? siteAssetUrl(`assets/demos/${slug}-${currentLang}-v2-poster.png`)
+      : siteAssetUrl(`assets/demos/${slug}-${currentLang}-v2.gif`);
     if (demoAlts[currentLang]?.[slug]) imgEl.alt = demoAlts[currentLang][slug];
   });
   document.querySelectorAll("[data-demo-toggle]").forEach((btn) => {
@@ -3770,16 +3665,17 @@ function applyI18n(isUserSwitch = false) {
     if (!slug) return;
     const isPaused = pausedDemoSlugs.has(slug);
     btn.setAttribute("aria-pressed", String(isPaused));
-    btn.textContent = isPaused ? dict["demos.play"] : dict["demos.pause"];
+    btn.setAttribute("aria-label", isPaused ? dict["demos.play"] : dict["demos.pause"]);
   });
 
   // Footer agent hint with link
   const agentHintEl = document.querySelector("[data-i18n='footer.agentHint']");
   if (agentHintEl) {
+    const llmsHref = escapeHtml(siteAssetUrl("llms.txt"));
     agentHintEl.innerHTML =
       currentLang === "zh"
-        ? '给 Agent 读的话，从 <a href="./llms.txt">/llms.txt</a> 开始。'
-        : 'For agents, start at <a href="./llms.txt">/llms.txt</a>.';
+        ? `给 Agent 读的话，从 <a href="${llmsHref}">/llms.txt</a> 开始。`
+        : `For agents, start at <a href="${llmsHref}">/llms.txt</a>.`;
   }
 
   // Update GitHub Awesome & Roadmap links to match language
@@ -3790,21 +3686,22 @@ function applyI18n(isUserSwitch = false) {
         ? "https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md"
         : "https://github.com/dislop-ai/dislop/tree/main/awesome";
   }
-  document.querySelectorAll('a[href="./awesome/"], a[href="./en/awesome/"], a[href^="./awesome/?"]').forEach((aEl) => {
-    aEl.setAttribute("href", currentLang === "en" ? "./en/awesome/" : "./awesome/");
+  const awesomeHref = currentLang === "zh" ? siteAssetUrl("zh/awesome/") : siteAssetUrl("awesome/");
+  document.querySelectorAll('a[href="./awesome/"], a[href="../zh/awesome/"], a[href="/awesome/"], a[href="/zh/awesome/"]').forEach((aEl) => {
+    aEl.setAttribute("href", awesomeHref);
   });
+  const guidesBase = currentLang === "zh" ? siteAssetUrl("zh/guides/") : siteAssetUrl("guides/");
   const navGuidesLink = document.getElementById("nav-guides-link");
-  if (navGuidesLink) navGuidesLink.href = currentLang === "en" ? "./en/guides/" : "./guides/";
-  const guidesBase = currentLang === "en" ? "./en/guides/" : "./guides/";
+  if (navGuidesLink) navGuidesLink.href = guidesBase;
   document.querySelectorAll("[data-guide-slug]").forEach((aEl) => {
     aEl.setAttribute("href", `${guidesBase}${aEl.getAttribute("data-guide-slug")}/`);
   });
   const guidesHomeAll = document.getElementById("guides-home-all");
   if (guidesHomeAll) guidesHomeAll.href = guidesBase;
   const footerGuidesLink = document.getElementById("footer-guides-link");
-  if (footerGuidesLink) footerGuidesLink.href = currentLang === "en" ? "./en/guides/" : "./guides/";
+  if (footerGuidesLink) footerGuidesLink.href = guidesBase;
   const footerRulesLink = document.getElementById("footer-rules-link");
-  if (footerRulesLink) footerRulesLink.href = currentLang === "en" ? "./en/rules/" : "./rules/";
+  if (footerRulesLink) footerRulesLink.href = currentLang === "zh" ? siteAssetUrl("zh/rules/") : siteAssetUrl("rules/");
   const roadmapHref =
     currentLang === "zh"
       ? "https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md"
@@ -3991,20 +3888,16 @@ function buildCurrentPageReturnTo(anchor = "cloud-token-box") {
   try {
     const u = new URL(window.location.href);
     const keep = new URLSearchParams();
-    if (currentLang === "en" && !u.pathname.startsWith("/en")) {
-      keep.set("lang", "en");
-    } else if (u.searchParams.get("lang")) {
-      keep.set("lang", u.searchParams.get("lang"));
-    }
     const authQ = u.searchParams.get("auth");
     const nextQ = u.searchParams.get("next");
     if (authQ === "link" || authQ === "github-link") keep.set("auth", authQ);
     if (nextQ && /^\/(?!\/)/.test(nextQ)) keep.set("next", nextQ);
     const qs = keep.toString();
     const hashPart = anchor ? `#${String(anchor).replace(/^#+/, "")}` : "";
-    return `${u.pathname || "/"}${qs ? `?${qs}` : ""}${hashPart}`;
+    const defaultPath = currentLang === "zh" ? siteAssetUrl("zh/") : SITE_ROOT_PATH;
+    return `${u.pathname || defaultPath}${qs ? `?${qs}` : ""}${hashPart}`;
   } catch {
-    return currentLang === "en" ? `/?lang=en#${anchor}` : `/#${anchor}`;
+    return `${currentLang === "zh" ? "/zh/" : "/"}#${anchor}`;
   }
 }
 
@@ -4195,6 +4088,9 @@ async function handleVoiceExtractClick() {
       if (data.error === "account_changed" || resp.status === 401) {
         resetCachedHubData(null);
         await refreshCloudSession();
+      }
+      if (data.error === "voice_limit_exceeded" || data.error === "insufficient_credits") {
+        openQuotaUpgradePanel(data.message || "", data.error);
       }
       outBox.innerHTML = `<p class="ai-error-msg" style="margin:0;">${escapeHtmlSafe(data.message || `HTTP ${resp.status}`)}</p>`;
       return;
@@ -4519,7 +4415,9 @@ async function finalizePendingOAuthLinkIfNeeded() {
         rawNext &&
         /^\/(?!\/)/.test(rawNext) &&
         rawNext !== "/" &&
+        rawNext !== "/zh/" &&
         !rawNext.startsWith("/#") &&
+        !rawNext.startsWith("/zh/#") &&
         !rawNext.startsWith("/?lang=");
       if (safeNext) {
         window.location.assign(rawNext);
@@ -4660,6 +4558,8 @@ async function openBillingPortal(triggerBtn = null) {
 function syncBillingSurfaceUi() {
   const isZh = currentLang === "zh";
   const billingLive = Boolean(cloudSessionState.billing?.enabled);
+  const skus = cloudSessionState.billing?.availableSkus || {};
+  const hasSku = (k) => skus[k] !== false;
   const paidActionsEl = document.getElementById("pricing-paid-actions");
   const wlHeading = document.getElementById("cloud-wl-heading");
   const wlDesc = document.getElementById("cloud-wl-desc");
@@ -4667,13 +4567,18 @@ function syncBillingSurfaceUi() {
 
   if (paidActionsEl) {
     if (billingLive) {
-      paidActionsEl.innerHTML = `
-        <button type="button" class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" data-checkout-plan="pro">${
-          isZh ? "开通 Pro · $12/月" : "Get Pro · $12/mo"
-        }</button>
-        <button type="button" class="ctrl-btn" data-checkout-plan="credits">${
-          isZh ? "买按量包 · $10" : "Buy 800 cr · $10"
-        }</button>`;
+      const creditsFirst = isZh && hasSku("credits");
+      const btnPro = hasSku("pro")
+        ? `<button type="button" class="${creditsFirst ? "ctrl-btn" : "btn-primary"}" ${
+            creditsFirst ? "" : 'style="min-height:32px;padding:6px 12px;font-size:0.8rem;"'
+          } data-checkout-plan="pro">${isZh ? "开通 Pro · $12/月" : "Get Pro · $12/mo"}</button>`
+        : "";
+      const btnCredits = hasSku("credits")
+        ? `<button type="button" class="${creditsFirst ? "btn-primary" : "ctrl-btn"}" ${
+            creditsFirst ? 'style="min-height:32px;padding:6px 12px;font-size:0.8rem;"' : ""
+          } data-checkout-plan="credits">${isZh ? "买按量包 · $10 / 800 额度" : "Buy 800 cr · $10"}</button>`
+        : "";
+      paidActionsEl.innerHTML = creditsFirst ? `${btnCredits}${btnPro}` : `${btnPro}${btnCredits}`;
       paidActionsEl.querySelectorAll("[data-checkout-plan]").forEach((btn) => {
         btn.addEventListener("click", (ev) => {
           startBillingCheckout(btn.getAttribute("data-checkout-plan") || "pro", { triggerBtn: ev.currentTarget });
@@ -4686,27 +4591,35 @@ function syncBillingSurfaceUi() {
   }
 
   if (billingLive) {
-    if (wlHeading) wlHeading.textContent = isZh ? "自助开通 Pro / 按量包 · 团队采购咨询" : "Upgrade to Pro or Credit Pack · Team inquiries";
+    if (wlHeading) wlHeading.textContent = isZh ? "自助开通按量包 / Pro · 团队采购咨询" : "Upgrade to Pro or Credit Pack · Team inquiries";
     if (wlDesc) {
       wlDesc.textContent = isZh
-        ? "支持 Stripe 自助结账并实时到账；如需多席位对公发票或团队部署，也可在下方留言。"
+        ? "支持 Stripe 银行卡、支付宝与微信支付自助结账；如需多席位对公发票，可在下方留言。"
         : "Instant self-serve checkout via Stripe, or leave a note below for multi-seat invoicing.";
     }
     if (selfServeStrip) {
-      selfServeStrip.hidden = false;
-      selfServeStrip.innerHTML = `
-        <button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-wl-checkout="pro">${
-          isZh ? "Pro 月付（$12）" : "Pro Monthly ($12)"
-        }</button>
-        <button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="pro_yearly">${
-          isZh ? "Pro 年付（$108·省25%）" : "Pro Annual ($108)"
-        }</button>
-        <button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="credits">${
-          isZh ? "按量 800 额度（$10）" : "800 Credits ($10)"
-        }</button>
-        <button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="team">${
-          isZh ? "Team（$29/席位）" : "Team ($29/seat)"
-        }</button>`;
+      const stripItems = isZh
+        ? [
+            hasSku("credits")
+              ? `<button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-wl-checkout="credits">按量 800 额度（$10·免月租）</button>`
+              : "",
+            hasSku("pro")
+              ? `<button type="button" class="${hasSku("credits") ? "ctrl-btn ctrl-btn-sm" : "btn-primary"}" data-wl-checkout="pro">Pro 月付（$12）</button>`
+              : "",
+            hasSku("pro_yearly") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="pro_yearly">Pro 年付（$108·省25%）</button>` : "",
+            hasSku("team") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="team">Team（$29/席位）</button>` : "",
+          ]
+        : [
+            hasSku("pro")
+              ? `<button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-wl-checkout="pro">Pro Monthly ($12)</button>`
+              : "",
+            hasSku("pro_yearly") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="pro_yearly">Pro Annual ($108)</button>` : "",
+            hasSku("credits") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="credits">800 Credits ($10)</button>` : "",
+            hasSku("team") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-wl-checkout="team">Team ($29/seat)</button>` : "",
+          ];
+      const stripHtml = stripItems.filter(Boolean).join("");
+      selfServeStrip.hidden = !stripHtml;
+      selfServeStrip.innerHTML = stripHtml;
       selfServeStrip.querySelectorAll("[data-wl-checkout]").forEach((btn) => {
         btn.addEventListener("click", (ev) => {
           startBillingCheckout(btn.getAttribute("data-wl-checkout") || "pro", { triggerBtn: ev.currentTarget });
@@ -4867,7 +4780,7 @@ function renderCloudAccountState() {
   } else {
     if (topAcctBtn) {
       topAcctBtn.classList.remove("is-signed-in");
-      topAcctBtn.textContent = I18N[currentLang]?.["nav.signIn"] || "登录 · 30 免费额度";
+      topAcctBtn.textContent = I18N[currentLang]?.["nav.signIn"] || (isZh ? "登录" : "Sign in");
     }
     if (quotaEl) {
       quotaEl.textContent =
@@ -5086,8 +4999,25 @@ async function renderAccountHub() {
     const sub = active.subscription || {};
     const seats = Math.max(1, Number(sub.seats || active.seats || 1));
     const charCap = Number(active.maxChars || active.maxTextChars || (planCode !== "free" || bonus > 0 ? 50000 : 12000)).toLocaleString("en-US");
-    const voiceCap = Number(active.voiceCap || (planCode === "team" ? 50 : planCode === "pro" ? 20 : 3));
+    const voiceCap = Number(active.voiceCap || (planCode === "team" ? 50 : planCode === "pro" || bonus > 0 ? 20 : 3));
+    const officeCap =
+      active.officeExportCap === null || active.officeExportCap === undefined
+        ? planCode === "free" && bonus === 0
+          ? 2
+          : null
+        : Number(active.officeExportCap);
+    const officeUsed = Math.max(0, Number(active.officeExportsUsed || 0));
+    const officeMeta =
+      officeCap !== null
+        ? isZh
+          ? `Office 导出剩余 ${Math.max(0, officeCap - officeUsed)}/${officeCap} 次`
+          : `${Math.max(0, officeCap - officeUsed)}/${officeCap} free Office exports left`
+        : isZh
+          ? "Office 原排版导出不限次"
+          : "Unlimited Office exports";
     const billingLive = Boolean(cloudSessionState.billing?.enabled);
+    const skus = cloudSessionState.billing?.availableSkus || {};
+    const hasSku = (k) => skus[k] !== false;
     const portalReady = Boolean(sub.hasCustomerPortal && (cloudSessionState.billing?.portalEnabled ?? billingLive));
     const periodEndDay = sub.currentPeriodEnd ? String(sub.currentPeriodEnd).slice(0, 10) : "";
 
@@ -5114,25 +5044,38 @@ async function renderAccountHub() {
 
     let planActionsHtml = "";
     if (billingLive) {
+      const creditsPrimary = isZh && bonus === 0 && hasSku("credits");
       const upgradeBtns =
         planCode === "free"
-          ? `
-            <button type="button" class="btn-primary" style="min-height:30px;padding:4px 12px;font-size:0.79rem;" data-hub-checkout="pro">${
-              isZh ? "升级 Pro（$12/月）" : "Upgrade to Pro ($12/mo)"
-            }</button>
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="pro_yearly">${
-              isZh ? "Pro 年付（$108·省25%）" : "Pro Annual ($108/yr)"
-            }</button>
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">${
-              isZh ? "买按量包（$10 / 800 额度）" : "Buy 800 Credits ($10)"
-            }</button>
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="team">${
-              isZh ? "开通 Team（$29/席位）" : "Start Team ($29/seat)"
-            }</button>`
-          : `
-            <button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">${
-              isZh ? "加购按量包（$10 / 800 额度）" : "Top up 800 Credits ($10)"
-            }</button>`;
+          ? (isZh
+              ? [
+                  hasSku("credits")
+                    ? `<button type="button" class="${creditsPrimary ? "btn-primary" : "ctrl-btn ctrl-btn-sm"}" ${
+                        creditsPrimary ? 'style="min-height:30px;padding:4px 12px;font-size:0.79rem;"' : ""
+                      } data-hub-checkout="credits">买按量包（$10 / 800 额度）</button>`
+                    : "",
+                  hasSku("pro")
+                    ? `<button type="button" class="${creditsPrimary ? "ctrl-btn ctrl-btn-sm" : "btn-primary"}" ${
+                        creditsPrimary ? "" : 'style="min-height:30px;padding:4px 12px;font-size:0.79rem;"'
+                      } data-hub-checkout="pro">升级 Pro（$12/月）</button>`
+                    : "",
+                  hasSku("pro_yearly") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="pro_yearly">Pro 年付（$108·省25%）</button>` : "",
+                  hasSku("team") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="team">开通 Team（$29/席位）</button>` : "",
+                ]
+              : [
+                  hasSku("pro")
+                    ? `<button type="button" class="btn-primary" style="min-height:30px;padding:4px 12px;font-size:0.79rem;" data-hub-checkout="pro">Upgrade to Pro ($12/mo)</button>`
+                    : "",
+                  hasSku("pro_yearly") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="pro_yearly">Pro Annual ($108/yr)</button>` : "",
+                  hasSku("credits") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">Buy 800 Credits ($10)</button>` : "",
+                  hasSku("team") ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="team">Start Team ($29/seat)</button>` : "",
+                ]
+            ).filter(Boolean).join("")
+          : hasSku("credits")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-hub-checkout="credits">${
+                isZh ? "加购按量包（$10 / 800 额度）" : "Top up 800 Credits ($10)"
+              }</button>`
+            : "";
       const portalBtn = portalReady
         ? `<button type="button" class="ctrl-btn ctrl-btn-sm" id="hub-open-portal-btn">${
             isZh ? "管理账单与发票" : "Manage billing & invoices"
@@ -5174,13 +5117,13 @@ async function renderAccountHub() {
       <div class="hub-plan-card">
         <div class="hub-plan-head">
           <span>
-            <span class="hub-badge ${planCode !== "free" ? "is-paid" : ""}">${escapeHtmlSafe(planCode.toUpperCase())}</span>
+            <span class="hub-badge ${planCode !== "free" || bonus > 0 ? "is-paid" : ""}">${escapeHtmlSafe(planCode.toUpperCase())}</span>
             ${planCode === "team" ? `<span style="font-size:0.78rem;color:var(--ink-2);margin-left:6px;">${seats} ${isZh ? "席位" : "seat(s)"}</span>` : ""}
           </span>
           <span style="font-size:0.76rem;color:var(--ink-2);">${
             isZh
-              ? `单次上限 ${charCap} 字 · 云端文风上限 ${voiceCap} 份`
-              : `Up to ${charCap} chars/call · ${voiceCap} voice cards`
+              ? `单次上限 ${charCap} 字 · 文风卡 ${voiceCap} 份 · ${officeMeta}`
+              : `Up to ${charCap} chars/call · ${voiceCap} voice cards · ${officeMeta}`
           }</span>
         </div>
         ${subStatusHtml}
@@ -5831,12 +5774,10 @@ function openAuthModal({ reasonMsg = "", action = null } = {}) {
 
   let providersSection = "";
   if (isZh) {
-    const topProviders = [githubBtnHtml].filter(Boolean).join("");
-    const bottomProviders = [googleBtnHtml].filter(Boolean).join("");
+    const bottomProviders = [githubBtnHtml, googleBtnHtml].filter(Boolean).join("");
     providersSection = `
-      ${topProviders ? `<div class="auth-provider-stack">${topProviders}</div>` : ""}
       ${otpFormHtml}
-      ${bottomProviders ? `<div class="auth-divider"><span>或</span></div><div class="auth-provider-stack">${bottomProviders}</div>` : ""}`;
+      ${bottomProviders ? `<div class="auth-divider"><span>或用第三方账号</span></div><div class="auth-provider-stack">${bottomProviders}</div>` : ""}`;
   } else {
     const topProviders = [googleBtnHtml, githubBtnHtml].filter(Boolean).join("");
     providersSection = `
@@ -6128,38 +6069,89 @@ function openInlineCloudKeyPanel(reasonMsg = "") {
   openInlineCloudKeyPanelFallback(reasonMsg);
 }
 
-function openQuotaUpgradePanel(message = "") {
+function openQuotaUpgradePanel(message = "", reasonCode = "insufficient_credits") {
   const panel = document.getElementById("ai-result-panel");
   if (!panel) return;
   const isZh = currentLang === "zh";
   const active = getActiveCloudAccount();
   const billingLive = Boolean(cloudSessionState.billing?.enabled);
+  const skus = cloudSessionState.billing?.availableSkus || {};
+  const hasSku = (k) => skus[k] !== false;
   panel.hidden = false;
 
+  const titleByReason = {
+    office_export_upgrade_required: isZh
+      ? "2 次免费 Word/PPT 原排版导出已用完（审校仍可用免费额度）"
+      : "2 complimentary Word/PPT exports used (Office review stays open)",
+    text_too_long: isZh
+      ? "超出免费档 12,000 字单次上限（付费解锁 50,000 字）"
+      : "Draft exceeds the 12,000-char Free limit (unlock 50,000 chars)",
+    voice_limit_exceeded: isZh
+      ? "云端文风卡已达免费上限（付费解锁 20–50 份）"
+      : "Free cloud voice card limit reached (unlock 20–50 cards)",
+  };
+  const panelTitle =
+    titleByReason[reasonCode] ||
+    (billingLive
+      ? isZh
+        ? "当前云端额度不足（本地离线检查仍永久免费）"
+        : "Cloud credits used up (local checks stay unlimited)"
+      : isZh
+        ? "本月云端免费额度已用完（本地离线检查仍永久免费）"
+        : "Monthly cloud credits used up (local checks stay unlimited)");
+
+  const capabilityLead = isZh
+    ? "$10 按量包（800 额度·不过期）或 Pro（$12/月）均可同时解锁不限次 Word/PPT 原排版导出、50,000 字长文与 20 份文风卡："
+    : "Either the $10 Credit Pack (800 non-expiring credits) or Pro ($12/mo) unlocks unlimited Word/PPT exports, 50,000 chars/call, and 20 voice cards:";
+
   if (billingLive) {
+    const creditsLead = (isZh || reasonCode === "office_export_upgrade_required") && hasSku("credits");
+    const actionBtns = (creditsLead
+      ? [
+          hasSku("credits")
+            ? `<button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-inline-checkout="credits">${
+                isZh ? "买按量包（$10 / 800 额度 · 不过期）" : "Buy 800 Credits ($10 · never expires)"
+              }</button>`
+            : "",
+          hasSku("pro")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="pro">${
+                isZh ? "升级 Pro（$12/月 · 1,500 额度）" : "Upgrade to Pro ($12/mo · 1,500 cr)"
+              }</button>`
+            : "",
+          hasSku("team")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="team">${
+                isZh ? "Team（$29/席位）" : "Team ($29/seat)"
+              }</button>`
+            : "",
+        ]
+      : [
+          hasSku("pro")
+            ? `<button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-inline-checkout="pro">${
+                isZh ? "升级 Pro（$12/月 · 1,500 额度）" : "Upgrade to Pro ($12/mo · 1,500 cr)"
+              }</button>`
+            : "",
+          hasSku("credits")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="credits">${
+                isZh ? "买按量包（$10 / 800 额度 · 不过期）" : "Buy 800 Credits ($10 · never expires)"
+              }</button>`
+            : "",
+          hasSku("team")
+            ? `<button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="team">${
+                isZh ? "Team（$29/席位）" : "Team ($29/seat)"
+              }</button>`
+            : "",
+        ]
+    ).filter(Boolean).join("");
+
     panel.innerHTML = `
       <div class="ai-result-head">
-        <span class="ai-result-title">${isZh ? "当前云端额度不足（本地离线检查仍永久免费）" : "Cloud credits used up (local checks stay unlimited)"}</span>
+        <span class="ai-result-title">${panelTitle}</span>
         <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
       </div>
       ${message ? `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>` : ""}
       <div class="upgrade-box">
-        <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${
-          isZh
-            ? "左侧全部离线规则检查、5 轴节奏体检和命令行（npx dislop check .）依然不限次使用。如需立即补充云端审校额度："
-            : "All local rules, 5-axis telemetry, and CLI checks (npx dislop check .) stay unlimited. To add cloud credits immediately:"
-        }</p>
-        <div class="quick-actions">
-          <button type="button" class="btn-primary" style="min-height:32px;padding:5px 12px;font-size:0.8rem;" data-inline-checkout="pro">${
-            isZh ? "升级 Pro（$12/月 · 1,500 额度）" : "Upgrade to Pro ($12/mo · 1,500 cr)"
-          }</button>
-          <button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="credits">${
-            isZh ? "买按量包（$10 / 800 额度 · 不过期）" : "Buy 800 Credits ($10 · never expires)"
-          }</button>
-          <button type="button" class="ctrl-btn ctrl-btn-sm" data-inline-checkout="team">${
-            isZh ? "Team（$29/席位）" : "Team ($29/seat)"
-          }</button>
-        </div>
+        <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${capabilityLead}</p>
+        <div class="quick-actions">${actionBtns}</div>
       </div>
     `;
     document.getElementById("btn-ai-close-panel")?.addEventListener("click", () => {
@@ -6175,20 +6167,16 @@ function openQuotaUpgradePanel(message = "") {
 
   panel.innerHTML = `
     <div class="ai-result-head">
-      <span class="ai-result-title">${isZh ? "本月云端免费额度已用完（本地离线检查仍永久免费）" : "Monthly cloud credits used up (local checks stay unlimited)"}</span>
+      <span class="ai-result-title">${panelTitle}</span>
       <button type="button" id="btn-ai-close-panel" class="ctrl-btn ctrl-btn-sm">${isZh ? "收起" : "Dismiss"}</button>
     </div>
     ${message ? `<p class="ai-error-msg">${escapeHtmlSafe(message)}</p>` : ""}
     <div class="upgrade-box">
-      <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${
-        isZh
-          ? "左侧全部离线规则检查、5 轴节奏体检和命令行（npx dislop check .）依然不限次使用。如需更多云端审校与 Word/PPT 原排版处理，可以直接预约："
-          : "All local rules, 5-axis telemetry, and CLI checks (npx dislop check .) stay unlimited. To reserve higher cloud capacity:"
-      }</p>
+      <p style="margin:0 0 8px;font-size:0.82rem;color:var(--ink-2);">${capabilityLead}</p>
       <form id="inline-upgrade-waitlist-form" class="cloud-inline-form">
         <select id="inline-wl-plan" class="pack-select" aria-label="${isZh ? "选择方案" : "Select plan"}">
-          <option value="pro">${isZh ? "Pro（$12/月 · 1,500 额度）" : "Pro ($12/mo · 1,500 credits)"}</option>
-          <option value="credits">${isZh ? "按量包（$10 / 800 额度 · 不过期）" : "PAYGO ($10 / 800 credits · never expires)"}</option>
+          <option value="credits" ${isZh ? "selected" : ""}>${isZh ? "按量包（$10 / 800 额度 · 不过期）" : "PAYGO ($10 / 800 credits · never expires)"}</option>
+          <option value="pro" ${!isZh ? "selected" : ""}>${isZh ? "Pro（$12/月 · 1,500 额度）" : "Pro ($12/mo · 1,500 credits)"}</option>
           <option value="team">${isZh ? "Team（$29/席位 · 团队文风）" : "Team ($29/seat · shared voice)"}</option>
         </select>
         <input type="email" id="inline-wl-email" class="cloud-input" required value="${escapeHtmlSafe(active?.email || "")}" placeholder="you@company.com">
@@ -6213,7 +6201,7 @@ function openQuotaUpgradePanel(message = "") {
       const resp = await fetch("/api/v1/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, plan, note: "exhausted_credits_inline", source: getEntrySource() }),
+        body: JSON.stringify({ email, plan, note: reasonCode || "exhausted_credits_inline", source: getEntrySource() }),
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
@@ -6234,8 +6222,13 @@ function openQuotaUpgradePanel(message = "") {
 function renderAiError(errCode, message) {
   const panel = document.getElementById("ai-result-panel");
   if (!panel) return;
-  if (errCode === "insufficient_credits") {
-    openQuotaUpgradePanel(message);
+  if (
+    errCode === "insufficient_credits" ||
+    errCode === "office_export_upgrade_required" ||
+    errCode === "text_too_long" ||
+    errCode === "voice_limit_exceeded"
+  ) {
+    openQuotaUpgradePanel(message, errCode);
     return;
   }
   if (errCode === "account_changed") {
@@ -6971,17 +6964,53 @@ function init() {
   });
 
   document.getElementById("lang-toggle").addEventListener("click", () => {
-    currentLang = currentLang === "zh" ? "en" : "zh";
+    const nextLang = currentLang === "zh" ? "en" : "zh";
+    safeSetStorage("dislop-lang", nextLang);
+    if (!binaryAuditResult && currentText && (customRuleTitle === "user-draft" || currentText !== baselineText)) {
+      try {
+        window.sessionStorage?.setItem(
+          LANG_SWITCH_DRAFT_KEY,
+          JSON.stringify({
+            packId: currentPackId,
+            register: currentRegister || "auto",
+            modality: currentModality,
+            filename: currentFilename,
+            text: String(currentText).slice(0, 50000),
+            ts: Date.now(),
+          })
+        );
+      } catch {
+        // ignore storage errors
+      }
+    }
+    const hreflang = nextLang === "zh" ? "zh-Hans" : "en";
+    const altEl = document.querySelector(`link[rel="alternate"][hreflang="${hreflang}"]`);
+    let targetPath = nextLang === "zh" ? siteAssetUrl("zh/") : SITE_ROOT_PATH;
+    if (altEl?.getAttribute("href")) {
+      try {
+        targetPath = new URL(altEl.getAttribute("href"), window.location.href).pathname || targetPath;
+      } catch {
+        // keep fallback targetPath
+      }
+    }
+    if (window.location.pathname !== targetPath) {
+      const peerParams = new URLSearchParams(window.location.search || "");
+      if (peerParams.has("lang")) peerParams.set("lang", nextLang);
+      const peerQs = peerParams.toString();
+      window.location.assign(`${targetPath}${peerQs ? `?${peerQs}` : ""}${window.location.hash || ""}`);
+      return;
+    }
+    currentLang = nextLang;
     applyI18n(true);
   });
 
-  // Hero 3-state Proof Card tabs (roving tabindex + arrow keys) & autoplay toggle
+  // Hero 3-state Proof Card tabs (roving tabindex + arrow keys)
   const heroTabsRail = document.getElementById("hero-proof-tabs");
   const heroTabs = heroTabsRail ? Array.from(heroTabsRail.querySelectorAll("[data-hero-state]")) : [];
   heroTabs.forEach((btn) => {
     btn.addEventListener("click", () => {
       const next = btn.getAttribute("data-hero-state") || "bad";
-      setHeroProofState(next, false);
+      setHeroProofState(next);
     });
   });
   if (heroTabsRail && heroTabs.length) {
@@ -6996,22 +7025,12 @@ function init() {
       if (next < 0) return;
       e.preventDefault();
       const targetTab = heroTabs[next];
-      setHeroProofState(targetTab.getAttribute("data-hero-state") || "bad", false);
+      setHeroProofState(targetTab.getAttribute("data-hero-state") || "bad");
       targetTab.focus();
     });
   }
 
-  document.getElementById("hp-autoplay-btn")?.addEventListener("click", () => {
-    heroProofAutoplay = !heroProofAutoplay;
-    if (heroProofAutoplay) {
-      startHeroProofTimer();
-    } else {
-      stopHeroProofTimer();
-    }
-    updateHeroAutoplayButton();
-  });
-
-  // Demo cards: Pause/Play poster swap (supports reduced-motion override), Replay, and Lightbox
+  // Demo cards: borderless click/keyboard surface swaps animated loop <-> poster (supports reduced-motion override)
   function setDemoCardPaused(slug, paused) {
     if (paused) pausedDemoSlugs.add(slug);
     else pausedDemoSlugs.delete(slug);
@@ -7027,17 +7046,17 @@ function init() {
     }
     if (webp) {
       webp.srcset = paused
-        ? `./assets/demos/${slug}-${currentLang}-v2-poster.png`
-        : `./assets/demos/${slug}-${currentLang}-v2.webp`;
+        ? siteAssetUrl(`assets/demos/${slug}-${currentLang}-v2-poster.png`)
+        : siteAssetUrl(`assets/demos/${slug}-${currentLang}-v2.webp`);
     }
     if (img) {
       img.src = paused
-        ? `./assets/demos/${slug}-${currentLang}-v2-poster.png`
-        : `./assets/demos/${slug}-${currentLang}-v2.gif`;
+        ? siteAssetUrl(`assets/demos/${slug}-${currentLang}-v2-poster.png`)
+        : siteAssetUrl(`assets/demos/${slug}-${currentLang}-v2.gif`);
     }
     if (btn) {
       btn.setAttribute("aria-pressed", String(paused));
-      btn.textContent = paused ? dict["demos.play"] : dict["demos.pause"];
+      btn.setAttribute("aria-label", paused ? dict["demos.play"] : dict["demos.pause"]);
     }
   }
 
@@ -7051,47 +7070,7 @@ function init() {
       setDemoCardPaused(slug, !pausedDemoSlugs.has(slug));
     });
   });
-
-  document.querySelectorAll("[data-demo-replay]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const slug = btn.getAttribute("data-demo-replay");
-      if (!slug) return;
-      setDemoCardPaused(slug, false);
-      const card = document.querySelector(`[data-demo-card="${slug}"]`);
-      const poster = card?.querySelector(`source[data-demo-poster="${slug}"]`);
-      const webp = card?.querySelector(`source[data-demo-webp="${slug}"]`);
-      const img = card?.querySelector(`img[data-demo-gif="${slug}"]`);
-      const bust = `?r=${Date.now()}`;
-      if (poster) poster.media = "not all";
-      if (webp) webp.srcset = `./assets/demos/${slug}-${currentLang}-v2.webp${bust}`;
-      if (img) img.src = `./assets/demos/${slug}-${currentLang}-v2.gif${bust}`;
-    });
-  });
-
-  const lightbox = document.getElementById("demo-lightbox");
-  const lightboxTitle = document.getElementById("demo-lightbox-title");
-  const lightboxImg = document.getElementById("demo-lightbox-img");
-  document.querySelectorAll("[data-demo-zoom]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const slug = btn.getAttribute("data-demo-zoom");
-      if (!slug || !lightbox || !lightboxImg) return;
-      const card = document.querySelector(`[data-demo-card="${slug}"]`);
-      const titleText = card?.querySelector(".demo-cap-title")?.textContent || slug;
-      const altText = card?.querySelector("img")?.alt || titleText;
-      if (lightboxTitle) lightboxTitle.textContent = titleText;
-      lightboxImg.src = `./assets/demos/${slug}-${currentLang}-v2.webp`;
-      lightboxImg.alt = altText;
-      if (typeof lightbox.showModal === "function") lightbox.showModal();
-    });
-  });
   initDemoStage();
-
-  document.getElementById("demo-lightbox-close")?.addEventListener("click", () => {
-    lightbox?.close();
-  });
-  lightbox?.addEventListener("click", (e) => {
-    if (e.target === lightbox) lightbox.close();
-  });
 
   document.getElementById("hero-open-wb")?.addEventListener("click", () => {
     const data = HERO_PROOF_BY_LANG[currentLang] || HERO_PROOF_BY_LANG.zh;
@@ -7585,7 +7564,8 @@ function init() {
     const btn = ev.currentTarget;
     try {
       const token = await encodeShareHash(currentText, currentPackId, currentModality);
-      const url = `${window.location.origin}/?lang=${currentLang}#share=${token}`;
+      const shareBase = currentLang === "zh" ? siteAssetUrl("zh/") : SITE_ROOT_PATH;
+      const url = `${window.location.origin}${shareBase}#share=${token}`;
       await copyTextWithFeedback(btn, url);
       showShareBanner(
         currentLang === "zh"
@@ -7825,8 +7805,40 @@ function init() {
     handleWorkbenchHash();
   });
 
+  try {
+    const rawDraft = window.sessionStorage?.getItem(LANG_SWITCH_DRAFT_KEY) || "";
+    if (rawDraft) {
+      window.sessionStorage?.removeItem(LANG_SWITCH_DRAFT_KEY);
+      const stashed = JSON.parse(rawDraft);
+      if (stashed?.text && stashed?.ts && Date.now() - Number(stashed.ts) < 5 * 60_000) {
+        customRuleTitle = "user-draft";
+        currentPackId = PACKS_BY_ID[stashed.packId] || stashed.packId === "auto" ? stashed.packId : "auto";
+        currentRegister = stashed.register || "auto";
+        currentModality = stashed.modality || inferPastedTextModality(stashed.text, currentPackId);
+        currentFilename = stashed.filename || `pasted-draft.${currentModality === "markdown" ? "md" : currentModality}`;
+        activeSpecimen = {
+          id: "user-draft",
+          pack: currentPackId,
+          filename: currentFilename,
+          modality: currentModality,
+          bad: stashed.text,
+          trap: null,
+          good: null,
+        };
+        baselineText = stashed.text;
+        currentText = stashed.text;
+        focusedFindingIdx = -1;
+        const packSel = document.getElementById("pack-select");
+        if (packSel) packSel.value = currentPackId;
+        const regSel = document.getElementById("register-select");
+        if (regSel) regSel.value = currentRegister;
+      }
+    }
+  } catch {
+    // ignore storage restore errors
+  }
+
   applyI18n(false);
-  startHeroProofTimer();
 
   try {
     const params = new URLSearchParams(window.location.search || "");

@@ -26,7 +26,8 @@
       "zones": ["prose"],
       "modalities": ["markdown", "text", "html", "docx", "pptx"],
       "patterns": [
-        "(?:^|[.!?]\\s+)(?:It(?:'s| is) (?:worth noting|important to note|crucial to remember) that|In today's (?:fast-paced|rapidly evolving|ever-changing)|In the (?:ever-evolving|rapidly changing) landscape of|Let's dive (?:right )?in(?:to)?|At the end of the day,)\\b"
+        "(?:^|[.!?]\\s+)(?:It(?:'s| is) (?:worth noting|important to note|crucial to remember) that|In today's (?:fast-paced|rapidly evolving|ever-changing)|In the (?:ever-evolving|rapidly changing) landscape of|Let's dive (?:right )?in(?:to)?|At the end of the day,)\\b",
+        "(?:^|[.!?]\\s+)Whether you(?:'re|’re| are) (?:a|an|just a)?\\s*(?:solo (?:developer|founder|creator|builder|beginner|engineer)|indie (?:hacker|developer|maker|builder)|freelancer|beginner|newcomer|small (?:startup|team|business|agency))\\b[^.!?\n]{0,60}?\\bor (?:a|an|the)?\\s*(?:seasoned (?:pro|veteran|architect|engineer)|growing team|Fortune[- ]500(?: company| enterprise)?|(?:large |global )?enterprise(?: team| organization)?)\\b"
       ],
       "message": {
         "en": "Throat-clearing opener delays the concrete point.",
@@ -51,11 +52,14 @@
       "fixtures": {
         "hit": [
           "It is worth noting that backups run every 6 hours.",
-          "In today's fast-paced payments market, settlement speed matters."
+          "In today's fast-paced payments market, settlement speed matters.",
+          "Whether you are a solo beginner or a Fortune 500 enterprise, deployments finish in seconds."
         ],
         "clean": [
           "Backups run every 6 hours and retain 14 snapshots.",
-          "Two leading underscores mark private fields in Python classes."
+          "Two leading underscores mark private fields in Python classes.",
+          "Check whether you are connected to the staging VPN or the production bastion before running migrations.",
+          "Whether you are a parent or a guardian, sign the consent form before Friday."
         ]
       }
     },
@@ -68,7 +72,8 @@
       "zones": ["prose"],
       "modalities": ["markdown", "text", "html", "docx", "pptx"],
       "patterns": [
-        "\\b(?:delve(?:s|d)? into|rich tapestry of|stands as a testament to|a testament to our|game-changer|paradigm shift|unlock(?:ing)? the full potential)\\b"
+        "\\b(?:delve(?:s|d)? into|rich tapestry of|stands as a testament to|a testament to our|game-changer|paradigm shift|unlock(?:ing)? the full potential|(?:take|takes|taking|elevate|elevates|elevating|bring|brings|bringing) (?:your|our|their|it|this|things|(?:your|our|their) [A-Za-z0-9-]+) to the next level|teams of all sizes|world-class)\\b",
+        "\\b(?:powerful|blazing(?:ly)?[- ]fast|lightning[- ]fast|seamless|intuitive|robust|scalable|effortless|cutting[- ]edge|modern|lightweight|flexible),\\s+(?:powerful|blazing(?:ly)?[- ]fast|lightning[- ]fast|seamless|intuitive|robust|scalable|effortless|cutting[- ]edge|modern|lightweight|flexible),?\\s+and\\s+(?:powerful|blazing(?:ly)?[- ]fast|lightning[- ]fast|seamless|intuitive|robust|scalable|effortless|cutting[- ]edge|modern|lightweight|flexible)\\b"
       ],
       "message": {
         "en": "Stock promotional phrase where a specific verb or measurement would carry more weight.",
@@ -91,11 +96,15 @@
       "fixtures": {
         "hit": [
           "This caching layer is a game-changer for read throughput.",
-          "Section 2 delves into retry budgets."
+          "Section 2 delves into retry budgets.",
+          "SuperFlow is a powerful, blazing-fast, and seamless platform built for teams of all sizes.",
+          "This workflow takes your productivity to the next level."
         ],
         "clean": [
           "The museum lent a 16th-century wool tapestry for the exhibition.",
-          "Run the Delve debugger to inspect goroutine stacks."
+          "Run the Delve debugger to inspect goroutine stacks.",
+          "ripgrep is fast, small, and portable across Linux, macOS, and Windows.",
+          "After the first coat dries, take the ladder to the next level."
         ]
       }
     },

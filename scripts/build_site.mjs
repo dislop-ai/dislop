@@ -16,19 +16,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  AWESOME_NAV_IDS,
-  buildEnglishAwesomeHtml,
-  buildEnglishHomeHtml,
+  buildAwesomePageHtml,
   buildGuidesAndRulesPages,
   loadGuides,
   loadKnowledgeBase,
-  renderAwesomeJsonLd,
-  renderAwesomeTriageHtml,
-  renderBrandLockup,
-  renderGithubCtrl,
   renderHomeJsonLd,
-  renderPrimaryNavLinks,
-  renderStaticAccountCtrl,
+  sanitizeEnglishRuleProse,
 } from "./lib/site_content.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -236,7 +229,19 @@ const canonicalProductBriefMd = fs.readFileSync(path.join(ROOT, "PRODUCT.md"), "
 const canonicalRoadmapEn = fs.readFileSync(path.join(ROOT, "ROADMAP.md"), "utf8");
 const canonicalRoadmapZh = fs.readFileSync(path.join(ROOT, "ROADMAP.zh-CN.md"), "utf8");
 
-// ---------- 1. Sync Core Engine, Brand Assets & JS Data Modules ----------
+// ---------- 1. Clean Stale Generated Directories & Sync Core Engine / Assets ----------
+
+for (const staleRel of ["en", "zh", "guides"]) {
+  fs.rmSync(path.join(SITE_DIR, staleRel), { recursive: true, force: true });
+}
+const rulesSiteDir = path.join(SITE_DIR, "rules");
+if (fs.existsSync(rulesSiteDir)) {
+  for (const ent of fs.readdirSync(rulesSiteDir, { withFileTypes: true })) {
+    if (ent.isDirectory()) {
+      fs.rmSync(path.join(rulesSiteDir, ent.name), { recursive: true, force: true });
+    }
+  }
+}
 
 fs.mkdirSync(ENGINE_OUT, { recursive: true });
 fs.mkdirSync(ASSETS_OUT, { recursive: true });
@@ -2006,8 +2011,8 @@ const repoAwesomeReadmeZh = `<p align="center">
 
 <p align="center">
   <a href="./README.md">English</a> ·
-  <a href="${BASE_URL}/awesome/">在线筛选</a> ·
-  <a href="${BASE_URL}/#workbench">试查一段稿子</a> ·
+  <a href="${BASE_URL}/zh/awesome/">在线筛选</a> ·
+  <a href="${BASE_URL}/zh/#workbench">试查一段稿子</a> ·
   <a href="${BASE_URL}/awesome/index.json">JSON 数据</a> ·
   <a href="../README.zh-CN.md">返回 dislop 主仓</a>
 </p>
@@ -2018,7 +2023,7 @@ const repoAwesomeReadmeZh = `<p align="center">
 
 所有链接、GitHub 星标和最近更新时间都在 \`${SNAPSHOT_DATE}\` 核过一遍。其中 ${awesomeDetTotal} 个可以在本地跑自动检查，不依赖大模型。AI 文本检测器和规避工具单独放在最下面的[检测与规避研究](#检测与规避研究仅供对照)，只作对照参考。
 
-想离线搜索筛选，可以打开 [dislop.com/awesome](${BASE_URL}/awesome/)。想给 Agent 读，直接用 [index.json](${BASE_URL}/awesome/index.json) 或 [index.md](${BASE_URL}/awesome/index.md)。补充新条目请看[提交新条目](#提交新条目)。
+想离线搜索筛选，可以打开 [dislop.com/zh/awesome](${BASE_URL}/zh/awesome/)。想给 Agent 读，直接用 [index.json](${BASE_URL}/awesome/index.json) 或 [index.md](${BASE_URL}/awesome/index.md)。补充新条目请看[提交新条目](#提交新条目)。
 
 ## 目录
 
@@ -2034,187 +2039,31 @@ ${githubTablesZh}
 `;
 fs.writeFileSync(path.join(REPO_AWESOME_OUT, "README.zh-CN.md"), sanitizeAgentText(repoAwesomeReadmeZh), "utf8");
 
-// Pre-render site/awesome/index.html in Chinese (default) with compact <select> + clean 3-column reading list
-const awesomeSectionOptionsHtml = [
-  `<option value="all">全部类别（${radarData.entries.length}）</option>`,
-  ...GITHUB_SECTION_META.map((sec) => {
-    const cnt = radarData.entries.filter((e) => e.section === sec.id).length;
-    return `<option value="${sec.id}">${escapeHtml(sec.headingZh)}（${cnt}）</option>`;
-  }),
-].join("\n          ");
-
-const awesomePreRenderedRows = radarData.entries
-  .map((e) => {
-    const secObj = GITHUB_SECTION_META.find((s) => s.id === e.section);
-    const secLabel = secObj ? secObj.headingZh : e.section;
-    const isContrast = e.section === "contrast-and-detection";
-    const metaParts = [];
-    if (typeof e.stars === "number") metaParts.push(`${e.stars.toLocaleString("en-US")}★`);
-    if (e.pushedAt) metaParts.push(e.pushedAt);
-    if (e.license && e.license !== "NOASSERTION") metaParts.push(e.license);
-    if (e.archived) metaParts.push("已归档");
-    return `<tr>
-              <td><a href="${escapeHtml(e.url)}" target="_blank" rel="noopener"><strong>${escapeHtml(e.name)}</strong></a>${
-      e.repo ? `<div style="font-family:var(--font-mono);font-size:0.73rem;color:var(--ink-3);margin-top:2px;">${escapeHtml(e.repo)}</div>` : ""
-    }<div style="font-size:0.74rem;color:${isContrast ? "var(--mark-error)" : "var(--ink-3)"};margin-top:4px;">${escapeHtml(secLabel)}${e.hasDeterministicCheck ? ' · <span style="color:var(--ink-2);font-weight:600;">自动检查</span>' : ""}</div></td>
-              <td>${escapeHtml(e.summary)}</td>
-              <td style="font-family:var(--font-mono);font-size:0.74rem;white-space:nowrap;text-align:right;">${escapeHtml(metaParts.join(" · ") || "—")}</td>
-            </tr>`;
-  })
-  .join("\n");
-
-const awesomeHtml = `<!DOCTYPE html>
-<html lang="zh-CN" data-static-lang="zh">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <script src="../lang-init.js"></script>
-  <title>去 AI 味工具清单 · Awesome Anti-Slop（${radarData.entries.length} 条）— dislop</title>
-  <meta name="description" content="去 AI 味才是真正的生产力！整理了 ${radarData.entries.length} 个中英文去 AI 味工具、检查器、写作规范、网页设计指南和论文，链接和仓库信息已核验，可在网页里筛选。">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="dislop">
-  <meta property="og:url" content="https://dislop.com/awesome/">
-  <meta property="og:title" content="Awesome Anti-Slop — ${radarData.entries.length} 个去 AI 味工具与资料">
-  <meta property="og:description" content="去 AI 味才是真正的生产力！中英文去 AI 味工具、检查器、写作与设计规范、代码 PR 治理和论文清单，可在网页里筛选。">
-  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@dislop_ai">
-  <meta name="twitter:title" content="Awesome Anti-Slop — ${radarData.entries.length} 个去 AI 味工具与资料">
-  <meta name="twitter:description" content="去 AI 味才是真正的生产力！中英文去 AI 味工具、检查器、写作与设计规范、代码 PR 治理和论文清单。">
-  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
-  <link rel="canonical" href="https://dislop.com/awesome/">
-  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/awesome/">
-  <link rel="alternate" hreflang="en" href="https://dislop.com/en/awesome/">
-  <link rel="alternate" hreflang="x-default" href="https://dislop.com/awesome/">
-  <link rel="alternate" type="application/atom+xml" href="../feed.xml" title="dislop 实用指南（中文）">
-  <link rel="alternate" type="text/markdown" href="./index.md" title="Awesome Anti-Slop Markdown Directory">
-  <link rel="alternate" type="application/json" href="./index.json" title="Awesome Anti-Slop JSON (${radarData.schema})">
-  <link rel="alternate" type="text/plain" href="../llms.txt" title="LLMs Resource Index">
-  <link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
-  <link rel="stylesheet" href="../styles.css">
-${renderAwesomeJsonLd({ lang: "zh", baseUrl: BASE_URL, entries: radarData.entries })}
-</head>
-<body>
-  <a class="skip-link" href="#main-content" data-i18n="nav.skip">跳至正文</a>
-  <div class="rail-shell">
-    <header class="topbar band-rule">
-      ${renderBrandLockup({ lang: "zh", depthPrefix: "../", homeHref: "../", version: VERSION, metaI18nKey: "nav.brandMeta" })}
-
-      <nav class="nav-links" aria-label="主导航">
-${renderPrimaryNavLinks({ lang: "zh", depthPrefix: "../", activeNav: "awesome", ids: AWESOME_NAV_IDS, withI18n: true })}
-      </nav>
-
-      <div class="top-controls">
-        ${renderStaticAccountCtrl({ lang: "zh", depthPrefix: "../", i18nKey: "nav.signIn" })}
-        ${renderGithubCtrl({ i18nKey: "nav.github" })}
-        <button type="button" id="lang-toggle" class="ctrl-btn" aria-label="Switch to English">EN</button>
-        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
-      </div>
-    </header>
-
-    <main id="main-content">
-    <section class="section-block band-rule">
-      <h1 class="lead-heading" style="max-width:24ch;" data-i18n="awesome.heading">去 AI 味工具清单</h1>
-      <p class="section-desc" data-i18n="awesome.sub">
-        一共整理了 ${radarData.entries.length} 个中英文工具、检查器、写作规范、网页设计指南和论文，包括 Vale、Impeccable 这类常用项目。可以按类别找，也可以只看能自动检查的工具。链接和 GitHub 状态核验于 ${SNAPSHOT_DATE}。
-      </p>
-      <div class="page-export-strip">
-        <span data-i18n="awesome.exportLabel">给 Agent 或脚本读：</span>
-        <a href="./index.json">index.json</a>
-        <a href="./index.md">index.md</a>
-        <a href="https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md" target="_blank" rel="noopener" id="awesome-gh-nav">GitHub</a>
-      </div>
-
-${renderAwesomeTriageHtml({ lang: "zh", depthPrefix: "../" })}
-
-      <div class="catalog-controls" style="margin-top:24px;">
-        <input type="search" id="awesome-search" class="search-input" placeholder="搜项目名、仓库或用途…" aria-label="搜索工具清单">
-        <select id="awesome-section" class="filter-select" aria-label="按类别筛选">
-          ${awesomeSectionOptionsHtml}
-        </select>
-        <select id="awesome-locale" class="filter-select" aria-label="按语种筛选">
-          <option value="all" data-i18n="awesome.allLocales">全部语种</option>
-          ${radarData.taxonomy.locales.map((l) => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join("")}
-        </select>
-        <button type="button" id="awesome-det-btn" class="ctrl-btn" aria-pressed="false" data-i18n="awesome.detOnly">只看能自动检查</button>
-        <button type="button" id="awesome-reset-btn" class="ctrl-btn" data-i18n="awesome.reset">重置</button>
-      </div>
-
-      <div class="filter-bar" style="margin-top:10px;">
-        <span class="catalog-count" id="awesome-count" aria-live="polite">${radarData.entries.length} / ${radarData.entries.length} 条</span>
-        <span style="font-size:0.78rem;color:var(--ink-3);" data-i18n="awesome.snapNote">核验日期 ${SNAPSHOT_DATE} · 标签页内筛选</span>
-      </div>
-
-      <div class="table-scroll" tabindex="0" role="region" aria-label="工具清单表格">
-        <table class="radar-table">
-          <thead>
-            <tr>
-              <th data-i18n="awesome.colName">项目与类别</th>
-              <th data-i18n="awesome.colSummary">做什么的</th>
-              <th style="text-align:right;" data-i18n="awesome.colMeta">星标 · 最近更新</th>
-            </tr>
-          </thead>
-          <tbody id="awesome-tbody">
-${awesomePreRenderedRows}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="contrast-notice" data-i18n="awesome.contrastNote">
-        说明：「检测与规避研究（仅供对照）」收录概率型 AI 文本检测器和规避工具，只作对照参考。dislop 只清理文案和设计里的 AI 味，不用于规避披露规则。
-      </div>
-    </section>
-    </main>
-
-    <footer class="colophon">
-      <div>
-        <span data-i18n="footer.snapshot">核验日期：${SNAPSHOT_DATE} · 离线运行，不发外网请求</span>
-      </div>
-      <div class="colophon-links">
-        <a href="../" id="awesome-foot-home" data-i18n="footer.home">返回首页</a>
-        <a href="./index.json" data-i18n="footer.json">JSON 数据</a>
-        <a href="./index.md">Markdown</a>
-        <a href="../llms.txt">llms.txt</a>
-        <a href="https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md" target="_blank" rel="noopener" id="awesome-gh-foot">GitHub</a>
-        <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
-      </div>
-    </footer>
-  </div>
-
-  <script type="module" src="./awesome.js"></script>
-</body>
-</html>
-`;
-fs.writeFileSync(path.join(AWESOME_OUT, "index.html"), awesomeHtml, "utf8");
-
-// 2h-ter. English Static Pages (/en/, /en/awesome/), Guides (/guides/, /en/guides/) & Rules Wiki (/rules/, /en/rules/)
+// 2h-ter. Awesome Directory (/awesome/ = EN, /zh/awesome/ = ZH), Guides (/guides/, /zh/guides/) & Rules Wiki (/rules/, /zh/rules/)
 const { raw: kbData, byId: kbById } = loadKnowledgeBase(ROOT);
 const CONTENT_DATE = kbData.snapshotDate || SNAPSHOT_DATE;
 const guides = loadGuides(ROOT, kbById, packsById);
 
-const enAwesomeHtml = buildEnglishAwesomeHtml({
+const enAwesomeHtml = buildAwesomePageHtml({
+  lang: "en",
   baseUrl: BASE_URL,
+  version: VERSION,
   snapshotDate: SNAPSHOT_DATE,
   radarData,
   githubSectionMeta: GITHUB_SECTION_META,
 });
-fs.mkdirSync(path.join(SITE_DIR, "en", "awesome"), { recursive: true });
-fs.writeFileSync(path.join(SITE_DIR, "en", "awesome", "index.html"), enAwesomeHtml, "utf8");
+fs.writeFileSync(path.join(AWESOME_OUT, "index.html"), enAwesomeHtml, "utf8");
 
-const enHomeHtml = buildEnglishHomeHtml({
+const zhAwesomeHtml = buildAwesomePageHtml({
+  lang: "zh",
   baseUrl: BASE_URL,
   version: VERSION,
   snapshotDate: SNAPSHOT_DATE,
-  packsById,
-  allRules,
   radarData,
-  guides,
+  githubSectionMeta: GITHUB_SECTION_META,
 });
-fs.mkdirSync(path.join(SITE_DIR, "en"), { recursive: true });
-fs.writeFileSync(path.join(SITE_DIR, "en", "index.html"), enHomeHtml, "utf8");
+fs.mkdirSync(path.join(SITE_DIR, "zh", "awesome"), { recursive: true });
+fs.writeFileSync(path.join(SITE_DIR, "zh", "awesome", "index.html"), zhAwesomeHtml, "utf8");
 
 const { htmlSitemapPairs, standaloneHtmlUrls } = buildGuidesAndRulesPages({
   siteDir: SITE_DIR,
@@ -2283,7 +2132,7 @@ const llmsTxt = writeCleanFile(
 - [Pre-release gate](${BASE_URL}/tasks/pre-release-gate.md): Core \`error\` checks and CI diff gating.
 
 ## Browse by topic
-- [Guides (EN & ZH)](${BASE_URL}/en/guides/): ${guides.length} tutorials (ZH at \`/guides/\`).
+- [Guides (EN & ZH)](${BASE_URL}/guides/): ${guides.length} tutorials (ZH at \`/zh/guides/\`).
 - [Product Brief](${BASE_URL}/methodology/product-brief.md): Positioning and user tiers.
 - [Methodology](${BASE_URL}/methodology/index.md): Plain writing guide and visual tokens.
 - [Cases & Refs](${BASE_URL}/cases/index.md): Contrasts and 31 design references.
@@ -2493,22 +2342,22 @@ function escapeXml(str) {
 }
 
 const bilingualPairs = [
-  { zh: "/", en: "/en/", prio: "1.0" },
-  { zh: "/awesome/", en: "/en/awesome/", prio: "0.9" },
+  { en: "/", zh: "/zh/", prio: "1.0" },
+  { en: "/awesome/", zh: "/zh/awesome/", prio: "0.9" },
   ...htmlSitemapPairs,
 ];
 
 const sitemapEntries = new Map();
 for (const pair of bilingualPairs) {
-  const zhUrl = `${BASE_URL}${pair.zh}`;
   const enUrl = `${BASE_URL}${pair.en}`;
+  const zhUrl = `${BASE_URL}${pair.zh}`;
   const alts = [
-    { hreflang: "zh-Hans", href: zhUrl },
     { hreflang: "en", href: enUrl },
-    { hreflang: "x-default", href: zhUrl },
+    { hreflang: "zh-Hans", href: zhUrl },
+    { hreflang: "x-default", href: enUrl },
   ];
-  sitemapEntries.set(zhUrl, { loc: zhUrl, lastmod: CONTENT_DATE, priority: pair.prio, alts });
   sitemapEntries.set(enUrl, { loc: enUrl, lastmod: CONTENT_DATE, priority: pair.prio, alts });
+  sitemapEntries.set(zhUrl, { loc: zhUrl, lastmod: CONTENT_DATE, priority: pair.prio, alts });
 }
 
 const standaloneUrls = [
@@ -2516,7 +2365,7 @@ const standaloneUrls = [
   [`${BASE_URL}/llms.txt`, "0.8"],
   [`${BASE_URL}/llms-full.txt`, "0.7"],
   [`${BASE_URL}/feed.xml`, "0.6"],
-  [`${BASE_URL}/en/feed.xml`, "0.6"],
+  [`${BASE_URL}/zh/feed.xml`, "0.6"],
   [`${BASE_URL}/roadmap.md`, "0.6"],
   [`${BASE_URL}/roadmap.zh-CN.md`, "0.6"],
   [`${BASE_URL}/privacy.md`, "0.5"],
@@ -2551,11 +2400,205 @@ ${sitemapUrls
 `;
 fs.writeFileSync(path.join(SITE_DIR, "sitemap.xml"), sitemapXml, "utf8");
 
-// ---------- 3. Pre-Render Static Content into site/index.html ----------
+// ---------- 3. Pre-Render Static Content into site/index.html (EN /) & site/zh/index.html (ZH /zh/) ----------
+
+const appJsSrcForBuild = fs.readFileSync(path.join(SITE_DIR, "app.js"), "utf8");
+const i18nMatchForBuild = appJsSrcForBuild.match(/const I18N = \{[\s\S]*?\n\};/);
+if (!i18nMatchForBuild) {
+  throw new Error("Could not locate const I18N in site/app.js for static home compilation");
+}
+const APP_I18N = new Function(`${i18nMatchForBuild[0]}\nreturn I18N;`)();
+
+const textMods = new Set(["markdown", "text", "html", "css", "jsx", "svg"]);
+const PACK_LABELS_EN = {
+  core: "Core",
+  "business-brief": "Work docs",
+  "engineering-spec": "Engineering",
+  "regulated-comms": "Regulated",
+  "literary-essay": "Essays",
+  "deck-and-ui": "Slides & UI",
+  "executive-deck": "Exec decks",
+};
+const PACK_LABELS_ZH = {
+  core: "交付底线",
+  "business-brief": "工作文档",
+  "engineering-spec": "研发文档与复盘",
+  "regulated-comms": "对外合规",
+  "literary-essay": "随笔长文",
+  "deck-and-ui": "PPT 和网页",
+  "executive-deck": "管理汇报",
+};
+
+function renderPreRenderedRulesHtml(lang, depthPrefix = "./") {
+  const isEn = lang === "en";
+  return allRules
+    .filter(({ rule: r }) => {
+      const meta = RULE_UI_META[r.id] || { lang: "both" };
+      if (isEn && meta.lang === "zh") return false;
+      if (!isEn && meta.lang === "en") return false;
+      return true;
+    })
+    .map(({ packId, rule: r }) => {
+      const meta = RULE_UI_META[r.id] || { lang: "both", title: { zh: r.id, en: r.id } };
+      const isHiddenInitial = !isEn && meta.lang === "en";
+      const sevCls = r.severity === "error" ? "sev-error" : r.severity === "info" ? "sev-info" : "sev-warning";
+      const sevText = isEn
+        ? (r.severity === "error" ? "hard bug" : r.severity === "warning" ? "warning" : "info")
+        : (r.severity === "error" ? "硬伤" : r.severity === "warning" ? "提醒" : "轻提示");
+      const canTry = r.exemplar && (r.modalities || []).some((m) => textMods.has(m));
+      const ex = isEn ? (meta.enEx || r.exemplar) : (meta.lang === "en" ? r.exemplar : meta.zhEx || r.exemplar);
+      const badLbl = isEn ? "Before:" : "原句：";
+      const trapLbl = isEn ? "Still sounds like AI:" : "换了种 AI 味：";
+      const goodLbl = isEn ? "After:" : "改好：";
+      const exLines = ex
+        ? [
+            `<div class="ex-stack">`,
+            `                 <div class="ex-row-bad"><strong>${badLbl}</strong> <code>${escapeHtml(sanitizePublicExemplar(ex.bad))}</code></div>`,
+            ...(ex.trap
+              ? [`                 <div class="ex-row-trap"><strong>${trapLbl}</strong> <code>${escapeHtml(sanitizePublicExemplar(ex.trap))}</code></div>`]
+              : []),
+            `                 <div class="ex-row-good"><strong>${goodLbl}</strong> <code>${escapeHtml(sanitizePublicExemplar(ex.good))}</code></div>`,
+            `               </div>`,
+          ].join("\n")
+        : "—";
+      const titleText = isEn ? (meta.title?.en || r.id) : (meta.title?.zh || r.id);
+      const actionLines = [];
+      if (canTry) {
+        actionLines.push(
+          `                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="${escapeHtml(r.id)}" aria-label="${isEn ? `Try ${escapeHtml(titleText)} in workbench` : `在工作台试试 ${escapeHtml(titleText)}`}">${isEn ? "Try ↑" : "试试 ↑"}</button>`
+        );
+      }
+      actionLines.push(
+        `                  <a class="rule-md-link" href="${depthPrefix}rules/${escapeHtml(r.id)}.md" aria-label="${isEn ? `Open ${escapeHtml(r.id)} Markdown rule card` : `查看 ${escapeHtml(r.id)} 规则卡片`}">.md</a>`
+      );
+      const packName = isEn ? (PACK_LABELS_EN[packId] || packId) : (PACK_LABELS_ZH[packId] || packId);
+      const msgText = isEn ? sanitizeEnglishRuleProse(r.message.en) : (r.message.zh || r.message.en);
+      const delText = isEn ? sanitizeEnglishRuleProse(r.deletionTest.en) : (r.deletionTest.zh || r.deletionTest.en);
+      const checkLbl = isEn ? "Check: " : "判断方法：";
+      return `            <tr id="rule-${escapeHtml(r.id)}" class="rule-row" data-rule-lang="${escapeHtml(meta.lang)}"${isHiddenInitial ? " hidden" : ""}>
+              <td class="rule-id-cell">
+                <strong>${escapeHtml(titleText)}</strong>
+                <div style="margin-top:2px;"><code>${escapeHtml(r.id)}</code></div>
+                <div class="rule-id-actions">
+${actionLines.join("\n")}
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">${escapeHtml(packName)}</span><span class="sev-tag ${sevCls}" style="font-size:0.75rem;">${sevText}</span></td>
+              <td><code>${escapeHtml((r.modalities || []).join(", "))}</code></td>
+              <td><div>${formatRuleProseHtml(msgText)}</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>${checkLbl}</strong>${formatRuleProseHtml(delText)}</div></td>
+              <td>${exLines}</td>
+            </tr>`;
+    })
+    .join("\n");
+}
+
+function renderEndpointsHtml(lang, depthPrefix = "./") {
+  const dict = APP_I18N[lang] || APP_I18N.en;
+  const featuredEndpoints = [
+    { rel: "llms.txt", label: "/llms.txt", i18nKey: "ep.llms", bytes: Buffer.byteLength(llmsTxt, "utf8"), tok: approxTokens(llmsTxt) },
+    { rel: "catalog.json", label: "/catalog.json", i18nKey: "ep.catalog", bytes: Buffer.byteLength(catalogJsonStr, "utf8"), tok: approxTokens(catalogJsonStr) },
+    { rel: ".well-known/mcp/server-card.json", label: "/.well-known/mcp/server-card.json", i18nKey: "ep.mcpCard", bytes: Buffer.byteLength(mcpServerCardJsonStr, "utf8"), tok: approxTokens(mcpServerCardJsonStr) },
+    { rel: ".well-known/agent-skills/index.json", label: "/.well-known/agent-skills/index.json", i18nKey: "ep.skillsIdx", bytes: Buffer.byteLength(agentSkillsIndexJsonStr, "utf8"), tok: approxTokens(agentSkillsIndexJsonStr) },
+    { rel: "tasks/business-doc.md", label: "/tasks/business-doc.md", i18nKey: "ep.taskBiz", resId: "task-business-doc" },
+    { rel: "tasks/web-and-deck.md", label: "/tasks/web-and-deck.md", i18nKey: "ep.taskWeb", resId: "task-web-and-deck" },
+    { rel: "tasks/editorial-writing.md", label: "/tasks/editorial-writing.md", i18nKey: "ep.taskEdit", resId: "task-editorial-writing" },
+    { rel: "tasks/pre-release-gate.md", label: "/tasks/pre-release-gate.md", i18nKey: "ep.taskGate", resId: "task-pre-release-gate" },
+    { rel: "tools/skill.md", label: "/tools/skill.md", i18nKey: "ep.skill", resId: "tools-skill" },
+    { rel: "awesome/index.json", label: "/awesome/index.json", i18nKey: "ep.awesome", bytes: Buffer.byteLength(awesomeJsonStr, "utf8"), tok: approxTokens(awesomeJsonStr) },
+    { rel: "methodology/product-brief.md", label: "/methodology/product-brief.md", i18nKey: "ep.brief", resId: "methodology-product-brief" },
+    { rel: "methodology/brand-and-voice.md", label: "/methodology/brand-and-voice.md", i18nKey: "ep.method", resId: "methodology-brand-voice" },
+    { rel: "llms-full.txt", label: "/llms-full.txt", i18nKey: "ep.full", bytes: Buffer.byteLength(llmsFullTxt, "utf8"), tok: approxTokens(llmsFullTxt) },
+  ];
+
+  return featuredEndpoints
+    .map((ep) => {
+      let bytes = ep.bytes;
+      let tok = ep.tok;
+      if (ep.resId) {
+        const found = catalogResources.find((r) => r.id === ep.resId);
+        if (!found) {
+          throw new Error(`Unknown featuredEndpoint resId: ${ep.resId}`);
+        }
+        bytes = found.bytes;
+        tok = found.approxTokens;
+      }
+      const kb = (bytes / 1024).toFixed(1);
+      return `          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="${depthPrefix}${ep.rel}">${escapeHtml(ep.label)}</a>
+              <div class="endpoint-desc" data-i18n="${ep.i18nKey}">${escapeHtml(dict[ep.i18nKey] || ep.label)}</div>
+            </div>
+            <span class="endpoint-meta">${kb} KB · ~${tok} tok</span>
+          </div>`;
+    })
+    .join("\n");
+}
+
+const detCount = radarData.entries.filter((e) => e.hasDeterministicCheck).length;
+const zhCount = radarData.entries.filter((e) => e.locale === "zh" || e.locale === "multilingual").length;
+function renderRadarStatsHtml(lang) {
+  const dict = APP_I18N[lang] || APP_I18N.en;
+  return `          <div class="stat-strip">
+            <div class="stat-cell"><span class="stat-num">${radarData.entries.length}</span><span class="stat-label" data-i18n="stat.entries">${escapeHtml(dict["stat.entries"])}</span></div>
+            <div class="stat-cell"><span class="stat-num">${radarData.taxonomy.sections.length}</span><span class="stat-label" data-i18n="stat.sections">${escapeHtml(dict["stat.sections"])}</span></div>
+            <div class="stat-cell"><span class="stat-num">${detCount}</span><span class="stat-label" data-i18n="stat.det">${escapeHtml(dict["stat.det"])}</span></div>
+            <div class="stat-cell"><span class="stat-num">${zhCount}</span><span class="stat-label" data-i18n="stat.zh">${escapeHtml(dict["stat.zh"])}</span></div>
+          </div>`;
+}
+
+const featuredPosIds = ["norm-zurich", "stiftung-buchkunst", "fonts-in-use", "dinamo", "the-type", "arena"];
+const featuredPos = featuredPosIds
+  .map((id) => positiveSources.entries.find((e) => e.id === id))
+  .filter(Boolean);
+
+function renderPosRefsHtml(lang) {
+  const dict = APP_I18N[lang] || APP_I18N.en;
+  return `          <ul class="ref-list">
+${featuredPos
+  .map((e) => {
+    const key = `pos.${e.id}`;
+    return `            <li><a href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${escapeHtml(e.name)}</a><span class="ref-note" data-i18n="${escapeHtml(key)}">${escapeHtml(dict[key] || e.extractablePrinciple)}</span></li>`;
+  })
+  .join("\n")}
+          </ul>`;
+}
+
+const defaultSnippetEn = `# Send this one-line prompt to your Agent (evaluate, install, and run first check):
+Read https://dislop.com/llms.txt, evaluate which dislop setup fits my environment and project (Skill, offline CLI, or Cloud MCP), install and configure it, and run a first check on our files.`;
+
+const defaultSnippetZh = `# 复制下面这句话发给你的 Agent（自动评估、安装并试跑）：
+请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。`;
 
 let indexHtml = fs.readFileSync(path.join(SITE_DIR, "index.html"), "utf8");
 indexHtml = replaceBuildBlock(
   indexHtml,
+  "SEO_JSONLD",
+  renderHomeJsonLd({
+    lang: "en",
+    baseUrl: BASE_URL,
+    version: VERSION,
+    ruleCount: allRules.length,
+    awesomeCount: radarData.entries.length,
+    guideCount: guides.length,
+  })
+);
+indexHtml = replaceBuildBlock(indexHtml, "RULES_TABLE", renderPreRenderedRulesHtml("en", "./"));
+indexHtml = replaceBuildBlock(indexHtml, "ENDPOINTS", renderEndpointsHtml("en", "./"));
+indexHtml = replaceBuildBlock(indexHtml, "DEFAULT_SNIPPET", escapeHtml(defaultSnippetEn));
+indexHtml = replaceBuildBlock(indexHtml, "RADAR_STATS", renderRadarStatsHtml("en"));
+indexHtml = replaceBuildBlock(indexHtml, "POSITIVE_REFS", renderPosRefsHtml("en"));
+
+const brandVerRe = /<span class="brand-ver">v[^<]*<\/span>/;
+if (!brandVerRe.test(indexHtml)) {
+  throw new Error('Missing <span class="brand-ver"> masthead version label in site/index.html');
+}
+indexHtml = indexHtml.replace(brandVerRe, `<span class="brand-ver">v${VERSION}</span>`);
+fs.writeFileSync(path.join(SITE_DIR, "index.html"), indexHtml, "utf8");
+
+// Derive full interactive Chinese homepage (site/zh/index.html) from the canonical English template
+let zhHomeHtml = indexHtml;
+zhHomeHtml = replaceBuildBlock(
+  zhHomeHtml,
   "SEO_JSONLD",
   renderHomeJsonLd({
     lang: "zh",
@@ -2566,167 +2609,295 @@ indexHtml = replaceBuildBlock(
     guideCount: guides.length,
   })
 );
+zhHomeHtml = replaceBuildBlock(zhHomeHtml, "RULES_TABLE", renderPreRenderedRulesHtml("zh", "../"));
+zhHomeHtml = replaceBuildBlock(zhHomeHtml, "ENDPOINTS", renderEndpointsHtml("zh", "../"));
+zhHomeHtml = replaceBuildBlock(zhHomeHtml, "DEFAULT_SNIPPET", escapeHtml(defaultSnippetZh));
+zhHomeHtml = replaceBuildBlock(zhHomeHtml, "RADAR_STATS", renderRadarStatsHtml("zh"));
+zhHomeHtml = replaceBuildBlock(zhHomeHtml, "POSITIVE_REFS", renderPosRefsHtml("zh"));
 
-// 3a. Pre-rendered Rules Table in default Chinese (en-only rules hidden on initial ZH load, preserving #rule-<id> anchors)
-const textMods = new Set(["markdown", "text", "html", "css", "jsx", "svg"]);
-const PACK_LABELS_ZH = {
-  core: "交付底线",
-  "business-brief": "工作文档",
-  "engineering-spec": "研发文档与复盘",
-  "regulated-comms": "对外合规",
-  "literary-essay": "随笔长文",
-  "deck-and-ui": "PPT 和网页",
-  "executive-deck": "管理汇报",
-};
-const preRenderedRules = allRules
-  .map(({ packId, rule: r }) => {
-    const meta = RULE_UI_META[r.id] || { lang: "both", title: { zh: r.id, en: r.id } };
-    const isEnOnly = meta.lang === "en";
-    const sevCls = r.severity === "error" ? "sev-error" : r.severity === "info" ? "sev-info" : "sev-warning";
-    const sevTextZh = r.severity === "error" ? "硬伤" : r.severity === "warning" ? "提醒" : "轻提示";
-    const canTry = r.exemplar && (r.modalities || []).some((m) => textMods.has(m));
-    const ex = isEnOnly ? r.exemplar : meta.zhEx || r.exemplar;
-    const exLines = ex
-      ? [
-          `<div class="ex-stack">`,
-          `                 <div class="ex-row-bad"><strong>原句：</strong> <code>${escapeHtml(sanitizePublicExemplar(ex.bad))}</code></div>`,
-          ...(ex.trap
-            ? [`                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>${escapeHtml(sanitizePublicExemplar(ex.trap))}</code></div>`]
-            : []),
-          `                 <div class="ex-row-good"><strong>改好：</strong> <code>${escapeHtml(sanitizePublicExemplar(ex.good))}</code></div>`,
-          `               </div>`,
-        ].join("\n")
-      : "—";
-    const actionLines = [];
-    if (canTry) {
-      actionLines.push(
-        `                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="${escapeHtml(r.id)}" aria-label="在工作台试试 ${escapeHtml(meta.title.zh)}">试试 ↑</button>`
-      );
-    }
-    actionLines.push(
-      `                  <a class="rule-md-link" href="./rules/${escapeHtml(r.id)}.md" aria-label="查看 ${escapeHtml(r.id)} 规则卡片">.md</a>`
-    );
-    return `            <tr id="rule-${escapeHtml(r.id)}" class="rule-row" data-rule-lang="${escapeHtml(meta.lang)}"${isEnOnly ? " hidden" : ""}>
-              <td class="rule-id-cell">
-                <strong>${escapeHtml(meta.title.zh)}</strong>
-                <div style="margin-top:2px;"><code>${escapeHtml(r.id)}</code></div>
-                <div class="rule-id-actions">
-${actionLines.join("\n")}
-                </div>
-              </td>
-              <td class="rule-pack-cell"><span class="rule-pack-name">${escapeHtml(PACK_LABELS_ZH[packId] || packId)}</span><span class="sev-tag ${sevCls}" style="font-size:0.75rem;">${sevTextZh}</span></td>
-              <td><code>${escapeHtml((r.modalities || []).join(", "))}</code></td>
-              <td><div>${formatRuleProseHtml(r.message.zh || r.message.en)}</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>${formatRuleProseHtml(r.deletionTest.zh || r.deletionTest.en)}</div></td>
-              <td>${exLines}</td>
-            </tr>`;
-  })
-  .join("\n");
+// Translate every data-i18n element with simple text content (skipping elements that wrap child tags like footer.agentHint)
+zhHomeHtml = zhHomeHtml.replace(
+  /(<[a-zA-Z0-9]+\b[^>]*\bdata-i18n="([^"]+)"[^>]*>)([^<]*)(<\/[a-zA-Z0-9]+>)/g,
+  (full, openTag, key, _inner, closeTag) => {
+    const val = APP_I18N.zh?.[key];
+    if (val === undefined) return full;
+    return `${openTag}${escapeHtml(val)}${closeTag}`;
+  }
+);
 
-indexHtml = replaceBuildBlock(indexHtml, "RULES_TABLE", preRenderedRules);
+const zhHeadAndBodySwaps = [
+  ['<html lang="en" data-static-lang="en">', '<html lang="zh-CN" data-static-lang="zh">'],
+  [
+    "<title>dislop — Cutting AI slop is real productivity.</title>",
+    "<title>dislop — 去 AI 味才是真正的生产力！</title>",
+  ],
+  [
+    '<meta name="description" content="Cutting AI slop is real productivity. A dedicated linter for AI slop across docs, web UI, Word, and PowerPoint, combining 53 deterministic rules and 90 curated anti-slop tools.">',
+    '<meta name="description" content="去 AI 味才是真正的生产力！专用的 AI 味检查工具，整合社区验证过的去味规则与 90 条精选工具，帮你和你的 Agent 挑出并改掉文档、网页和 PPT 里的 AI 味。">',
+  ],
+  [
+    '<meta property="og:url" content="https://dislop.com/">',
+    '<meta property="og:url" content="https://dislop.com/zh/">',
+  ],
+  [
+    '<meta property="og:title" content="dislop — Cutting AI slop is real productivity.">',
+    '<meta property="og:title" content="dislop — 去 AI 味才是真正的生产力！">',
+  ],
+  [
+    '<meta property="og:description" content="Dedicated linter for AI slop across docs, web UI, Word, and PowerPoint. Runs offline in your browser, CLI, editor, or coding agent.">',
+    '<meta property="og:description" content="去 AI 味才是真正的生产力！整合社区去味规则与 90 条精选工具，帮你和你的 Agent 挑出并改掉文档、网页和 PPT 里的 AI 味。">',
+  ],
+  [
+    '<meta property="og:image" content="https://dislop.com/assets/og-card.png">',
+    '<meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">',
+  ],
+  [
+    '<meta name="twitter:title" content="dislop — Cutting AI slop is real productivity.">',
+    '<meta name="twitter:title" content="dislop — 去 AI 味才是真正的生产力！">',
+  ],
+  [
+    '<meta name="twitter:description" content="Dedicated linter for AI slop across docs, web UI, Word, and PowerPoint, with 53 rules and 90 curated tools.">',
+    '<meta name="twitter:description" content="去 AI 味才是真正的生产力！专用的 AI 味检查工具，整合社区验证过的去味规则与 90 条精选工具，支持本地离线检查。">',
+  ],
+  [
+    '<meta name="twitter:image" content="https://dislop.com/assets/og-card.png">',
+    '<meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">',
+  ],
+  [
+    '<link rel="canonical" href="https://dislop.com/">',
+    '<link rel="canonical" href="https://dislop.com/zh/">',
+  ],
+  ['<script src="./lang-init.js"></script>', '<script src="../lang-init.js"></script>'],
+  [
+    '<link rel="alternate" type="application/atom+xml" href="./feed.xml" title="dislop Guides (EN)">',
+    '<link rel="alternate" type="application/atom+xml" href="./feed.xml" title="dislop 实用指南（中文）">',
+  ],
+  ['href="./llms.txt"', 'href="../llms.txt"'],
+  ['href="./index.md"', 'href="../index.md"'],
+  ['href="./catalog.json"', 'href="../catalog.json"'],
+  ['href="./styles.css"', 'href="../styles.css"'],
+  ['src="./app.js"', 'src="../app.js"'],
+  ['href="./tools/index.md"', 'href="../tools/index.md"'],
+  ['href="./cases/copy-contrasts.md"', 'href="../cases/copy-contrasts.md"'],
+  ['href="./methodology/brand-and-voice.md"', 'href="../methodology/brand-and-voice.md"'],
+  ['href="./methodology/design-system.md"', 'href="../methodology/design-system.md"'],
+  ['href="./privacy.md"', 'href="../privacy.md"'],
+  ['href="./llms-full.txt"', 'href="../llms-full.txt"'],
+  ['href="./awesome/index.json"', 'href="../awesome/index.json"'],
+  ['href="./cases/ui-specimens.md"', 'href="../cases/ui-specimens.md"'],
+  [
+    '<button type="button" id="lang-toggle" class="ctrl-btn" lang="zh-CN" aria-label="Switch to Chinese">中文</button>',
+    '<button type="button" id="lang-toggle" class="ctrl-btn" lang="en" aria-label="切换为英文">EN</button>',
+  ],
+  [
+    '<span id="wb-doc-pack">Work docs</span>',
+    '<span id="wb-doc-pack">工作文档</span>',
+  ],
+  [
+    '<span id="wb-doc-stats">5 lines</span>',
+    '<span id="wb-doc-stats">5 行</span>',
+  ],
+  [
+    '<span id="wb-mobile-counts">0 hard bugs · 0 warnings</span>',
+    '<span id="wb-mobile-counts">0 处硬伤 · 0 条提醒</span>',
+  ],
+  [
+    '<span>0 hard bugs · 0 warnings</span>',
+    '<span>0 处硬伤 · 0 条提醒</span>',
+  ],
+  [
+    'id="wb-notes-anchor" aria-label="Check results"',
+    'id="wb-notes-anchor" aria-label="检查结果"',
+  ],
+  [
+    'id="btn-prev-finding" class="ctrl-btn ctrl-btn-sm" aria-label="Previous issue" title="Previous"',
+    'id="btn-prev-finding" class="ctrl-btn ctrl-btn-sm" aria-label="上一处问题" title="上一处"',
+  ],
+  [
+    'id="btn-next-finding" class="ctrl-btn ctrl-btn-sm" aria-label="Next issue" title="Next"',
+    'id="btn-next-finding" class="ctrl-btn ctrl-btn-sm" aria-label="下一处问题" title="下一处"',
+  ],
+  [
+    '<span class="agent-fold-sub" id="rules-count" aria-live="polite">Filtered by current language</span>',
+    '<span class="agent-fold-sub" id="rules-count" aria-live="polite">已按当前语言过滤</span>',
+  ],
+  [
+    '<div class="mode-tabs" role="group" aria-label="Switch view">',
+    '<div class="mode-tabs" role="group" aria-label="切换视图">',
+  ],
+  [
+    'placeholder="Paste your doc, copy, or HTML here to check for AI slop live..." aria-label="Draft text editor"',
+    'placeholder="粘贴文档、文案或 HTML，实时离线标出 AI 味…" aria-label="草稿文本编辑器"',
+  ],
+  [
+    'placeholder="Search rules or symptoms..." aria-label="Search rules"',
+    'placeholder="搜索规则名称或典型症状…" aria-label="搜索规则"',
+  ],
+  [
+    'id="rule-modality-filter" class="filter-select" aria-label="Filter by format"',
+    'id="rule-modality-filter" class="filter-select" aria-label="按文件格式筛选"',
+  ],
+  [
+    '<button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>',
+    '<button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>',
+  ],
+  ['<del class="hero-strike" id="hero-strike-text">Certainly! Here is your polished draft.</del>', '<del class="hero-strike" id="hero-strike-text">好的，以下是为您润色后的版本。</del>'],
+  [
+    `<span class="mark-span mark-error">Certainly! Here is</span> the launch note. <span class="mark-span mark-warn">It's worth noting that</span> CSV exports are a <span class="mark-span mark-warn">game-changer</span>: they finish in up to 12 minutes for workspaces above 500,000 rows.`,
+    `<span class="mark-span mark-error">好的，以下是修改后</span>的上线说明。<span class="mark-span mark-warn">值得注意的是，</span>本次改造以队列分级为重要<span class="mark-span mark-warn">抓手</span>，<span class="mark-span mark-warn">全面赋能</span>一线运维团队，故障恢复时间最多 45 秒。`,
+  ],
+  [
+    `<li><span class="hero-note-dot is-error"></span><span><strong>Hard bug: </strong>Stray chat reply on line one. Delete it.</span></li>
+                <li><span class="hero-note-dot is-warn"></span><span><strong>Warning: </strong>Filler opener and hype noun ('game-changer'). Say what changed instead.</span></li>`,
+    `<li><span class="hero-note-dot is-error"></span><span><strong>硬伤：</strong>开头留着 AI 寒暄，删掉就行。</span></li>
+                <li><span class="hero-note-dot is-warn"></span><span><strong>提醒：</strong>“值得注意的是”“抓手”“全面赋能”都是空话，可以直接说做了什么。</span></li>`,
+  ],
+  [
+    `<div class="cases-grid" id="cases-grid">
+        <article class="case-card">
+          <span class="case-kicker">Release note (rewrite + number check)</span>
+          <h3 class="case-title">Stripping chat wrappers and hype while keeping every metric exact</h3>
+          <div class="case-body">
+            <!-- dislop-ignore-next-line chatbot-artifact -- intentional before-edit case example -->
+            <div class="case-step is-bad"><span class="case-step-label"><span>Original (chat wrapper + buzzwords)</span><span class="case-step-tag">rejected</span></span>Happy to help! Below is the Q4 settlement note. In today's fast-paced landscape, async queues supercharge throughput from 1,200 to 4,800 TPS and cut p99 latency from 210ms to 42ms.</div>
+            <div class="case-step is-trap"><span class="case-step-label"><span>Still sounds like AI (dropped numbers + fallback slogan)</span><span class="case-step-tag">rejected</span></span>This isn't just an upgrade — it's a new standard for blazing-fast settlement.</div>
+            <div class="case-step is-good"><span class="case-step-label"><span>Cleaned up (just the action and numbers)</span><span class="case-step-tag">passed</span></span>Switching the Q4 settlement engine to async queues raised peak throughput from 1,200 to 4,800 TPS and cut p99 latency from 210ms to 42ms.</div>
+          </div>
+          <div class="case-actions">
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="brief">Try in workbench ↑</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="doc">Copy to share</button>
+          </div>
+        </article>
 
-// 3b. Pre-rendered Agent Endpoints Ledger (Chinese default)
-const featuredEndpoints = [
-  { path: "./llms.txt", label: "/llms.txt", i18nKey: "ep.llms", desc: "Agent 入口索引", bytes: Buffer.byteLength(llmsTxt, "utf8"), tok: approxTokens(llmsTxt) },
-  { path: "./catalog.json", label: "/catalog.json", i18nKey: "ep.catalog", desc: "全部文档的 JSON 目录", bytes: Buffer.byteLength(catalogJsonStr, "utf8"), tok: approxTokens(catalogJsonStr) },
-  { path: "./.well-known/mcp/server-card.json", label: "/.well-known/mcp/server-card.json", i18nKey: "ep.mcpCard", desc: "MCP 自动发现描述（10 个工具）", bytes: Buffer.byteLength(mcpServerCardJsonStr, "utf8"), tok: approxTokens(mcpServerCardJsonStr) },
-  { path: "./.well-known/agent-skills/index.json", label: "/.well-known/agent-skills/index.json", i18nKey: "ep.skillsIdx", desc: "Agent Skills 索引与 SHA-256", bytes: Buffer.byteLength(agentSkillsIndexJsonStr, "utf8"), tok: approxTokens(agentSkillsIndexJsonStr) },
-  { path: "./tasks/business-doc.md", label: "/tasks/business-doc.md", i18nKey: "ep.taskBiz", desc: "任务卡：工作文档与技术方案", resId: "task-business-doc" },
-  { path: "./tasks/web-and-deck.md", label: "/tasks/web-and-deck.md", i18nKey: "ep.taskWeb", desc: "任务卡：网页与 PPT 模板味", resId: "task-web-and-deck" },
-  { path: "./tasks/editorial-writing.md", label: "/tasks/editorial-writing.md", i18nKey: "ep.taskEdit", desc: "任务卡：随笔与长文", resId: "task-editorial-writing" },
-  { path: "./tasks/pre-release-gate.md", label: "/tasks/pre-release-gate.md", i18nKey: "ep.taskGate", desc: "任务卡：发稿前 AI 残留硬伤检查", resId: "task-pre-release-gate" },
-  { path: "./tools/skill.md", label: "/tools/skill.md", i18nKey: "ep.skill", desc: "跨宿主 Agent Skill", resId: "tools-skill" },
-  { path: "./awesome/index.json", label: "/awesome/index.json", i18nKey: "ep.awesome", desc: `${radarData.entries.length} 条工具清单 JSON`, bytes: Buffer.byteLength(awesomeJsonStr, "utf8"), tok: approxTokens(awesomeJsonStr) },
-  { path: "./methodology/product-brief.md", label: "/methodology/product-brief.md", i18nKey: "ep.brief", desc: "产品定义（定位 / 用户 / 卖点）", resId: "methodology-product-brief" },
-  { path: "./methodology/brand-and-voice.md", label: "/methodology/brand-and-voice.md", i18nKey: "ep.method", desc: "文案与设计基准", resId: "methodology-brand-voice" },
-  { path: "./llms-full.txt", label: "/llms-full.txt", i18nKey: "ep.full", desc: `单次拉取的全部 ${allRules.length} 条规则`, bytes: Buffer.byteLength(llmsFullTxt, "utf8"), tok: approxTokens(llmsFullTxt) },
+        <article class="case-card">
+          <span class="case-kicker">Previous hero audit (pitch cadence)</span>
+          <h3 class="case-title">0 linter findings, yet our own previous hero still sounded like AI</h3>
+          <div class="case-body">
+            <div class="case-step is-bad"><span class="case-step-label"><span>Previous hero (0 findings, still pitchy AI)</span><span class="case-step-tag">rejected</span></span>Drop in a draft, deck, or page. Hard defects get crossed out; cliché lines get a margin query; once you edit, we check every number and link. It never rewrites for you—the pen stays in your hand.</div>
+            <p class="case-note">Zero buzzwords triggered a rule, yet the 3-part semicolon pitch, editor roleplay, and pull-quote closer still screamed AI. That's why we put plain writing rules into SKILL.md and the Plugin alongside the linter.</p>
+            <div class="case-step is-good"><span class="case-step-label"><span>Plain rewrite</span><span class="case-step-tag">passed</span></span>AI-written docs, Word files, slides, and web pages often ship with chat replies, stock phrasing, crowded slides, or purple-pink template chrome. Install dislop into your coding agent offline, or switch between local and Cloud MCP checks here.</div>
+          </div>
+          <div class="case-actions">
+            <a href="../methodology/brand-and-voice.md" class="ctrl-btn ctrl-btn-sm">Read full autopsy →</a>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="autopsy">Copy to share</button>
+          </div>
+        </article>
+
+        <article class="case-card">
+          <span class="case-kicker">Web UI &amp; slide templates</span>
+          <h3 class="case-title">Purple-pink gradient + prompt badge + dead href='#' button</h3>
+          <div class="case-body">
+            <div class="case-step is-bad"><span class="case-step-label"><span>Default generated template</span><span class="case-step-tag">rejected</span></span><code>from-indigo via-purple to-pink</code> gradient heading + <code>AI-Powered</code> badge + dead <code>href=&quot;#&quot;</code> download button.</div>
+            <div class="case-step is-good"><span class="case-step-label"><span>Cleaned up</span><span class="case-step-tag">passed</span></span>Flat paper surfaces with 1px rules, no prompt-echo badge, and a working <code>./report.html</code> link.</div>
+            <p class="case-note">The same zero-dep engine inspects .pptx decks for slide word walls (&gt; 120 words), &gt; 6 bullets, autofit text shrink, and generic 'Overview' titles.</p>
+          </div>
+          <div class="case-actions">
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="ui-chrome">Try in workbench ↑</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="ui">Copy to share</button>
+          </div>
+        </article>
+      </div>`,
+    `<div class="cases-grid" id="cases-grid">
+        <article class="case-card">
+          <span class="case-kicker">发版简报（去套话 + 核对数字）</span>
+          <h3 class="case-title">清掉寒暄、官话与口号，四个核心指标一个不丢</h3>
+          <div class="case-body">
+            <!-- dislop-ignore-next-line chatbot-artifact -- intentional before-edit case example -->
+            <div class="case-step is-bad"><span class="case-step-label"><span>原稿（AI 寒暄 + 黑话 + 喊口号）</span><span class="case-step-tag">没通过</span></span>好的，以下是 Q4 结算引擎升级说明。值得注意的是，本次以异步化为核心抓手，全面赋能商户体验。峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，一致性达 99.99%。</div>
+            <div class="case-step is-trap"><span class="case-step-label"><span>换了种 AI 味（掉进反转口号）</span><span class="case-step-tag">没通过</span></span>这绝非一次普通升级，而是结算架构的效率跃迁，性能实现数倍提升。</div>
+            <div class="case-step is-good"><span class="case-step-label"><span>改干净（只留动作和真实数字）</span><span class="case-step-tag">通过</span></span>Q4 结算引擎改为全链路异步化后，峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，数据一致性 99.99%。</div>
+          </div>
+          <div class="case-actions">
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="brief">在工作台试一下 ↑</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="doc">复制这段分享</button>
+          </div>
+        </article>
+
+        <article class="case-card">
+          <span class="case-kicker">上一版首屏复盘（句式推销味）</span>
+          <h3 class="case-title">检查报 0 处问题，但我们自己上一版首屏照样像 AI</h3>
+          <div class="case-body">
+            <div class="case-step is-bad"><span class="case-step-label"><span>翻车原稿（0 命中，却满屏 AI 味）</span><span class="case-step-tag">没通过</span></span>把稿子、PPT 或网页贴进来。不能发的硬伤，dislop 直接划掉；听着像套话的地方，它在页边问你一句；等你改完，再拿原稿逐条对一遍。它不替你改稿，笔一直在你手里。</div>
+            <p class="case-note">毛病不在单个词，在于“三段对称分号推销句 + 假装老校对 + 段尾金句收尾”。这就是为什么单靠脚本标红线不够，必须把写作规矩一起写进 Skill，并在云端叠加深度文风审校。</p>
+            <div class="case-step is-good"><span class="case-step-label"><span>改回人话</span><span class="case-step-tag">通过</span></span>AI 写完的文档、Word、PPT 和网页，经常留着开头寒暄、空话套话、满页字墙或默认紫粉模板。你可以装进本地 Coding Agent 离线运行，也可以在这里切换本地检查与云增强（MCP）模式。</div>
+          </div>
+          <div class="case-actions">
+            <a href="../methodology/brand-and-voice.md" class="ctrl-btn ctrl-btn-sm">看完整复盘 →</a>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="autopsy">复制这段分享</button>
+          </div>
+        </article>
+
+        <article class="case-card">
+          <span class="case-kicker">网页与 PPT 模板味</span>
+          <h3 class="case-title">紫粉渐变 + 装饰徽章 + 点不动的空链接</h3>
+          <div class="case-body">
+            <div class="case-step is-bad"><span class="case-step-label"><span>生成式模板原稿</span><span class="case-step-tag">没通过</span></span><code>from-indigo via-purple to-pink</code> 渐变标题 + <code>AI 强力驱动</code> 徽章 + <code>href=&quot;#&quot;</code> 假下载按钮。</div>
+            <div class="case-step is-good"><span class="case-step-label"><span>改干净</span><span class="case-step-tag">通过</span></span>纯色纸面和 1px 分界线、去掉装饰徽章、按钮接上真实报告路径 <code>./report.html</code>。</div>
+            <p class="case-note">同一套引擎也能直接读 .pptx，挑出单页字墙（&gt; 280 字）、要点超过 6 条、文字自动缩排和空泛标题。</p>
+          </div>
+          <div class="case-actions">
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="ui-chrome">在工作台试一下 ↑</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="ui">复制这段分享</button>
+          </div>
+        </article>
+      </div>`,
+  ],
+  ['return=%2F%23cloud-token-box', 'return=%2Fzh%2F%23cloud-token-box'],
+  [
+    '<span data-i18n="footer.agentHint">For agents, start at <a href="../llms.txt">/llms.txt</a>.</span>',
+    '<span data-i18n="footer.agentHint">给 Agent 读的话，从 <a href="../llms.txt">/llms.txt</a> 开始。</span>',
+  ],
+  [
+    'https://github.com/dislop-ai/dislop/tree/main/awesome',
+    'https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md',
+  ],
+  [
+    'https://github.com/dislop-ai/dislop/blob/main/ROADMAP.md',
+    'https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md',
+  ],
+  [
+    '<h2 id="auth-modal-title" class="auth-modal-title">Sign in for Cloud Review &amp; Rewrite</h2>',
+    '<h2 id="auth-modal-title" class="auth-modal-title">登录解锁云端审校与改写</h2>',
+  ],
+  [
+    '<p id="auth-modal-sub" class="auth-modal-sub">30 free credits/mo · Same account works in Remote MCP, zero draft storage.</p>',
+    '<p id="auth-modal-sub" class="auth-modal-sub">每月 30 免费额度 · 同一账号可用于远程 MCP，不存草稿。</p>',
+  ],
+  ['aria-label="Close sign-in modal"', 'aria-label="关闭登录窗口"'],
 ];
 
-const endpointsHtml = featuredEndpoints
-  .map((ep) => {
-    let bytes = ep.bytes;
-    let tok = ep.tok;
-    if (ep.resId) {
-      const found = catalogResources.find((r) => r.id === ep.resId);
-      if (!found) {
-        throw new Error(`Unknown featuredEndpoint resId: ${ep.resId}`);
-      }
-      bytes = found.bytes;
-      tok = found.approxTokens;
-    }
-    const kb = (bytes / 1024).toFixed(1);
-    return `          <div class="endpoint-row">
-            <div class="endpoint-main">
-              <a class="endpoint-path" href="${ep.path}">${escapeHtml(ep.label)}</a>
-              <div class="endpoint-desc" data-i18n="${ep.i18nKey}">${escapeHtml(ep.desc)}</div>
-            </div>
-            <span class="endpoint-meta">${kb} KB · ~${tok} tok</span>
-          </div>`;
-  })
-  .join("\n");
-
-indexHtml = replaceBuildBlock(indexHtml, "ENDPOINTS", endpointsHtml);
-
-// 3c. Default Prompt snippet pre-rendered in Chinese
-const defaultSnippet = `# 复制下面这句话发给你的 Agent（自动评估、安装并试跑）：
-请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。`;
-
-indexHtml = replaceBuildBlock(indexHtml, "DEFAULT_SNIPPET", escapeHtml(defaultSnippet));
-
-// 3d. Awesome live stats computed directly from SSOT (Chinese default, translated by app.js)
-const detCount = radarData.entries.filter((e) => e.hasDeterministicCheck).length;
-const zhCount = radarData.entries.filter((e) => e.locale === "zh" || e.locale === "multilingual").length;
-const radarStatsHtml = `          <div class="stat-strip">
-            <div class="stat-cell"><span class="stat-num">${radarData.entries.length}</span><span class="stat-label" data-i18n="stat.entries">条资料</span></div>
-            <div class="stat-cell"><span class="stat-num">${radarData.taxonomy.sections.length}</span><span class="stat-label" data-i18n="stat.sections">个分类</span></div>
-            <div class="stat-cell"><span class="stat-num">${detCount}</span><span class="stat-label" data-i18n="stat.det">个可自动检查</span></div>
-            <div class="stat-cell"><span class="stat-num">${zhCount}</span><span class="stat-label" data-i18n="stat.zh">条中文 / 多语种</span></div>
-          </div>`;
-
-indexHtml = replaceBuildBlock(indexHtml, "RADAR_STATS", radarStatsHtml);
-
-// 3e. Positive Non-Mainstream Design References compiled directly from verified-positive-sources.json (Chinese default, toggled by app.js)
-const featuredPosIds = ["norm-zurich", "stiftung-buchkunst", "fonts-in-use", "dinamo", "the-type", "arena"];
-const POS_ZH_NOTES = {
-  "norm-zurich": "苏黎世独立设计事务所，用严格的模数网格排版。",
-  "stiftung-buchkunst": "世界最美的书评选档案：看页边距、版心比例与长篇阅读怎么排得不挤。",
-  "fonts-in-use": "真实印刷品与网页里的字体搭配库。",
-  dinamo: "瑞士独立字厂，看可变字重与大号字阶怎么撑起实用界面。",
-  "the-type": "中文排印评论，细聊标点挤压、混排细节与出版规范。",
-  arena: "研究者自己攒的视觉线索库：旧印刷、路牌与独立小书。",
-};
-const featuredPos = featuredPosIds
-  .map((id) => positiveSources.entries.find((e) => e.id === id))
-  .filter(Boolean);
-
-const posRefsHtml = `          <ul class="ref-list">
-${featuredPos
-  .map(
-    (e) =>
-      `            <li><a href="${escapeHtml(e.url)}" target="_blank" rel="noopener">${escapeHtml(e.name)}</a><span class="ref-note" data-i18n="pos.${escapeHtml(e.id)}">${escapeHtml(POS_ZH_NOTES[e.id] || e.extractablePrinciple)}</span></li>`
-  )
-  .join("\n")}
-          </ul>`;
-
-indexHtml = replaceBuildBlock(indexHtml, "POSITIVE_REFS", posRefsHtml);
-
-// 3f. Masthead version label follows package.json (static markup, rewritten on every build)
-const brandVerRe = /<span class="brand-ver">v[^<]*<\/span>/;
-if (!brandVerRe.test(indexHtml)) {
-  throw new Error('Missing <span class="brand-ver"> masthead version label in site/index.html');
+for (const [fromStr, toStr] of zhHeadAndBodySwaps) {
+  zhHomeHtml = zhHomeHtml.replaceAll(fromStr, toStr);
 }
-indexHtml = indexHtml.replace(brandVerRe, `<span class="brand-ver">v${VERSION}</span>`);
+zhHomeHtml = zhHomeHtml
+  .replaceAll('href="./assets/', 'href="../assets/')
+  .replaceAll('src="./assets/', 'src="../assets/')
+  .replaceAll('srcset="./assets/', 'srcset="../assets/')
+  .replaceAll('-en-v2', '-zh-v2')
+  .replaceAll('aria-label="Pause animation"', 'aria-label="暂停画面"');
 
-fs.writeFileSync(path.join(SITE_DIR, "index.html"), indexHtml, "utf8");
+fs.mkdirSync(path.join(SITE_DIR, "zh"), { recursive: true });
+fs.writeFileSync(path.join(SITE_DIR, "zh", "index.html"), zhHomeHtml, "utf8");
 
 // ---------- 4. Build-Time Security, Budget & Link Assertions ----------
 
 const errors = [];
 
-// Every published guide must stay linked from the homepage guide index (copy lives in site/app.js I18N)
+// Every published guide must stay linked from both / and /zh/ homepage guide indexes
 for (const g of guides) {
   if (!indexHtml.includes(`data-guide-slug="${g.slug}"`)) {
     errors.push(`site/index.html #guides-home is missing guide ${g.slug}`);
   }
+  if (!zhHomeHtml.includes(`data-guide-slug="${g.slug}"`)) {
+    errors.push(`site/zh/index.html #guides-home is missing guide ${g.slug}`);
+  }
+}
+
+const enRootStripped = indexHtml
+  .replace(/>中文<\/(?:a|button)>/g, "><")
+  .replace(/aria-label="切换为中文"/g, "");
+if (/[\u4E00-\u9FFF]/.test(enRootStripped)) {
+  errors.push("site/index.html (English root) leaked Chinese characters");
 }
 
 const llmsBytes = Buffer.byteLength(llmsTxt, "utf8");

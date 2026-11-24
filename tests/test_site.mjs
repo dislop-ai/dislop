@@ -246,7 +246,7 @@ for (const [mode, t] of [
   }
 }
 
-// 6. Verify default Chinese HTML, brand baseline tokens, 2-mark system, and OG card assets
+// 6. Verify English root (/), full interactive Chinese app (/zh/), brand tokens, zero dated chrome, and OG card assets
 assert.ok(css.includes("--pen: #F04438;"), "Missing master Vermilion --pen token in site/styles.css");
 assert.ok(css.includes("border-bottom: 2px solid var(--mark-error);"), "Missing solid error underline in site/styles.css");
 assert.ok(css.includes("border-bottom: 1.5px dashed var(--mark-warn);"), "Missing dashed warning underline in site/styles.css");
@@ -254,6 +254,11 @@ assert.equal(css.includes("--mark-stet"), false, "site/styles.css must not defin
 assert.equal(css.includes(".mark-stet"), false, "site/styles.css must not define removed .mark-stet rule");
 assert.equal(css.includes(".fact-lock-bar"), false, "site/styles.css must not define removed .fact-lock-bar rule");
 assert.equal(css.includes(".verify-banner"), false, "site/styles.css must not define dead .verify-banner rule");
+assert.equal(css.includes(".hero-proof-progress"), false, "site/styles.css must not define removed .hero-proof-progress bar");
+assert.equal(css.includes(".marks-strip"), false, "site/styles.css must not define removed .marks-strip grid");
+assert.equal(css.includes(".demo-card-actions"), false, "site/styles.css must not define removed .demo-card-actions player bar");
+assert.equal(css.includes(".demo-lightbox"), false, "site/styles.css must not define removed .demo-lightbox");
+assert.ok(css.includes(".demo-media-surface"), "site/styles.css must define borderless .demo-media-surface button");
 assert.ok(fs.existsSync(path.join(SITE_DIR, "methodology", "brand-and-voice.md")), "Missing site/methodology/brand-and-voice.md");
 assert.ok(fs.existsSync(path.join(ROOT, "ROADMAP.md")), "Missing root ROADMAP.md");
 assert.ok(fs.existsSync(path.join(ROOT, "ROADMAP.zh-CN.md")), "Missing root ROADMAP.zh-CN.md");
@@ -263,17 +268,32 @@ assert.ok(fs.existsSync(path.join(SITE_DIR, "assets", "og-card.png")), "Missing 
 assert.ok(fs.existsSync(path.join(SITE_DIR, "assets", "og-card.svg")), "Missing site/assets/og-card.svg");
 
 const indexHtml = fs.readFileSync(path.join(SITE_DIR, "index.html"), "utf8");
+const zhIndexHtml = fs.readFileSync(path.join(SITE_DIR, "zh", "index.html"), "utf8");
 const awesomeHtml = fs.readFileSync(path.join(SITE_DIR, "awesome", "index.html"), "utf8");
+const zhAwesomeHtml = fs.readFileSync(path.join(SITE_DIR, "zh", "awesome", "index.html"), "utf8");
 const llmsTxt = fs.readFileSync(path.join(SITE_DIR, "llms.txt"), "utf8");
-assert.ok(indexHtml.includes('<html lang="zh-CN" data-static-lang="zh">'), "site/index.html static fallback should declare data-static-lang=zh");
-assert.ok(awesomeHtml.includes('<html lang="zh-CN" data-static-lang="zh">'), "site/awesome/index.html static fallback should declare data-static-lang=zh");
-assert.ok(indexHtml.includes('property="og:image" content="https://dislop.com/assets/og-card-zh.png"'));
-const enIndexHtml = fs.readFileSync(path.join(SITE_DIR, "en", "index.html"), "utf8");
-assert.ok(enIndexHtml.includes('property="og:image" content="https://dislop.com/assets/og-card.png"'));
+assert.ok(indexHtml.includes('<html lang="en" data-static-lang="en">'), "site/index.html must declare lang=en and data-static-lang=en");
+assert.ok(zhIndexHtml.includes('<html lang="zh-CN" data-static-lang="zh">'), "site/zh/index.html must declare lang=zh-CN and data-static-lang=zh");
+assert.ok(awesomeHtml.includes('<html lang="en" data-static-lang="en">'), "site/awesome/index.html must declare lang=en and data-static-lang=en");
+assert.ok(zhAwesomeHtml.includes('<html lang="zh-CN" data-static-lang="zh">'), "site/zh/awesome/index.html must declare lang=zh-CN and data-static-lang=zh");
+assert.ok(indexHtml.includes('property="og:image" content="https://dislop.com/assets/og-card.png"'));
+assert.ok(zhIndexHtml.includes('property="og:image" content="https://dislop.com/assets/og-card-zh.png"'));
+for (const docHtml of [indexHtml, zhIndexHtml]) {
+  assert.equal(docHtml.includes("hero-proof-progress"), false, "Homepage must not contain hero-proof-progress bar");
+  assert.equal(docHtml.includes("hp-autoplay-btn"), false, "Homepage must not contain hp-autoplay-btn");
+  assert.equal(docHtml.includes("marks-strip"), false, "Homepage must not contain redundant marks-strip");
+  assert.equal(docHtml.includes("demo-card-actions"), false, "Homepage must not contain demo-card-actions player buttons");
+  assert.equal(docHtml.includes("demo-lightbox"), false, "Homepage must not contain demo-lightbox");
+  assert.ok(docHtml.includes('id="workbench"'), "Both / and /zh/ must render the full interactive #workbench");
+  assert.ok(docHtml.includes('id="cloud-account-hub"'), "Both / and /zh/ must render #cloud-account-hub");
+  assert.ok(docHtml.includes('id="auth-modal-backdrop"'), "Both / and /zh/ must render #auth-modal-backdrop");
+}
 assert.equal(indexHtml.includes('data-theme="light"'), false, "index.html should not force data-theme=light before hydration");
 assert.equal(/^[ \t]+$/m.test(indexHtml), false, "index.html contains whitespace-only lines");
 assert.equal(indexHtml.includes("NaN KB"), false, "index.html contains NaN KB in endpoints ledger");
 assert.equal(indexHtml.includes("undefined tok"), false, "index.html contains undefined tok in endpoints ledger");
+assert.equal(zhIndexHtml.includes("NaN KB"), false, "zh/index.html contains NaN KB in endpoints ledger");
+assert.equal(zhIndexHtml.includes("undefined tok"), false, "zh/index.html contains undefined tok in endpoints ledger");
 assert.equal(indexHtml.includes("dislop_verify"), false, "site/index.html must not reference dislop_verify");
 assert.equal(indexHtml.includes("dislop verify"), false, "site/index.html must not reference dislop verify");
 assert.equal(indexHtml.includes("fact-lock-bar"), false, "site/index.html must not contain #fact-lock-bar");
@@ -405,11 +425,12 @@ const sitemapXml = fs.readFileSync(path.join(SITE_DIR, "sitemap.xml"), "utf8");
 assert.ok(sitemapXml.includes('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'), "sitemap.xml missing urlset xmlns");
 assert.ok(sitemapXml.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), "sitemap.xml missing xhtml xmlns");
 assert.ok(sitemapXml.includes("<loc>https://dislop.com/</loc>"), "sitemap.xml missing root URL");
-assert.ok(sitemapXml.includes("<loc>https://dislop.com/en/</loc>"), "sitemap.xml missing /en/ URL");
+assert.ok(sitemapXml.includes("<loc>https://dislop.com/zh/</loc>"), "sitemap.xml missing /zh/ URL");
 assert.ok(sitemapXml.includes("<loc>https://dislop.com/awesome/</loc>"), "sitemap.xml missing /awesome/ URL");
-assert.ok(sitemapXml.includes("<loc>https://dislop.com/en/awesome/</loc>"), "sitemap.xml missing /en/awesome/ URL");
+assert.ok(sitemapXml.includes("<loc>https://dislop.com/zh/awesome/</loc>"), "sitemap.xml missing /zh/awesome/ URL");
 assert.ok(sitemapXml.includes("<loc>https://dislop.com/guides/</loc>"), "sitemap.xml missing /guides/ URL");
-assert.ok(sitemapXml.includes("<loc>https://dislop.com/en/guides/</loc>"), "sitemap.xml missing /en/guides/ URL");
+assert.ok(sitemapXml.includes("<loc>https://dislop.com/zh/guides/</loc>"), "sitemap.xml missing /zh/guides/ URL");
+assert.equal(sitemapXml.includes("https://dislop.com/en/"), false, "sitemap.xml must not list legacy /en/ redirect URLs");
 assert.equal(INVISIBLE_BIDI_RE.test(sitemapXml), false, "sitemap.xml contains invisible/bidi chars");
 assert.equal(/&(?!amp;|lt;|gt;|quot;|apos;)/.test(sitemapXml), false, "sitemap.xml contains unescaped '&'");
 const sitemapUrlCount = (sitemapXml.match(/<url>/g) || []).length;
@@ -418,6 +439,7 @@ assert.ok(sitemapUrlCount >= 50, `Expected >= 50 <url> entries in sitemap.xml, g
 // 11. Verify animated demo GIFs, animated WebPs & reduced-motion posters exist in site/assets/demos/ and match HTML references
 const DEMOS_DIR = path.join(SITE_DIR, "assets", "demos");
 const demoSlugs = ["proof-cycle", "cli-check", "workbench-live", "ui-slop", "deck-office", "agent-workflow"];
+const homeDemoSlugs = ["cli-check", "ui-slop", "deck-office", "agent-workflow"];
 for (const lang of ["zh", "en"]) {
   for (const slug of demoSlugs) {
     const gifPath = path.join(DEMOS_DIR, `${slug}-${lang}-v2.gif`);
@@ -443,8 +465,8 @@ for (const lang of ["zh", "en"]) {
     assert.ok(posterBuf.length <= 70 * 1024, `Demo poster exceeds 70 KB budget: ${path.basename(posterPath)}`);
   }
 }
-const demoCheckFiles = [indexHtml, fs.readFileSync(path.join(SITE_DIR, "en", "index.html"), "utf8")];
-for (const baseDir of [path.join(SITE_DIR, "guides"), path.join(SITE_DIR, "en", "guides")]) {
+const demoCheckFiles = [indexHtml, zhIndexHtml];
+for (const baseDir of [path.join(SITE_DIR, "guides"), path.join(SITE_DIR, "zh", "guides")]) {
   if (fs.existsSync(baseDir)) {
     for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
       if (entry.isDirectory()) {
@@ -464,11 +486,17 @@ for (const docHtml of demoCheckFiles) {
 const langInitPath = path.join(SITE_DIR, "lang-init.js");
 assert.ok(fs.existsSync(langInitPath), "Missing site/lang-init.js");
 assert.ok(indexHtml.includes('<script src="./lang-init.js"></script>'), "site/index.html must load ./lang-init.js synchronously");
+assert.ok(zhIndexHtml.includes('<script src="../lang-init.js"></script>'), "site/zh/index.html must load ../lang-init.js synchronously");
 assert.ok(awesomeHtml.includes('<script src="../lang-init.js"></script>'), "site/awesome/index.html must load ../lang-init.js synchronously");
-for (const docHtml of [indexHtml, awesomeHtml]) {
+assert.ok(zhAwesomeHtml.includes('<script src="../../lang-init.js"></script>'), "site/zh/awesome/index.html must load ../../lang-init.js synchronously");
+for (const docHtml of [indexHtml, zhIndexHtml, awesomeHtml, zhAwesomeHtml]) {
   assert.ok(docHtml.includes('hreflang="zh-Hans"'), "Missing hreflang=zh-Hans");
   assert.ok(docHtml.includes('hreflang="en"'), "Missing hreflang=en");
   assert.ok(docHtml.includes('hreflang="x-default"'), "Missing hreflang=x-default");
+  assert.ok(
+    docHtml.indexOf('hreflang="zh-Hans"') < docHtml.indexOf("lang-init.js"),
+    "hreflang alternate links must appear before lang-init.js in <head>"
+  );
 }
 for (const assetRel of [
   "assets/banner-zh-light.svg",
@@ -485,29 +513,67 @@ assert.ok(productBrief.includes("去 AI 味才是真正的生产力！"), "PRODU
 assert.ok(productBrief.includes("Cutting AI slop is real productivity."), "PRODUCT.md missing official EN slogan");
 
 const langInitSrc = fs.readFileSync(langInitPath, "utf8");
-const fakeRoot = {
-  lang: "zh-CN",
-  attrs: { "data-static-lang": "zh" },
-  getAttribute(k) { return this.attrs[k] ?? null; },
-  setAttribute(k, v) { this.attrs[k] = String(v); },
-  removeAttribute(k) { delete this.attrs[k]; },
-};
-const sandbox = {
-  URLSearchParams,
-  Intl,
-  navigator: { languages: ["en-US", "zh-CN"], language: "en-US" },
-  location: { search: "" },
-  localStorage: { getItem: () => null },
-  document: { documentElement: fakeRoot },
-  setTimeout: () => 0,
-};
-sandbox.window = sandbox;
-vm.runInNewContext(langInitSrc, sandbox);
-const resolveLang = sandbox.__DISLOP_RESOLVE_LANG__;
+function runLangInitSim({ staticLang = "en", languages = ["en-US"], userAgent = "Mozilla/5.0", search = "", hash = "", stored = null, referrer = "", pathname = "/" } = {}) {
+  let replacedTo = null;
+  const fakeRoot = {
+    lang: staticLang === "zh" ? "zh-CN" : "en",
+    attrs: { "data-static-lang": staticLang },
+    getAttribute(k) { return this.attrs[k] ?? null; },
+    setAttribute(k, v) { this.attrs[k] = String(v); },
+    removeAttribute(k) { delete this.attrs[k]; },
+  };
+  const storeObj = {};
+  if (stored) storeObj["dislop-lang"] = stored;
+  const sb = {
+    URL,
+    URLSearchParams,
+    Intl,
+    navigator: { languages, language: languages[0] || "", userAgent },
+    location: {
+      href: `https://dislop.com${pathname}${search}${hash}`,
+      origin: "https://dislop.com",
+      pathname,
+      search,
+      hash,
+      replace(target) { replacedTo = target; },
+    },
+    localStorage: {
+      getItem: (k) => storeObj[k] ?? null,
+      setItem: (k, v) => { storeObj[k] = String(v); },
+    },
+    document: {
+      referrer,
+      documentElement: fakeRoot,
+      querySelector(sel) {
+        if (sel.includes('hreflang="zh-Hans"')) return { getAttribute: () => "https://dislop.com/zh/" };
+        if (sel.includes('hreflang="en"')) return { getAttribute: () => "https://dislop.com/" };
+        return null;
+      },
+    },
+    history: { replaceState() {} },
+    setTimeout: () => 0,
+  };
+  sb.window = sb;
+  vm.runInNewContext(langInitSrc, sb);
+  return { sb, fakeRoot, replacedTo, storeObj };
+}
+
+const enSim = runLangInitSim({ staticLang: "en", languages: ["en-US", "zh-CN"], pathname: "/" });
+const resolveLang = enSim.sb.__DISLOP_RESOLVE_LANG__;
 assert.equal(typeof resolveLang, "function", "site/lang-init.js did not expose __DISLOP_RESOLVE_LANG__");
-assert.equal(sandbox.__DISLOP_INIT_LANG__, "en", "Expected en-US browser to resolve to en");
-assert.equal(fakeRoot.lang, "en", "Expected root lang attribute updated pre-paint to en");
-assert.equal(fakeRoot.attrs["data-lang-hydrating"], "1", "Expected data-lang-hydrating=1 when browser != staticLang");
+assert.equal(enSim.sb.__DISLOP_INIT_LANG__, "en", "Expected en-US browser to resolve to en");
+assert.equal(enSim.replacedTo, null, "English browser on / must not redirect");
+assert.equal(enSim.fakeRoot.lang, "en", "English root must keep lang=en");
+
+const zhAutoSim = runLangInitSim({ staticLang: "en", languages: ["zh-CN", "en-US"], pathname: "/", hash: "#workbench" });
+assert.equal(zhAutoSim.replacedTo, "/zh/#workbench", "First-visit zh-CN browser on / should redirect to /zh/#workbench");
+
+const botSim = runLangInitSim({ staticLang: "en", languages: ["zh-CN"], userAgent: "Mozilla/5.0 (compatible; Twitterbot/1.0)", pathname: "/" });
+assert.equal(botSim.replacedTo, null, "Crawler/bot UA on / must never redirect even with zh locale");
+
+const fromZhRefSim = runLangInitSim({ staticLang: "en", languages: ["zh-CN"], stored: "zh", referrer: "https://dislop.com/zh/guides/", pathname: "/" });
+assert.equal(fromZhRefSim.replacedTo, null, "Navigating from /zh/* to / must stay on English and not bounce back");
+assert.equal(fromZhRefSim.storeObj["dislop-lang"], "en", "Navigating from /zh/* to / should persist dislop-lang=en");
 
 assert.equal(resolveLang({ search: "?lang=en", stored: "zh", languages: ["zh-CN"] }), "en");
 assert.equal(resolveLang({ search: "?lang=zh", stored: "en", languages: ["en-US"] }), "zh");
@@ -706,7 +772,7 @@ for (const bot of ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot", "Disall
 }
 
 assert.ok(Buffer.byteLength(llmsTxt, "utf8") <= 2600, `site/llms.txt exceeds 2600-byte budget`);
-for (const feedRel of ["feed.xml", "en/feed.xml"]) {
+for (const feedRel of ["feed.xml", "zh/feed.xml"]) {
   const feedPath = path.join(SITE_DIR, feedRel);
   assert.ok(fs.existsSync(feedPath), `Missing Atom feed: site/${feedRel}`);
   const feedXml = fs.readFileSync(feedPath, "utf8");
@@ -724,15 +790,38 @@ function walkHtmlFiles(dir, out = []) {
 }
 
 const allSiteHtml = walkHtmlFiles(SITE_DIR);
-assert.ok(allSiteHtml.length >= 115, `Expected >= 115 static HTML pages, got ${allSiteHtml.length}`);
+assert.ok(allSiteHtml.length >= 165, `Expected >= 165 static + redirect HTML pages, got ${allSiteHtml.length}`);
 const seenTitles = new Map();
 const seenDescs = new Map();
 const hreflangClusters = new Map();
+let redirectStubCount = 0;
+let canonicalHtmlCount = 0;
 
 for (const htmlFile of allSiteHtml) {
   const rel = path.relative(SITE_DIR, htmlFile).replace(/\\/g, "/");
   const doc = fs.readFileSync(htmlFile, "utf8");
-  const isEnPage = rel.startsWith("en/");
+  const pageDir = path.dirname(htmlFile);
+
+  if (doc.includes('data-redirect-stub="1"')) {
+    redirectStubCount += 1;
+    assert.ok(rel.startsWith("en/") || /^rules\/zh-[a-z0-9-]+\/index\.html$/.test(rel), `Unexpected redirect stub path: ${rel}`);
+    assert.ok(doc.includes('name="robots" content="noindex, follow"'), `Redirect stub missing noindex: ${rel}`);
+    assert.equal(/<script\b/i.test(doc), false, `Redirect stub must not contain inline <script>: ${rel}`);
+    const refreshMatch = doc.match(/http-equiv="refresh"\s+content="0;\s*url=([^"]+)"/i);
+    assert.ok(refreshMatch, `Redirect stub missing meta refresh: ${rel}`);
+    let stubTarget = path.resolve(pageDir, refreshMatch[1]);
+    if (fs.existsSync(stubTarget) && fs.statSync(stubTarget).isDirectory()) {
+      stubTarget = path.join(stubTarget, "index.html");
+    }
+    assert.ok(fs.existsSync(stubTarget), `Redirect stub target missing on disk for ${rel}: ${refreshMatch[1]}`);
+    const stubCanon = doc.match(/<link\s+rel="canonical"\s+href="([^"]*)"/i);
+    assert.ok(stubCanon && stubCanon[1].startsWith("https://dislop.com/") && !stubCanon[1].includes("/en/"), `Invalid canonical on redirect stub ${rel}`);
+    continue;
+  }
+
+  canonicalHtmlCount += 1;
+  const isZhPage = rel.startsWith("zh/");
+  const isEnPage = !isZhPage;
 
   const titleMatch = doc.match(/<title>([\s\S]*?)<\/title>/i);
   assert.ok(titleMatch && titleMatch[1].trim(), `Missing <title> in ${rel}`);
@@ -748,7 +837,7 @@ for (const htmlFile of allSiteHtml) {
 
   const canonMatch = doc.match(/<link\s+rel="canonical"\s+href="([^"]*)"/i);
   assert.ok(canonMatch, `Missing canonical in ${rel}`);
-  const expectedCanon = `https://dislop.com/${rel.replace(/index\.html$/, "")}`;
+  const expectedCanon = `https://dislop.com/${rel.replace(/(?:^|\/)index\.html$/, (m) => (m.startsWith("/") ? "/" : ""))}`;
   assert.equal(canonMatch[1], expectedCanon, `Canonical mismatch in ${rel}`);
   assert.equal(canonMatch[1].includes("?lang="), false, `Canonical must not include ?lang= in ${rel}`);
 
@@ -772,9 +861,11 @@ for (const htmlFile of allSiteHtml) {
   const enAlt = doc.match(/<link\s+rel="alternate"\s+hreflang="en"\s+href="([^"]*)"/i)?.[1];
   const defAlt = doc.match(/<link\s+rel="alternate"\s+hreflang="x-default"\s+href="([^"]*)"/i)?.[1];
   assert.ok(zhAlt && defAlt, `Missing hreflang zh-Hans/x-default in ${rel}`);
-  if (enAlt) hreflangClusters.set(canonMatch[1], { zhAlt, enAlt, defAlt });
+  if (enAlt) {
+    assert.equal(defAlt, enAlt, `hreflang x-default must point to English URL on bilingual page ${rel}`);
+    hreflangClusters.set(canonMatch[1], { zhAlt, enAlt, defAlt });
+  }
 
-  const pageDir = path.dirname(htmlFile);
   for (const m of doc.matchAll(/\b(?:href|src)="([^"]+)"/gi)) {
     const raw = m[1].split("#")[0].split("?")[0];
     if (!raw || raw.startsWith("https://") || raw.startsWith("http://") || raw.startsWith("mailto:") || raw.startsWith("data:") || raw.startsWith("/api/") || raw === "/mcp") {
@@ -787,6 +878,8 @@ for (const htmlFile of allSiteHtml) {
     assert.ok(fs.existsSync(targetPath), `Broken internal link in ${rel}: ${m[1]}`);
   }
 }
+assert.ok(canonicalHtmlCount >= 115, `Expected >= 115 canonical HTML pages, got ${canonicalHtmlCount}`);
+assert.ok(redirectStubCount >= 55, `Expected >= 55 legacy redirect stubs, got ${redirectStubCount}`);
 
 for (const [url, alts] of hreflangClusters.entries()) {
   const peerUrl = url === alts.zhAlt ? alts.enAlt : alts.zhAlt;
@@ -797,8 +890,8 @@ for (const [url, alts] of hreflangClusters.entries()) {
 // 16. Rule exemplar notes, share action bars, offline workbench share hashes & slop-sample form
 for (const [ruleRel, ruleId] of [
   ["rules/negation-pivot-frame/index.html", "negation-pivot-frame"],
-  ["en/rules/negation-pivot-frame/index.html", "negation-pivot-frame"],
-  ["rules/zh-bureaucratic-padding/index.html", "zh-bureaucratic-padding"],
+  ["zh/rules/negation-pivot-frame/index.html", "negation-pivot-frame"],
+  ["zh/rules/zh-bureaucratic-padding/index.html", "zh-bureaucratic-padding"],
 ]) {
   const ruleDoc = fs.readFileSync(path.join(SITE_DIR, ruleRel), "utf8");
   assert.ok(ruleDoc.includes('class="rule-note"'), `Expected .rule-note in ${ruleRel}`);
@@ -808,7 +901,7 @@ for (const [ruleRel, ruleId] of [
   assert.ok(ruleDoc.includes("template=slop_sample.yml"), `Expected slop_sample.yml link in ${ruleRel}`);
 }
 
-for (const guideRel of ["guides/remove-ai-slop-writing/index.html", "en/guides/remove-ai-slop-writing/index.html"]) {
+for (const guideRel of ["guides/remove-ai-slop-writing/index.html", "zh/guides/remove-ai-slop-writing/index.html"]) {
   const guideDoc = fs.readFileSync(path.join(SITE_DIR, guideRel), "utf8");
   assert.ok(guideDoc.includes('class="share-action-bar"'), `Expected .share-action-bar in ${guideRel}`);
   assert.ok(guideDoc.includes('data-copy-target="share-cite-payload"') && guideDoc.includes('id="share-cite-payload"'), `Expected citation copy button in ${guideRel}`);
@@ -860,23 +953,20 @@ assert.ok(
   "site/tools/index.md missing Agent Evaluation, Install & Rollout Workflow"
 );
 
-for (const homeRel of ["index.html", "en/index.html"]) {
+for (const homeRel of ["index.html", "zh/index.html"]) {
   const homeDoc = fs.readFileSync(path.join(SITE_DIR, homeRel), "utf8");
-  if (homeRel === "index.html") {
-    assert.ok(homeDoc.includes('id="hero-prompt"'), "index.html missing #hero-prompt");
-    assert.ok(homeDoc.includes("https://dislop.com/llms.txt"), "index.html prompt missing llms.txt reference");
-  } else {
-    assert.ok(homeDoc.includes('id="en-hero-prompt"'), "en/index.html missing #en-hero-prompt");
-    assert.ok(homeDoc.includes('data-copy-target="en-hero-prompt"'), "en/index.html missing copy button for #en-hero-prompt");
-    assert.ok(homeDoc.includes("https://dislop.com/llms.txt"), "en/index.html prompt missing llms.txt reference");
-  }
+  assert.ok(homeDoc.includes('id="hero-prompt"'), `${homeRel} missing #hero-prompt`);
+  assert.ok(homeDoc.includes('data-copy-target="hero-prompt"'), `${homeRel} missing copy button for #hero-prompt`);
+  assert.ok(homeDoc.includes("https://dislop.com/llms.txt"), `${homeRel} prompt missing llms.txt reference`);
   assert.ok(homeDoc.includes('class="hero-agent-mark"') && homeDoc.includes('d="M2.2 14H12.3'), `${homeRel} missing Hero Dele Loop SVG mark`);
-  for (const slug of demoSlugs) {
+  for (const slug of homeDemoSlugs) {
     assert.ok(homeDoc.includes(`data-demo-select="${slug}"`), `${homeRel} missing #demos tab for ${slug}`);
   }
+  assert.equal(homeDoc.includes('data-demo-select="proof-cycle"'), false, `${homeRel} #demos should omit redundant proof-cycle tab`);
+  assert.equal(homeDoc.includes('data-demo-select="workbench-live"'), false, `${homeRel} #demos should omit redundant workbench-live tab`);
   assert.ok(homeDoc.includes('id="guides-home"'), `${homeRel} missing #guides-home section`);
-  for (const gf of fs.readdirSync(guidesDir).filter((f) => f.endsWith(".md") && !f.endsWith(".en.md") && !f.endsWith(".zh-CN.md"))) {
-    const guideSlug = gf.replace(/\.md$/, "");
+  for (const gf of fs.readdirSync(guidesDir).filter((f) => f.endsWith(".en.md"))) {
+    const guideSlug = gf.replace(/\.en\.md$/, "");
     assert.ok(homeDoc.includes(`data-guide-slug="${guideSlug}"`), `${homeRel} #guides-home missing guide card ${guideSlug}`);
   }
   assert.ok(homeDoc.includes("https://www.npmjs.com/package/dislop"), `${homeRel} JSON-LD missing npm sameAs`);
@@ -887,25 +977,28 @@ for (const homeRel of ["index.html", "en/index.html"]) {
 
 for (const navRel of [
   "index.html",
-  "en/index.html",
+  "zh/index.html",
   "awesome/index.html",
-  "en/awesome/index.html",
+  "zh/awesome/index.html",
   "guides/index.html",
+  "zh/guides/index.html",
   "rules/index.html",
+  "zh/rules/index.html",
 ]) {
   const navHtml = fs.readFileSync(path.join(SITE_DIR, navRel), "utf8");
   const navMatch = navHtml.match(/<nav\b[^>]*class="nav-links"[^>]*>([\s\S]*?)<\/nav>/);
   assert.ok(navMatch, `${navRel} missing <nav class="nav-links">`);
   const navLinks = navMatch[1].match(/<a\b[^>]*>/g) || [];
   assert.equal(navLinks.length, 6, `${navRel} primary nav should contain 6 links (got ${navLinks.length})`);
-  if (navRel !== "index.html") {
+  if (navRel !== "index.html" && navRel !== "zh/index.html") {
     assert.ok(navHtml.includes("data-static-acct"), `${navRel} top-controls missing data-static-acct sign-in link`);
+  } else {
+    assert.ok(navHtml.includes('id="topbar-account-btn"'), `${navRel} top-controls missing #topbar-account-btn`);
   }
 }
 
-const enHomeHtml = fs.readFileSync(path.join(SITE_DIR, "en", "index.html"), "utf8");
-assert.ok(enHomeHtml.includes('id="pricing"'), "en/index.html missing #pricing section");
-assert.ok(enHomeHtml.includes("50,000 chars/call") && enHomeHtml.includes("20 cloud voice cards"), "en/index.html #pricing missing honest Pro limits");
+assert.ok(indexHtml.includes('id="pricing"'), "index.html missing #pricing section");
+assert.ok(indexHtml.includes("50,000 chars/call") && indexHtml.includes("20 cloud voice cards"), "index.html #pricing missing honest Pro limits");
 for (const sym of [
   "k.id || k.keyId",
   "a.id || a.grantId",
@@ -920,6 +1013,9 @@ for (const sym of [
   "X-Dislop-Account-Id",
   "account_switch_confirm_required",
   "sourceAccountId",
+  "office_export_upgrade_required",
+  "availableSkus",
+  "officeExportCap",
 ]) {
   assert.ok(wbApp.includes(sym), `Expected ${sym} in site/app.js`);
 }
@@ -940,6 +1036,26 @@ assert.ok(
   (stylesCss.match(/linear-gradient\(/gi) || []).length <= 1,
   "site/styles.css must not add decorative linear-gradient() backgrounds beyond mobile table scroll shadow"
 );
+
+// 18. Regression checks for Codex Sol audit: pure EN aria-label on /, pure ZH static defaults & zero EN-only rule rows on /zh/, and stateful language switch
+assert.ok(
+  indexHtml.includes('id="lang-toggle" class="ctrl-btn" lang="zh-CN" aria-label="Switch to Chinese"'),
+  "site/index.html #lang-toggle must use pure English aria-label"
+);
+for (const leakedEn of [
+  '<span id="wb-doc-pack">Work docs</span>',
+  '<span id="wb-doc-stats">5 lines</span>',
+  "0 hard bugs · 0 warnings",
+  "Filtered by current language",
+  'data-rule-lang="en"',
+]) {
+  assert.equal(zhIndexHtml.includes(leakedEn), false, `site/zh/index.html must not contain English default/specimen: ${leakedEn}`);
+}
+const staticUiJs = fs.readFileSync(path.join(SITE_DIR, "static-ui.js"), "utf8");
+const awesomeJs = fs.readFileSync(path.join(SITE_DIR, "awesome", "awesome.js"), "utf8");
+assert.ok(wbApp.includes("new URLSearchParams(window.location.search") && wbApp.includes("peerQs"), "site/app.js language switch must preserve query string");
+assert.ok(awesomeJs.includes("new URLSearchParams(window.location.search") && awesomeJs.includes("peerSuffix"), "site/awesome/awesome.js language switch must preserve query and hash");
+assert.ok(staticUiJs.includes("buildStatefulHref") && staticUiJs.includes("window.location.search"), "site/static-ui.js language switch must preserve query and hash");
 
 console.log(
   `dislop site-test: ok (${totalRules} rules, ${tryRulesChecked} Try demos, ${specimenCount} ZH/EN specimens + 2 hero proofs + 6 cases, ` +

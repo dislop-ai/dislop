@@ -1,84 +1,83 @@
 ---
 content-type: reference-data
-lang: zh
+lang: en
 updated: 2026-11-23
 version: 0.8.3
 ---
 
-# Vibe Coding 前端页面怎么去 AI 味：告别紫粉渐变、卡片套卡片和假按钮
+# Fixing AI Slop in Web UI: Beyond Purple Gradients, Pill Soup, and Dead Buttons
 
-> AI 写的网页一眼像模板，主要是因为“紫粉霓虹渐变 + 满屏胶囊标签 + 框套框 + 假窗口三点 + 点不动的 href=\"#\" 按钮”。改回干净工程界面的做法是用 1px 细线网格、单色字体层次和确定性静态检查。
+> AI-generated web UIs look interchangeable when they fall back on purple-pink gradients, pill-badge walls, 3-level nested cards, fake macOS window dots, and dead href='#' buttons. Replace template chrome with 1px structural grids, clear type hierarchy, and deterministic HTML/CSS linting.
 
-让 Coding Agent 从零搭一个官网或控制台，十次里有八次会吐出同一套界面：黑底或纯白底上面飘着紫粉光晕球、大字号紫粉渐变标题、假装是 macOS 窗口的红黄绿三点、三张一模一样的马卡龙图标卡片，以及点下去毫无反应的 `href="#"` 按钮。
+Ask a coding agent to scaffold a landing page or admin dashboard, and eight times out of ten you get the same template. It puts blurred purple orbs on the background, adds gradient hero text, draws fake macOS window dots above pastel icon cards, and wires `"Get Started"` to `href="#"`.
 
-Anthropic 官方的 `frontend-design`（198,134 星）和 `pbakaus/impeccable`（114,155 星）之所以在开发者社区流行，就是因为大家已经看腻了这套默认的“AI SaaS 模板脸”。
+That convergence is why design skills like Anthropic's `frontend-design` (198,134 stars) and `pbakaus/impeccable` (114,155 stars) gained rapid adoption. Fixing it does not require rewriting your stack—it requires catching template habits automatically before merge.
 
-## 1. 最先暴露“AI 写的” 7 个页面特征
+## 1. Seven UI defects that scream "generated template"
 
-| 规则 ID | 页面里长什么样 | 为什么影响使用 | 干净改法 |
+| Rule ID | What appears in code | Why it hurts users | Clean fix |
 |---|---|---|---|
-| `ui-dead-control` | `<a href="#">下载报告</a>` 或空按钮、莫名 `disabled` | 属于功能硬伤，点不动会让用户以为页面坏了 | 接上真实链接/交互，没做的功能直接删掉按钮 |
-| `ui-ai-gradient` | `from-indigo-500 via-purple-500 to-pink-500` 文字渐变 | 强烈预设模板味，还经常压低对比度 | 退回高对比度实色正文，只在品牌局部留单一强调色 |
-| `ui-pill-soup` | 一张卡片里挤 8 个 `rounded-full` 胶囊徽章 | 视觉噪音大，真正重要的状态反而看不出 | 普通属性写成 ` · ` 分隔的轻文本，只保留 1 个异常状态标签 |
-| `ui-box-in-box` | 连续三层 `border rounded-xl p-6` 套盒子 | 挤窄移动端有效宽度，层层边框像套娃 | 用 `1px` 细线网格、对齐和背景明度阶梯分层次 |
-| `ui-prompt-echo-badge` | 页面印着 `AI 强力驱动` `零幻觉保证` 标牌 | 把写给模型的口号印到用户界面上，没说具体功能 | 改成实际动作或边界说明，如“本地离线运行 · 不上传” |
-| `ui-glow-blob-chrome` | `blur-3xl` 霓虹光晕球和闪烁 `animate-ping` 圆点 | 干扰阅读，增加 GPU 合成开销 | 去掉无功能光晕，用静态结构留白代替 |
-| `ui-template-card-grid` | `01`/`02`/`03` 编号眉题 + 假窗口三点 + 通用 Emoji 图标 | 每一行都要贴火箭和闪电，结构高度雷同 | 用直接的小标题和真实截屏/交互样本取代假窗口和 Emoji |
+| `ui-dead-control` | `<a href="#">Download</a>` or unexplained `<button disabled>` | Hard functional bug; users click controls that go nowhere | Wire real destinations or remove unbuilt actions |
+| `ui-ai-gradient` | `from-indigo-500 via-purple-500 to-pink-500` clipped text | Instantly marks a generic SaaS template and lowers contrast | Use crisp solid ink and reserve a single brand accent |
+| `ui-pill-soup` | 7+ `rounded-full` pill tags stacked on one card | Drowns out the one status badge users actually need | Format routine metadata as plain `·`-separated text |
+| `ui-box-in-box` | Three nested `border rounded-xl p-4` wrappers | Eats mobile viewport width with repetitive padding | Use alignment, whitespace, or single `1px` dividers |
+| `ui-prompt-echo-badge` | Eyebrow stickers saying `"AI-Powered · Zero Hallucination"` | Echoes marketing prompt slogans instead of product function | Name the concrete behavior (`"Runs offline locally"`) |
+| `ui-glow-blob-chrome` | `blur-3xl` neon background orbs and `animate-ping` dots | Visual noise with zero information value | Remove decorative orbs; separate layers with surface tone |
+| `ui-template-card-grid` | `01`/`02`/`03` eyebrow numbers, fake window dots, `🚀✨🛡️` icons | Makes every feature section look identical | Lead with direct headings and real product screenshots |
 
-## 2. 一组真实代码改法对照
+## 2. Before and after markup
 
 ```text
 bad:
 <div class="border rounded-xl p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-  <span class="rounded-full px-3 py-1">AI 强力驱动</span>
-  <h3>🚀 极速上线</h3>
-  <a href="#">查看完整报告</a>
+  <span class="rounded-full px-3 py-1">AI-Powered · Zero Hallucination</span>
+  <h3>🚀 Blazing Fast Audits</h3>
+  <a href="#">Download Report</a>
 </div>
 
 good:
 <section class="surface-sheet">
-  <span class="section-meta">本地离线检查</span>
-  <h3>50 毫秒完成本地检查</h3>
-  <a href="./report.html">查看完整报告</a>
+  <span class="section-meta">Local offline engine</span>
+  <h3>50ms checks with zero uploads</h3>
+  <a href="./report.html">Download report</a>
 </section>
 ```
 
-对于内联 SVG 图解，还常出现两个漏掉的工程细节：大画布没写 `viewBox`（窄屏直接被截断）、或者两个 `<text>` 坐标挤在一起重叠。检查器会在交付前直接标出具体行号。
+For inline `<svg>` diagrams, check two additional failure modes: large canvases missing an explicit `viewBox` (which clip on mobile) and overlapping `<text>` coordinates.
 
-![网页组件模板味排查：标出紫粉渐变、胶囊标签墙与空链接，改为 1px 白底版式](demo:ui-slop)
+![Web UI audit flagging purple-pink gradients, pill soup, prompt-echo badges, and dead href='#' buttons before switching to a 1px paper sheet](demo:ui-slop)
 
-## 3. 在项目里建立“不靠 AI 模板”的视觉底线
+## 3. Keep pages grounded without heavy frameworks
 
-1. **先把设计边界写进代码仓**：参考 `Norm (Zurich)`、`Fonts In Use` 和中文排印站点 `The Type` 的规律——用冷中性纸面背景、不超过 2 种字族（正文字体 + 等宽代码字体）、1px 实线分隔和明确的 WCAG 对比度（正文 >= `4.5:1`，控件边框 >= `3.0:1`）。
-2. **禁止外链字体和无关装饰脚本**：静态页面只用系统字体栈和本地静态资源，既快又符合离线安全基线。
-3. **把静态检查挂进构建和 CI**：
+1. **Adopt print-inspired constraints**: Study modular grids and type pairings from `Norm (Zurich)`, `Fonts In Use`, and `Stiftung Buchkunst`. Pair one readable UI sans-serif with a monospace font for code, rule IDs, and numbers, and enforce WCAG 2.2 AA contrast (`>= 4.5:1` for text, `>= 3.0:1` for control borders).
+2. **Keep runtime dependencies minimal**: Avoid third-party font CDNs or tracking scripts when static HTML/CSS solves the job faster.
+3. **Gate HTML, CSS, JSX, and SVG in CI**:
 
 ```bash
-# 对网站或前端目录跑严格检查（发现警告即拦截）
 npx --yes dislop check site/ --pack deck-and-ui --fail-on warning
 ```
 
-如果你手头已经有 HTML、CSS、JSX 或 SVG 文件，也可以直接拖进官网首页的工作台，不用传到服务器，当前标签页里就能标出全部模板问题。
+You can also drop any `.html`, `.css`, `.jsx`, `.svg`, or `.png` file directly into the browser workbench on the homepage to inspect UI slop locally without uploading files.
 
-## 常见问题
+## FAQ
 
-### 为什么用 Tailwind 写出来的页面老是带紫粉渐变和发光阴影？
+### Why do coding agents keep generating purple-indigo gradients and glow blobs?
 
-因为多数通用模型在“现代科技感 SaaS”提示下默认复用 indigo/purple/pink 渐变、blur-3xl 背景光晕球和彩色圆角方块图标，这正是开源社区重点治理的视觉平均值。
+Under generic prompts like 'modern SaaS landing page', models default to the highest-probability Tailwind patterns in their training mix: indigo-to-pink gradients, blur-3xl orbs, and three-column icon cards.
 
-### 前端静态检查工具能抓出哪些 AI 网页毛病？
+### Can static code analysis actually catch AI UI slop without opening a browser?
 
-不需要启动浏览器，仅扫 HTML/CSS/JSX/SVG 源码就能精确抓住 href=\"#\" 空链接、未说明原因的 disabled 按钮、紫粉渐变类名、单个视图超过 6 个胶囊标签、三层嵌套边框盒，以及 SVG 缺少 viewBox 或文字重叠。
+Yes for structural and markup defects. Deterministic probes reliably catch dead href='#' anchors, unexplained disabled buttons, purple-pink gradient stops, 7+ rounded-full pills per view, 3-level nested borders, and SVGs missing viewBox or overlapping text coordinates.
 
-### 不用紫粉模板之后，去哪里找干净不老套的排版参考？
+### What references help teams move beyond SaaS templates?
 
-可以参考瑞士印刷与字体网站（如 Norm Zurich、Fonts In Use、Stiftung Buchkunst）和中文排印站点 The Type，用明确的字号阶梯、1px 分界线和局部强调色撑起结构，不靠发光和圆角堆装饰。
+Browse independent print, foundry, and editorial archives such as Norm (Zurich), Fonts In Use, and Stiftung Buchkunst. Rely on grid proportions, 1px hairline rules, and real product specimens instead of glowing card chrome.
 
-## 参考出处
+## References
 
 - [anthropics/skills — frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design): 198,134 repo stars (2026-11-21 snapshot); warns coding agents against generic SaaS palettes, purple gradients, and default AI card grids.
 - [pbakaus/impeccable: Design rules & /audit workflow for AI-built UI](https://github.com/pbakaus/impeccable): 114,155 stars (2026-11-21 snapshot); packages frontend anti-slop design rules, 7 domain references, and commands like /audit and /polish.
 - [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill): 152,711 stars (2026-11-21 snapshot); supplies pre-built palette, font, and layout constraints for AI coding tools.
 - [Norm (Zurich) — Modular Graphic Systems](https://www.norm.to): Independent Swiss studio demonstrating modular grids, restrained micro-typography, and zero-ornament structure.
 - [Fonts In Use](https://fontsinuse.com): Indexed archive of real-world type pairings across print, signage, and web interfaces instead of generic SaaS defaults.
-- [The Type — Chinese & Multilingual Typography Critique](https://www.thetype.com): Documents Chinese punctuation spacing, mixed-script kerning, and editorial layout discipline for longform Chinese pages and slides.
+- [Stiftung Buchkunst — Best Book Design from all over the World](https://www.stiftung-buchkunst.de): Book proportion, margin choreography, and reading pacing benchmarks directly transferable to PDF reports and presentation decks.

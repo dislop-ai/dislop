@@ -1,30 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-static-lang="zh">
+<html lang="en" data-static-lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>霓虹光晕球与闪烁圆点 (ui-glow-blob-chrome) — dislop</title>
-  <meta name="description" content="霓虹光晕球与闪烁圆点: 堆砌装饰性环境光晕球（`blur-3xl`）、霓虹色阴影、闪烁 `animate-ping` 小圆点或重度 SVG 发光滤镜。">
+  <title>Ambient glow orbs &amp; pulsing dots (ui-glow-blob-chrome) — dislop</title>
+  <meta name="description" content="Ambient glow orbs &amp; pulsing dots: Decorative ambient blur orbs (`blur-3xl`), neon box-shadows, pulsing `animate-ping` pill dots, or heavy SVG glow filters.">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="dislop">
   <meta property="og:url" content="https://dislop.com/rules/ui-glow-blob-chrome/">
-  <meta property="og:title" content="霓虹光晕球与闪烁圆点 (ui-glow-blob-chrome) — dislop">
-  <meta property="og:description" content="霓虹光晕球与闪烁圆点: 堆砌装饰性环境光晕球（`blur-3xl`）、霓虹色阴影、闪烁 `animate-ping` 小圆点或重度 SVG 发光滤镜。">
-  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:title" content="Ambient glow orbs &amp; pulsing dots (ui-glow-blob-chrome) — dislop">
+  <meta property="og:description" content="Ambient glow orbs &amp; pulsing dots: Decorative ambient blur orbs (`blur-3xl`), neon box-shadows, pulsing `animate-ping` pill dots, or heavy SVG glow filters.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@dislop_ai">
   <meta name="twitter:creator" content="@dislop_ai">
-  <meta name="twitter:title" content="霓虹光晕球与闪烁圆点 (ui-glow-blob-chrome) — dislop">
-  <meta name="twitter:description" content="霓虹光晕球与闪烁圆点: 堆砌装饰性环境光晕球（`blur-3xl`）、霓虹色阴影、闪烁 `animate-ping` 小圆点或重度 SVG 发光滤镜。">
-  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta name="twitter:title" content="Ambient glow orbs &amp; pulsing dots (ui-glow-blob-chrome) — dislop">
+  <meta name="twitter:description" content="Ambient glow orbs &amp; pulsing dots: Decorative ambient blur orbs (`blur-3xl`), neon box-shadows, pulsing `animate-ping` pill dots, or heavy SVG glow filters.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
   <link rel="canonical" href="https://dislop.com/rules/ui-glow-blob-chrome/">
-  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/rules/ui-glow-blob-chrome/">
-  <link rel="alternate" hreflang="en" href="https://dislop.com/en/rules/ui-glow-blob-chrome/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/rules/ui-glow-blob-chrome/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/rules/ui-glow-blob-chrome/">
   <link rel="alternate" hreflang="x-default" href="https://dislop.com/rules/ui-glow-blob-chrome/">
-  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop 实用指南（中文）">
+  <script src="../../lang-init.js"></script>
+  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop Guides (EN)">
   <link rel="alternate" type="text/markdown" href="../../rules/ui-glow-blob-chrome.md" title="Markdown Mirror">
   <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
   <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
@@ -37,9 +38,9 @@
       "@type": "TechArticle",
       "@id": "https://dislop.com/rules/ui-glow-blob-chrome/",
       "url": "https://dislop.com/rules/ui-glow-blob-chrome/",
-      "headline": "霓虹光晕球与闪烁圆点 (ui-glow-blob-chrome)",
-      "description": "删掉无功能的光晕球和霓虹发光阴影，改用单调阶梯底色和 1px 实线分隔层次。",
-      "inLanguage": "zh-CN",
+      "headline": "Ambient glow orbs & pulsing dots (ui-glow-blob-chrome)",
+      "description": "Delete decorative blur orbs and colored glow shadows; separate layers with solid surface tokens and crisp 1px borders.",
+      "inLanguage": "en",
       "dateModified": "2026-11-23",
       "author": {
         "@type": "Organization",
@@ -59,7 +60,7 @@
         {
           "@type": "ListItem",
           "position": 2,
-          "name": "规则百科",
+          "name": "Rules",
           "item": "https://dislop.com/rules/"
         },
         {
@@ -75,96 +76,100 @@
   </script>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">跳至正文</a>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="rail-shell">
     <header class="topbar band-rule">
       <a class="brand-lockup" href="../../">
         <img src="../../assets/logo.svg" width="30" height="30" alt="">
         <span class="brand-wordmark">dislop</span>
-        <span class="brand-meta"><span>AI 味检查</span> · <span class="brand-ver">v0.8.3</span></span>
+        <span class="brand-meta"><span>AI slop linter</span> · <span class="brand-ver">v0.8.3</span></span>
       </a>
 
-      <nav class="nav-links" aria-label="主导航">
-        <a href="../../#workbench">工作台</a>
-        <a href="../../#surfaces">接入</a>
-        <a href="../../#cases">案例</a>
-        <a href="../../guides/">指南</a>
-        <a href="../../rules/" aria-current="page">规则</a>
-        <a href="../../awesome/">工具清单</a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../#workbench">Workbench</a>
+        <a href="../../#surfaces">Setup</a>
+        <a href="../../#cases">Cases</a>
+        <a href="../../guides/">Guides</a>
+        <a href="../../rules/" aria-current="page">Rules</a>
+        <a href="../../awesome/">Directory</a>
       </nav>
 
       <div class="top-controls">
-        <a href="../../#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>登录 · 30 免费额度</a>
+        <a href="../../#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>Sign in</a>
         <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label">GitHub ★</span></a>
-        <a href="../../en/rules/ui-glow-blob-chrome/" class="ctrl-btn" aria-label="Switch to English">EN</a>
-        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+        <a href="../../zh/rules/ui-glow-blob-chrome/" data-lang-switch="zh" class="ctrl-btn" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
       </div>
     </header>
 
     <main id="main-content">
     <section class="section-block">
-      <nav class="breadcrumbs" aria-label="面包屑导航">
-        <a href="../../">dislop</a> / <a href="../">规则百科</a> / <span aria-current="page"><code>ui-glow-blob-chrome</code></span>
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../">dislop</a> / <a href="../">Rules</a> / <span aria-current="page"><code>ui-glow-blob-chrome</code></span>
       </nav>
 
       <article class="article-prose">
         <header>
-          <h1 class="lead-heading" style="max-width:28ch;">霓虹光晕球与闪烁圆点</h1>
+          <h1 class="lead-heading" style="max-width:28ch;">Ambient glow orbs &amp; pulsing dots</h1>
           <div class="article-meta">
             <span><code>ui-glow-blob-chrome</code></span>
-            <span>PPT 和网页 (<code>deck-and-ui</code>)</span>
-            <span class="sev-tag sev-warning">提醒</span>
+            <span>Slide Deck, Web UI &amp; Graphic Layout (<code>deck-and-ui</code>)</span>
+            <span class="sev-tag sev-warning">warning</span>
             <span><code>html, css, jsx, svg</code></span>
-            <a href="../../rules/ui-glow-blob-chrome.md">Markdown 规则卡</a>
+            <a href="../../rules/ui-glow-blob-chrome.md">Markdown card</a>
           </div>
           <div class="answer-box">
-            <div class="answer-box-label">判断方法</div>
-            <p>删掉无功能的光晕球和霓虹发光阴影，改用单调阶梯底色和 1px 实线分隔层次。</p>
+            <div class="answer-box-label">How to judge</div>
+            <p>Delete decorative blur orbs and colored glow shadows; separate layers with solid surface tokens and crisp 1px borders.</p>
           </div>
         </header>
 
-        <h2>这条规则查什么</h2>
-        <p>堆砌装饰性环境光晕球（<code>blur-3xl</code>）、霓虹色阴影、闪烁 <code>animate-ping</code> 小圆点或重度 SVG 发光滤镜。</p>
+        <h2>What this rule catches</h2>
+        <p>Decorative ambient blur orbs (<code>blur-3xl</code>), neon box-shadows, pulsing <code>animate-ping</code> pill dots, or heavy SVG glow filters.</p>
 
-        <h2>原句与改法对照</h2>
+        <h2>Before and after examples</h2>
 <!-- dislop-quote-start -->
         <div class="rule-contrast-grid">
           <div class="rule-contrast-cell is-bad">
-            <div class="rule-contrast-label">原句（会标出问题）</div>
-            <pre><code>&lt;div class=&quot;blur-3xl rounded-full bg-purple-500/30&quot;&gt;&lt;/div&gt;&lt;button class=&quot;shadow-indigo-500/50&quot;&gt;启动&lt;/button&gt;</code></pre>
+            <div class="rule-contrast-label">Original (flagged)</div>
+            <pre><code>&lt;div class=&quot;blur-3xl rounded-full bg-purple-500/30&quot;&gt;&lt;/div&gt;&lt;button class=&quot;shadow-indigo-500/50&quot;&gt;Launch&lt;/button&gt;</code></pre>
+          </div>
+          <div class="rule-contrast-cell is-trap">
+            <div class="rule-contrast-label">Still sounds like AI</div>
+            <pre><code>&lt;div class=&quot;blur-3xl rounded-full bg-amber-500/20&quot;&gt;&lt;/div&gt;&lt;button class=&quot;shadow-teal-500/50&quot;&gt;Launch&lt;/button&gt;</code></pre>
           </div>
           <div class="rule-contrast-cell is-good">
-            <div class="rule-contrast-label">改干净的版本</div>
-            <pre><code>&lt;section class=&quot;surface-sheet border&quot;&gt;&lt;button class=&quot;btn-primary&quot;&gt;运行检查&lt;/button&gt;&lt;/section&gt;</code></pre>
+            <div class="rule-contrast-label">Clean version</div>
+            <pre><code>&lt;section class=&quot;surface-sheet border&quot;&gt;&lt;button class=&quot;btn-primary&quot;&gt;Launch&lt;/button&gt;&lt;/section&gt;</code></pre>
           </div>
         </div>
         <!-- dislop-quote-end -->
-<p class="rule-note"><strong>改法要点：</strong> 把紫色光晕换成青色光晕还是同一种发光套路，直接去掉模糊光斑即可。</p>
+<p class="rule-note"><strong>Edit note:</strong> Swapping purple glow for teal glow repeats the same decorative haze; use solid ink contrast.</p>
 
-        <h2>命令行单独查看或检查</h2>
+        <h2>Run locally via CLI</h2>
         <pre><code>npx --yes dislop explain ui-glow-blob-chrome
 npx --yes dislop check . --pack deck-and-ui</code></pre>
 
-        <h2>相关教程</h2>
+        <h2>Related guides</h2>
 <div class="related-strip">
-<a class="related-link-chip" href="../../guides/fix-ai-slop-web-ui/">前端页面去 AI 味</a>
+<a class="related-link-chip" href="../../guides/fix-ai-slop-web-ui/">Fix AI Slop in Web UI</a>
 </div>
-        <h2>同场景其他规则（deck-and-ui）</h2>
+        <h2>Other rules in deck-and-ui</h2>
 <div class="related-strip">
-<a class="related-link-chip" href="../slide-word-wall/"><code>slide-word-wall</code> · 单页 PPT 字太多</a>
-<a class="related-link-chip" href="../slide-bullet-overload/"><code>slide-bullet-overload</code> · 单页要点超过 6 条</a>
-<a class="related-link-chip" href="../slide-autofit-shrink/"><code>slide-autofit-shrink</code> · PPT 文字被硬缩太小</a>
-<a class="related-link-chip" href="../slide-weak-topic-title/"><code>slide-weak-topic-title</code> · 幻灯片标题太泛</a>
-<a class="related-link-chip" href="../ui-ai-gradient/"><code>ui-ai-gradient</code> · 默认紫粉霓虹渐变</a>
-<a class="related-link-chip" href="../ui-pill-soup/"><code>ui-pill-soup</code> · 满屏胶囊小标签</a>
-<a class="related-link-chip" href="../ui-box-in-box/"><code>ui-box-in-box</code> · 框套框套框（三层套盒）</a>
-<a class="related-link-chip" href="../ui-prompt-echo-badge/"><code>ui-prompt-echo-badge</code> · 把提示词印成了界面徽章</a>
+<a class="related-link-chip" href="../slide-word-wall/"><code>slide-word-wall</code> · Slide word wall</a>
+<a class="related-link-chip" href="../slide-bullet-overload/"><code>slide-bullet-overload</code> · Too many bullets on one slide</a>
+<a class="related-link-chip" href="../slide-autofit-shrink/"><code>slide-autofit-shrink</code> · Slide text auto-shrunk too small</a>
+<a class="related-link-chip" href="../slide-weak-topic-title/"><code>slide-weak-topic-title</code> · Generic slide title</a>
+<a class="related-link-chip" href="../ui-ai-gradient/"><code>ui-ai-gradient</code> · Default purple-pink AI gradient</a>
+<a class="related-link-chip" href="../ui-pill-soup/"><code>ui-pill-soup</code> · Pill-badge soup</a>
+<a class="related-link-chip" href="../ui-box-in-box/"><code>ui-box-in-box</code> · Three-level nested boxes</a>
+<a class="related-link-chip" href="../ui-prompt-echo-badge/"><code>ui-prompt-echo-badge</code> · Prompt-echo marketing badge</a>
 </div>
         <div class="share-action-bar">
-          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../?lang=zh#try=ui-glow-blob-chrome">在工作台试试这条规则 →</a>
-          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">复制引用（PR / 群聊）</button><code id="share-cite-payload" hidden>[`ui-glow-blob-chrome`](https://dislop.com/rules/ui-glow-blob-chrome/)：堆砌装饰性环境光晕球（`blur-3xl`）、霓虹色阴影、闪烁 `animate-ping` 小圆点或重度 SVG 发光滤镜。</code>
-          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">投稿翻车样本</a>
-          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub 收藏 ★</a>
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../#try=ui-glow-blob-chrome">Try this rule in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[`ui-glow-blob-chrome`](https://dislop.com/rules/ui-glow-blob-chrome/): Decorative ambient blur orbs (`blur-3xl`), neon box-shadows, pulsing `animate-ping` pill dots, or heavy SVG glow filters.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
         </div>
       </article>
     </section>
@@ -173,26 +178,26 @@ npx --yes dislop check . --pack deck-and-ui</code></pre>
     <footer class="colophon">
       <div class="colophon-note">
         <a class="colophon-brand" href="../../"><img src="../../assets/logo.svg" width="20" height="20" alt="">dislop</a>
-        <span>这个页面自己也跑过 dislop check site/，0 处问题。</span>
-        <span>给 Agent 读的话，从 <a href="../../llms.txt">/llms.txt</a> 开始。</span>
+        <span>This site passes dislop check site/ with 0 issues.</span>
+        <span>For agents, start at <a href="../../llms.txt">/llms.txt</a>.</span>
       </div>
-      <nav class="colophon-groups" aria-label="页脚导航">
+      <nav class="colophon-groups" aria-label="Footer">
         <div class="colophon-group">
-          <span class="colophon-group-title">资料</span>
-          <a href="../../guides/">实用指南</a>
-          <a href="../../rules/">全部规则</a>
-          <a href="../../awesome/">工具清单</a>
+          <span class="colophon-group-title">Resources</span>
+          <a href="../../guides/">Guides</a>
+          <a href="../../rules/">All rules</a>
+          <a href="../../awesome/">Awesome list</a>
           <a href="../../llms.txt">llms.txt</a>
         </div>
         <div class="colophon-group">
-          <span class="colophon-group-title">项目</span>
-          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener">路线图</a>
-          <a href="../../methodology/brand-and-voice.md">文案基准</a>
-          <a href="../../methodology/design-system.md">视觉规范</a>
-          <a href="../../privacy.md">隐私与数据边界</a>
+          <span class="colophon-group-title">Project</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.md" target="_blank" rel="noopener">Roadmap</a>
+          <a href="../../methodology/brand-and-voice.md">Voice guide</a>
+          <a href="../../methodology/design-system.md">Design tokens</a>
+          <a href="../../privacy.md">Privacy</a>
         </div>
         <div class="colophon-group">
-          <span class="colophon-group-title">外部链接</span>
+          <span class="colophon-group-title">Elsewhere</span>
           <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
           <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
           <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
@@ -201,15 +206,6 @@ npx --yes dislop check . --pack deck-and-ui</code></pre>
       </nav>
     </footer>
   </div>
-  <dialog id="demo-lightbox" class="demo-lightbox" aria-labelledby="demo-lightbox-title">
-    <div class="demo-lightbox-head">
-      <strong id="demo-lightbox-title" class="demo-lightbox-title"></strong>
-      <button type="button" id="demo-lightbox-close" class="ctrl-btn ctrl-btn-sm">关闭</button>
-    </div>
-    <div class="demo-lightbox-body">
-      <img id="demo-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
-    </div>
-  </dialog>
   <script defer src="../../static-ui.js"></script>
 
 </body>

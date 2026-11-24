@@ -1,6 +1,6 @@
 # Contributing to `dislop`
 
-Thank you for helping keep `dislop` accurate, low-noise, and zero-dependency. Before picking up a larger change, check [ROADMAP.md](./ROADMAP.md) ([Chinese](./ROADMAP.zh-CN.md)) for active tracks and open design questions, and read [docs/brand-and-voice-guide.md](./docs/brand-and-voice-guide.md) before editing visitor-facing copy.
+Thank you for helping keep `dislop` accurate, low-noise, and zero-dependency. `dislop` follows an **English (Global) first** baseline across rules, schemas, primary visual assets, and canonical documentation (`*.md`), paired with native Chinese counterparts (`*.zh-CN.md` and `/zh/`) authored without word-for-word translation or language mixing. Before picking up a larger change, check [ROADMAP.md](./ROADMAP.md) ([Chinese](./ROADMAP.zh-CN.md)) for active tracks and open design questions, and read [docs/brand-and-voice-guide.md](./docs/brand-and-voice-guide.md) before editing visitor-facing copy.
 
 ## 1. Rule Design Checklist
 

@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-static-lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>dislop — 去 AI 味才是真正的生产力！</title>
+  <meta name="description" content="去 AI 味才是真正的生产力！专用的 AI 味检查工具，整合社区验证过的去味规则与 90 条精选工具，帮你和你的 Agent 挑出并改掉文档、网页和 PPT 里的 AI 味。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/zh/">
+  <meta property="og:title" content="dislop — 去 AI 味才是真正的生产力！">
+  <meta property="og:description" content="去 AI 味才是真正的生产力！整合社区去味规则与 90 条精选工具，帮你和你的 Agent 挑出并改掉文档、网页和 PPT 里的 AI 味。">
+  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="dislop — 去 AI 味才是真正的生产力！">
+  <meta name="twitter:description" content="去 AI 味才是真正的生产力！专用的 AI 味检查工具，整合社区验证过的去味规则与 90 条精选工具，支持本地离线检查。">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <link rel="canonical" href="https://dislop.com/zh/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/">
+  <script src="../lang-init.js"></script>
+  <link rel="alternate" type="application/atom+xml" href="./feed.xml" title="dislop 实用指南（中文）">
+  <link rel="alternate" type="text/plain" href="../llms.txt" title="LLMs Resource Index">
+  <link rel="alternate" type="text/markdown" href="../index.md" title="Markdown Mirror">
+  <link rel="alternate" type="application/json" href="../catalog.json" title="dislop Resource Catalog (dislop.catalog/1)">
+  <link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+  <link rel="stylesheet" href="../styles.css">
+<!-- BUILD:SEO_JSONLD -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://dislop.com/#organization",
+      "name": "dislop",
+      "url": "https://dislop.com/",
+      "logo": "https://dislop.com/assets/logo.svg",
+      "sameAs": [
+        "https://github.com/dislop-ai",
+        "https://github.com/dislop-ai/dislop",
+        "https://www.npmjs.com/package/dislop",
+        "https://pypi.org/project/dislop/",
+        "https://x.com/dislop_ai"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://dislop.com/zh/#website",
+      "url": "https://dislop.com/zh/",
+      "name": "dislop — 去 AI 味才是真正的生产力！",
+      "inLanguage": "zh-CN",
+      "publisher": {
+        "@id": "https://dislop.com/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "dislop",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Linux, Windows, Web",
+      "softwareVersion": "0.8.3",
+      "url": "https://dislop.com/zh/",
+      "codeRepository": "https://github.com/dislop-ai/dislop",
+      "softwareHelp": "https://dislop.com/llms.txt",
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "description": "专用的 AI 味检查工具，内置 7 套场景包 53 条规则与 90 条核验工具清单，支持本地离线检查文档、网页和 Word/PPT。",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "开源本地 CLI 与 Skill",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "name": "云端免费版（每月 30 额度）",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "用 dislop 检查稿子会上传内容吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "不会。纯文档 Skill、本地 CLI、编辑器插件和网页工作台默认本地检查全部离线运行，不上传稿件；只有登录后主动点击云端审校或使用远程 MCP 时才走付费版模型接口，且不存草稿。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "dislop 和概率型 AI 文本检测器有什么区别？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "概率型检测器只给出一个猜测百分比，不告诉你要改哪里。dislop 按 53 条可核验规则直接标出 AI 寒暄、占位符、公文黑话、紫粉渐变和 PPT 字墙，并给出行号和改法。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "支持哪些 Agent 和编辑器？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "支持 Claude Code、Codex、Cursor、Windsurf、Antigravity、WorkBuddy、GitHub Actions，以及任何支持 Agent Skills 或远程 MCP（https://dislop.com/mcp）的客户端。"
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+<!-- /BUILD:SEO_JSONLD -->
+</head>
+<body>
+  <a class="skip-link" href="#main-content" data-i18n="nav.skip">跳至正文</a>
+  <div class="rail-shell">
+    <!-- Masthead -->
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="#top">
+        <img src="../assets/logo.svg" width="30" height="30" alt="">
+        <span class="brand-wordmark">dislop</span>
+        <span class="brand-meta"><span data-i18n="nav.brandMeta">AI 味检查</span> · <span class="brand-ver">v0.8.3</span></span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#workbench" data-i18n="nav.workbench">工作台</a>
+        <a href="#surfaces" data-i18n="nav.surfaces">接入</a>
+        <a href="#cases" data-i18n="nav.cases">案例</a>
+        <a href="./guides/" id="nav-guides-link" data-i18n="nav.guides">指南</a>
+        <a href="#rules" data-i18n="nav.rules">规则</a>
+        <a href="./awesome/" data-i18n="nav.awesome">工具清单</a>
+      </nav>
+
+      <div class="top-controls">
+        <button type="button" id="topbar-account-btn" class="ctrl-btn topbar-acct-btn" data-i18n="nav.signIn">登录</button>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label" data-i18n="nav.github">GitHub ★</span></a>
+        <button type="button" id="lang-toggle" class="ctrl-btn" lang="en" aria-label="切换为英文">EN</button>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <!-- Chapter 1: Hero (dele loop + agent prompt + 3-state proof slip) -->
+    <section id="top" class="band-rule">
+      <div class="lead-band">
+        <div class="lead-copy">
+          <div>
+            <!-- dislop-quote-start -->
+            <div class="hero-strike-wrap" aria-hidden="true">
+              <del class="hero-strike" id="hero-strike-text">好的，以下是为您润色后的版本。</del>
+              <svg class="hero-pen-svg" viewBox="0 0 340 40" preserveAspectRatio="none" focusable="false">
+                <path class="hero-pen-path" d="M4 26H314C321.9 26 327.5 20.6 327.5 13.6C327.5 8.4 323.9 5 319.4 5C314.6 5 311.4 8.75 311.4 14.15C311.4 22.85 318.1 31.6 328.3 35.8"/>
+              </svg>
+            </div>
+            <!-- dislop-quote-end -->
+            <h1 class="lead-heading" data-i18n="lead.title">去 AI 味才是真正的生产力！</h1>
+            <p class="lead-sub" data-i18n="lead.sub">专用的 AI 味检查工具。在文档、网页和 Word/PPT 发出前，标出开头寒暄、空话套话、反转口号和默认紫粉模板。一行命令接进主流 Agent 与编辑器，默认纯本地运行。</p>
+          </div>
+
+          <div class="hero-cta-row">
+            <a href="#workbench" class="btn-primary" data-i18n="lead.cta">在工作台试一段 ↓</a>
+            <a href="#surfaces" class="ctrl-btn" data-i18n="lead.installBtn">装进 Agent 或编辑器</a>
+          </div>
+
+          <div class="hero-cli-inline hero-agent-card ink-stage">
+            <div class="hero-agent-head">
+              <svg class="hero-agent-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.2 14H12.3C16.7 14 19.8 10.9 19.8 7C19.8 4.1 17.8 2.2 15.3 2.2C12.6 2.2 10.8 4.3 10.8 7.3C10.8 12.2 14.6 17.1 20.3 19.4"/></svg>
+              <span class="hero-cli-label" data-i18n="lead.promptLabel">发给 Agent · 自动评估与安装</span>
+            </div>
+            <div class="cmd-box is-prompt">
+              <code id="hero-prompt" data-i18n="lead.promptText">请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。</code>
+              <button type="button" class="ctrl-btn is-ink-primary" data-copy-target="hero-prompt" data-i18n="lead.copyPromptBtn">复制发给 Agent</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: live 3-state proof on a galley slip -->
+        <div class="hero-proof" aria-label="Three-state editing example">
+          <div class="hero-proof-head">
+            <div class="mode-tabs" id="hero-proof-tabs" role="tablist" aria-label="Switch example version">
+              <button type="button" id="hp-tab-bad" role="tab" aria-selected="true" aria-controls="hero-proof-slip" tabindex="0" class="ctrl-btn is-active" data-hero-state="bad" data-i18n="hp.tabBad">原稿</button>
+              <button type="button" id="hp-tab-trap" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="trap" data-i18n="hp.tabTrap">换了种 AI 味</button>
+              <button type="button" id="hp-tab-good" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="good" data-i18n="hp.tabGood">改干净了</button>
+            </div>
+          </div>
+
+          <div class="hero-slip" id="hero-proof-slip" role="tabpanel" aria-labelledby="hp-tab-bad">
+            <div class="hero-slip-head" aria-hidden="true"><span>launch-note.md</span><span>business-brief</span></div>
+            <!-- dislop-quote-start -->
+            <div class="hero-proof-stage" id="hero-proof-stage" aria-live="polite">
+              <!-- dislop-ignore-next-line chatbot-artifact -- intentional before-edit hero proof specimen -->
+              <span class="mark-span mark-error">好的，以下是修改后</span>的上线说明。<span class="mark-span mark-warn">值得注意的是，</span>本次改造以队列分级为重要<span class="mark-span mark-warn">抓手</span>，<span class="mark-span mark-warn">全面赋能</span>一线运维团队，故障恢复时间最多 45 秒。
+            </div>
+            <!-- dislop-quote-end -->
+            <div id="hero-proof-feedback">
+              <ul class="hero-proof-notes">
+                <li><span class="hero-note-dot is-error"></span><span><strong>硬伤：</strong>开头留着 AI 寒暄，删掉就行。</span></li>
+                <li><span class="hero-note-dot is-warn"></span><span><strong>提醒：</strong>“值得注意的是”“抓手”“全面赋能”都是空话，可以直接说做了什么。</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="hero-proof-foot">
+            <span id="hero-proof-meta" data-i18n="hp.meta">用同一个检查引擎实时跑的</span>
+            <a href="#workbench" id="hero-open-wb" data-i18n="hp.openWb">在下面工作台打开 ↓</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chapter 2: Galley workbench -->
+    <section id="workbench" class="band-rule" aria-labelledby="wb-heading">
+      <div class="workbench-header band-rule">
+        <div class="workbench-title-group">
+          <h2 class="sub-heading" id="wb-heading" tabindex="-1" style="margin:0;" data-i18n="wb.heading">工作台</h2>
+          <span class="workbench-subtitle" data-i18n="wb.subhint">粘贴文字，或把文档 / 网页 / PPT / PDF / 图片拖进稿纸</span>
+        </div>
+        <div class="workbench-toolbar">
+          <label for="pack-select" style="font-size:0.82rem;color:var(--ink-2);" data-i18n="wb.packLabel">场景包：</label>
+          <select id="pack-select" class="pack-select" aria-label="Choose scenario pack">
+            <option value="auto" data-i18n="pack.auto">自动识别</option>
+            <option value="business-brief" data-i18n="pack.brief">工作文档</option>
+            <option value="engineering-spec" data-i18n="pack.eng">研发文档与复盘</option>
+            <option value="regulated-comms" data-i18n="pack.reg">对外合规</option>
+            <option value="executive-deck" data-i18n="pack.exec">管理汇报</option>
+            <option value="literary-essay" data-i18n="pack.essay">随笔长文</option>
+            <option value="deck-and-ui" data-i18n="pack.ui">PPT 和网页</option>
+          </select>
+
+          <label for="register-select" style="font-size:0.82rem;color:var(--ink-2);" data-i18n="wb.registerLabel">语体：</label>
+          <select id="register-select" class="pack-select" aria-label="Choose prose register">
+            <option value="auto" data-i18n="reg.auto">自动</option>
+            <option value="technical" data-i18n="reg.technical">工程技术</option>
+            <option value="argumentative" data-i18n="reg.argumentative">商业论证</option>
+            <option value="official" data-i18n="reg.official">公文合规</option>
+            <option value="narrative" data-i18n="reg.narrative">随笔叙事</option>
+            <option value="casual" data-i18n="reg.casual">日常口语</option>
+            <option value="marketing" data-i18n="reg.marketing">宣传推广</option>
+          </select>
+
+          <label class="ctrl-btn file-upload-label">
+            <span data-i18n="wb.openFile">打开本地文件</span>
+            <input type="file" id="file-picker" accept=".md,.mdx,.txt,.html,.css,.jsx,.tsx,.svg,.docx,.pptx,.pdf,.png,.jpg,.jpeg,.webp">
+          </label>
+        </div>
+      </div>
+      <div id="wb-scenario-hint" class="workbench-scenario-hint" aria-live="polite"></div>
+
+      <div class="workbench-grid">
+        <!-- Left Specimen Index -->
+        <aside class="specimen-rail" id="specimen-list" aria-label="Example list">
+          <div class="rail-title" data-i18n="wb.specimensTitle">示例</div>
+          <!-- Populated by app.js -->
+          <div class="privacy-note" data-i18n="wb.privacyNote">本地检查在当前标签页完成。点下方云端按钮（审校、改写、提炼文风）并登录后，才会经我们的服务端发给付费版 Google Gemini 接口；Google 不拿它训练，我们不存草稿。</div>
+        </aside>
+
+        <!-- Center Galley Sheet -->
+        <div class="galley-sheet" id="galley-dropzone">
+          <div class="galley-bar">
+            <div class="mode-tabs" role="group" aria-label="切换视图">
+              <button type="button" id="mode-proof-btn" class="ctrl-btn is-active" aria-pressed="true" data-i18n="wb.modeProof">标出问题</button>
+              <button type="button" id="mode-edit-btn" class="ctrl-btn" aria-pressed="false" data-i18n="wb.modeEdit">编辑原文</button>
+            </div>
+            <div class="quick-actions">
+              <button type="button" id="btn-paste-own" class="ctrl-btn" data-i18n="wb.pasteOwn">贴我的稿子</button>
+              <button type="button" id="btn-apply-good" class="ctrl-btn sheet-btn" data-i18n="wb.applyClean">看改好的</button>
+              <button type="button" id="btn-apply-trap" class="ctrl-btn sheet-btn" data-i18n="wb.tryTrap">看换了种 AI 味的</button>
+              <button type="button" id="btn-copy-draft" class="ctrl-btn sheet-btn" data-i18n="wb.copyDraft">复制正文</button>
+              <button type="button" id="wb-share-link-btn" class="ctrl-btn sheet-btn" data-i18n="wb.shareLink">生成分享链接</button>
+              <button type="button" id="btn-reset" class="ctrl-btn sheet-btn" data-i18n="wb.reset">还原</button>
+            </div>
+          </div>
+
+          <div class="wb-doc-meta" id="wb-doc-meta">
+            <span id="wb-doc-file">launch-note.md</span>
+            <span id="wb-doc-pack">工作文档</span>
+            <span id="wb-doc-stats">5 行</span>
+            <span class="wb-doc-offline" id="wb-doc-offline" data-i18n="wb.offlinePill">当前标签页离线运行 · 0 上传</span>
+          </div>
+
+          <div id="wb-mobile-summary" class="wb-mobile-summary">
+            <span id="wb-mobile-counts">0 处硬伤 · 0 条提醒</span>
+            <a href="#wb-notes-anchor" data-i18n="wb.jumpNotes">看批注详情 ↓</a>
+          </div>
+
+          <div id="wb-applied-banner" class="wb-applied-banner" hidden aria-live="polite"></div>
+
+          <div class="manuscript-stage" id="manuscript-stage">
+            <div id="wb-edit-hint" class="wb-edit-hint" hidden data-i18n="wb.editHint">直接粘贴或修改原文，右侧批注会实时更新；按 ⌘/Ctrl+Enter 或切回「标出问题」查看划线。</div>
+            <div id="binary-summary-view" class="binary-summary-view" hidden></div>
+            <ol id="proof-view" class="proof-lines" aria-live="polite"></ol>
+            <textarea id="edit-textarea" class="editor-textarea" hidden placeholder="粘贴文档、文案或 HTML，实时离线标出 AI 味…" aria-label="草稿文本编辑器"></textarea>
+          </div>
+
+          <div class="legend-strip">
+            <span class="legend-item"><span class="swatch-line swatch-error"></span> <span data-i18n="legend.error">红实线：硬伤</span></span>
+            <span class="legend-item"><span class="swatch-line swatch-warn"></span> <span data-i18n="legend.warn">蓝虚线：提醒（套话与模板味）</span></span>
+          </div>
+
+          <div class="voice-meter" id="voice-meter" aria-label="Rhythm and concreteness stats">
+            <div class="voice-meter-head">
+              <span class="voice-meter-title" data-i18n="wb.voiceTitle">5 轴节奏与细节体检</span>
+              <span class="voice-meter-sub" id="voice-meter-summary">Computed offline · 0 uploads</span>
+            </div>
+            <div class="rhythm-grid" id="voice-meter-values"></div>
+          </div>
+
+          <div class="ai-assist-bar" id="ai-assist-bar">
+            <div class="ai-assist-actions">
+              <button type="button" id="btn-ai-review" class="ctrl-btn" data-i18n="ai.reviewBtn">云端审校（1 额度）</button>
+              <button type="button" id="btn-ai-deslop" class="btn-primary ai-deslop-btn" data-i18n="ai.deslopBtn">云端改写（2 额度）</button>
+              <label id="office-track-changes-wrap" class="office-opt-label" hidden>
+                <input type="checkbox" id="office-track-changes" checked>
+                <span data-i18n="ai.trackChanges">保留 Word 修订标记</span>
+              </label>
+            </div>
+            <div class="ai-assist-meta">
+              <span id="ai-quota-label" data-i18n="ai.anonHint">本地检查免登录 · 云端审校需免费登录（每月 30 额度，同账号可用于远程 MCP）</span>
+              <button type="button" id="ai-token-link" class="wb-link-btn" data-i18n="ai.claimLink">登录 / 绑定密钥</button>
+              <a href="#cloud-waitlist-box" id="ai-upgrade-link" class="wb-link-btn" hidden data-i18n="ai.lowCreditLink">额度偏低 · 预约扩容 ↓</a>
+            </div>
+          </div>
+
+          <div class="ai-result-panel" id="ai-result-panel" hidden aria-live="polite"></div>
+
+          <details class="voice-drawer" id="voice-drawer">
+            <summary class="voice-drawer-summary">
+              <span data-i18n="voice.drawerTitle">可选：提取个人文风（支持本地统计，或云端提炼）</span>
+              <span id="voice-active-badge" class="voice-active-badge" hidden></span>
+            </summary>
+            <div class="voice-drawer-body">
+              <p class="voice-drawer-desc" data-i18n="voice.drawerDesc">贴入 1–3 段你自己写过的干净文字（用空行隔开）。点「本地统计文风」在当前标签页完成；保存的文风会在点「云端改写」时自动套用。</p>
+              <textarea id="voice-samples-input" class="voice-textarea" rows="3" placeholder="Paste 1-3 paragraphs you wrote, separated by blank lines..." aria-label="Personal writing samples"></textarea>
+              <div class="quick-actions" style="margin-top:8px;">
+                <button type="button" id="btn-voice-offline" class="ctrl-btn ctrl-btn-sm sheet-btn" data-i18n="voice.offlineBtn">本地统计文风（0 额度 · 不联网）</button>
+                <button type="button" id="btn-voice-extract" class="ctrl-btn ctrl-btn-sm sheet-btn" data-i18n="voice.extractBtn">云端提炼文风（2 额度）</button>
+                <button type="button" id="btn-voice-clear" class="ctrl-btn ctrl-btn-sm sheet-btn" hidden data-i18n="voice.clearBtn">清除已保存文风</button>
+              </div>
+              <div id="voice-output-box" class="cloud-output-box" hidden></div>
+            </div>
+          </details>
+
+          <div class="wb-mobile-privacy" data-i18n="wb.privacyNote">本地检查在当前标签页完成。点下方云端按钮（审校、改写、提炼文风）并登录后，才会经我们的服务端发给付费版 Google Gemini 接口；Google 不拿它训练，我们不存草稿。</div>
+        </div>
+
+        <!-- Right Margin Column -->
+        <aside class="margin-column" id="wb-notes-anchor" aria-label="检查结果">
+          <div class="summary-strip" id="wb-summary-bar">
+            <div class="summary-strip-main" id="wb-summary">
+              <span>0 处硬伤 · 0 条提醒</span>
+              <span>0.0 ms</span>
+            </div>
+            <div class="summary-strip-actions">
+              <div class="note-nav-group">
+                <button type="button" id="btn-prev-finding" class="ctrl-btn ctrl-btn-sm" aria-label="上一处问题" title="上一处">↑</button>
+                <button type="button" id="btn-next-finding" class="ctrl-btn ctrl-btn-sm" aria-label="下一处问题" title="下一处">↓</button>
+              </div>
+              <button type="button" id="btn-copy-agent-brief" class="ctrl-btn ctrl-btn-sm" data-i18n="wb.copyAgentBrief">复制给 Agent 改稿</button>
+            </div>
+          </div>
+          <div id="notes-container" class="notes-list"></div>
+        </aside>
+      </div>
+
+      <div class="wb-nudge">
+        <span id="wb-nudge-text" data-i18n="wb.nudgeText">想在自己电脑上离线查，就装开源 Skill 或 CLI。想让 Agent 用云端审校，登录后每月有 30 免费额度。</span>
+        <div class="quick-actions">
+          <button type="button" id="wb-nudge-cloud-btn" class="btn-primary" style="min-height:30px;padding:5px 12px;font-size:0.8rem;" data-i18n="wb.nudgeCloud">验证码登录 · 30 免费额度</button>
+          <a href="#surfaces" class="ctrl-btn ctrl-btn-sm sheet-btn" data-i18n="wb.nudgeInstall">装开源 Skill / CLI ↓</a>
+          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn ctrl-btn-sm sheet-btn" data-i18n="wb.nudgeStar">GitHub ★</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chapter 3: Setup (ledger + charcoal ink terminal) -->
+    <section id="surfaces" class="section-block band-rule" aria-labelledby="surfaces-heading">
+      <div class="surfaces-split">
+        <div class="surfaces-intro">
+          <h2 class="section-title" id="surfaces-heading" data-i18n="surf.title">接入方式：纯文档 Skill、本地 CLI 与云端 MCP</h2>
+          <p class="section-desc" data-i18n="surf.desc">按你手上的工具选一种，每种都有能直接复制的配置。</p>
+          <ol class="setup-ledger">
+            <li>
+              <h3 data-i18n="surf.w1Title">纯文档 Agent Skill</h3>
+              <p data-i18n="surf.w1Desc">按文体整理的写作与界面避坑卡，不带脚本。装进 Claude Code、Codex、Cursor 或 Antigravity，Agent 动笔前读取，写完再调用本地 CLI 自检。</p>
+            </li>
+            <li>
+              <h3 data-i18n="surf.w2Title">开源本地 CLI 与插件</h3>
+              <p data-i18n="surf.w2Desc">零依赖，安装包不到 250 KB，内置 7 套场景包。断网也能查文档、Word、PPT 和 Git 改动，适合终端、编辑器和 CI。开发者也可以配自己的模型密钥。</p>
+            </li>
+            <li>
+              <h3 data-i18n="surf.w3Title">官方云端 MCP 与网页工作台</h3>
+              <p data-i18n="surf.w3Desc">在 WorkBuddy、千问、Claude Cowork 或编辑器里直连，登录后每月 30 免费额度，按文体做多模型审校并返回改法。</p>
+              <span class="setup-ledger-url">https://dislop.com/mcp</span>
+            </li>
+            <li class="is-agent-note">
+              <h3 data-i18n="surf.w4Title">一句话让 Agent 自己接管</h3>
+              <p data-i18n="surf.w4Desc">把 dislop.com/llms.txt 发给你的 Agent，它会自己判断装 Skill、CLI 还是远程 MCP，再拿现有文件试跑一次。</p>
+            </li>
+          </ol>
+          <a href="../tools/index.md" class="surfaces-more" data-i18n="surf.readTools">完整接入文档（.md）→</a>
+        </div>
+
+        <!-- Copyable snippets on the charcoal ink terminal -->
+        <div class="code-panel ink-stage" id="cli-mcp">
+          <div class="code-panel-head">
+            <div class="mode-tabs" id="snippet-tabs" role="tablist" aria-label="Setup snippets">
+              <button type="button" id="tab-prompt" role="tab" aria-selected="true" aria-controls="snippet-panel" tabindex="0" class="ctrl-btn is-active" data-snippet="prompt" data-i18n="snip.prompt">发给 Agent</button>
+              <button type="button" id="tab-skill" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="skill">Skill</button>
+              <button type="button" id="tab-cloud" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cloud" data-i18n="snip.cloud">云端 MCP</button>
+              <button type="button" id="tab-plugin" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="plugin" data-i18n="snip.plugin">插件</button>
+              <button type="button" id="tab-cli" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="cli" data-i18n="snip.cli">命令行</button>
+              <button type="button" id="tab-ci" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="ci">GitHub Actions</button>
+              <button type="button" id="tab-config" role="tab" aria-selected="false" aria-controls="snippet-panel" tabindex="-1" class="ctrl-btn" data-snippet="config">.dislop.json</button>
+            </div>
+            <button type="button" id="copy-snippet-btn" class="ctrl-btn ctrl-btn-sm is-ink-primary" data-i18n="btn.copy">复制</button>
+          </div>
+          <pre class="code-pre" id="snippet-panel" role="tabpanel" aria-labelledby="tab-prompt" tabindex="0"><code id="snippet-code"><!-- BUILD:DEFAULT_SNIPPET -->
+# 复制下面这句话发给你的 Agent（自动评估、安装并试跑）：
+请阅读 https://dislop.com/llms.txt，结合我当前的环境与项目内容评估最合适的 dislop 接入方式（Skill、本地 CLI 或远程 MCP），完成安装配置并拿现有文件试跑一次。
+<!-- /BUILD:DEFAULT_SNIPPET --></code></pre>
+        </div>
+      </div>
+
+      <!-- Folded agent-facing static endpoints (full DOM for agents, folded for people) -->
+      <details class="agent-fold surfaces-fold" id="agent-endpoints-fold">
+        <summary>
+          <span>
+            <span data-i18n="ep.foldTitle">给 Agent / 开发者看：静态 Markdown 与 JSON 接口</span>
+            <span class="agent-fold-sub" data-i18n="ep.foldSub">/llms.txt · /catalog.json · 任务卡 · 规则卡（纯静态，展开查看）</span>
+          </span>
+        </summary>
+        <div class="agent-fold-body">
+          <div class="endpoints-box">
+            <div class="endpoints-head">
+              <span data-i18n="ep.heading">给 Agent 读的静态文档（纯 Markdown / JSON）</span>
+              <a href="../catalog.json" style="font-size:0.78rem;">catalog.json</a>
+            </div>
+            <div class="endpoints-list">
+<!-- BUILD:ENDPOINTS -->
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../llms.txt">/llms.txt</a>
+              <div class="endpoint-desc" data-i18n="ep.llms">Agent 入口索引</div>
+            </div>
+            <span class="endpoint-meta">2.4 KB · ~622 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../catalog.json">/catalog.json</a>
+              <div class="endpoint-desc" data-i18n="ep.catalog">全部文档的 JSON 目录</div>
+            </div>
+            <span class="endpoint-meta">77.0 KB · ~19716 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../.well-known/mcp/server-card.json">/.well-known/mcp/server-card.json</a>
+              <div class="endpoint-desc" data-i18n="ep.mcpCard">MCP 自动发现描述（10 个工具）</div>
+            </div>
+            <span class="endpoint-meta">1.6 KB · ~418 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../.well-known/agent-skills/index.json">/.well-known/agent-skills/index.json</a>
+              <div class="endpoint-desc" data-i18n="ep.skillsIdx">Agent Skills 索引与 SHA-256</div>
+            </div>
+            <span class="endpoint-meta">2.5 KB · ~649 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../tasks/business-doc.md">/tasks/business-doc.md</a>
+              <div class="endpoint-desc" data-i18n="ep.taskBiz">任务卡：工作文档与技术方案</div>
+            </div>
+            <span class="endpoint-meta">5.4 KB · ~1370 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../tasks/web-and-deck.md">/tasks/web-and-deck.md</a>
+              <div class="endpoint-desc" data-i18n="ep.taskWeb">任务卡：网页与 PPT 模板味</div>
+            </div>
+            <span class="endpoint-meta">4.7 KB · ~1212 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../tasks/editorial-writing.md">/tasks/editorial-writing.md</a>
+              <div class="endpoint-desc" data-i18n="ep.taskEdit">任务卡：随笔与长文</div>
+            </div>
+            <span class="endpoint-meta">3.4 KB · ~860 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../tasks/pre-release-gate.md">/tasks/pre-release-gate.md</a>
+              <div class="endpoint-desc" data-i18n="ep.taskGate">任务卡：发稿前 AI 残留硬伤检查</div>
+            </div>
+            <span class="endpoint-meta">1.3 KB · ~335 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../tools/skill.md">/tools/skill.md</a>
+              <div class="endpoint-desc" data-i18n="ep.skill">跨宿主 Agent Skill</div>
+            </div>
+            <span class="endpoint-meta">5.7 KB · ~1466 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../awesome/index.json">/awesome/index.json</a>
+              <div class="endpoint-desc" data-i18n="ep.awesome">90 条工具清单 JSON</div>
+            </div>
+            <span class="endpoint-meta">68.1 KB · ~17424 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../methodology/product-brief.md">/methodology/product-brief.md</a>
+              <div class="endpoint-desc" data-i18n="ep.brief">产品定义（定位 / 用户 / 卖点）</div>
+            </div>
+            <span class="endpoint-meta">7.3 KB · ~1863 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../methodology/brand-and-voice.md">/methodology/brand-and-voice.md</a>
+              <div class="endpoint-desc" data-i18n="ep.method">文案与设计基准</div>
+            </div>
+            <span class="endpoint-meta">9.9 KB · ~2544 tok</span>
+          </div>
+          <div class="endpoint-row">
+            <div class="endpoint-main">
+              <a class="endpoint-path" href="../llms-full.txt">/llms-full.txt</a>
+              <div class="endpoint-desc" data-i18n="ep.full">单次拉取的全部 53 条规则</div>
+            </div>
+            <span class="endpoint-meta">35.6 KB · ~9106 tok</span>
+          </div>
+<!-- /BUILD:ENDPOINTS -->
+            </div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- Chapter 4: Before/after contrasts -->
+    <section id="cases" class="section-block band-rule" aria-labelledby="cases-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="cases-heading" data-i18n="cases.title">删掉热词之后，哪些写法读着还像 AI</h2>
+          <p class="section-desc" data-i18n="cases.desc">删掉“抓手”“赋能”这类热词之后，模型常换成“不是 A，而是 B”的反转口号，或者写出检查报 0 处问题、读起来仍像推销稿的句子。每组都能在工作台里直接试。</p>
+        </div>
+        <a href="../cases/copy-contrasts.md" data-i18n="cases.readAll">看全部对照案例（.md）→</a>
+      </div>
+
+      <!-- dislop-quote-start -->
+      <div class="cases-grid" id="cases-grid">
+        <article class="case-card">
+          <span class="case-kicker">发版简报（去套话 + 核对数字）</span>
+          <h3 class="case-title">清掉寒暄、官话与口号，四个核心指标一个不丢</h3>
+          <div class="case-body">
+            <!-- dislop-ignore-next-line chatbot-artifact -- intentional before-edit case example -->
+            <div class="case-step is-bad"><span class="case-step-label"><span>原稿（AI 寒暄 + 黑话 + 喊口号）</span><span class="case-step-tag">没通过</span></span>好的，以下是 Q4 结算引擎升级说明。值得注意的是，本次以异步化为核心抓手，全面赋能商户体验。峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，一致性达 99.99%。</div>
+            <div class="case-step is-trap"><span class="case-step-label"><span>换了种 AI 味（掉进反转口号）</span><span class="case-step-tag">没通过</span></span>这绝非一次普通升级，而是结算架构的效率跃迁，性能实现数倍提升。</div>
+            <div class="case-step is-good"><span class="case-step-label"><span>改干净（只留动作和真实数字）</span><span class="case-step-tag">通过</span></span>Q4 结算引擎改为全链路异步化后，峰值 TPS 从 1,200 升至 4,800，P99 延迟从 210ms 降至 42ms，数据一致性 99.99%。</div>
+          </div>
+          <div class="case-actions">
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="brief">在工作台试一下 ↑</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="doc">复制这段分享</button>
+          </div>
+        </article>
+
+        <article class="case-card">
+          <span class="case-kicker">上一版首屏复盘（句式推销味）</span>
+          <h3 class="case-title">检查报 0 处问题，但我们自己上一版首屏照样像 AI</h3>
+          <div class="case-body">
+            <div class="case-step is-bad"><span class="case-step-label"><span>翻车原稿（0 命中，却满屏 AI 味）</span><span class="case-step-tag">没通过</span></span>把稿子、PPT 或网页贴进来。不能发的硬伤，dislop 直接划掉；听着像套话的地方，它在页边问你一句；等你改完，再拿原稿逐条对一遍。它不替你改稿，笔一直在你手里。</div>
+            <p class="case-note">毛病不在单个词，在于“三段对称分号推销句 + 假装老校对 + 段尾金句收尾”。这就是为什么单靠脚本标红线不够，必须把写作规矩一起写进 Skill，并在云端叠加深度文风审校。</p>
+            <div class="case-step is-good"><span class="case-step-label"><span>改回人话</span><span class="case-step-tag">通过</span></span>AI 写完的文档、Word、PPT 和网页，经常留着开头寒暄、空话套话、满页字墙或默认紫粉模板。你可以装进本地 Coding Agent 离线运行，也可以在这里切换本地检查与云增强（MCP）模式。</div>
+          </div>
+          <div class="case-actions">
+            <a href="../methodology/brand-and-voice.md" class="ctrl-btn ctrl-btn-sm">看完整复盘 →</a>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="autopsy">复制这段分享</button>
+          </div>
+        </article>
+
+        <article class="case-card">
+          <span class="case-kicker">网页与 PPT 模板味</span>
+          <h3 class="case-title">紫粉渐变 + 装饰徽章 + 点不动的空链接</h3>
+          <div class="case-body">
+            <div class="case-step is-bad"><span class="case-step-label"><span>生成式模板原稿</span><span class="case-step-tag">没通过</span></span><code>from-indigo via-purple to-pink</code> 渐变标题 + <code>AI 强力驱动</code> 徽章 + <code>href=&quot;#&quot;</code> 假下载按钮。</div>
+            <div class="case-step is-good"><span class="case-step-label"><span>改干净</span><span class="case-step-tag">通过</span></span>纯色纸面和 1px 分界线、去掉装饰徽章、按钮接上真实报告路径 <code>./report.html</code>。</div>
+            <p class="case-note">同一套引擎也能直接读 .pptx，挑出单页字墙（&gt; 280 字）、要点超过 6 条、文字自动缩排和空泛标题。</p>
+          </div>
+          <div class="case-actions">
+            <button type="button" class="ctrl-btn ctrl-btn-sm" data-load-case="ui-chrome">在工作台试一下 ↑</button>
+            <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-share-case="ui">复制这段分享</button>
+          </div>
+        </article>
+      </div>
+      <!-- dislop-quote-end -->
+    </section>
+
+    <!-- Chapter 5: Charcoal dark-room demo stage (four distinct non-redundant clips) -->
+    <section id="demos" class="section-block band-rule" aria-labelledby="demos-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="demos-heading" data-i18n="demos.title">命令行、网页、PPT 与 PR 门禁实录</h2>
+          <p class="section-desc" data-i18n="demos.desc">用同一套规则离线录制，点击画面可定格查看细节。</p>
+        </div>
+      </div>
+
+      <div class="demo-stage" data-demo-stage>
+        <div class="demo-stage-rail" role="tablist" aria-label="Choose a demo scene" hidden>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-cli-check" aria-selected="true" aria-controls="demo-card-cli-check" data-demo-select="cli-check"><span data-i18n="demos.tab2">命令行门禁</span></button>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-ui-slop" aria-selected="false" aria-controls="demo-card-ui-slop" tabindex="-1" data-demo-select="ui-slop"><span data-i18n="demos.tab4">网页去模板</span></button>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-deck-office" aria-selected="false" aria-controls="demo-card-deck-office" tabindex="-1" data-demo-select="deck-office"><span data-i18n="demos.tab5">Word / PPT</span></button>
+          <button type="button" class="demo-tab" role="tab" id="demo-tab-agent-workflow" aria-selected="false" aria-controls="demo-card-agent-workflow" tabindex="-1" data-demo-select="agent-workflow"><span data-i18n="demos.tab6">Agent + CI</span></button>
+        </div>
+
+        <div class="demos-grid">
+        <figure class="demo-card" id="demo-card-cli-check" data-demo-card="cli-check">
+          <div class="demo-media">
+            <button type="button" class="demo-media-surface" data-demo-toggle="cli-check" aria-pressed="false" aria-label="暂停画面">
+              <picture>
+                <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/cli-check-zh-v2-poster.png" data-demo-poster="cli-check">
+                <source type="image/webp" srcset="../assets/demos/cli-check-zh-v2.webp" data-demo-webp="cli-check">
+                <img src="../assets/demos/cli-check-zh-v2.gif" alt="dislop CLI offline check: exit code 1 on draft and exit code 0 after cleanup" width="920" height="460" loading="lazy" decoding="async" data-demo-gif="cli-check">
+              </picture>
+            </button>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c2Title">命令行门禁：Node 与 Python 结果一致</strong>
+            </div>
+            <span class="demo-cap-desc" data-i18n="demos.c2Desc">本地跑 dislop check --profile，硬伤直接返回退出码 1 卡住 CI，顺带输出句长起伏与具体度体检。</span>
+          </figcaption>
+        </figure>
+
+        <figure class="demo-card" id="demo-card-ui-slop" data-demo-card="ui-slop">
+          <div class="demo-media">
+            <button type="button" class="demo-media-surface" data-demo-toggle="ui-slop" aria-pressed="false" aria-label="暂停画面">
+              <picture>
+                <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/ui-slop-zh-v2-poster.png" data-demo-poster="ui-slop">
+                <source type="image/webp" srcset="../assets/demos/ui-slop-zh-v2.webp" data-demo-webp="ui-slop">
+                <img src="../assets/demos/ui-slop-zh-v2.gif" alt="UI template slop check: flagging AI gradient, pill wall, and dead href='#' control" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="ui-slop">
+              </picture>
+            </button>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c4Title">网页与组件：清掉默认紫粉模板和死按钮</strong>
+            </div>
+            <span class="demo-cap-desc" data-i18n="demos.c4Desc">直接扫 HTML/CSS/JSX 里的渐变标题、装饰徽章、胶囊堆叠和 href=&quot;#&quot; 假按钮，退回干净可用的界面。</span>
+          </figcaption>
+        </figure>
+
+        <figure class="demo-card" id="demo-card-deck-office" data-demo-card="deck-office">
+          <div class="demo-media">
+            <button type="button" class="demo-media-surface" data-demo-toggle="deck-office" aria-pressed="false" aria-label="暂停画面">
+              <picture>
+                <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/deck-office-zh-v2-poster.png" data-demo-poster="deck-office">
+                <source type="image/webp" srcset="../assets/demos/deck-office-zh-v2.webp" data-demo-webp="deck-office">
+                <img src="../assets/demos/deck-office-zh-v2.gif" alt="dislop auditing quarterly-review.pptx for markdown leaks, word walls, autofit shrink, and process titles" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="deck-office">
+              </picture>
+            </button>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c5Title">Word / PPT 检查：揪出裸星号、字墙和过程标题</strong>
+            </div>
+            <span class="demo-cap-desc" data-i18n="demos.c5Desc">直接解包 .pptx 检查未渲染的 **加粗** 符号、单页字墙、68% 自动缩字与空泛标题，改回结论先行的干净页。</span>
+          </figcaption>
+        </figure>
+
+        <figure class="demo-card" id="demo-card-agent-workflow" data-demo-card="agent-workflow">
+          <div class="demo-media">
+            <button type="button" class="demo-media-surface" data-demo-toggle="agent-workflow" aria-pressed="false" aria-label="暂停画面">
+              <picture>
+                <source media="(prefers-reduced-motion: reduce)" srcset="../assets/demos/agent-workflow-zh-v2-poster.png" data-demo-poster="agent-workflow">
+                <source type="image/webp" srcset="../assets/demos/agent-workflow-zh-v2.webp" data-demo-webp="agent-workflow">
+                <img src="../assets/demos/agent-workflow-zh-v2.gif" alt="Agent workflow loop: loading SKILL.md, PR diff gate exit 1, and passing re-check with exit 0" width="960" height="500" loading="lazy" decoding="async" data-demo-gif="agent-workflow">
+              </picture>
+            </button>
+          </div>
+          <figcaption class="demo-caption">
+            <div class="demo-cap-head">
+              <strong class="demo-cap-title" data-i18n="demos.c6Title">编码 Agent + CI 闭环：写前读 Skill，提交前过门禁</strong>
+            </div>
+            <span class="demo-cap-desc" data-i18n="demos.c6Desc">Agent 先读取纯文档 SKILL.md，再用 --changed origin/main 拦下 PR 寒暄与复读 diff，修完复检确认数字零丢失。</span>
+          </figcaption>
+        </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chapter 6: Honest format matrix -->
+    <section id="coverage" class="section-block band-rule">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="cov.title">支持哪些文件，哪些还查不了</h2>
+          <p class="section-desc" data-i18n="cov.desc">能查的和还没做的都写明白。损坏或读不出来的文档会直接报跳过，不会显示成 0 问题。</p>
+        </div>
+        <a href="../index.md" data-i18n="cov.readMd">看纯文本说明（.md）→</a>
+      </div>
+
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Supported formats">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th data-i18n="cov.colTarget">文件类型</th>
+              <th data-i18n="cov.colFormat">扩展名</th>
+              <th data-i18n="cov.colScope">查什么</th>
+              <th data-i18n="cov.colStatus">现状</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong data-i18n="cov.r1Name">文稿与研发文档</strong></td>
+              <td><code>.md</code>, <code>.mdx</code>, <code>.txt</code></td>
+              <td data-i18n="cov.r1Scope">开头寒暄、未填占位符、公文黑话、“不是 A，而是 B”套句、三段分号推销句、自问自答、五连逗号句、同构句首、句长齐平空话、PR 摘要复读与浅层复盘归因。</td>
+              <td data-i18n="status.live">可用</td>
+            </tr>
+            <tr>
+              <td><strong data-i18n="cov.r2Name">Word 和 PPT</strong></td>
+              <td><code>.docx</code>, <code>.pptx</code></td>
+              <td data-i18n="cov.r2Scope">贴进文档没渲染的 Markdown 星号、正文套话、PPT 单页字墙、要点超过 6 条、文字自动缩得太小、空泛标题（如“背景”“概述”）与连续 4 页同版式。</td>
+              <td data-i18n="status.live">可用</td>
+            </tr>
+            <tr>
+              <td><strong data-i18n="cov.r4Name">网页与组件</strong></td>
+              <td><code>.html</code>, <code>.css</code>, <code>.jsx</code>, <code>.tsx</code></td>
+              <td data-i18n="cov.r4Scope">点不动的空链接和占位按钮、默认紫粉渐变、满屏胶囊标签、三层套盒、把提示词口号印成装饰徽章。</td>
+              <td data-i18n="status.live">可用</td>
+            </tr>
+            <tr>
+              <td><strong data-i18n="cov.r5Name">Git 改动与 PR</strong></td>
+              <td><code>--changed</code>, <code>--staged</code></td>
+              <td data-i18n="cov.r5Scope">只查本次改过的行，拦住残留寒暄、占位符和文字/页面里的 AI 味，支持 GitHub PR 批注和 SARIF。代码语法树检查还没做。</td>
+              <td data-i18n="status.partial">改动检查可用，AST 未做</td>
+            </tr>
+            <tr>
+              <td><strong data-i18n="cov.r6Name">个人文风、轻量模型与云端深度审校</strong></td>
+              <td><code>voice</code>, <code>--ml</code>, <code>MCP</code></td>
+              <td data-i18n="cov.r6Scope">本地 CLI 与工作台支持离线统计个人文风、内置 14.6 KB 轻量空话识别（--ml）；登录后可通过官方云端 MCP 按文体做多模型深度审校与提炼个人文风。</td>
+              <td data-i18n="status.live">可用</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Rule encyclopedia (folded by default; opens on #rule-* or click) -->
+    <section id="rules" class="section-block band-rule">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="rules.title">内置规则明细与在线筛选</h2>
+          <p class="section-desc" data-i18n="rules.desc">平时不需要背规则，直接交给 Agent 或贴进工作台就行。想逐条查判断依据、看正反例或者点「试试 ↑」加载单条规则时，展开下面这张表。</p>
+        </div>
+        <a href="../llms-full.txt" data-i18n="rules.readCases">单文件拉取全部规则（llms-full.txt）→</a>
+      </div>
+
+      <details class="agent-fold" id="rules-fold" style="margin-top:0;">
+        <summary>
+          <span>
+            <span data-i18n="rules.foldTitle">展开查看内置规则明细与在线筛选</span>
+            <span class="agent-fold-sub" id="rules-count" aria-live="polite">已按当前语言过滤</span>
+          </span>
+        </summary>
+        <div class="agent-fold-body">
+          <div class="catalog-controls">
+            <input type="search" id="rule-search" class="search-input" placeholder="搜索规则名称或典型症状…" aria-label="搜索规则">
+            <select id="rule-modality-filter" class="filter-select" aria-label="按文件格式筛选">
+              <option value="all" data-i18n="rules.modAll">全部格式</option>
+              <option value="markdown">markdown</option>
+              <option value="html">html</option>
+              <option value="css">css</option>
+              <option value="docx">docx</option>
+              <option value="pptx">pptx</option>
+            </select>
+            <select id="rule-severity-filter" class="filter-select" aria-label="Filter by level">
+              <option value="all" data-i18n="rules.sevAll">全部级别</option>
+              <option value="error" data-i18n="rules.sevError">硬伤（error）</option>
+              <option value="warning" data-i18n="rules.sevWarn">提醒（warning）</option>
+              <option value="info" data-i18n="rules.sevInfo">轻提示（info）</option>
+            </select>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-group" id="rule-filters" role="group" aria-label="Filter by rule pack">
+              <button type="button" class="ctrl-btn sheet-btn is-active" data-pack-filter="all" data-i18n="rules.filterAll">全部</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="core" data-i18n="rules.filterCore">交付底线</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="business-brief" data-i18n="rules.filterBrief">工作文档</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="engineering-spec" data-i18n="rules.filterEng">研发文档与复盘</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="regulated-comms" data-i18n="rules.filterReg">对外合规</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="literary-essay" data-i18n="rules.filterEssay">随笔长文</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="deck-and-ui" data-i18n="rules.filterUi">PPT 和网页</button>
+              <button type="button" class="ctrl-btn sheet-btn" data-pack-filter="executive-deck" data-i18n="rules.filterExec">管理汇报</button>
+            </div>
+          </div>
+
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Built-in rules table">
+            <table class="rules-table">
+              <thead>
+                <tr>
+                  <th data-i18n="rules.colId">规则</th>
+                  <th data-i18n="rules.colPack">分类</th>
+                  <th data-i18n="rules.colMod">格式</th>
+                  <th data-i18n="rules.colWhy">查什么 / 怎么判断</th>
+                  <th data-i18n="rules.colEx">原句 → 换了种 AI 味 → 改好</th>
+                </tr>
+              </thead>
+              <tbody id="rules-tbody">
+<!-- dislop-quote-start -->
+<!-- BUILD:RULES_TABLE -->
+            <tr id="rule-unfilled-placeholder" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>忘了填的占位符</strong>
+                <div style="margin-top:2px;"><code>unfilled-placeholder</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="unfilled-placeholder" aria-label="在工作台试试 忘了填的占位符">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/unfilled-placeholder.md" aria-label="查看 unfilled-placeholder 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">交付底线</span><span class="sev-tag sev-error" style="font-size:0.75rem;">硬伤</span></td>
+              <td><code>markdown, text, html, jsx, svg, docx, pptx, pdf</code></td>
+              <td><div>存在未替换的模板占位符或测试假文。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>发稿前填入真实信息，或者直接删掉这一句，不要留括号占位。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>第三季度清分覆盖 14 条通道，p95 延迟见【待补充】。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>第三季度清分在 14 条通道上表现大幅提升。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>第三季度清分覆盖 14 条通道（p95 延迟待压测签字后补齐）。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-chatbot-artifact" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>留在正文里的 AI 寒暄</strong>
+                <div style="margin-top:2px;"><code>chatbot-artifact</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="chatbot-artifact" aria-label="在工作台试试 留在正文里的 AI 寒暄">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/chatbot-artifact.md" aria-label="查看 chatbot-artifact 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">交付底线</span><span class="sev-tag sev-error" style="font-size:0.75rem;">硬伤</span></td>
+              <td><code>markdown, text, html, jsx, docx, pptx, pdf</code></td>
+              <td><div>残留未清理的 AI 对话寒暄壳或检索引用内部标记。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>直接删掉对话寒暄句或内部引用残迹，正文从实际内容开始。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>好的，以下是修改后的上线说明：集群 B 已于 02:00 UTC 完成迁移。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>没问题，集群 B 已于 02:00 UTC 完成迁移。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>集群 B 已于 02:00 UTC 完成迁移。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-markdown-leak" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>没渲染的 Markdown 符号</strong>
+                <div style="margin-top:2px;"><code>markdown-leak</code></div>
+                <div class="rule-id-actions">
+                  <a class="rule-md-link" href="../rules/markdown-leak.md" aria-label="查看 markdown-leak 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">交付底线</span><span class="sev-tag sev-error" style="font-size:0.75rem;">硬伤</span></td>
+              <td><code>docx, pptx, pdf</code></td>
+              <td><div>Word 或 PowerPoint 文本中残留未渲染的原始 Markdown 标记（如 <code>**加粗**</code> 或 <code>## 标题</code>）。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>去掉原始星号或井号，改用 Word/PowerPoint 原生样式或加粗格式。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>**核心节点**：周五前完成 v0.2 解析器上线。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>核心节点：周五前完成 v0.2 解析器上线（在 Word/PPT 里直接加粗）。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-ui-dead-control" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>点不动的假按钮或空链接</strong>
+                <div style="margin-top:2px;"><code>ui-dead-control</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-dead-control" aria-label="在工作台试试 点不动的假按钮或空链接">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/ui-dead-control.md" aria-label="查看 ui-dead-control 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">交付底线</span><span class="sev-tag sev-error" style="font-size:0.75rem;">硬伤</span></td>
+              <td><code>html, jsx</code></td>
+              <td><div>AI 生成网页常见的空跳转链接（<code>href=&quot;#&quot;</code>）、空按钮或未说明原因的占位禁用按钮。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>接上真实链接或交互，或者说明禁用原因；没做的功能直接删掉按钮。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>&lt;a href=&quot;#&quot; class=&quot;btn&quot;&gt;下载完整报告&lt;/a&gt;</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>&lt;a href=&quot;./report.html&quot; class=&quot;btn&quot;&gt;下载完整报告&lt;/a&gt;</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-zh-bureaucratic-padding" class="rule-row" data-rule-lang="zh">
+              <td class="rule-id-cell">
+                <strong>公文黑话与空泛词</strong>
+                <div style="margin-top:2px;"><code>zh-bureaucratic-padding</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-bureaucratic-padding" aria-label="在工作台试试 公文黑话与空泛词">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/zh-bureaucratic-padding.md" aria-label="查看 zh-bureaucratic-padding 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>存在空泛汇报套词或铺垫口头禅，掩盖了具体动作、主体与结果。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>追问“谁对什么做了哪项改动、指标变了多少”，删掉抽象包装词。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>值得注意的是，本次改造以工单分级为重要抓手，全面赋能一线客服团队形成服务闭环，将首响时间压缩至 45 秒内。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>这不是一次工单改造，而是客服体验的底气：首响压缩至 45 秒内。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>本次改造按问题紧急度拆分工单队列，一线客服首次响应时间压缩至 45 秒内。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-negation-pivot-frame" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>“不是 A，而是 B”套句</strong>
+                <div style="margin-top:2px;"><code>negation-pivot-frame</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="negation-pivot-frame" aria-label="在工作台试试 “不是 A，而是 B”套句">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/negation-pivot-frame.md" aria-label="查看 negation-pivot-frame 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>二阶“不是 A，而是 B”对比修辞：先否定稻草人再拔高抽象概念，缺乏具体事实增量。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删掉前半句否定铺垫，只看“而是 B”。如果 B 没有数值、机制或真实纠偏信息，整句删改。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>这不是一款简单的文档检查工具，而是交付质量的底气。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>工具已至。底气自生。交付无忧。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>`dislop` 在发稿前标出本机路径泄露、未填占位符和超载幻灯片。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-zh-four-char-triad" class="rule-row" data-rule-lang="zh">
+              <td class="rule-id-cell">
+                <strong>四字排比串</strong>
+                <div style="margin-top:2px;"><code>zh-four-char-triad</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-four-char-triad" aria-label="在工作台试试 四字排比串">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/zh-four-char-triad.md" aria-label="查看 zh-four-char-triad 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>连续三个及以上四字套语并列（如“精准高效、安全可靠、灵活易用”），信息密度低。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删掉整组四字形容词，只保留有数字、故障边界或配置项支撑的具体事实。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>新版网关具备精准高效、安全可靠、灵活易用的特性，单节点支持 8,000 QPS。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>新版网关不是简单升级，而是 8,000 QPS 的性能飞跃。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>新版网关单节点支持 8,000 QPS，并在上游超时 2 秒后自动熔断。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-unsourced-attribution" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>没写明出处的“研究表明”</strong>
+                <div style="margin-top:2px;"><code>unsourced-attribution</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="unsourced-attribution" aria-label="在工作台试试 没写明出处的“研究表明”">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/unsourced-attribution.md" aria-label="查看 unsourced-attribution 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>出现“研究表明/数据显示/业内人士指出”等模糊权威背书，但句内无具体机构、年份、链接或引用标记。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>补齐具体报告名称、年份或引用编号 <code>[n]</code>；若查无实据则直接删去该判断。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>业内普遍认为，超过 70% 的演示文稿存在对比度问题。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>专家指出，大部分演示文稿都看不清。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>2026 年 3 月抽查的 40 份内部简报里，有 28 份存在对比度不足。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-bold-lead-list-wall" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>满屏“加粗词 + 冒号”清单</strong>
+                <div style="margin-top:2px;"><code>bold-lead-list-wall</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="bold-lead-list-wall" aria-label="在工作台试试 满屏“加粗词 + 冒号”清单">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/bold-lead-list-wall.md" aria-label="查看 bold-lead-list-wall 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-info" style="font-size:0.75rem;">轻提示</span></td>
+              <td><code>markdown, text</code></td>
+              <td><div>连续 4 条及以上 <code>- **小标题**：说明</code> 列表墙，呈现典型大模型平铺罗列感。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>如果是在阐述同一观点，改写为有主次逻辑的自然段；仅在参数说明、术语表或清单核对时保留加粗列表。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>- **速度**：本地运行很快。
+- **隐私**：不上传文件。
+- **准确**：只看确定规则。
+- **易用**：一行命令开跑。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>全部检查都在本地零依赖完成，不上传文件；终端里一行命令即可直接跑完。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-cooccurrence-slop-cluster" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>低事实段落堆叠空泛动词</strong>
+                <div style="margin-top:2px;"><code>cooccurrence-slop-cluster</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="cooccurrence-slop-cluster" aria-label="在工作台试试 低事实段落堆叠空泛动词">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/cooccurrence-slop-cluster.md" aria-label="查看 cooccurrence-slop-cluster 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>同一低事实段落内密集堆叠多个弱套词组合（如“有效推动/持续优化/显著提升”或“leverage/streamline/robust”），冲淡了具体改动。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>不要把一个套词换成另一个近义词；整片替换成具体改动、执行主体与实测变化。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>本次客服系统按工单紧急度拆成 3 级队列，旨在有效推动跨部门协同效率，持续优化客户交互体验，并进一步助力业务团队实现精细化运营，最终显著提升整体服务质量，首响时间从 110 秒降到 42 秒。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>客服系统升级不是功能叠加，而是首响从 110 秒降到 42 秒的服务跃升。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>本次客服系统按工单紧急度拆成 3 级队列，平均首响时间从 110 秒降到 42 秒。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-semicolon-tricolon" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>三段对称分号推销句</strong>
+                <div style="margin-top:2px;"><code>semicolon-tricolon</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="semicolon-tricolon" aria-label="在工作台试试 三段对称分号推销句">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/semicolon-tricolon.md" aria-label="查看 semicolon-tricolon 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>单句内连续使用两个及以上分号构成三段对称排比，呈现典型 AI 推销腔。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>打破三段工整对称：拆成长短不一的平实句子，或删掉充数的并列分句。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>前端把表单校验前置到输入时；后端将异步任务拆进独立队列；监控台实时追踪每笔超时请求。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>校验前置。任务异步。超时可追。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>前端在输入时先做字段校验，后端把异步任务放进独立队列，监控台则负责追踪每笔超时请求。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-rhetorical-qa-cadence" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>自问自答式营销设问</strong>
+                <div style="margin-top:2px;"><code>rhetorical-qa-cadence</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="rhetorical-qa-cadence" aria-label="在工作台试试 自问自答式营销设问">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/rhetorical-qa-cadence.md" aria-label="查看 rhetorical-qa-cadence 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>自问自答式设问套路（“为什么……？因为……”“结果呢？”），带有明显生成式营销文节奏。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删掉摆拍式设问，直接在一句话里写出原因与结果。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>为什么很多内部看板上线两周就没人打开？因为上面只有汇总虚荣数字而没有下一步动作。结果呢？业务每周一还是手动导表格。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>看板失灵。数字堆砌。全靠导表。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>内部看板如果只摆汇总数字、不标异常订单，运营每周一还是得手动导出表格排查。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-comma-chain-runon" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>五连逗号一逗到底长句</strong>
+                <div style="margin-top:2px;"><code>comma-chain-runon</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="comma-chain-runon" aria-label="在工作台试试 五连逗号一逗到底长句">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/comma-chain-runon.md" aria-label="查看 comma-chain-runon 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-info" style="font-size:0.75rem;">轻提示</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>单句内连续串接 5 个及以上逗号分句，节奏平铺拖沓。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>拆成 2 到 3 句主干清晰的短句，顺手删掉凑排比的空分句。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>通过建立跨部门沟通机制，明确周二评审与周五发版节点，优化内部评审流程，加强文档沉淀管理，完善接口超时预警体系，同步推进自动化落地，我们让团队交付过程更稳。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>建机制。明节点。优评审。强沉淀。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>我们固定了周二评审和周五发版两个节点，并补齐了接口超时预警和自动化检查，交付过程稳定多了。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-narrative-sandwich-frame" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>趋势帽开场与展望帽收尾</strong>
+                <div style="margin-top:2px;"><code>narrative-sandwich-frame</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="narrative-sandwich-frame" aria-label="在工作台试试 趋势帽开场与展望帽收尾">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/narrative-sandwich-frame.md" aria-label="查看 narrative-sandwich-frame 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>出现宏大趋势开场（“随着……的飞速发展”）、展望式升华收尾（“展望未来……”）或连接词堆叠（“此外/与此同时/不仅如此”），呈现典型 AI 三明治叙事壳。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>切掉开头趋势帽和结尾展望帽，直接从具体事实或改动起笔，在下一步动作或边界条件处收束。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>随着人工智能技术的飞速发展，研发团队正面临效率变革。此外，我们在 11 月把 PR 静态检查接入了 CI。与此同时，配置错误提前被拦了下来。不仅如此，下周还会覆盖剩余 4 个仓库。展望未来，主动拥抱变化的团队必将赢得先机。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>时代变了。工具变了。协作也在变。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>11 月我们把 PR 静态检查接入了 CI，配置错误会在合并前被拦下，下周计划覆盖剩余 4 个仓库。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-template-skeleton-echo" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>连续三段同构句首填表腔</strong>
+                <div style="margin-top:2px;"><code>template-skeleton-echo</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="template-skeleton-echo" aria-label="在工作台试试 连续三段同构句首填表腔">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/template-skeleton-echo.md" aria-label="查看 template-skeleton-echo 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>连续 3 个及以上段落或句子复用同一句首骨架（如“在……方面，”“首先/其次/再次/最后”“By …ing,”），结构像套模板填词。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>把同构段落按因果或主次合并成自然段并变化句首；若是并列参数对照，直接改成简洁表格。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>在数据采集方面，系统接入了业务日志。
+
+在模型训练方面，团队定期更新权重。
+
+在结果应用方面，业务方通过看板查看波动。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>采数据。训模型。看看板。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>系统接入业务日志后，团队定期更新模型权重，业务方直接在看板里查看指标波动。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-low-burstiness-vapor" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>句长齐平且缺具体事实</strong>
+                <div style="margin-top:2px;"><code>low-burstiness-vapor</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="low-burstiness-vapor" aria-label="在工作台试试 句长齐平且缺具体事实">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/low-burstiness-vapor.md" aria-label="查看 low-burstiness-vapor 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-info" style="font-size:0.75rem;">轻提示</span></td>
+              <td><code>markdown, text</code></td>
+              <td><div>多句段落同时出现句长高度齐平（突发性变异系数 CV &lt; 0.24）且几乎没有具体锚点（数字、时间、文件名或可核查动作），空泛同质感强。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>砍掉一半抽象概括句，拉开长短句节奏，并为保留的每条判断补上数字、文件、时间或真实边界。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>该方案注重用户体验的全面改善。系统架构保持了良好的扩展能力。团队协作形成了清晰的责任分工。日常运维建立了规范的处理流程。产品迭代围绕核心需求稳步推进。业务指标呈现出健康的增长态势。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>体验改善。架构扩展。分工清晰。运维规范。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>本段暂未提供具体指标、改动文件或责任人，请先删去概括句，再由作者补入实测数据和变更项。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-zh-dev-jargon" class="rule-row" data-rule-lang="zh">
+              <td class="rule-id-cell">
+                <strong>中文研发与产品自嗨黑话</strong>
+                <div style="margin-top:2px;"><code>zh-dev-jargon</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-dev-jargon" aria-label="在工作台试试 中文研发与产品自嗨黑话">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/zh-dev-jargon.md" aria-label="查看 zh-dev-jargon 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>单段集中出现 AI 爱写的空洞自嗨黑话（如“全闭环/深度赋能/范式跃迁/零失误/体系化”），而非具体工程或业务机制；偶发行业实词会自动豁免。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>把空洞黑话拆成真实机制：写出具体报错码、重试上限、超时秒数或人工处理步骤。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>本次发布建立全闭环校验机制，通过铁律约束完成总收口并形成强兜底，实现零失误交付。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>这不只是发布脚本，而是零缺陷交付的工程铁律。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>发布脚本在合入前运行单测与类型检查；任一失败直接退出非零状态码，并保留前一次构建产物用于回滚。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-zh-exclamation" class="rule-row" data-rule-lang="zh">
+              <td class="rule-id-cell">
+                <strong>中文正文鸡血感叹号</strong>
+                <div style="margin-top:2px;"><code>zh-exclamation</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-exclamation" aria-label="在工作台试试 中文正文鸡血感叹号">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/zh-exclamation.md" aria-label="查看 zh-exclamation 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>中文正文段出现鸡血营销感叹号（2 处及以上或搭配“太棒了/重磅/彻底告别/震撼”等煽动词），破坏冷静客观的叙述语气。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>把句末感叹号改回句号，删去“重磅/太棒了/彻底告别”等鼓动字眼。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>太棒了！新版工具帮你彻底告别繁琐的人工排查！</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>别再手查了！立刻开启自动化新体验！</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>新版工具会在提交前自动扫描未填占位符和超长列表，减少人工复核遗漏。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-zh-mega-sentence" class="rule-row" data-rule-lang="zh">
+              <td class="rule-id-cell">
+                <strong>中文超长一逗到底单句</strong>
+                <div style="margin-top:2px;"><code>zh-mega-sentence</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-mega-sentence" aria-label="在工作台试试 中文超长一逗到底单句">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/zh-mega-sentence.md" aria-label="查看 zh-mega-sentence 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>中文单句一逗到底超过 180 个汉字（或 &gt;= 120 汉字且总长超 180 字），阅读负担重，呈大模型长从句生成特征。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>按事件或条件转换处切成句号短句，每句只交代一个主动作或边界条件。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>我们在周一完成双集群流量切分后观察到 orders-worker-service-cluster-01 核心交易接口延迟上升三毫秒但考虑到异步日志落盘能够避免主线程在高峰期被磁盘刷写操作阻塞并且可在节点异常重启后完整保留上下文追踪链路以便值班同学快速排查请求参数与调用栈因此决定保留当前配置并在周四晚低峰期继续观察四十八小时以确认内存缓冲池没有缓慢泄漏或堆积风险。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>切双集群。延迟微升。观察两天。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>周一完成双集群切分后延迟升了 3ms，但异步落盘可防阻塞并保链路。团队周四再复查 48 小时内存占用。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-unsourced-statistic" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>无基线/出处的百分比宣称</strong>
+                <div style="margin-top:2px;"><code>unsourced-statistic</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="unsourced-statistic" aria-label="在工作台试试 无基线/出处的百分比宣称">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/unsourced-statistic.md" aria-label="查看 unsourced-statistic 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">工作文档</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>宣传式百分比数字宣称（如“提升 40%”“高达 80%”“up to 50%”）附近缺少测试基线、样本数、指标口径或引用来源。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>补出改动前后的基准对比、样本量或测评出处；拿不出出处就删掉具体百分比。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>接入该工作流后，团队交付效率提升 45%，运营成本节省 30%。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>效率暴涨。成本骤降。交付跃迁。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>在 12 个仓库的 112 份样本实测中，人工复核耗时从 18 分钟降到 10 分钟（按 CI 日志统计）。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-eng-pr-diff-parrot" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>空泛的 AI 提交摘要壳</strong>
+                <div style="margin-top:2px;"><code>eng-pr-diff-parrot</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="eng-pr-diff-parrot" aria-label="在工作台试试 空泛的 AI 提交摘要壳">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/eng-pr-diff-parrot.md" aria-label="查看 eng-pr-diff-parrot 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">研发文档与复盘</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text</code></td>
+              <td><div>空泛的 AI 提交摘要只重复“通过优化提升可维护性”，未说明具体修掉的缺陷、边界条件或单号。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删掉套话壳，直接写出关联问题单、改动前后的具体行为差异及验证方法。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>本次 PR 旨在通过重构连接池管理逻辑进一步提升系统的稳定性与可维护性。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>这不是一次普通的代码重构，而是连接池稳定性的底层重塑。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>修复连接池重连分支未释放旧句柄导致的连接泄漏，避免长运行后连接耗尽。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-eng-shallow-root-cause" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>复盘止步于“人为失误”</strong>
+                <div style="margin-top:2px;"><code>eng-shallow-root-cause</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="eng-shallow-root-cause" aria-label="在工作台试试 复盘止步于“人为失误”">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/eng-shallow-root-cause.md" aria-label="查看 eng-shallow-root-cause 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">研发文档与复盘</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, docx</code></td>
+              <td><div>故障复盘停在“人为失误/操作不当”，没有追查缺失的系统校验或防呆机制。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>追问“为什么发布或运维工具允许一次手误直接打挂线上”，把缺失的自动拦截写成根因。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>根本原因：人为失误。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>根本原因：值班人员风险意识有待进一步强化。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>根本原因：生产迁移脚本缺少库名白名单与行数上限预检，未拦截误指向主库的删除语句。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-eng-vague-action-item" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>无指标无负责人的改进项</strong>
+                <div style="margin-top:2px;"><code>eng-vague-action-item</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="eng-vague-action-item" aria-label="在工作台试试 无指标无负责人的改进项">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/eng-vague-action-item.md" aria-label="查看 eng-vague-action-item 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">研发文档与复盘</span><span class="sev-tag sev-info" style="font-size:0.75rem;">轻提示</span></td>
+              <td><code>markdown, text, docx</code></td>
+              <td><div>许愿式改进项（如“加强监控”“提高警惕”）缺少具体模块、阈值、负责人或截止时间，无法验收。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>改成可验收的具体动作：给哪个服务加什么阈值告警或单测、谁负责、哪天上线。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>- [ ] 加强监控与告警。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>- [ ] 全面排查并持续跟进线上隐患。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>- [ ] 给 `checkout-api` 增加 P99 &gt; 400ms 持续 3 分钟告警并接入值班群（负责人：李工，11 月 30 日前完成）。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-reg-unsubstantiated-superlative" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>绝对化承诺与极限合规词</strong>
+                <div style="margin-top:2px;"><code>reg-unsubstantiated-superlative</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="reg-unsubstantiated-superlative" aria-label="在工作台试试 绝对化承诺与极限合规词">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/reg-unsubstantiated-superlative.md" aria-label="查看 reg-unsubstantiated-superlative 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">对外合规</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>出现绝对化承诺或极限排他用语（如“绝对安全”“零风险保障”“全网第一”），存在合规与履约风险。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删掉绝对化极限词，改写为具体的加密协议、审计认证编号或合同约定的 SLA 指标。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>新同城双活备份方案提供绝对安全与永久零故障保障（SLA 99.95%），客户迁移零风险承诺。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>新同城双活备份方案打造坚不可摧的行业标杆级防线（SLA 99.95%）。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>新同城双活备份方案合同承诺月度可用性 99.95%，迁移前支持演练回滚。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-reg-unanchored-multiplier" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>无基线的悬空倍数宣称</strong>
+                <div style="margin-top:2px;"><code>reg-unanchored-multiplier</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="reg-unanchored-multiplier" aria-label="在工作台试试 无基线的悬空倍数宣称">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/reg-unanchored-multiplier.md" aria-label="查看 reg-unanchored-multiplier 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">对外合规</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx, pptx</code></td>
+              <td><div>出现悬空的倍数宣称（如“10x faster”“效率提升数倍”），句内未给出改动前后的具体基线数值。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>补齐改动前后的实测对比基线（如“从 18 秒降到 1.8 秒”），无实测基线时直接删去倍数词。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>接入新版流式批处理引擎后，对账单导出效率提升数倍。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>接入新版流式批处理引擎后，对账单导出迎来质的飞跃。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>接入新版流式批处理引擎后，对账单改为按块流式导出，无需等待全表缓存在内存。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-zh-essay-moralizing-ending" class="rule-row" data-rule-lang="zh">
+              <td class="rule-id-cell">
+                <strong>段尾说教式升华</strong>
+                <div style="margin-top:2px;"><code>zh-essay-moralizing-ending</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-essay-moralizing-ending" aria-label="在工作台试试 段尾说教式升华">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/zh-essay-moralizing-ending.md" aria-label="查看 zh-essay-moralizing-ending 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">随笔长文</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>段尾出现说教升华套句，冲淡了前文的具体细节。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>直接删去最后一句升华总结，在它前面的具体动作或画面处收尾。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>傍晚六点半，修表匠把拆下的三枚铜齿轮泡进煤油皿里，关掉台灯。这或许就是慢工出细活在喧嚣时代真正的意义所在。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>傍晚六点半，三枚铜齿轮泡进煤油皿。这不是修表，而是与时间的对话。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>傍晚六点半，修表匠把拆下的三枚铜齿轮泡进煤油皿里，关掉台灯。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-literary-negation-pivot" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>金句腔“不是……而是……”</strong>
+                <div style="margin-top:2px;"><code>literary-negation-pivot</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="literary-negation-pivot" aria-label="在工作台试试 金句腔“不是……而是……”">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/literary-negation-pivot.md" aria-label="查看 literary-negation-pivot 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">随笔长文</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>套路化“不是 A，而是 B”金句打断叙事质感。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删掉抽象对比金句，改写人物实际做出的动作或看到的细节。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>老周留下的那把旧刨子不是工具，而是手艺人的尊严。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>一把旧刨子。半生木工活。满手老茧。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>老周退休那天把用了二十年的旧刨子擦净木屑，收进樟木箱底。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-zh-halfwidth-punctuation" class="rule-row" data-rule-lang="zh">
+              <td class="rule-id-cell">
+                <strong>中文里混了半角标点</strong>
+                <div style="margin-top:2px;"><code>zh-halfwidth-punctuation</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="zh-halfwidth-punctuation" aria-label="在工作台试试 中文里混了半角标点">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/zh-halfwidth-punctuation.md" aria-label="查看 zh-halfwidth-punctuation 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">随笔长文</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>汉字之间混入半角西文标点（<code>,;:!?</code>），违反中文排版规范（W3C CLREQ）。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>将汉字之间的半角标点替换为全角中文标点（<code>，；：！？</code>）。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>冬至那天下了初雪,院子里的腊梅开了三朵;香气一直飘到走廊。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>冬至初雪。腊梅三朵。暗香盈袖。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>冬至那天下了初雪，院子里的腊梅开了三朵；香气一直飘到走廊。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-literary-semicolon-tricolon" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>散文三段分号排比腔</strong>
+                <div style="margin-top:2px;"><code>literary-semicolon-tricolon</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="literary-semicolon-tricolon" aria-label="在工作台试试 散文三段分号排比腔">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/literary-semicolon-tricolon.md" aria-label="查看 literary-semicolon-tricolon 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">随笔长文</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>单句连续用两个及以上分号排比景物或情绪，带有明显的生成式散文腔。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>打破工整的三段分号排比，改成长短自然的叙述句，留住最具体的一两处感官细节。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>街道两旁的树叶逐渐染上金黄；午后的阳光变得柔和而绵长；行人的衣领也悄然立了起来。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>树叶金黄。阳光柔和。衣领立起。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>午后阳光柔和，街道两旁的树叶已经发黄，路过的行人把衣领立了起来。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-literary-rhetorical-qa" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>随笔自问自答抒情腔</strong>
+                <div style="margin-top:2px;"><code>literary-rhetorical-qa</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="literary-rhetorical-qa" aria-label="在工作台试试 随笔自问自答抒情腔">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/literary-rhetorical-qa.md" aria-label="查看 literary-rhetorical-qa 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">随笔长文</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>散文里出现自问自答式设问（“为什么……？因为……”），像主持词而非真实叙述。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删掉自问自答的铺陈，直接写现场发生了什么。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>早上六点半他照例冲了一壶手冲咖啡。为什么手冲咖啡总能让人安静下来？因为缓慢注水的节奏提醒我们停下脚步。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>热水落下。香气升起。脚步放慢。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>早上六点半，他烧开水冲了一壶咖啡。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-literary-narrative-frame" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>随笔时代大帽子与升华尾</strong>
+                <div style="margin-top:2px;"><code>literary-narrative-frame</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="literary-narrative-frame" aria-label="在工作台试试 随笔时代大帽子与升华尾">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/literary-narrative-frame.md" aria-label="查看 literary-narrative-frame 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">随笔长文</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, text, html, docx</code></td>
+              <td><div>以宏大时代背景起笔（“在快节奏的都市生活中……”）或未来式鸡汤收尾，给随笔套上了模板外壳。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删掉开头“在当今/快节奏的时代”与结尾升华句，直接从具体时间、地点或器物写起。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>在当今被弹窗消息包围的快节奏时代里，七点前的巷子只有送奶车经过。未来，守住内心的片刻宁静依然是我们生活的必修课。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>消息不断。奶车驶过。宁静仍在。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>早上七点前，巷子里只有送奶车经过。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-slide-word-wall" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>单页 PPT 字太多</strong>
+                <div style="margin-top:2px;"><code>slide-word-wall</code></div>
+                <div class="rule-id-actions">
+                  <a class="rule-md-link" href="../rules/slide-word-wall.md" aria-label="查看 slide-word-wall 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>pptx, pdf</code></td>
+              <td><div>单页幻灯片可见文字超载（英文 &gt; 120 词或中文 &gt; 280 字），变成文档搬家。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>将长篇背景移入演讲者备注或配套文档，画面仅保留 1 句结论标题与不超过 3 条核心论据。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>第 3 页塞了 340 字完整长段落解释数据迁移方案与回滚步骤。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>拆成 3 条要点（每条不超过 20 字），把详细回滚步骤移到演讲者备注。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-slide-bullet-overload" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>单页要点超过 6 条</strong>
+                <div style="margin-top:2px;"><code>slide-bullet-overload</code></div>
+                <div class="rule-id-actions">
+                  <a class="rule-md-link" href="../rules/slide-bullet-overload.md" aria-label="查看 slide-bullet-overload 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>pptx</code></td>
+              <td><div>单页幻灯片项目符号超过 6 条（<code>maxSlideBullets</code>），视觉层级碎裂。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>将零散条目归并为 2–3 组结构化分栏，或拆分为两页演示。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>同一页 PPT 竖排堆了 9 条并列要点，同时讲定价、排期和风险。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>拆成「定价」和「排期与风险」两页，每页只留 3–4 条。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-slide-autofit-shrink" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>PPT 文字被硬缩太小</strong>
+                <div style="margin-top:2px;"><code>slide-autofit-shrink</code></div>
+                <div class="rule-id-actions">
+                  <a class="rule-md-link" href="../rules/slide-autofit-shrink.md" aria-label="查看 slide-autofit-shrink 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>pptx</code></td>
+              <td><div>文本框触发 PowerPoint 自动缩排（<code>fontScale &lt; 80%</code>），表明文案超出容器容量。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>精简溢出文案或调大文本框尺寸，使正文按 100% 原始字号清晰排布。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>文本框触发自动缩排，字号被压缩到原来的 62.5%。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>删减约 40% 冗余文字，恢复原始正文字号。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-slide-weak-topic-title" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>幻灯片标题太泛</strong>
+                <div style="margin-top:2px;"><code>slide-weak-topic-title</code></div>
+                <div class="rule-id-actions">
+                  <a class="rule-md-link" href="../rules/slide-weak-topic-title.md" aria-label="查看 slide-weak-topic-title 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-info" style="font-size:0.75rem;">轻提示</span></td>
+              <td><code>pptx</code></td>
+              <td><div>正文密集的幻灯片使用“背景/概述/总结”等空泛名词做标题，未直接亮出本页结论。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>把“项目背景/数据概述”替换为听众看完本页应记住的一句具体结论。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>标题只写「项目背景」（下方塞了 65 字讲购物车流失 38%）。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>标题直给结论：「结算页第 3 步造成 38% 购物车流失」。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-ui-ai-gradient" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>默认紫粉霓虹渐变</strong>
+                <div style="margin-top:2px;"><code>ui-ai-gradient</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-ai-gradient" aria-label="在工作台试试 默认紫粉霓虹渐变">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/ui-ai-gradient.md" aria-label="查看 ui-ai-gradient 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>html, css, jsx, svg, pdf</code></td>
+              <td><div>使用默认紫粉/蓝紫高饱和渐变或渐变裁切艺术字标题（典型生成式模板特征）。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>去掉装饰性霓虹渐变，改用克制的纯色纸面令牌、1px 结构分界线与字重对比。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>&lt;h1 class=&quot;bg-gradient-to-r from-indigo via-purple to-pink bg-clip-text text-transparent&quot;&gt;智能工作流&lt;/h1&gt;</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>&lt;h1 class=&quot;page-title&quot;&gt;本地审校工作台&lt;/h1&gt;</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-ui-pill-soup" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>满屏胶囊小标签</strong>
+                <div style="margin-top:2px;"><code>ui-pill-soup</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-pill-soup" aria-label="在工作台试试 满屏胶囊小标签">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/ui-pill-soup.md" aria-label="查看 ui-pill-soup 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>html, jsx</code></td>
+              <td><div>单视图堆砌超过 6 个胶囊圆角文字标签（<code>rounded-full</code> / <code>999px</code>），导致视觉噪音泛滥。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>将常规元数据改为用间隔号（<code>·</code>）或细线分隔的纯文本，仅对需要干预的异常状态保留单枚强调标记。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>一张卡片上连排 8 个圆角胶囊标签：运行中、v2.4、专业版、AI 驱动、已验证、快速、安全、开源。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>只留 1 个状态文字，其余写成一行轻元数据。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-ui-box-in-box" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>框套框套框（三层套盒）</strong>
+                <div style="margin-top:2px;"><code>ui-box-in-box</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-box-in-box" aria-label="在工作台试试 框套框套框（三层套盒）">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/ui-box-in-box.md" aria-label="查看 ui-box-in-box 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>html, jsx</code></td>
+              <td><div>连续三层及以上带边框与圆角的容器层层套盒，挤压有效内容空间。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>去掉多余的外层描边套盒，改用对齐、留白或单根 1px 分界线组织层级。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>&lt;div class=&quot;border rounded-xl p-6&quot;&gt;&lt;div class=&quot;border rounded-lg p-4&quot;&gt;&lt;div class=&quot;border rounded p-3&quot;&gt;指标&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>&lt;section class=&quot;metric-row&quot;&gt;&lt;h3&gt;延迟&lt;/h3&gt;&lt;p&gt;18 毫秒&lt;/p&gt;&lt;/section&gt;</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-ui-prompt-echo-badge" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>把提示词印成了界面徽章</strong>
+                <div style="margin-top:2px;"><code>ui-prompt-echo-badge</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-prompt-echo-badge" aria-label="在工作台试试 把提示词印成了界面徽章">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/ui-prompt-echo-badge.md" aria-label="查看 ui-prompt-echo-badge 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>html, jsx, svg</code></td>
+              <td><div>界面标签直接回显提示词营销口号（如<code>AI 强力驱动</code><code>零幻觉保证</code>），未说明具体功能。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删去“AI 驱动”装饰标牌，直接用控件完成的实际动作命名（如“核对幻灯片字数”）。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>&lt;span class=&quot;eyebrow&quot;&gt;AI-Powered · Zero Hallucination&lt;/span&gt;</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>&lt;span class=&quot;section-meta&quot;&gt;本地离线运行&lt;/span&gt;</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-ui-glow-blob-chrome" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>霓虹光晕球与闪烁圆点</strong>
+                <div style="margin-top:2px;"><code>ui-glow-blob-chrome</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-glow-blob-chrome" aria-label="在工作台试试 霓虹光晕球与闪烁圆点">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/ui-glow-blob-chrome.md" aria-label="查看 ui-glow-blob-chrome 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>html, css, jsx, svg</code></td>
+              <td><div>堆砌装饰性环境光晕球（<code>blur-3xl</code>）、霓虹色阴影、闪烁 <code>animate-ping</code> 小圆点或重度 SVG 发光滤镜。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删掉无功能的光晕球和霓虹发光阴影，改用单调阶梯底色和 1px 实线分隔层次。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>&lt;div class=&quot;blur-3xl rounded-full bg-purple-500/30&quot;&gt;&lt;/div&gt;&lt;button class=&quot;shadow-indigo-500/50&quot;&gt;启动&lt;/button&gt;</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>&lt;section class=&quot;surface-sheet border&quot;&gt;&lt;button class=&quot;btn-primary&quot;&gt;运行检查&lt;/button&gt;&lt;/section&gt;</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-ui-emoji-icon-chrome" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>界面标题堆砌通用 Emoji</strong>
+                <div style="margin-top:2px;"><code>ui-emoji-icon-chrome</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-emoji-icon-chrome" aria-label="在工作台试试 界面标题堆砌通用 Emoji">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/ui-emoji-icon-chrome.md" aria-label="查看 ui-emoji-icon-chrome 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>html, jsx, svg</code></td>
+              <td><div>在界面标题、按钮或卡片里堆砌 3 处及以上通用 Emoji（如 <code>🚀</code>、<code>✨</code>、<code>⚡</code>、<code>🛡️</code>）充当图标。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删去标题与按钮里的装饰 Emoji，改用纯文字层级或统一线宽的单色矢量图标。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>&lt;h3&gt;🚀 极速启动&lt;/h3&gt;&lt;h3&gt;⚡ 智能同步&lt;/h3&gt;&lt;h3&gt;🛡️ 安全加固&lt;/h3&gt;</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>&lt;h3&gt;50 毫秒本地检查&lt;/h3&gt;&lt;h3&gt;增量同步&lt;/h3&gt;&lt;h3&gt;离线零上传&lt;/h3&gt;</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-ui-template-card-grid" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>彩色图标方块与假窗口三点</strong>
+                <div style="margin-top:2px;"><code>ui-template-card-grid</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="ui-template-card-grid" aria-label="在工作台试试 彩色图标方块与假窗口三点">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/ui-template-card-grid.md" aria-label="查看 ui-template-card-grid 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>html, jsx</code></td>
+              <td><div>命中生成式界面三大件：彩色圆角方块图标卡（&gt;= 3 组）、假 macOS 三色窗口圆点或 <code>01</code>/<code>02</code>/<code>03</code> 编号眉题。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>删去假窗口圆点、编号眉题和马卡龙图标块，靠真实小标题和对齐建立网格秩序。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>&lt;div class=&quot;rounded-xl w-10 h-10 bg-indigo-50&quot;&gt;A&lt;/div&gt;&lt;div class=&quot;rounded-xl w-10 h-10 bg-purple-50&quot;&gt;B&lt;/div&gt;&lt;div class=&quot;rounded-xl w-10 h-10 bg-pink-50&quot;&gt;C&lt;/div&gt;</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>&lt;section class=&quot;grid&quot;&gt;&lt;div&gt;&lt;h3&gt;命令行&lt;/h3&gt;&lt;p&gt;本地检查文稿与幻灯片。&lt;/p&gt;&lt;/div&gt;&lt;/section&gt;</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-svg-layout-slop" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>SVG 缺 viewBox 或文字重叠</strong>
+                <div style="margin-top:2px;"><code>svg-layout-slop</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="svg-layout-slop" aria-label="在工作台试试 SVG 缺 viewBox 或文字重叠">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/svg-layout-slop.md" aria-label="查看 svg-layout-slop 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>svg</code></td>
+              <td><div>SVG 平面图形存在生成式结构缺陷：大画布缺失 <code>viewBox</code>、文字坐标重叠或 <code>&lt;defs&gt;</code> 中残留 2 处及以上孤立未用定义。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>补齐显式 <code>viewBox</code>，拉开重叠文字坐标，并清理 <code>&lt;defs&gt;</code> 里未被引用的冗余渐变与滤镜。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>&lt;svg width=&quot;640&quot; height=&quot;360&quot;&gt;&lt;text x=&quot;40&quot; y=&quot;50&quot;&gt;步骤一&lt;/text&gt;&lt;text x=&quot;42&quot; y=&quot;52&quot;&gt;重叠字&lt;/text&gt;&lt;/svg&gt;</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 640 360&quot; width=&quot;640&quot; height=&quot;360&quot;&gt;&lt;text x=&quot;40&quot; y=&quot;50&quot;&gt;步骤一&lt;/text&gt;&lt;text x=&quot;40&quot; y=&quot;96&quot;&gt;步骤二&lt;/text&gt;&lt;/svg&gt;</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-image-ai-workflow-residue" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>图片残留生成参数或来源标识</strong>
+                <div style="margin-top:2px;"><code>image-ai-workflow-residue</code></div>
+                <div class="rule-id-actions">
+                  <a class="rule-md-link" href="../rules/image-ai-workflow-residue.md" aria-label="查看 image-ai-workflow-residue 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>image</code></td>
+              <td><div>图片文件内嵌了未清理的生成提示词/工作流参数（提醒），或带有显式 AI 生成来源标识（提示：合规场景请保留法定标识，重点复核成图质感）。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>交付前清理意外残留的提示词与工作流 JSON；属于法规要求的 C2PA 或 <code>trainedAlgorithmicMedia</code> 标识请勿私自剥除，仅作质感复核。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>PNG 文本块残留 `Negative prompt: blurry\nSteps: 28, CFG scale: 7` 生成参数。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>交付前剥除内部提示词与节点图 JSON，依法保留面向公众的来源声明。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-image-ai-palette-slop" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>PNG 霓虹紫粉或高饱和塑料质感</strong>
+                <div style="margin-top:2px;"><code>image-ai-palette-slop</code></div>
+                <div class="rule-id-actions">
+                  <a class="rule-md-link" href="../rules/image-ai-palette-slop.md" aria-label="查看 image-ai-palette-slop 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-info" style="font-size:0.75rem;">轻提示</span></td>
+              <td><code>image</code></td>
+              <td><div>PNG 像素分布呈现典型生成式视觉套路：高占比蓝紫霓虹主色，或大面积高饱和光滑“塑料感”涂抹。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>人工复核图片是否存在塑料反光质感或默认黑底蓝紫霓虹，改用自然材质细节与克制配色。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>暗底上高占比紫粉霓虹渐变，或缺乏自然微对比的光滑高饱和表面。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>克制底色配自然纹理细节，关键强调色控制在局部。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-pdf-visual-layout-slop" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>PDF 纯图幻灯片或字阶扁平</strong>
+                <div style="margin-top:2px;"><code>pdf-visual-layout-slop</code></div>
+                <div class="rule-id-actions">
+                  <a class="rule-md-link" href="../rules/pdf-visual-layout-slop.md" aria-label="查看 pdf-visual-layout-slop 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">PPT 和网页</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>pdf</code></td>
+              <td><div>PDF 演示页或海报存在排版缺陷：多页全图无可选文字、横版页字阶扁平或正文缩至 &lt; 9.5pt，或连续 4 页及以上同骨架纯字横版页。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>导出可选择矢量文本而非整页贴图，拉开至少 1.2 倍的标题与正文字号阶梯（正文 &gt;= 11pt），并穿插表格或图表。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>连续多页横版 PDF 全是整页位图，或把正文缩到 8.5pt 挤满纯字页面。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>保留可选矢量文字，保持 1.2 倍以上标题正文字号阶梯并穿插图表。</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-slide-process-not-finding-title" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>汇报标题只写“关于……的分析”</strong>
+                <div style="margin-top:2px;"><code>slide-process-not-finding-title</code></div>
+                <div class="rule-id-actions">
+                  <button type="button" class="ctrl-btn ctrl-btn-sm sheet-btn" data-try-rule="slide-process-not-finding-title" aria-label="在工作台试试 汇报标题只写“关于……的分析”">试试 ↑</button>
+                  <a class="rule-md-link" href="../rules/slide-process-not-finding-title.md" aria-label="查看 slide-process-not-finding-title 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">管理汇报</span><span class="sev-tag sev-warning" style="font-size:0.75rem;">提醒</span></td>
+              <td><code>markdown, pptx</code></td>
+              <td><div>标题只写了“关于……的分析/汇报”这类过程标签，没有直接亮出本页结论。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>如果听众只扫一眼标题，最该记住哪一个结论或变化数字？直接拿那句话当标题。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>## 关于三季度新客首周流失率（34% 降至 19%）的分析汇报</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>## 重塑新客留存增长飞轮</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>## 三季度新客首周流失率从 34% 降至 19%</code></div>
+               </div></td>
+            </tr>
+            <tr id="rule-pptx-layout-monotony" class="rule-row" data-rule-lang="both">
+              <td class="rule-id-cell">
+                <strong>连续 4 页纯文字同版式 PPT</strong>
+                <div style="margin-top:2px;"><code>pptx-layout-monotony</code></div>
+                <div class="rule-id-actions">
+                  <a class="rule-md-link" href="../rules/pptx-layout-monotony.md" aria-label="查看 pptx-layout-monotony 规则卡片">.md</a>
+                </div>
+              </td>
+              <td class="rule-pack-cell"><span class="rule-pack-name">管理汇报</span><span class="sev-tag sev-info" style="font-size:0.75rem;">轻提示</span></td>
+              <td><code>pptx</code></td>
+              <td><div>连续 4 页及以上幻灯片重复完全相同的纯文字要点骨架（无表格、图表或版式变化），容易引发审阅疲劳。</div><div style="color:var(--ink-2);font-size:0.82rem;margin-top:4px;"><strong>判断方法：</strong>把其中对比或趋势类的要点页改成双栏对照表、流程图或数据图表，打破连页同版式。</div></td>
+              <td><div class="ex-stack">
+                 <div class="ex-row-bad"><strong>原句：</strong> <code>第 2 至第 5 页连续使用完全相同的「标题 + 4 条纯文字要点」版式，无一页表格或图表。</code></div>
+                 <div class="ex-row-trap"><strong>换了种 AI 味：</strong> <code>第 2 至第 5 页保留同样的 4 条纯文字，只给每页贴了四个装饰图标。</code></div>
+                 <div class="ex-row-good"><strong>改好：</strong> <code>第 3 页改为四行区域延迟对照表，第 4 页改为周度错误率折线图。</code></div>
+               </div></td>
+            </tr>
+<!-- /BUILD:RULES_TABLE -->
+<!-- dislop-quote-end -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- Chapter 7: Open-source and cloud ledger -->
+    <section id="pricing" class="section-block band-rule" aria-labelledby="pricing-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="pricing-heading" data-i18n="price.title">本地工具永久免费，云端审校按额度计费</h2>
+          <p class="section-desc" data-i18n="price.desc">Skill、CLI 和规则库按 Apache-2.0 开源，离线运行不上传。云端审校、改写和远程 MCP 登录后使用，免费版每月 30 额度，付费版模型接口不拿你的稿子训练。</p>
+        </div>
+        <a href="https://github.com/dislop-ai/dislop/blob/main/benchmarks/MODEL-COMPARISON.md" target="_blank" rel="noopener" data-i18n="price.benchLink">看 5 模型实测对比 →</a>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="pricing-col">
+          <div class="pricing-head">
+            <h3 data-i18n="price.t1Name">开源本地（Skill + CLI）</h3>
+            <span class="pricing-amount" data-i18n="price.t1Price">$0 · 永久免费</span>
+          </div>
+          <p class="pricing-sub" data-i18n="price.t1Sub">适合稿子不能上传的场景，比如内网和私有仓库。代码和规则都开源。</p>
+          <ul class="pricing-list">
+            <li data-i18n="price.t1F1">纯文档 Agent Skill（不含脚本）与开源本地 CLI（Apache-2.0）</li>
+            <li data-i18n="price.t1F2">全量内置 7 套场景与行业包（53 条规则），离线查文档、Word、PPT、PDF、图片与网页</li>
+            <li data-i18n="price.t1F3">内置 5 轴节奏体检、14.6 KB 轻量本地模型（--ml）与 dislop voice 离线个人文风</li>
+            <li data-i18n="price.t1F4">零联网零上传；开发者也可配自有密钥做单步审校</li>
+          </ul>
+          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="#surfaces" class="ctrl-btn" data-i18n="price.t1Cta">安装 Skill / CLI ↑</a>
+          </div>
+        </div>
+
+        <div class="pricing-col is-featured">
+          <div class="pricing-head">
+            <h3 data-i18n="price.t2Name">云端免费版（远程 MCP）</h3>
+            <span class="pricing-amount" data-i18n="price.t2Price">$0 · 30 额度 / 月</span>
+          </div>
+          <p class="pricing-sub" data-i18n="price.t2Sub">邮箱验证码登录，免密码免绑卡，立即在网页工作台或远程 MCP 使用。</p>
+          <ul class="pricing-list">
+            <li data-i18n="price.t2F1">直连 https://dislop.com/mcp，支持 OAuth 免填密钥或生成 API 密钥（单次最长 12,000 字）</li>
+            <li data-i18n="price.t2F2">云增强审校（1 额度）：查出推销腔、官话与套话，给出具体改法</li>
+            <li data-i18n="price.t2F3">云增强改写（2 额度）：自动改写后复检，核对原稿数字与限定词</li>
+            <li data-i18n="price.t2F4">Word/PPT 原排版去味与个人文风（2–3 额度）：保留样式与修订，云端文风同步给远程 MCP</li>
+          </ul>
+          <div class="quick-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="#cloud-token-box" class="btn-primary" style="min-height:32px;padding:6px 14px;font-size:0.82rem;" data-i18n="price.t2Cta">下方 10 秒验证码登录 ↓</a>
+          </div>
+        </div>
+
+        <div class="pricing-col">
+          <div class="pricing-head">
+            <h3 data-i18n="price.t3Name">Pro · 按量包 · Team</h3>
+            <span class="pricing-amount" data-i18n="price.t3Price">$12/月 · $10 按量</span>
+          </div>
+          <p class="pricing-sub" data-i18n="price.t3Sub">经常写选 Pro，每额度比按量省 36%；偶尔用买按量包，额度不过期。</p>
+          <ul class="pricing-list">
+            <li data-i18n="price.t3F1">Pro（$12/月 或 $108/年）：1,500 额度/月（单次最长 50,000 字）+ 20 份云端文风</li>
+            <li data-i18n="price.t3F2">按量额度包（$10 / 800 额度）：一次买断不过期，解锁单次 50,000 字上限</li>
+            <li data-i18n="price.t3F3">Team（$29/席位/月）：每席位 5,000 额度 + 50 份团队共享文风与 PR 审核</li>
+            <li data-i18n="price.t3F4">统一调用 Google Gemini 付费版接口，不存草稿，不拿你的稿子训练</li>
+          </ul>
+          <div class="quick-actions" id="pricing-paid-actions" style="margin-top:auto;padding-top:12px;">
+            <a href="#cloud-waitlist-box" class="ctrl-btn" id="pricing-t3-cta" data-i18n="price.t3Cta">预约开通通知 ↓</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="cloud-forms-grid">
+        <div class="cloud-form-pane" id="cloud-token-box">
+          <h3 class="sub-heading" style="margin:0 0 6px;" data-i18n="cloud.tokenTitle">登录领取每月 30 免费额度 · 管理远程 MCP</h3>
+          <p class="cloud-form-desc" data-i18n="cloud.tokenDesc">输入邮箱接收 6 位验证码或一键登录链接，免密码免绑卡。登录后可在工作台审校与改写 Word/PPT，并管理订阅额度、MCP 密钥、已连应用与云端文风（不存草稿，详见底部隐私说明）。</p>
+          <div id="cloud-account-status" class="cloud-status-bar" hidden></div>
+          <div id="cloud-auth-panel">
+            <form id="free-token-form" class="cloud-stack-form">
+              <div class="cloud-inline-form">
+                <input type="email" id="token-email-input" class="cloud-input" required autocomplete="email" placeholder="Enter your email, e.g. you@company.com" aria-label="Email address">
+                <button type="submit" id="token-submit-btn" class="btn-primary" style="min-height:36px;padding:6px 14px;font-size:0.84rem;" data-i18n="cloud.tokenBtn">发验证码</button>
+              </div>
+              <div id="token-otp-step" class="cloud-inline-form" hidden>
+                <input type="text" id="token-otp-input" class="cloud-input" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="Enter 6-digit code from email" aria-label="6-digit verification code">
+                <button type="button" id="token-otp-verify-btn" class="btn-primary" style="min-height:36px;padding:6px 14px;font-size:0.84rem;" data-i18n="cloud.otpVerifyBtn">验证并登录</button>
+                <button type="button" id="token-otp-change-btn" class="ctrl-btn ctrl-btn-sm" data-i18n="cloud.otpChangeBtn">换个邮箱</button>
+              </div>
+            </form>
+            <div id="cloud-google-row" class="cloud-alt-row" hidden>
+              <a id="cloud-github-btn" href="/api/v1/auth/github/start?return=%2Fzh%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" hidden data-i18n="cloud.githubBtn">用 GitHub 账号登录</a>
+              <a id="cloud-google-btn" href="/api/v1/auth/google/start?return=%2Fzh%2F%23cloud-token-box" class="ctrl-btn ctrl-btn-sm" hidden data-i18n="cloud.googleBtn">用 Google 账号登录</a>
+            </div>
+            <details id="cloud-legacy-key-fold" class="cloud-legacy-fold">
+              <summary data-i18n="cloud.legacyKeySummary">已有 dslp_... 密钥？点此直接绑定</summary>
+              <form id="legacy-key-bind-form" class="cloud-inline-form" style="margin-top:8px;">
+                <input type="text" id="legacy-key-input" class="cloud-input" autocomplete="off" placeholder="dslp_..." aria-label="Existing API key">
+                <button type="submit" id="legacy-key-btn" class="ctrl-btn ctrl-btn-sm" data-i18n="cloud.legacyKeyBtn">验证并绑定</button>
+              </form>
+            </details>
+          </div>
+          <div id="cloud-account-hub" class="account-hub" hidden></div>
+          <div id="token-output-box" class="cloud-output-box" hidden></div>
+        </div>
+
+        <div class="cloud-form-pane" id="cloud-waitlist-box">
+          <h3 class="sub-heading" id="cloud-wl-heading" style="margin:0 0 6px;" data-i18n="cloud.wlTitle">预约 Pro / 按量包 / Team</h3>
+          <p class="cloud-form-desc" id="cloud-wl-desc" data-i18n="cloud.wlDesc">自助支付还没上线。留下邮箱和想用的方案，上线后通知你。</p>
+          <div id="cloud-self-serve-strip" class="quick-actions" style="margin-bottom:10px;" hidden></div>
+          <form id="waitlist-form" class="cloud-stack-form">
+            <div class="cloud-inline-form">
+              <select id="wl-plan-select" class="pack-select" aria-label="Select plan">
+                <option value="pro" data-i18n="cloud.planPro">Pro（$12/月 · 1,500 额度）</option>
+                <option value="credits" data-i18n="cloud.planCredits">按量包（$10 / 800 额度 · 永不过期）</option>
+                <option value="team" data-i18n="cloud.planTeam">Team（$29/席位 · 团队文风）</option>
+              </select>
+              <input type="email" id="wl-email-input" class="cloud-input" required placeholder="Work or personal email" aria-label="Waitlist email">
+            </div>
+            <div class="cloud-inline-form">
+              <input type="text" id="wl-note-input" class="cloud-input" maxlength="200" placeholder="Optional: main use case (specs, slides, blog, team docs)" aria-label="Use case note">
+              <button type="submit" id="wl-submit-btn" class="ctrl-btn" style="min-height:36px;padding:6px 14px;" data-i18n="cloud.wlBtn">提交预约</button>
+            </div>
+          </form>
+          <div id="wl-output-box" class="cloud-output-box" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Awesome Anti-Slop directory -->
+    <section id="awesome" class="section-block band-rule">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="awesome.title">去 AI 味工具清单：核验过的工具、规范与论文</h2>
+          <p class="section-desc" data-i18n="awesome.desc">除了 dislop 自己，我们也维护了一份按场景整理的去 AI 味资源索引，包含 Vale、Impeccable 等常用工具、中英文写作规范、代码 PR 治理规则和实证论文。全部链接在 2026-11-21 逐条核过一遍。</p>
+        </div>
+        <a href="./awesome/" data-i18n="awesome.openFull">打开完整清单 →</a>
+      </div>
+
+      <div class="radar-split">
+        <div class="radar-split-col">
+          <h3 class="sub-heading" data-i18n="awesome.ecoTitle">按用途筛选，也可以直接给 Agent 读</h3>
+          <p style="margin:0;font-size:0.88rem;color:var(--ink-2);" data-i18n="awesome.ecoDesc">按写作、网页、代码、研究分类筛选，或者只看能本地自动检查的工具。AI 检测器和规避工具单独放在最下面做对照。</p>
+<!-- BUILD:RADAR_STATS -->
+          <div class="stat-strip">
+            <div class="stat-cell"><span class="stat-num">90</span><span class="stat-label" data-i18n="stat.entries">条资料</span></div>
+            <div class="stat-cell"><span class="stat-num">8</span><span class="stat-label" data-i18n="stat.sections">个分类</span></div>
+            <div class="stat-cell"><span class="stat-num">20</span><span class="stat-label" data-i18n="stat.det">个可自动检查</span></div>
+            <div class="stat-cell"><span class="stat-num">21</span><span class="stat-label" data-i18n="stat.zh">条中文 / 多语种</span></div>
+          </div>
+<!-- /BUILD:RADAR_STATS -->
+          <div class="quick-actions" style="margin-top:14px;">
+            <a href="./awesome/" class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" data-i18n="awesome.browseBtn">打开在线筛选 →</a>
+            <a href="https://github.com/dislop-ai/dislop/blob/main/awesome/README.zh-CN.md" target="_blank" rel="noopener" class="ctrl-btn sheet-btn" id="awesome-gh-link" data-i18n="awesome.ghBtn">GitHub 中文版</a>
+            <button type="button" class="ctrl-btn sheet-btn" id="copy-awesome-share-btn" data-i18n="awesome.shareBtn">复制清单推荐语</button>
+            <a href="../awesome/index.json" class="ctrl-btn sheet-btn">index.json</a>
+          </div>
+        </div>
+
+        <div class="radar-split-col">
+          <h3 class="sub-heading" data-i18n="awesome.posTitle">非模板排版与字体参考</h3>
+          <p style="margin:0;font-size:0.86rem;color:var(--ink-2);" data-i18n="awesome.posDesc">印刷、字体厂和独立出版站点，做网页或排版前可以拿来对照。</p>
+<!-- BUILD:POSITIVE_REFS -->
+          <ul class="ref-list">
+            <li><a href="https://www.norm.to" target="_blank" rel="noopener">Norm (Zurich)</a><span class="ref-note" data-i18n="pos.norm-zurich">苏黎世独立设计事务所，用严格的模数网格排版。</span></li>
+            <li><a href="https://www.stiftung-buchkunst.de" target="_blank" rel="noopener">Stiftung Buchkunst (Best Book Design from all over the World)</a><span class="ref-note" data-i18n="pos.stiftung-buchkunst">世界最美的书评选档案：看页边距、版心比例与长篇阅读怎么排得不挤。</span></li>
+            <li><a href="https://fontsinuse.com" target="_blank" rel="noopener">Fonts In Use</a><span class="ref-note" data-i18n="pos.fonts-in-use">真实印刷品与网页里的字体搭配库。</span></li>
+            <li><a href="https://abcdinamo.com" target="_blank" rel="noopener">Dinamo</a><span class="ref-note" data-i18n="pos.dinamo">瑞士独立字厂，看可变字重与大号字阶怎么撑起实用界面。</span></li>
+            <li><a href="https://www.thetype.com" target="_blank" rel="noopener">The Type</a><span class="ref-note" data-i18n="pos.the-type">中文排印评论，细聊标点挤压、混排细节与出版规范。</span></li>
+            <li><a href="https://www.are.na" target="_blank" rel="noopener">Are.na</a><span class="ref-note" data-i18n="pos.arena">研究者自己攒的视觉线索库：旧印刷、路牌与独立小书。</span></li>
+          </ul>
+<!-- /BUILD:POSITIVE_REFS -->
+          <p style="margin:12px 0 0;font-size:0.8rem;"><a href="../cases/ui-specimens.md" data-i18n="awesome.posAll">看全部参考（.md）→</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Practical field guides -->
+    <section id="guides-home" class="section-block band-rule" aria-labelledby="guides-home-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="guides-home-heading" data-i18n="guides.title">写作、网页、PPT 与工程接入指南</h2>
+          <p class="section-desc" data-i18n="guides.desc">每篇都带可复制的命令和前后对照，按手上的活挑一篇读。</p>
+        </div>
+        <a href="./guides/" id="guides-home-all" data-i18n="guides.all">全部指南 →</a>
+      </div>
+
+      <div class="guides-index">
+        <a class="guide-index-item" href="./guides/remove-ai-slop-writing/" data-guide-slug="remove-ai-slop-writing">
+          <span class="guide-index-cat" data-i18n="guides.g1Cat">写作与改稿 · 7 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g1Title">中文写作怎么去 AI 味</strong>
+          <span class="guide-index-desc" data-i18n="guides.g1Desc">别只靠禁词表，用删除测试避开换汤不换药的二阶套话。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/fix-ai-slop-web-ui/" data-guide-slug="fix-ai-slop-web-ui">
+          <span class="guide-index-cat" data-i18n="guides.g2Cat">前端与视觉 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g2Title">前端页面怎么去模板味</strong>
+          <span class="guide-index-desc" data-i18n="guides.g2Desc">清掉紫粉渐变、卡片套卡片和点不动的假按钮。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/deslop-pptx-docx/" data-guide-slug="deslop-pptx-docx">
+          <span class="guide-index-cat" data-i18n="guides.g3Cat">办公文档与演示 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g3Title">PPT 和 Word 去模板味</strong>
+          <span class="guide-index-desc" data-i18n="guides.g3Desc">排查裸星号、单页字墙、自动缩字和空泛标题。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/agent-cli-mcp-tutorial/" data-guide-slug="agent-cli-mcp-tutorial">
+          <span class="guide-index-cat" data-i18n="guides.g4Cat">工程接入 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g4Title">接进 Agent、编辑器与 CI</strong>
+          <span class="guide-index-desc" data-i18n="guides.g4Desc">Skill、本地 CLI、GitHub Actions 增量门禁和远程 MCP 的配置步骤。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/linter-vs-detector-vs-skill/" data-guide-slug="linter-vs-detector-vs-skill">
+          <span class="guide-index-cat" data-i18n="guides.g5Cat">选型与基准 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g5Title">检查器、检测器和写作 Skill 怎么选</strong>
+          <span class="guide-index-desc" data-i18n="guides.g5Desc">三类工具各能查什么、查不了什么。</span>
+        </a>
+        <a class="guide-index-item" href="./guides/what-is-ai-slop/" data-guide-slug="what-is-ai-slop">
+          <span class="guide-index-cat" data-i18n="guides.g6Cat">基础识别 · 6 分钟</span>
+          <strong class="guide-index-title" data-i18n="guides.g6Title">AI 味长什么样</strong>
+          <span class="guide-index-desc" data-i18n="guides.g6Desc">从词面套话、二阶句式到模板网页与 PPT 的四层信号。</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Compact share band -->
+    <section id="share" class="section-block band-rule" aria-labelledby="share-heading">
+      <div class="section-header">
+        <h2 class="section-title" id="share-heading" data-i18n="share.title">推荐给同事或一起补案例和规则</h2>
+      </div>
+
+      <div class="share-grid">
+        <div class="share-col">
+          <h3 data-i18n="share.c1Title">发给团队</h3>
+          <p data-i18n="share.c1Desc">复制一段直白的介绍，带官网、案例页和工具清单链接，贴进群聊或文档。</p>
+          <div class="quick-actions">
+            <button type="button" class="ctrl-btn" id="copy-site-share-btn" data-i18n="share.copySiteBtn">复制项目推荐语</button>
+            <button type="button" class="ctrl-btn sheet-btn" id="copy-cases-link-btn" data-i18n="share.copyCasesBtn">复制案例页链接</button>
+          </div>
+        </div>
+        <div class="share-col">
+          <h3 data-i18n="share.c2Title">在 GitHub 收藏</h3>
+          <p data-i18n="share.c2Desc">检查引擎、Skill、插件、命令行和工具清单都在同一个仓库。</p>
+          <div class="quick-actions">
+            <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="btn-primary" style="min-height:32px;padding:6px 14px;font-size:0.82rem;" data-i18n="share.starCta">GitHub 点 Star ★</a>
+          </div>
+        </div>
+        <div class="share-col">
+          <h3 data-i18n="share.c3Title">一起补案例、规则和工具</h3>
+          <p data-i18n="share.c3Desc">碰到典型的 AI 味翻车样本，或者好用的工具还没收录，开个 Issue 告诉我们。</p>
+          <div class="quick-actions">
+            <a href="https://github.com/dislop-ai/dislop/issues" target="_blank" rel="noopener" class="ctrl-btn" data-i18n="share.issueCta">投稿案例 / 工具</a>
+            <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener" class="ctrl-btn sheet-btn" id="share-roadmap-link" data-i18n="share.roadmapCta">看路线图 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    </main>
+
+    <!-- Colophon: compact ledger -->
+    <footer class="colophon">
+      <div class="colophon-note">
+        <a class="colophon-brand" href="#top"><img src="../assets/logo.svg" width="20" height="20" alt="">dislop</a>
+        <span data-i18n="footer.selfAudit">这个页面自己也跑过 dislop check site/，0 处问题。</span>
+        <span data-i18n="footer.agentHint">给 Agent 读的话，从 <a href="../llms.txt">/llms.txt</a> 开始。</span>
+      </div>
+      <nav class="colophon-groups" aria-label="Footer">
+        <div class="colophon-group">
+          <span class="colophon-group-title" data-i18n="footer.gResources">资料</span>
+          <a href="./guides/" id="footer-guides-link" data-i18n="footer.guides">实用指南</a>
+          <a href="./rules/" id="footer-rules-link" data-i18n="footer.rules">全部规则</a>
+          <a href="./awesome/" data-i18n="footer.awesome">工具清单</a>
+          <a href="../llms.txt">llms.txt</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title" data-i18n="footer.gProject">项目</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener" id="footer-roadmap-link" data-i18n="footer.roadmap">路线图</a>
+          <a href="../methodology/brand-and-voice.md" data-i18n="footer.brand">文案基准</a>
+          <a href="../methodology/design-system.md" data-i18n="footer.design">视觉规范</a>
+          <a href="../privacy.md" data-i18n="footer.privacy">隐私与数据边界</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title" data-i18n="footer.gElsewhere">外部链接</span>
+          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+          <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
+          <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
+          <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+        </div>
+      </nav>
+    </footer>
+  </div>
+
+  <div id="auth-modal-backdrop" class="auth-modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="auth-modal-card">
+      <div class="auth-modal-head">
+        <div>
+          <h2 id="auth-modal-title" class="auth-modal-title">登录解锁云端审校与改写</h2>
+          <p id="auth-modal-sub" class="auth-modal-sub">每月 30 免费额度 · 同一账号可用于远程 MCP，不存草稿。</p>
+        </div>
+        <button type="button" id="auth-modal-close" class="ctrl-btn ctrl-btn-sm" aria-label="关闭登录窗口">✕</button>
+      </div>
+      <div id="auth-modal-body" class="auth-modal-body"></div>
+    </div>
+  </div>
+  <script type="module" src="../app.js"></script>
+</body>
+</html>

@@ -18,7 +18,7 @@ const I18N = {
   zh: {
     "page.title": `去 AI 味工具清单 · Awesome Anti-Slop（${TOTAL_COUNT} 条）— dislop`,
     "nav.skip": "跳至正文",
-    "nav.signIn": "登录 · 30 免费额度",
+    "nav.signIn": "登录",
     "nav.brandMeta": "AI 味检查",
     "nav.workbench": "工作台",
     "nav.surfaces": "接入",
@@ -59,7 +59,7 @@ const I18N = {
   en: {
     "page.title": `Awesome Anti-Slop (${TOTAL_COUNT} Entries) — dislop`,
     "nav.skip": "Skip to main content",
-    "nav.signIn": "Sign in · 30 free",
+    "nav.signIn": "Sign in",
     "nav.brandMeta": "AI slop linter",
     "nav.workbench": "Workbench",
     "nav.surfaces": "Setup",
@@ -120,57 +120,7 @@ function detectInitialLang() {
     typeof document !== "undefined" && document.documentElement
       ? document.documentElement.getAttribute("data-static-lang")
       : "";
-  if (staticLang === "en") {
-    try {
-      const q = new URLSearchParams(window.location.search).get("lang");
-      if (q && /^zh\b/i.test(String(q).trim())) return "zh";
-    } catch {
-      // Ignore URL parse issues
-    }
-    return "en";
-  }
-  if (typeof window.__DISLOP_RESOLVE_LANG__ === "function") {
-    let intlLocale = "";
-    try {
-      intlLocale = Intl.DateTimeFormat().resolvedOptions().locale || "";
-    } catch {
-      intlLocale = "";
-    }
-    return window.__DISLOP_RESOLVE_LANG__({
-      search: window.location ? window.location.search : "",
-      stored: safeGetStorage("dislop-lang"),
-      languages: typeof navigator !== "undefined" ? navigator.languages : undefined,
-      language: typeof navigator !== "undefined" ? navigator.language || "" : "",
-      intlLocale,
-    });
-  }
-  try {
-    const q = new URLSearchParams(window.location.search).get("lang");
-    if (q) {
-      const norm = String(q).trim().toLowerCase();
-      if (/^zh\b/.test(norm)) return "zh";
-      if (/^en\b/.test(norm)) return "en";
-    }
-  } catch {
-    // Ignore URL parse issues
-  }
-  const saved = safeGetStorage("dislop-lang");
-  if (saved === "en" || saved === "zh") return saved;
-  const nav = typeof navigator !== "undefined" ? navigator : {};
-  const list = Array.isArray(nav.languages) && nav.languages.length > 0 ? nav.languages : nav.language ? [nav.language] : [];
-  for (const raw of list) {
-    const tag = String(raw || "").trim().toLowerCase();
-    if (/^zh\b/.test(tag)) return "zh";
-    if (/^en\b/.test(tag)) return "en";
-  }
-  if (list.length > 0) return "en";
-  try {
-    const intlLocale = Intl.DateTimeFormat().resolvedOptions().locale || "";
-    if (/^zh\b/i.test(intlLocale)) return "zh";
-  } catch {
-    // Ignore Intl errors
-  }
-  return "en";
+  return staticLang === "zh" ? "zh" : "en";
 }
 
 let currentLang = detectInitialLang();
@@ -307,11 +257,19 @@ function applyTheme(theme) {
 }
 
 function applyLanguage(lang, isUserSwitch = false) {
-  const isEnStaticPage = document.documentElement.getAttribute("data-static-lang") === "en";
+  const isZhStaticPage = document.documentElement.getAttribute("data-static-lang") === "zh";
   if (isUserSwitch) {
     safeSetStorage("dislop-lang", lang);
-    if (isEnStaticPage && lang === "zh") {
-      window.location.href = "../../awesome/?lang=zh";
+    const peerParams = new URLSearchParams(window.location.search || "");
+    if (peerParams.has("lang")) peerParams.set("lang", lang);
+    const peerQs = peerParams.toString();
+    const peerSuffix = `${peerQs ? `?${peerQs}` : ""}${window.location.hash || ""}`;
+    if (isZhStaticPage && lang === "en") {
+      window.location.href = `../../awesome/${peerSuffix}`;
+      return;
+    }
+    if (!isZhStaticPage && lang === "zh") {
+      window.location.href = `../zh/awesome/${peerSuffix}`;
       return;
     }
   }
@@ -326,23 +284,21 @@ function applyLanguage(lang, isUserSwitch = false) {
     }
   }
 
-  const rootPrefix = isEnStaticPage ? "../../" : "../";
-  const langPrefix = lang === "en" ? `${rootPrefix}en/` : rootPrefix;
+  const rootPrefix = isZhStaticPage ? "../../" : "../";
+  const langPrefix = lang === "zh" ? `${rootPrefix}zh/` : rootPrefix;
   const homeNav = document.getElementById("awesome-home-link");
   const surfacesNav = document.getElementById("awesome-surfaces-link");
   const casesNav = document.getElementById("awesome-cases-link");
   const guidesNav = document.getElementById("awesome-guides-link");
   const rulesNav = document.getElementById("awesome-rules-link");
   const footHome = document.getElementById("awesome-foot-home");
-  // The live workbench and cases sit on the root page (?lang=en switches it); /en/ carries the static setup section
-  const rootQuery = lang === "en" ? `${rootPrefix}?lang=en` : rootPrefix;
-  if (homeNav) homeNav.href = `${rootQuery}#workbench`;
+  if (homeNav) homeNav.href = `${langPrefix}#workbench`;
   if (surfacesNav) surfacesNav.href = `${langPrefix}#surfaces`;
-  if (casesNav) casesNav.href = `${rootQuery}#cases`;
+  if (casesNav) casesNav.href = `${langPrefix}#cases`;
   if (footHome) footHome.href = langPrefix;
   const acctCtrl = document.querySelector("[data-static-acct]");
   if (acctCtrl) {
-    acctCtrl.href = `${rootQuery}#cloud-token-box`;
+    acctCtrl.href = `${langPrefix}#cloud-token-box`;
     let signedIn = false;
     try {
       signedIn =
@@ -353,7 +309,7 @@ function applyLanguage(lang, isUserSwitch = false) {
     }
     if (signedIn) {
       acctCtrl.classList.add("is-signed-in");
-      acctCtrl.textContent = lang === "en" ? "Account · Cloud" : "账号与额度";
+      acctCtrl.textContent = lang === "en" ? "Account" : "账号";
     } else {
       acctCtrl.classList.remove("is-signed-in");
       acctCtrl.textContent = I18N[lang]["nav.signIn"];

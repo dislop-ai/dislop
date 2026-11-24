@@ -3430,7 +3430,7 @@ Diagnostics & optional local models:
   pack-test                 Validate Pack Schema v2 manifests and embedded fixtures
 
 Exit codes: 0 clean | 1 findings >= --fail-on | 2 usage, config, or unreadable file error
-Example:    dislop check draft.md --deep --lang zh""")
+Example:    dislop check draft.md --deep""")
 
 
 def _cmd_init() -> int:

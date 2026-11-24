@@ -44,7 +44,8 @@ export const PACKS_BY_ID = {
           "pptx"
         ],
         "patterns": [
-          "(?:^|[.!?]\\s+)(?:It(?:'s| is) (?:worth noting|important to note|crucial to remember) that|In today's (?:fast-paced|rapidly evolving|ever-changing)|In the (?:ever-evolving|rapidly changing) landscape of|Let's dive (?:right )?in(?:to)?|At the end of the day,)\\b"
+          "(?:^|[.!?]\\s+)(?:It(?:'s| is) (?:worth noting|important to note|crucial to remember) that|In today's (?:fast-paced|rapidly evolving|ever-changing)|In the (?:ever-evolving|rapidly changing) landscape of|Let's dive (?:right )?in(?:to)?|At the end of the day,)\\b",
+          "(?:^|[.!?]\\s+)Whether you(?:'re|’re| are) (?:a|an|just a)?\\s*(?:solo (?:developer|founder|creator|builder|beginner|engineer)|indie (?:hacker|developer|maker|builder)|freelancer|beginner|newcomer|small (?:startup|team|business|agency))\\b[^.!?\n]{0,60}?\\bor (?:a|an|the)?\\s*(?:seasoned (?:pro|veteran|architect|engineer)|growing team|Fortune[- ]500(?: company| enterprise)?|(?:large |global )?enterprise(?: team| organization)?)\\b"
         ],
         "message": {
           "en": "Throat-clearing opener delays the concrete point.",
@@ -84,7 +85,8 @@ export const PACKS_BY_ID = {
           "pptx"
         ],
         "patterns": [
-          "\\b(?:delve(?:s|d)? into|rich tapestry of|stands as a testament to|a testament to our|game-changer|paradigm shift|unlock(?:ing)? the full potential)\\b"
+          "\\b(?:delve(?:s|d)? into|rich tapestry of|stands as a testament to|a testament to our|game-changer|paradigm shift|unlock(?:ing)? the full potential|(?:take|takes|taking|elevate|elevates|elevating|bring|brings|bringing) (?:your|our|their|it|this|things|(?:your|our|their) [A-Za-z0-9-]+) to the next level|teams of all sizes|world-class)\\b",
+          "\\b(?:powerful|blazing(?:ly)?[- ]fast|lightning[- ]fast|seamless|intuitive|robust|scalable|effortless|cutting[- ]edge|modern|lightweight|flexible),\\s+(?:powerful|blazing(?:ly)?[- ]fast|lightning[- ]fast|seamless|intuitive|robust|scalable|effortless|cutting[- ]edge|modern|lightweight|flexible),?\\s+and\\s+(?:powerful|blazing(?:ly)?[- ]fast|lightning[- ]fast|seamless|intuitive|robust|scalable|effortless|cutting[- ]edge|modern|lightweight|flexible)\\b"
         ],
         "message": {
           "en": "Stock promotional phrase where a specific verb or measurement would carry more weight.",

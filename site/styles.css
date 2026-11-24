@@ -757,19 +757,6 @@ a.ctrl-btn {
   gap: 8px;
 }
 
-.hero-proof-progress {
-  height: 3px;
-  width: 100%;
-  background-color: var(--rule);
-  overflow: hidden;
-}
-
-.hero-proof-progress-bar {
-  height: 100%;
-  width: 0%;
-  background-color: var(--mark-error);
-}
-
 .hero-proof-stage {
   background-color: var(--sheet);
   border-top: 1px solid var(--rule);
@@ -848,56 +835,6 @@ a.ctrl-btn {
   padding-top: 10px;
   border-top: 1px solid var(--rule);
   font-size: 0.8rem;
-  color: var(--ink-2);
-}
-
-/* Three-Rung Architecture Strip */
-.marks-strip {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  background-color: var(--sheet);
-}
-
-.mark-pillar {
-  position: relative;
-  padding: 22px 28px 24px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.mark-pillar::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: 28px;
-  width: 24px;
-  height: 2px;
-  background-color: var(--ink);
-}
-
-.mark-pillar + .mark-pillar {
-  border-left: 1px solid var(--rule);
-}
-
-.mark-pillar-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.mark-pillar-title {
-  margin: 0;
-  font-size: 0.98rem;
-  font-weight: 650;
-  color: var(--ink);
-}
-
-.mark-pillar-desc {
-  margin: 0;
-  font-size: 0.86rem;
-  line-height: 1.58;
   color: var(--ink-2);
 }
 
@@ -2748,6 +2685,23 @@ html[lang^="zh"] .proof-line {
   width: 100%;
 }
 
+.demo-media-surface {
+  appearance: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+.demo-media-surface:focus-visible {
+  outline: 2px solid var(--focus, var(--pen));
+  outline-offset: 3px;
+}
+
 .demo-media img {
   display: block;
   width: 100%;
@@ -2777,38 +2731,10 @@ html[lang^="zh"] .proof-line {
   letter-spacing: -0.01em;
 }
 
-.demo-cap-badge {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--ink-3);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .demo-cap-desc {
   font-size: 0.84rem;
   line-height: 1.55;
   color: var(--ink-2);
-}
-
-.demo-card-actions {
-  margin-top: auto;
-  padding-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.demo-card-actions .ctrl-btn {
-  background-color: transparent;
-  color: var(--ink-2);
-  border-color: var(--control-border-quiet);
-}
-
-.demo-card-actions .ctrl-btn:hover:not(:disabled) {
-  color: var(--ink);
-  border-color: var(--ink);
 }
 
 /* Charcoal dark-room demo stage (progressive: plain 2-column grid until JS marks it ready) */
@@ -2934,35 +2860,10 @@ html[lang^="zh"] .proof-line {
   text-wrap: balance;
 }
 
-.demos-grid.is-stage-ready .demo-cap-badge {
-  color: var(--ink-stage-pen);
-}
-
 .demos-grid.is-stage-ready .demo-cap-desc {
   color: var(--ink-stage-muted);
   font-size: 0.88rem;
   line-height: 1.65;
-}
-
-.demos-grid.is-stage-ready .demo-card-actions {
-  padding-top: 16px;
-  border-top: 1px solid var(--ink-stage-border);
-}
-
-.demos-grid.is-stage-ready .demo-card-actions .ctrl-btn {
-  background-color: transparent;
-  color: var(--ink-stage-ink);
-  border-color: var(--ink-stage-control-border);
-}
-
-.demos-grid.is-stage-ready .demo-card-actions .ctrl-btn:hover:not(:disabled) {
-  border-color: var(--ink-stage-ink);
-}
-
-.demos-grid.is-stage-ready .demo-card-actions .ctrl-btn[aria-pressed="true"] {
-  background-color: var(--ink-stage-ink);
-  color: var(--ink-stage);
-  border-color: var(--ink-stage-ink);
 }
 
 .guide-demo {
@@ -2973,51 +2874,6 @@ html[lang^="zh"] .proof-line {
 
 .guide-demo .demo-caption {
   padding: 12px 16px 14px;
-}
-
-.demo-lightbox {
-  border: 1px solid var(--rule);
-  background-color: var(--sheet);
-  color: var(--ink);
-  padding: 0;
-  max-width: min(1160px, 94vw);
-  max-height: 92vh;
-  width: fit-content;
-}
-
-.demo-lightbox::backdrop {
-  background: rgba(14, 16, 18, 0.72);
-}
-
-.demo-lightbox-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--rule);
-  background-color: var(--stage);
-}
-
-.demo-lightbox-title {
-  font-size: 0.88rem;
-  color: var(--ink);
-}
-
-.demo-lightbox-body {
-  padding: 12px;
-  background-color: var(--inset);
-  display: flex;
-  justify-content: center;
-}
-
-.demo-lightbox-body img {
-  display: block;
-  max-width: 100%;
-  max-height: calc(92vh - 76px);
-  width: auto;
-  height: auto;
-  border: 1px solid var(--rule);
 }
 
 /* Standard Content Sections */
@@ -4710,13 +4566,13 @@ html[lang^="zh"] .case-step {
     border-bottom: none;
   }
   .demo-tab {
-    flex: 1 1 33.33%;
+    flex: 1 1 50%;
     min-height: 42px;
     padding: 10px 8px;
     font-size: 0.8rem;
     border-bottom: 1px solid var(--ink-stage-border);
   }
-  .demo-tab:nth-child(3n) {
+  .demo-tab:nth-child(2n) {
     border-right: none;
   }
   .code-panel.ink-stage .code-pre {
@@ -4731,7 +4587,6 @@ html[lang^="zh"] .case-step {
   }
   .lead-band,
   .pillars-strip,
-  .marks-strip,
   .cases-grid,
   .share-grid,
   .where-grid,
@@ -4744,7 +4599,6 @@ html[lang^="zh"] .case-step {
     grid-template-columns: minmax(0, 1fr);
   }
   .pillar-cell + .pillar-cell,
-  .mark-pillar + .mark-pillar,
   .case-card + .case-card,
   .share-col + .share-col,
   .compat-col + .compat-col {
@@ -4752,7 +4606,6 @@ html[lang^="zh"] .case-step {
     border-top: 1px solid var(--rule);
   }
   .pillar-cell,
-  .mark-pillar,
   .case-card,
   .share-col,
   .compat-col {

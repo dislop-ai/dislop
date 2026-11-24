@@ -24,7 +24,7 @@ faqs:
 
 Search for anti-slop tooling and three very different categories show up side by side: probabilistic AI-text detectors, Markdown instruction skills (`SKILL.md`), and deterministic static linters.
 
-Each solves a different problem. Using the wrong category—such as plugging a probabilistic detector into a pull-request check—creates false positives without telling anyone how to fix the draft. Based on our [90-entry Awesome Anti-Slop directory](/en/awesome/), here is how the three approaches compare.
+Each solves a different problem. Using the wrong category—such as plugging a probabilistic detector into a pull-request check—creates false positives without telling anyone how to fix the draft. Based on our [90-entry Awesome Anti-Slop directory](/awesome/), here is how the three approaches compare.
 
 ## 1. Side-by-side comparison
 
@@ -38,7 +38,7 @@ Each solves a different problem. Using the wrong category—such as plugging a p
 
 A piece of writing can score "low AI probability" after random paraphrasing while still reading like synthetic filler packed with `"Not just X — it's Y"` slogans. Conversely, formal compliance documents often trigger detectors despite being written cleanly by humans.
 
-That is why `/en/awesome/` isolates detectors and adversarial bypass tools in **Contrast Watch (Reference Only)**. Cleaning AI slop means removing leftover greetings, hollow jargon, dead links, and unreadable slides—not gaming a classifier.
+That is why `/awesome/` isolates detectors and adversarial bypass tools in **Contrast Watch (Reference Only)**. Cleaning AI slop means removing leftover greetings, hollow jargon, dead links, and unreadable slides—not gaming a classifier.
 
 ## 3. Practical pairings by team
 
@@ -46,4 +46,4 @@ That is why `/en/awesome/` isolates detectors and adversarial bypass tools in **
 2. **Frontend & full-stack engineers**: Pair `frontend-design` or `Impeccable` for UI direction with `dislop check --pack deck-and-ui` in CI to catch purple gradients, pill walls, and `href="#"` placeholders.
 3. **Documentation teams**: Keep `Vale` for house terminology if you already have rulesets, and layer `dislop` for second-order cadence checks, Chinese localization, and `.docx`/`.pptx`/`.pdf` deliverables.
 
-Browse all 90 verified tools, star counts, licenses, and automated-check flags in [Awesome Anti-Slop](/en/awesome/).
+Browse all 90 verified tools, star counts, licenses, and automated-check flags in [Awesome Anti-Slop](/awesome/).

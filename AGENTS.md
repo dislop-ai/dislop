@@ -8,19 +8,19 @@
 
 明显的 AI 交付残留放进 `packs/core/`：留在正文里的 AI 寒暄、未填占位符、贴进 Word/PPT 没渲染的裸 Markdown、AI 网页里的空链接与占位禁用按钮。这一层固定为 `error`，所有文体包默认开启。因场景而异的 AI 套话与模板味放进各自的 `packs/<pack-id>/`，默认 `warning` 或 `info`，每条写清删掉会损失什么，并附原句、换了种 AI 味的改过头版本，以及改干净版本三段对照。
 
-三个运行时要给出同一个结果。浏览器工作台（`site/`）与 Node CLI/MCP（`bin/`）共用零依赖 ES 模块 `src/core.mjs`；Python CLI/MCP（`src/dislop/`）须通过 `tests/test_conformance.py`，与 Node 跑同一组公开样本与 `dislop pack-test`。仓库自身的文档、网站（`site/`）、`awesome/`、SVG 资产与 CLI 输出均受 `dislop check . --fail-on warning` 约束。
+三个运行时要给出同一个结果。浏览器工作台（`site/`）与 Node CLI/MCP（`bin/`）共用零依赖 ES 模块 `src/core.mjs`；Python CLI/MCP（`src/dislop/`）须通过 `tests/test_conformance.py`，与 Node 跑同一组公开样本与 `dislop pack-test`。在技术、规则与评测优先级上始终以**英文（全球）语料精度与母语干净稿零误报**为第一基准，中文规则（`zh-*`）与双语评测同步跟进且不得拉低英文精度。仓库自身的文档、网站（`site/`）、`awesome/`、SVG 资产与 CLI 输出均受 `dislop check . --fail-on warning` 约束。
 
-## 2. 写给人看的字
+## 2. 写给人看的字与全球优先基准
 
-`0 findings` 只说明没踩中规则，不代表文字不像 AI 写的。访客读得到的字（README、官网、`/awesome/`、CLI 提示、发布说明、仓库与组织简介），动笔前先对照 [PRODUCT.md](./PRODUCT.md) 对齐定位、用户阶梯、卖点与一句话介绍，再读 [docs/brand-and-voice-guide.zh-CN.md](./docs/brand-and-voice-guide.zh-CN.md)，按朴实、轻松、直接的开发者口吻写（参考 80% 简化技术表达），守住七条：
+`0 findings` 只说明没踩中规则，不代表文字不像 AI 写的。动笔前先对照 [PRODUCT.md](./PRODUCT.md) 对齐全球英文优先定位、用户阶梯、卖点与一句话介绍，再读 [docs/brand-and-voice-guide.md](./docs/brand-and-voice-guide.md)（中文见 [docs/brand-and-voice-guide.zh-CN.md](./docs/brand-and-voice-guide.zh-CN.md)），按朴实、轻松、直接的开发者口吻写（参考 ASD-STE100 简化技术表达），守住七条：
 
 1. 第一句落在具体的东西上：一段原文、一个文件、一个数字或一条命令，不说空话。
 2. 不写三段对称分号推销句，不写段尾“金句”收尾（如 `笔一直在你手里`），不穿校对编辑戏服（如 `可以付印`、`页边问你一句`、`蓝笔商榷`、`同路清单`）。
-3. 同一个概念全站叫同一个普通名字（`硬伤` / `提醒` / `通过` / `没通过` / `工具清单`），不为了显得有变化来回换词。
+3. 同一个概念全站叫同一个普通名字（英文 `hard bug` / `warning` / `passed` / `rejected` / `Awesome list`；中文 `硬伤` / `提醒` / `通过` / `没通过` / `工具清单`），不为了显得有变化来回换词。
 4. 内部叫法不出门。`Level 0`、`L0–L3`、`Stage-3`、`双引擎`、`负向防线`、`正向牵引`、`三带熵`、`人机双读`、`单一事实源`、`P0/P1` 只留在 `docs/research/`，对外换成用户自己会说的话。
 5. 同一屏里，同一个数字只说一次，不反复念经。
 6. 小标题是一句人话。不加编号眉题（`00 / ...`），不拿全大写等宽标签当标题。
-7. 中英文不是逐字翻译关系，而是各自按对应受众独立做物料（头图、案例、社交帖），单页单帖严格不混排：中文界面与例句不夹英文样本，英文页面与清单不夹中文说明；官网根据访问者浏览器语言自动选中文或英文，不写死默认语种。
+7. **文档、物料与站点坚持英文（全球）优先，中英文独立成稿且绝不混排**。主干规范（`PRODUCT.md`、`README.md`、`ROADMAP.md`、`CHANGELOG.md`、`CONTRIBUTING.md`、`docs/*.md`、`skills/*/SKILL.md`）、协议描述与默认视觉物料（`og-card.png`、`-en-v2` 动图、纯英文官号 `@dislop_ai`）以英文为第一事实源；中文对应文档（`*.zh-CN.md`）与中文物料按母语习惯独立制作，不做逐字互译。全站守单一域名 `dislop.com`（不拆子域名），目标布局以根路径 `/` 提供默认纯英文静态页（`x-default`）、`/zh/` 提供原生中文静态页，保留按浏览器语言自动引导与一键手动切换；中文页不夹英文样本，英文页不夹中文说明。
 
 ## 3. 安全、样本与隐私红线
 

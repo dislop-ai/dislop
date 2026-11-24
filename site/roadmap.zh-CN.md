@@ -8,13 +8,13 @@ snapshot: 2026-11-21
 
 [English](./roadmap.md) · [产品定义](./PRODUCT.md)
 
-最后更新：`2026-11-24` · 当前基线：`v0.8.3`（`dislop.com` 已上线）
+最后更新：`2026-11-24` · 当前基线：`v0.8.3`（`dislop.com` 已上线 · 全球英文优先基线）
 
-这份路线图记录 `dislop` 现在已经做到哪一步、接下来按什么顺序覆盖 Coding Agent 用户、办公 Agent（WorkBuddy、千问、Claude Cowork 等）用户与日常办公人群，以及还没写死、欢迎团队一起拍板的开放问题。认领任务、反馈误报，或者聊新点子，直接在 [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) 开帖，或建一个 [Issue](https://github.com/dislop-ai/dislop/issues) 即可。
+这份路线图记录 `dislop` 现在已经做到哪一步、接下来按全球英文优先与中英同核适配原则覆盖 Coding Agent 用户、办公 Agent（Claude Cowork、ChatGPT 及千问、WorkBuddy 等）用户与日常办公人群的推进顺序，以及欢迎团队一起拍板的开放问题。认领任务、反馈误报，或者聊新点子，直接在 [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) 开帖，或建一个 [Issue](https://github.com/dislop-ai/dislop/issues) 即可。
 
 ---
 
-## 1. 当前进度（`v0.8.0` 已落地）
+## 1. 当前进度（`v0.8.3` 已落地）
 
 | 模块 | 现已实现 | 核心目录 |
 |---|---|---|
