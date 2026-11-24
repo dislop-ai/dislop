@@ -1,16 +1,16 @@
 {
   "schema": "dislop.visual-dogfood-audit/1",
-  "generatedAt": "2026-11-24T03:31:10.755Z",
+  "generatedAt": "2026-11-24T14:56:30.178Z",
   "layer1": {
     "assets": {
-      "assetCount": 61,
+      "assetCount": 62,
       "totalFindings": 0,
       "flaggedCount": 0,
       "flagged": [],
       "pythonParity": {
         "checked": true,
         "matched": true,
-        "pythonFilesCount": 61,
+        "pythonFilesCount": 62,
         "mismatches": []
       },
       "assets": [
@@ -1076,6 +1076,28 @@
             "height": 640,
             "frameCount": 1,
             "pixelMetrics": null
+          }
+        },
+        {
+          "file": "assets/logo-400.png",
+          "ext": ".png",
+          "findingCount": 0,
+          "findings": [],
+          "metadata": {
+            "format": "png",
+            "width": 400,
+            "height": 400,
+            "frameCount": 1,
+            "pixelMetrics": {
+              "sampledPixels": 38561,
+              "neonPurpleRatio": 0,
+              "neonCyanRatio": 0,
+              "darkBgRatio": 0.7961,
+              "highSatRatio": 0.1841,
+              "smoothHighSatRatio": 0.9527,
+              "neutralRatio": 0.0143,
+              "quantizedColors": 34
+            }
           }
         },
         {

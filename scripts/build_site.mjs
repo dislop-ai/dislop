@@ -11,6 +11,7 @@
 //   - Human workbench & directory: site/index.html (pre-rendered), site/awesome/index.html, awesome/README.md, site/engine/*, site/assets/*
 //   - Agent-native static service: site/llms.txt, site/llms-full.txt, site/catalog.json, site/index.md,
 //     site/{methodology,cases,tools,tasks,packs,rules,awesome}/*.md, site/awesome/index.json
+import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -314,6 +315,7 @@ fs.writeFileSync(
   "utf8"
 );
 fs.copyFileSync(path.join(ROOT, "assets", "logo.svg"), path.join(ASSETS_OUT, "logo.svg"));
+fs.copyFileSync(path.join(ROOT, "assets", "logo-400.png"), path.join(ASSETS_OUT, "logo-400.png"));
 fs.copyFileSync(path.join(ROOT, "assets", "og-card.svg"), path.join(ASSETS_OUT, "og-card.svg"));
 fs.copyFileSync(path.join(ROOT, "assets", "og-card.png"), path.join(ASSETS_OUT, "og-card.png"));
 fs.copyFileSync(path.join(ROOT, "assets", "og-card-zh.svg"), path.join(ASSETS_OUT, "og-card-zh.svg"));
@@ -2044,6 +2046,23 @@ const { raw: kbData, byId: kbById } = loadKnowledgeBase(ROOT);
 const CONTENT_DATE = kbData.snapshotDate || SNAPSHOT_DATE;
 const guides = loadGuides(ROOT, kbById, packsById);
 
+function readGitLastMod(relPath, fallbackDate) {
+  try {
+    const out = execFileSync("git", ["log", "-1", "--format=%cs", "--", relPath], {
+      cwd: ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(out)) return out;
+  } catch {}
+  return fallbackDate;
+}
+
+const packDates = Object.fromEntries(
+  PACK_ORDER.map((pid) => [pid, readGitLastMod(path.join("packs", pid, "pack.json"), CONTENT_DATE)])
+);
+const awesomeDate = readGitLastMod(path.join("docs", "research", "anti-slop-radar-index.json"), SNAPSHOT_DATE);
+
 const enAwesomeHtml = buildAwesomePageHtml({
   lang: "en",
   baseUrl: BASE_URL,
@@ -2070,6 +2089,7 @@ const { htmlSitemapPairs, standaloneHtmlUrls } = buildGuidesAndRulesPages({
   baseUrl: BASE_URL,
   version: VERSION,
   snapshotDate: CONTENT_DATE,
+  packDates,
   packsById,
   packOrder: PACK_ORDER,
   allRules,
@@ -2499,16 +2519,24 @@ const aiCatalogObj = {
 };
 fs.writeFileSync(path.join(SITE_DIR, ".well-known", "ai-catalog.json"), JSON.stringify(aiCatalogObj, null, 2) + "\n", "utf8");
 
-// 2l. Search & Crawlability files (/robots.txt & /sitemap.xml)
+// 2l. Search & Crawlability files (/robots.txt, IndexNow verification key & /sitemap.xml)
 const searchBots = [
   "*",
   "Googlebot",
+  "Google-Extended",
   "Bingbot",
+  "Bravebot",
   "OAI-SearchBot",
   "ChatGPT-User",
+  "GPTBot",
   "Claude-SearchBot",
   "Claude-User",
+  "ClaudeBot",
   "PerplexityBot",
+  "Perplexity-User",
+  "Applebot",
+  "Applebot-Extended",
+  "DuckAssistBot",
 ];
 const robotsTxt =
   searchBots
@@ -2529,6 +2557,9 @@ Sitemap: ${BASE_URL}/sitemap.xml
 `;
 fs.writeFileSync(path.join(SITE_DIR, "robots.txt"), robotsTxt, "utf8");
 
+const INDEXNOW_KEY = "d1510ba4e8f74c92a6d38b1e5f0c7a49";
+fs.writeFileSync(path.join(SITE_DIR, `${INDEXNOW_KEY}.txt`), `${INDEXNOW_KEY}\n`, "utf8");
+
 function escapeXml(str) {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -2538,9 +2569,10 @@ function escapeXml(str) {
     .replace(/'/g, "&apos;");
 }
 
+const homeDate = readGitLastMod(path.join("site", "index.html"), CONTENT_DATE);
 const bilingualPairs = [
-  { en: "/", zh: "/zh/", prio: "1.0" },
-  { en: "/awesome/", zh: "/zh/awesome/", prio: "0.9" },
+  { en: "/", zh: "/zh/", lastmodEn: homeDate, lastmodZh: homeDate },
+  { en: "/awesome/", zh: "/zh/awesome/", lastmodEn: awesomeDate, lastmodZh: awesomeDate },
   ...htmlSitemapPairs,
 ];
 
@@ -2553,29 +2585,12 @@ for (const pair of bilingualPairs) {
     { hreflang: "zh-Hans", href: zhUrl },
     { hreflang: "x-default", href: enUrl },
   ];
-  sitemapEntries.set(enUrl, { loc: enUrl, lastmod: CONTENT_DATE, priority: pair.prio, alts });
-  sitemapEntries.set(zhUrl, { loc: zhUrl, lastmod: CONTENT_DATE, priority: pair.prio, alts });
+  sitemapEntries.set(enUrl, { loc: enUrl, lastmod: pair.lastmodEn || CONTENT_DATE, alts });
+  sitemapEntries.set(zhUrl, { loc: zhUrl, lastmod: pair.lastmodZh || CONTENT_DATE, alts });
 }
 
-const standaloneUrls = [
-  ...standaloneHtmlUrls,
-  [`${BASE_URL}/llms.txt`, "0.8"],
-  [`${BASE_URL}/llms-full.txt`, "0.7"],
-  [`${BASE_URL}/feed.xml`, "0.6"],
-  [`${BASE_URL}/zh/feed.xml`, "0.6"],
-  [`${BASE_URL}/roadmap.md`, "0.6"],
-  [`${BASE_URL}/roadmap.zh-CN.md`, "0.6"],
-  [`${BASE_URL}/privacy.md`, "0.5"],
-];
-for (const [loc, prio] of standaloneUrls) {
-  sitemapEntries.set(loc, { loc, lastmod: CONTENT_DATE, priority: prio, alts: [] });
-}
-for (const res of catalogResources) {
-  const fullUrl = `${BASE_URL}${res.path.startsWith("/") ? res.path : `/${res.path}`}`;
-  if (!sitemapEntries.has(fullUrl)) {
-    const prio = res.kind === "guide" || res.kind === "task" ? "0.7" : "0.6";
-    sitemapEntries.set(fullUrl, { loc: fullUrl, lastmod: CONTENT_DATE, priority: prio, alts: [] });
-  }
+for (const [loc, lastmod] of standaloneHtmlUrls) {
+  sitemapEntries.set(loc, { loc, lastmod: lastmod || CONTENT_DATE, alts: [] });
 }
 
 const sitemapUrls = [...sitemapEntries.values()].sort((a, b) => a.loc.localeCompare(b.loc));
@@ -2590,7 +2605,7 @@ ${sitemapUrls
           `    <xhtml:link rel="alternate" hreflang="${escapeXml(alt.hreflang)}" href="${escapeXml(alt.href)}" />`
       )
       .join("\n");
-    return `  <url>\n    <loc>${escapeXml(entry.loc)}</loc>\n    <lastmod>${escapeXml(entry.lastmod)}</lastmod>\n    <priority>${entry.priority}</priority>${altLines ? `\n${altLines}` : ""}\n  </url>`;
+    return `  <url>\n    <loc>${escapeXml(entry.loc)}</loc>\n    <lastmod>${escapeXml(entry.lastmod)}</lastmod>${altLines ? `\n${altLines}` : ""}\n  </url>`;
   })
   .join("\n")}
 </urlset>

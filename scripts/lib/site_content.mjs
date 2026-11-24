@@ -542,19 +542,28 @@ export function renderMarkdownToHtml(mdBody, opts = {}) {
 export function renderHomeJsonLd({ lang, baseUrl, version, ruleCount, awesomeCount, guideCount }) {
   const isEn = lang === "en";
   const pageUrl = isEn ? `${baseUrl}/` : `${baseUrl}/zh/`;
+  const cardImg = `${baseUrl}/assets/${isEn ? "og-card.png" : "og-card-zh.png"}`;
+  const orgLogoObj = {
+    "@type": "ImageObject",
+    url: `${baseUrl}/assets/logo-400.png`,
+    width: 400,
+    height: 400,
+  };
   return renderJsonLdScript([
     {
       "@type": "Organization",
       "@id": `${baseUrl}/#organization`,
       name: "dislop",
       url: `${baseUrl}/`,
-      logo: `${baseUrl}/assets/logo.svg`,
+      logo: orgLogoObj,
       sameAs: [
         "https://github.com/dislop-ai",
         "https://github.com/dislop-ai/dislop",
         "https://www.npmjs.com/package/dislop",
         "https://pypi.org/project/dislop/",
         "https://x.com/dislop_ai",
+        "https://glama.ai/mcp/servers/dislop-ai/dislop",
+        "https://glama.ai/mcp/connectors/io.github.dislop-ai/dislop",
       ],
     },
     {
@@ -572,15 +581,33 @@ export function renderHomeJsonLd({ lang, baseUrl, version, ruleCount, awesomeCou
       operatingSystem: "macOS, Linux, Windows, Web",
       softwareVersion: version,
       url: pageUrl,
+      image: cardImg,
+      installUrl: "https://www.npmjs.com/package/dislop",
       codeRepository: "https://github.com/dislop-ai/dislop",
       softwareHelp: `${baseUrl}/llms.txt`,
       license: "https://www.apache.org/licenses/LICENSE-2.0",
       description: isEn
         ? `Dedicated linter for AI slop across docs, web UI, Word, and PowerPoint (${ruleCount} built-in rules, 7 scenario packs, ${awesomeCount} curated anti-slop tools, ${guideCount} guides).`
         : `专用的 AI 味检查工具，内置 7 套场景包 ${ruleCount} 条规则与 ${awesomeCount} 条核验工具清单，支持本地离线检查文档、网页和 Word/PPT。`,
+      featureList: isEn
+        ? [
+            "Deterministic linter with 53 rules across Markdown, HTML, CSS, JSX, SVG, Word (.docx), PowerPoint (.pptx), and PDF",
+            "Revision verifier checking numbers, units, dates, and protected terms against the original draft",
+            "Offline local CLI, editor extensions, pure-Markdown Agent Skills, and stdio MCP",
+            "Hosted Streamable HTTP MCP at https://dislop.com/mcp with multimodal visual layout review",
+          ]
+        : [
+            "内置 53 条离线确定性规则，覆盖 Markdown、网页界面、Word、PPT 和 PDF",
+            "改后核验保留数字、单位、日期和关键词，并防改过头",
+            "支持本地 CLI、编辑器插件、纯 Markdown Skill 与本地 stdio MCP",
+            "可选连接 https://dislop.com/mcp 远程 MCP 进行多模态视觉版式审校",
+          ],
       offers: [
         { "@type": "Offer", name: isEn ? "Open-Source CLI & Skill" : "开源本地 CLI 与 Skill", price: "0", priceCurrency: "USD" },
         { "@type": "Offer", name: isEn ? "Cloud Free (30 credits/mo)" : "云端免费版（每月 30 额度）", price: "0", priceCurrency: "USD" },
+        { "@type": "Offer", name: isEn ? "Cloud PAYGO (500 credits)" : "按量加油包（500 额度）", price: "10", priceCurrency: "USD" },
+        { "@type": "Offer", name: isEn ? "Cloud Pro (1,500 credits/mo)" : "云端 Pro（每月 1,500 额度）", price: "9", priceCurrency: "USD" },
+        { "@type": "Offer", name: isEn ? "Cloud Team (5,000 credits/mo)" : "团队版（每月 5,000 额度）", price: "29", priceCurrency: "USD" },
       ],
     },
     {
@@ -1093,6 +1120,7 @@ export function buildGuidesAndRulesPages({
   baseUrl,
   version,
   snapshotDate,
+  packDates = {},
   packsById,
   packOrder,
   allRules,
@@ -1103,6 +1131,13 @@ export function buildGuidesAndRulesPages({
 }) {
   const htmlSitemapPairs = [];
   const standaloneHtmlUrls = [];
+  const maxGuideDate = guides.reduce((acc, pair) => {
+    for (const d of [pair.en?.meta?.updated, pair.zh?.meta?.updated]) {
+      if (d && d > acc) acc = d;
+    }
+    return acc;
+  }, snapshotDate);
+  const maxPackDate = Object.values(packDates).reduce((acc, d) => (d && d > acc ? d : acc), snapshotDate);
   const zhRulePackLabels = {
     core: "交付底线",
     "business-brief": "工作文档",
@@ -1199,7 +1234,12 @@ ${cardsHtml}
       })
     );
   }
-  htmlSitemapPairs.push({ en: "/guides/", zh: "/zh/guides/", prio: "0.9" });
+  htmlSitemapPairs.push({
+    en: "/guides/",
+    zh: "/zh/guides/",
+    lastmodEn: maxGuideDate,
+    lastmodZh: maxGuideDate,
+  });
 
   // 2. Individual Guide Articles (/guides/<slug>/ = EN, /zh/guides/<slug>/ = ZH)
   const guidePairBySlug = new Map(guides.map((p) => [p.slug, p]));
@@ -1384,7 +1424,12 @@ ${tocHtml}
         content: `---\ncontent-type: reference-data\nlang: ${lang}\nupdated: ${m.updated}\nversion: ${version}\n---\n\n# ${m.title}\n\n> ${m.summary || m.description}\n\n${g.body}${faqMd}${sourceText}\n`,
       });
     }
-    htmlSitemapPairs.push({ en: `/guides/${pair.slug}/`, zh: `/zh/guides/${pair.slug}/`, prio: "0.8" });
+    htmlSitemapPairs.push({
+      en: `/guides/${pair.slug}/`,
+      zh: `/zh/guides/${pair.slug}/`,
+      lastmodEn: pair.en.meta.updated || snapshotDate,
+      lastmodZh: pair.zh.meta.updated || snapshotDate,
+    });
   }
 
   // 3. Rules Directory Index (/rules/ = EN, /zh/rules/ = ZH)
@@ -1487,7 +1532,12 @@ ${packSections}`;
       })
     );
   }
-  htmlSitemapPairs.push({ en: "/rules/", zh: "/zh/rules/", prio: "0.8" });
+  htmlSitemapPairs.push({
+    en: "/rules/",
+    zh: "/zh/rules/",
+    lastmodEn: maxPackDate,
+    lastmodZh: maxPackDate,
+  });
 
   // 4. Individual Rule Detail HTML Pages (/rules/<id>/ = EN, /zh/rules/<id>/ = ZH)
   for (const { packId, pack, rule: r } of allRules) {
@@ -1604,16 +1654,31 @@ npx --yes dislop check . --pack ${escapeHtml(packId)}</code></pre>
     </section>`;
       const rulesIndexUrl = `${baseUrl}${isEn ? "/rules/" : "/zh/rules/"}`;
       const homeUrl = `${baseUrl}${isEn ? "/" : "/zh/"}`;
+      const ruleDate = packDates[packId] || snapshotDate;
       const jsonLd = renderJsonLdScript([
         {
           "@type": "TechArticle",
           "@id": pageUrl,
+          mainEntityOfPage: pageUrl,
           url: pageUrl,
           headline: `${rTitle} (${r.id})`,
           description: delTest,
           inLanguage: isEn ? "en" : "zh-CN",
-          dateModified: snapshotDate,
-          author: { "@type": "Organization", name: "dislop", url: `${baseUrl}/` },
+          dateModified: ruleDate,
+          image: `${baseUrl}/assets/${isEn ? "og-card.png" : "og-card-zh.png"}`,
+          author: { "@type": "Organization", "@id": `${baseUrl}/#organization`, name: "dislop", url: `${baseUrl}/` },
+          publisher: {
+            "@type": "Organization",
+            "@id": `${baseUrl}/#organization`,
+            name: "dislop",
+            url: `${baseUrl}/`,
+            logo: {
+              "@type": "ImageObject",
+              url: `${baseUrl}/assets/logo-400.png`,
+              width: 400,
+              height: 400,
+            },
+          },
         },
         {
           "@type": "BreadcrumbList",
@@ -1646,8 +1711,9 @@ npx --yes dislop check . --pack ${escapeHtml(packId)}</code></pre>
         })
       );
     }
+    const ruleDate = packDates[packId] || snapshotDate;
     if (isZhOnlyRule) {
-      standaloneHtmlUrls.push([`${baseUrl}/zh/rules/${r.id}/`, "0.7"]);
+      standaloneHtmlUrls.push([`${baseUrl}/zh/rules/${r.id}/`, ruleDate]);
       writeHtml(
         `rules/${r.id}/index.html`,
         renderRedirectStubHtml({
@@ -1657,7 +1723,12 @@ npx --yes dislop check . --pack ${escapeHtml(packId)}</code></pre>
         })
       );
     } else {
-      htmlSitemapPairs.push({ en: `/rules/${r.id}/`, zh: `/zh/rules/${r.id}/`, prio: "0.7" });
+      htmlSitemapPairs.push({
+        en: `/rules/${r.id}/`,
+        zh: `/zh/rules/${r.id}/`,
+        lastmodEn: ruleDate,
+        lastmodZh: ruleDate,
+      });
       writeHtml(
         `en/rules/${r.id}/index.html`,
         renderRedirectStubHtml({

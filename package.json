@@ -38,6 +38,7 @@
     "bench:visual": "node scripts/run_visual_benchmark.mjs",
     "bench:visual:vlm": "node scripts/run_visual_vlm_bench.mjs",
     "build:site": "node scripts/build_site.mjs",
+    "seo:indexnow": "node scripts/ping_indexnow.mjs",
     "sync:manifests": "node scripts/sync_manifests.mjs",
     "check:manifests": "node scripts/sync_manifests.mjs --check",
     "release:check": "node scripts/release.mjs --check",

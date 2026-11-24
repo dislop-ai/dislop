@@ -9,7 +9,17 @@ Allow: /
 Disallow: /api/
 Disallow: /mcp
 
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
 User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: Bravebot
 Allow: /
 Disallow: /api/
 Disallow: /mcp
@@ -24,6 +34,11 @@ Allow: /
 Disallow: /api/
 Disallow: /mcp
 
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
 User-agent: Claude-SearchBot
 Allow: /
 Disallow: /api/
@@ -34,7 +49,32 @@ Allow: /
 Disallow: /api/
 Disallow: /mcp
 
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
 User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: Applebot
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+
+User-agent: DuckAssistBot
 Allow: /
 Disallow: /api/
 Disallow: /mcp

@@ -42,13 +42,20 @@
       "@id": "https://dislop.com/#organization",
       "name": "dislop",
       "url": "https://dislop.com/",
-      "logo": "https://dislop.com/assets/logo.svg",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://dislop.com/assets/logo-400.png",
+        "width": 400,
+        "height": 400
+      },
       "sameAs": [
         "https://github.com/dislop-ai",
         "https://github.com/dislop-ai/dislop",
         "https://www.npmjs.com/package/dislop",
         "https://pypi.org/project/dislop/",
-        "https://x.com/dislop_ai"
+        "https://x.com/dislop_ai",
+        "https://glama.ai/mcp/servers/dislop-ai/dislop",
+        "https://glama.ai/mcp/connectors/io.github.dislop-ai/dislop"
       ]
     },
     {
@@ -68,10 +75,18 @@
       "operatingSystem": "macOS, Linux, Windows, Web",
       "softwareVersion": "0.9.1",
       "url": "https://dislop.com/",
+      "image": "https://dislop.com/assets/og-card.png",
+      "installUrl": "https://www.npmjs.com/package/dislop",
       "codeRepository": "https://github.com/dislop-ai/dislop",
       "softwareHelp": "https://dislop.com/llms.txt",
       "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "description": "Dedicated linter for AI slop across docs, web UI, Word, and PowerPoint (53 built-in rules, 7 scenario packs, 90 curated anti-slop tools, 7 guides).",
+      "featureList": [
+        "Deterministic linter with 53 rules across Markdown, HTML, CSS, JSX, SVG, Word (.docx), PowerPoint (.pptx), and PDF",
+        "Revision verifier checking numbers, units, dates, and protected terms against the original draft",
+        "Offline local CLI, editor extensions, pure-Markdown Agent Skills, and stdio MCP",
+        "Hosted Streamable HTTP MCP at https://dislop.com/mcp with multimodal visual layout review"
+      ],
       "offers": [
         {
           "@type": "Offer",
@@ -83,6 +98,24 @@
           "@type": "Offer",
           "name": "Cloud Free (30 credits/mo)",
           "price": "0",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "name": "Cloud PAYGO (500 credits)",
+          "price": "10",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "name": "Cloud Pro (1,500 credits/mo)",
+          "price": "9",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "name": "Cloud Team (5,000 credits/mo)",
+          "price": "29",
           "priceCurrency": "USD"
         }
       ]

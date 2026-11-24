@@ -1,6 +1,6 @@
 {
   "schema": "dislop.kb/1",
-  "snapshotDate": "2026-11-23",
+  "snapshotDate": "2026-11-24",
   "verificationMethod": "Verified against official primary URLs, arXiv/DOI records, GitHub repository snapshots (2026-11-21), and live search checks (2026-11-23).",
   "categories": [
     "academic-stylometrics",

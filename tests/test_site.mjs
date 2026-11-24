@@ -415,13 +415,22 @@ for (const m of indexHtml.matchAll(/href="#([^"]+)"/g)) {
   assert.ok(htmlIds.has(m[1]), `Broken internal anchor href="#${m[1]}" in site/index.html`);
 }
 
-// 10. Verify robots.txt and sitemap.xml crawlability assets
+// 10. Verify robots.txt, IndexNow verification key, logo-400 PNG and HTML-only sitemap.xml crawlability assets
 const robotsTxt = fs.readFileSync(path.join(SITE_DIR, "robots.txt"), "utf8");
 assert.ok(robotsTxt.includes("Sitemap: https://dislop.com/sitemap.xml"), "robots.txt missing Sitemap directive");
 assert.ok(robotsTxt.includes("Disallow: /api/"), "robots.txt missing Disallow: /api/");
 assert.ok(robotsTxt.includes("Disallow: /mcp"), "robots.txt missing Disallow: /mcp");
 assert.ok(robotsTxt.includes("Content-Signal: ai-train=no, search=yes, ai-input=yes"), "robots.txt missing Content-Signal directive");
 assert.ok(robotsTxt.includes("Agentmap: https://dislop.com/.well-known/ai-catalog.json"), "robots.txt missing Agentmap directive");
+for (const extraBot of ["GPTBot", "ClaudeBot", "Bravebot", "Applebot", "DuckAssistBot"]) {
+  assert.ok(robotsTxt.includes(extraBot), `robots.txt missing ${extraBot}`);
+}
+
+const INDEXNOW_KEY = "d1510ba4e8f74c92a6d38b1e5f0c7a49";
+const indexNowKeyFile = path.join(SITE_DIR, `${INDEXNOW_KEY}.txt`);
+assert.ok(fs.existsSync(indexNowKeyFile), `Missing IndexNow key file site/${INDEXNOW_KEY}.txt`);
+assert.equal(fs.readFileSync(indexNowKeyFile, "utf8").trim(), INDEXNOW_KEY, "IndexNow verification key content mismatch");
+assert.ok(fs.existsSync(path.join(SITE_DIR, "assets", "logo-400.png")), "Missing site/assets/logo-400.png");
 
 const sitemapXml = fs.readFileSync(path.join(SITE_DIR, "sitemap.xml"), "utf8");
 assert.ok(sitemapXml.includes('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'), "sitemap.xml missing urlset xmlns");
@@ -435,8 +444,12 @@ assert.ok(sitemapXml.includes("<loc>https://dislop.com/zh/guides/</loc>"), "site
 assert.equal(sitemapXml.includes("https://dislop.com/en/"), false, "sitemap.xml must not list legacy /en/ redirect URLs");
 assert.equal(INVISIBLE_BIDI_RE.test(sitemapXml), false, "sitemap.xml contains invisible/bidi chars");
 assert.equal(/&(?!amp;|lt;|gt;|quot;|apos;)/.test(sitemapXml), false, "sitemap.xml contains unescaped '&'");
-const sitemapUrlCount = (sitemapXml.match(/<url>/g) || []).length;
-assert.ok(sitemapUrlCount >= 50, `Expected >= 50 <url> entries in sitemap.xml, got ${sitemapUrlCount}`);
+const sitemapLocs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+const sitemapUrlCount = sitemapLocs.length;
+assert.ok(sitemapUrlCount >= 115, `Expected >= 115 canonical HTML <url> entries in sitemap.xml, got ${sitemapUrlCount}`);
+for (const loc of sitemapLocs) {
+  assert.ok(loc.startsWith("https://dislop.com/") && loc.endsWith("/"), `Non-canonical non-HTML URL in sitemap.xml: ${loc}`);
+}
 
 // 11. Verify animated demo GIFs, animated WebPs & reduced-motion posters exist in site/assets/demos/ and match HTML references
 const DEMOS_DIR = path.join(SITE_DIR, "assets", "demos");
@@ -1001,6 +1014,8 @@ for (const homeRel of ["index.html", "zh/index.html"]) {
   }
   assert.ok(homeDoc.includes("https://www.npmjs.com/package/dislop"), `${homeRel} JSON-LD missing npm sameAs`);
   assert.ok(homeDoc.includes("https://pypi.org/project/dislop/"), `${homeRel} JSON-LD missing PyPI sameAs`);
+  assert.ok(homeDoc.includes("https://glama.ai/mcp/servers/dislop-ai/dislop"), `${homeRel} JSON-LD missing Glama sameAs`);
+  assert.ok(homeDoc.includes("https://dislop.com/assets/logo-400.png"), `${homeRel} JSON-LD missing logo-400.png`);
   assert.ok(homeDoc.includes('"codeRepository": "https://github.com/dislop-ai/dislop"'), `${homeRel} JSON-LD missing codeRepository`);
   assert.ok(homeDoc.includes('"softwareHelp": "https://dislop.com/llms.txt"'), `${homeRel} JSON-LD missing softwareHelp`);
 }

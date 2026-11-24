@@ -42,13 +42,20 @@
       "@id": "https://dislop.com/#organization",
       "name": "dislop",
       "url": "https://dislop.com/",
-      "logo": "https://dislop.com/assets/logo.svg",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://dislop.com/assets/logo-400.png",
+        "width": 400,
+        "height": 400
+      },
       "sameAs": [
         "https://github.com/dislop-ai",
         "https://github.com/dislop-ai/dislop",
         "https://www.npmjs.com/package/dislop",
         "https://pypi.org/project/dislop/",
-        "https://x.com/dislop_ai"
+        "https://x.com/dislop_ai",
+        "https://glama.ai/mcp/servers/dislop-ai/dislop",
+        "https://glama.ai/mcp/connectors/io.github.dislop-ai/dislop"
       ]
     },
     {
@@ -68,10 +75,18 @@
       "operatingSystem": "macOS, Linux, Windows, Web",
       "softwareVersion": "0.9.1",
       "url": "https://dislop.com/zh/",
+      "image": "https://dislop.com/assets/og-card-zh.png",
+      "installUrl": "https://www.npmjs.com/package/dislop",
       "codeRepository": "https://github.com/dislop-ai/dislop",
       "softwareHelp": "https://dislop.com/llms.txt",
       "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "description": "专用的 AI 味检查工具，内置 7 套场景包 53 条规则与 90 条核验工具清单，支持本地离线检查文档、网页和 Word/PPT。",
+      "featureList": [
+        "内置 53 条离线确定性规则，覆盖 Markdown、网页界面、Word、PPT 和 PDF",
+        "改后核验保留数字、单位、日期和关键词，并防改过头",
+        "支持本地 CLI、编辑器插件、纯 Markdown Skill 与本地 stdio MCP",
+        "可选连接 https://dislop.com/mcp 远程 MCP 进行多模态视觉版式审校"
+      ],
       "offers": [
         {
           "@type": "Offer",
@@ -83,6 +98,24 @@
           "@type": "Offer",
           "name": "云端免费版（每月 30 额度）",
           "price": "0",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "name": "按量加油包（500 额度）",
+          "price": "10",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "name": "云端 Pro（每月 1,500 额度）",
+          "price": "9",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "name": "团队版（每月 5,000 额度）",
+          "price": "29",
           "priceCurrency": "USD"
         }
       ]
