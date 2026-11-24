@@ -13,6 +13,13 @@
     <summary>The cleanest anti-slop setup splits prevention from verification: load the pure-Markdown Skill before drafting so agents avoid stock templates, then run the offline `dislop check` CLI locally or on `--changed` PR lines. For office agents without local shells, connect `https://dislop.com/mcp`.</summary>
   </entry>
   <entry>
+    <title>4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark)</title>
+    <link href="https://dislop.com/guides/anti-slop-skill-benchmark/"/>
+    <id>https://dislop.com/guides/anti-slop-skill-benchmark/</id>
+    <updated>2026-11-24T00:00:00Z</updated>
+    <summary>Upfront disclosure: pass-rate scores use dislop&apos;s own deterministic packs. Across 30 drafts on gemini-3.5-flash, all four standalone Markdown skills left dead href=\&quot;#\&quot; links in HTML cards, stop-slop left raw **Summary**: markdown and 62.5% text shrink inside .pptx XML, and 3 of 4 returned a three-semicolon pitch verbatim. Adding one dislop check pass lifted clean passes by +13.3 pp in English and +20.0 pp in Chinese with 0 fact drift.</summary>
+  </entry>
+  <entry>
     <title>Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)</title>
     <link href="https://dislop.com/guides/deslop-pptx-docx/"/>
     <id>https://dislop.com/guides/deslop-pptx-docx/</id>

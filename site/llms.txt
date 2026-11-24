@@ -14,7 +14,7 @@
 - [Pre-release gate](https://dislop.com/tasks/pre-release-gate.md): Core `error` checks and CI diff gating.
 
 ## Browse by topic
-- [Guides (EN & ZH)](https://dislop.com/guides/): 6 tutorials (ZH at `/zh/guides/`).
+- [Guides (EN & ZH)](https://dislop.com/guides/): 7 tutorials (ZH at `/zh/guides/`).
 - [Product Brief](https://dislop.com/methodology/product-brief.md): Positioning and user tiers.
 - [Methodology](https://dislop.com/methodology/index.md): Plain writing guide and visual tokens.
 - [Cases & Refs](https://dislop.com/cases/index.md): Contrasts and 31 design references.

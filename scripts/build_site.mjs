@@ -2257,6 +2257,38 @@ const skillReferences = SKILL_REFS.map((ref) => {
   };
 }).filter(Boolean);
 
+const subSkillNames = ["deslop-docs", "deslop-slides-docx", "deslop-web-ui", "deslop-verify"];
+const subSkillEntries = [];
+for (const subName of subSkillNames) {
+  const subPath = path.join(ROOT, "skills", subName, "SKILL.md");
+  if (!fs.existsSync(subPath)) continue;
+  const subRaw = fs.readFileSync(subPath, "utf8");
+  const subDescMatch = subRaw.match(/^description:\s*(.+)$/m);
+  const subDesc = subDescMatch
+    ? subDescMatch[1].trim().replace(/^["']|["']$/g, "")
+    : `Task-focused anti-slop skill (${subName}).`;
+  const subRel = `tools/skills/${subName}.md`;
+  writeCleanFile(
+    subRel,
+    `---
+content-type: reference-data
+version: ${VERSION}
+skill: ${subName}
+---
+
+${subRaw}`,
+    { isAgentText: true }
+  );
+  subSkillEntries.push({
+    name: subName,
+    type: "skill-md",
+    description: subDesc,
+    url: `${BASE_URL}/${subRel}`,
+    digest: `sha256:${crypto.createHash("sha256").update(subRaw, "utf8").digest("hex")}`,
+    install: `npx --yes skills add dislop-ai/dislop --skill ${subName}`,
+  });
+}
+
 const agentSkillsIndexObj = {
   $schema: "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
   version: VERSION,
@@ -2270,11 +2302,72 @@ const agentSkillsIndexObj = {
       install: "npx --yes skills add dislop-ai/dislop --skill dislop",
       references: skillReferences,
     },
+    ...subSkillEntries,
   ],
 };
 const agentSkillsIndexJsonStr = JSON.stringify(agentSkillsIndexObj, null, 2) + "\n";
 fs.mkdirSync(path.join(SITE_DIR, ".well-known", "agent-skills"), { recursive: true });
 fs.writeFileSync(path.join(SITE_DIR, ".well-known", "agent-skills", "index.json"), agentSkillsIndexJsonStr, "utf8");
+
+// RFC 9727 API Catalog (/.well-known/api-catalog)
+const apiCatalogObj = {
+  linkset: [
+    {
+      anchor: `${BASE_URL}/mcp`,
+      "service-desc": [{ href: `${BASE_URL}/.well-known/mcp/server-card.json`, type: "application/json" }],
+      "service-doc": [{ href: `${BASE_URL}/tools/mcp-sdk-api.md`, type: "text/markdown" }],
+      status: [{ href: `${BASE_URL}/api/health`, type: "application/json" }],
+    },
+    {
+      anchor: `${BASE_URL}/api/health`,
+      "service-doc": [{ href: `${BASE_URL}/tools/mcp-sdk-api.md`, type: "text/markdown" }],
+      describedby: [{ href: `${BASE_URL}/llms.txt`, type: "text/markdown" }],
+    },
+  ],
+};
+const apiCatalogJsonStr = JSON.stringify(apiCatalogObj, null, 2) + "\n";
+fs.writeFileSync(path.join(SITE_DIR, ".well-known", "api-catalog"), apiCatalogJsonStr, "utf8");
+
+// Agent Auth Guide (/auth.md)
+writeCleanFile(
+  "auth.md",
+  `---
+content-type: reference-data
+version: ${VERSION}
+snapshot: ${SNAPSHOT_DATE}
+---
+
+# dislop Agent Auth & Access Guide
+
+Connect to \`${BASE_URL}/mcp\` with zero configuration for free checks, or sign in when you need multi-model review, layout-preserving Office cleanup, or visual screenshot audits.
+
+## 1. Free Tools Without Sign-In (0 Credits)
+
+Calling \`dislop_check\`, \`dislop_verify\`, or \`dislop_rules\` on \`${BASE_URL}/mcp\` requires no Bearer token or OAuth flow. These deterministic checks run on the server and return structured \`dislop.findings/1\` diagnostics immediately.
+
+## 2. OAuth 2.1 + PKCE S256 (Recommended for Remote MCP Clients)
+
+Paid and account tools (\`dislop_review\`, \`dislop_deslop\`, \`dislop_office\`, \`dislop_visual_review\`, \`dislop_voice_extract\`, \`dislop_voice_manage\`, \`dislop_account\`) use standard OAuth 2.1 with dynamic client registration and PKCE S256:
+
+- Authorization server metadata: \`${BASE_URL}/.well-known/oauth-authorization-server\`
+- Protected resource metadata (MCP): \`${BASE_URL}/.well-known/oauth-protected-resource/mcp\`
+- Supported scope: \`dislop\`
+- Free signed-in tier: \`30\` credits per month (paid-tier Gemini models, zero draft training)
+
+## 3. Personal Bearer Token (\`dslp_*\`)
+
+For scripts or CLI wrappers, sign in at \`${BASE_URL}/#cloud-token-box\` via Google, GitHub, or 6-digit email OTP to create a scoped \`dslp_*\` token and pass \`Authorization: Bearer dslp_...\` to \`${BASE_URL}/mcp\`.
+
+## 4. Offline Local Alternative (Zero Network)
+
+Run the same 7 rule packs and 65 patterns locally with no sign-in or uploads:
+
+\`\`\`bash
+npx --yes dislop check . --pack auto --format agent
+\`\`\`
+`,
+  { isAgentText: true }
+);
 
 // 2k. /catalog.json (schema: "dislop.catalog/1")
 const catalogObj = {
@@ -2288,6 +2381,9 @@ const catalogObj = {
     mcpAlias: "/.well-known/mcp.json",
     agentSkillsIndex: "/.well-known/agent-skills/index.json",
     oauthProtectedResource: "/.well-known/oauth-protected-resource/mcp",
+    apiCatalog: "/.well-known/api-catalog",
+    aiCatalog: "/.well-known/ai-catalog.json",
+    authDoc: "/auth.md",
   },
   entryPoints: {
     llmsTxt: { path: "/llms.txt", bytes: Buffer.byteLength(llmsTxt, "utf8"), approxTokens: approxTokens(llmsTxt) },
@@ -2302,6 +2398,24 @@ const catalogObj = {
 };
 const catalogJsonStr = JSON.stringify(catalogObj, null, 2) + "\n";
 fs.writeFileSync(path.join(SITE_DIR, "catalog.json"), catalogJsonStr, "utf8");
+
+// ARD Agentic Resource Discovery (/.well-known/ai-catalog.json)
+const aiCatalogObj = {
+  version: VERSION,
+  baseUrl: BASE_URL,
+  llmsTxt: "/llms.txt",
+  apiCatalog: "/.well-known/api-catalog",
+  mcpServerCard: "/.well-known/mcp/server-card.json",
+  agentSkillsIndex: "/.well-known/agent-skills/index.json",
+  authDoc: "/auth.md",
+  resources: catalogResources.map((r) => ({
+    id: r.id,
+    title: r.titleEn || r.titleZh || r.id,
+    url: `${BASE_URL}${r.path}`,
+    mediaType: r.path.endsWith(".json") ? "application/json" : "text/markdown",
+  })),
+};
+fs.writeFileSync(path.join(SITE_DIR, ".well-known", "ai-catalog.json"), JSON.stringify(aiCatalogObj, null, 2) + "\n", "utf8");
 
 // 2l. Search & Crawlability files (/robots.txt & /sitemap.xml)
 const searchBots = [
@@ -2318,7 +2432,7 @@ const robotsTxt =
   searchBots
     .map(
       (ua) => `User-agent: ${ua}
-Allow: /
+${ua === "*" ? "Content-Signal: ai-train=no, search=yes, ai-input=yes\n" : ""}Allow: /
 Disallow: /api/
 Disallow: /mcp`
     )
@@ -2328,6 +2442,7 @@ Disallow: /mcp`
 # Agent index: ${BASE_URL}/llms.txt
 # MCP server card: ${BASE_URL}/.well-known/mcp/server-card.json
 # Agent skills index: ${BASE_URL}/.well-known/agent-skills/index.json
+Agentmap: ${BASE_URL}/.well-known/ai-catalog.json
 Sitemap: ${BASE_URL}/sitemap.xml
 `;
 fs.writeFileSync(path.join(SITE_DIR, "robots.txt"), robotsTxt, "utf8");

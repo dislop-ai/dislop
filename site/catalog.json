@@ -12,7 +12,10 @@
     "mcpServerCard": "/.well-known/mcp/server-card.json",
     "mcpAlias": "/.well-known/mcp.json",
     "agentSkillsIndex": "/.well-known/agent-skills/index.json",
-    "oauthProtectedResource": "/.well-known/oauth-protected-resource/mcp"
+    "oauthProtectedResource": "/.well-known/oauth-protected-resource/mcp",
+    "apiCatalog": "/.well-known/api-catalog",
+    "aiCatalog": "/.well-known/ai-catalog.json",
+    "authDoc": "/auth.md"
   },
   "entryPoints": {
     "llmsTxt": {
@@ -3072,6 +3075,68 @@
         "mcp"
       ],
       "sha256": "761ed70f324e2a37e891123d1b6dd315f04c33cb91fb421b81b7a65fdd171a24"
+    },
+    {
+      "id": "guide-anti-slop-skill-benchmark-en",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark)",
+        "zh": "4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准）"
+      },
+      "path": "/guides/anti-slop-skill-benchmark/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "en"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 8937,
+      "approxTokens": 2234,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "42bc8670f0fb6443cceacf0d8f6f27ec04cd274c74f1f2b3a106b51f8cd564e5"
+    },
+    {
+      "id": "guide-anti-slop-skill-benchmark-zh",
+      "pillar": "methodology",
+      "kind": "guide",
+      "title": {
+        "en": "4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark)",
+        "zh": "4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准）"
+      },
+      "path": "/zh/guides/anti-slop-skill-benchmark/index.md",
+      "modalities": [
+        "markdown",
+        "text",
+        "html",
+        "docx",
+        "pptx"
+      ],
+      "languages": [
+        "zh"
+      ],
+      "packs": [
+        "core"
+      ],
+      "bytes": 8943,
+      "approxTokens": 2236,
+      "relatedTools": [
+        "cli",
+        "skill",
+        "mcp"
+      ],
+      "sha256": "3bfee2c448fea2f334f5d78e49bd8e97b583cbd0946513d988061845bb6dc107"
     },
     {
       "id": "guide-deslop-pptx-docx-en",

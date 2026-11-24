@@ -69,6 +69,19 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://dislop.com/guides/anti-slop-skill-benchmark/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/anti-slop-skill-benchmark/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/anti-slop-skill-benchmark/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/anti-slop-skill-benchmark/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/guides/anti-slop-skill-benchmark/index.md</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://dislop.com/guides/deslop-pptx-docx/</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.8</priority>
@@ -998,6 +1011,19 @@
   </url>
   <url>
     <loc>https://dislop.com/zh/guides/agent-cli-mcp-tutorial/index.md</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/anti-slop-skill-benchmark/</loc>
+    <lastmod>2026-11-23</lastmod>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dislop.com/guides/anti-slop-skill-benchmark/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/anti-slop-skill-benchmark/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/anti-slop-skill-benchmark/" />
+  </url>
+  <url>
+    <loc>https://dislop.com/zh/guides/anti-slop-skill-benchmark/index.md</loc>
     <lastmod>2026-11-23</lastmod>
     <priority>0.7</priority>
   </url>

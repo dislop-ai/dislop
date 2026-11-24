@@ -13,6 +13,13 @@
     <summary>防 AI 味最好分两步：写前挂上纯文档 Skill 让 Agent 少写套话，写完跑离线 `dislop check` 在本地或 Git PR 里做确定性拦截；如果是 Claude Cowork、WorkBuddy 等不方便装本机环境的办公 Agent，直接连 `https://dislop.com/mcp`。</summary>
   </entry>
   <entry>
+    <title>4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准）</title>
+    <link href="https://dislop.com/zh/guides/anti-slop-skill-benchmark/"/>
+    <id>https://dislop.com/zh/guides/anti-slop-skill-benchmark/</id>
+    <updated>2026-11-24T00:00:00Z</updated>
+    <summary>先交代口径偏置：第 2 节通过率由 dislop 自身规则打分。从原始输出字符串看，4 款独立 Skill 在 HTML 任务上全部留下了 href=\&quot;#\&quot; 空链接，stop-slop 在 .pptx XML 里留下了裸 **Summary**: 与 62.5% 缩字参数，3 款原样退回了三分号旧推销句。接入一道 dislop 复检后，英文一次过检率提升 +13.3 个百分点，中文提升 +20.0 个百分点，6 份干净人工对照稿零误伤。</summary>
+  </entry>
+  <entry>
     <title>AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程</title>
     <link href="https://dislop.com/zh/guides/deslop-pptx-docx/"/>
     <id>https://dislop.com/zh/guides/deslop-pptx-docx/</id>

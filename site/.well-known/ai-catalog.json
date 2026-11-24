@@ -1,0 +1,647 @@
+{
+  "version": "0.9.0",
+  "baseUrl": "https://dislop.com",
+  "llmsTxt": "/llms.txt",
+  "apiCatalog": "/.well-known/api-catalog",
+  "mcpServerCard": "/.well-known/mcp/server-card.json",
+  "agentSkillsIndex": "/.well-known/agent-skills/index.json",
+  "authDoc": "/auth.md",
+  "resources": [
+    {
+      "id": "site-index",
+      "title": "site-index",
+      "url": "https://dislop.com/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "methodology-index",
+      "title": "methodology-index",
+      "url": "https://dislop.com/methodology/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "methodology-deletion-test",
+      "title": "methodology-deletion-test",
+      "url": "https://dislop.com/methodology/deletion-test.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "methodology-anti-pattern-map",
+      "title": "methodology-anti-pattern-map",
+      "url": "https://dislop.com/methodology/anti-pattern-map.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "methodology-positive-divergence",
+      "title": "methodology-positive-divergence",
+      "url": "https://dislop.com/methodology/positive-divergence.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "methodology-product-brief",
+      "title": "methodology-product-brief",
+      "url": "https://dislop.com/methodology/product-brief.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "methodology-brand-voice",
+      "title": "methodology-brand-voice",
+      "url": "https://dislop.com/methodology/brand-and-voice.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "methodology-design-system",
+      "title": "methodology-design-system",
+      "url": "https://dislop.com/methodology/design-system.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "cases-index",
+      "title": "cases-index",
+      "url": "https://dislop.com/cases/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "cases-copy-contrasts",
+      "title": "cases-copy-contrasts",
+      "url": "https://dislop.com/cases/copy-contrasts.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "cases-dogfood-audit",
+      "title": "cases-dogfood-audit",
+      "url": "https://dislop.com/cases/dogfood-audit.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "cases-ui-specimens",
+      "title": "cases-ui-specimens",
+      "url": "https://dislop.com/cases/ui-specimens.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-index",
+      "title": "tools-index",
+      "url": "https://dislop.com/tools/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-skill",
+      "title": "tools-skill",
+      "url": "https://dislop.com/tools/skill.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-skill-ref-work-docs",
+      "title": "tools-skill-ref-work-docs",
+      "url": "https://dislop.com/tools/references/work-docs.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-skill-ref-work-docs.zh-CN",
+      "title": "tools-skill-ref-work-docs.zh-CN",
+      "url": "https://dislop.com/tools/references/work-docs.zh-CN.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-skill-ref-essay",
+      "title": "tools-skill-ref-essay",
+      "url": "https://dislop.com/tools/references/essay.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-skill-ref-essay.zh-CN",
+      "title": "tools-skill-ref-essay.zh-CN",
+      "url": "https://dislop.com/tools/references/essay.zh-CN.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-skill-ref-office",
+      "title": "tools-skill-ref-office",
+      "url": "https://dislop.com/tools/references/office.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-skill-ref-office.zh-CN",
+      "title": "tools-skill-ref-office.zh-CN",
+      "url": "https://dislop.com/tools/references/office.zh-CN.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-skill-ref-web-ui",
+      "title": "tools-skill-ref-web-ui",
+      "url": "https://dislop.com/tools/references/web-ui.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-skill-ref-web-ui.zh-CN",
+      "title": "tools-skill-ref-web-ui.zh-CN",
+      "url": "https://dislop.com/tools/references/web-ui.zh-CN.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-prompts",
+      "title": "tools-prompts",
+      "url": "https://dislop.com/tools/prompts.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-cli-hooks",
+      "title": "tools-cli-hooks",
+      "url": "https://dislop.com/tools/cli-and-hooks.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "tools-mcp-sdk-api",
+      "title": "tools-mcp-sdk-api",
+      "url": "https://dislop.com/tools/mcp-sdk-api.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "privacy-policy",
+      "title": "privacy-policy",
+      "url": "https://dislop.com/privacy.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "pack-core",
+      "title": "pack-core",
+      "url": "https://dislop.com/packs/core.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "pack-business-brief",
+      "title": "pack-business-brief",
+      "url": "https://dislop.com/packs/business-brief.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "pack-engineering-spec",
+      "title": "pack-engineering-spec",
+      "url": "https://dislop.com/packs/engineering-spec.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "pack-regulated-comms",
+      "title": "pack-regulated-comms",
+      "url": "https://dislop.com/packs/regulated-comms.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "pack-literary-essay",
+      "title": "pack-literary-essay",
+      "url": "https://dislop.com/packs/literary-essay.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "pack-deck-and-ui",
+      "title": "pack-deck-and-ui",
+      "url": "https://dislop.com/packs/deck-and-ui.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "pack-executive-deck",
+      "title": "pack-executive-deck",
+      "url": "https://dislop.com/packs/executive-deck.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-unfilled-placeholder",
+      "title": "rule-unfilled-placeholder",
+      "url": "https://dislop.com/rules/unfilled-placeholder.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-chatbot-artifact",
+      "title": "rule-chatbot-artifact",
+      "url": "https://dislop.com/rules/chatbot-artifact.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-markdown-leak",
+      "title": "rule-markdown-leak",
+      "url": "https://dislop.com/rules/markdown-leak.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-ui-dead-control",
+      "title": "rule-ui-dead-control",
+      "url": "https://dislop.com/rules/ui-dead-control.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-en-throat-clearing-opener",
+      "title": "rule-en-throat-clearing-opener",
+      "url": "https://dislop.com/rules/en-throat-clearing-opener.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-en-cliche-lexicon",
+      "title": "rule-en-cliche-lexicon",
+      "url": "https://dislop.com/rules/en-cliche-lexicon.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-zh-bureaucratic-padding",
+      "title": "rule-zh-bureaucratic-padding",
+      "url": "https://dislop.com/rules/zh-bureaucratic-padding.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-negation-pivot-frame",
+      "title": "rule-negation-pivot-frame",
+      "url": "https://dislop.com/rules/negation-pivot-frame.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-staccato-slogan-run",
+      "title": "rule-staccato-slogan-run",
+      "url": "https://dislop.com/rules/staccato-slogan-run.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-zh-four-char-triad",
+      "title": "rule-zh-four-char-triad",
+      "url": "https://dislop.com/rules/zh-four-char-triad.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-unsourced-attribution",
+      "title": "rule-unsourced-attribution",
+      "url": "https://dislop.com/rules/unsourced-attribution.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-bold-lead-list-wall",
+      "title": "rule-bold-lead-list-wall",
+      "url": "https://dislop.com/rules/bold-lead-list-wall.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-cooccurrence-slop-cluster",
+      "title": "rule-cooccurrence-slop-cluster",
+      "url": "https://dislop.com/rules/cooccurrence-slop-cluster.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-semicolon-tricolon",
+      "title": "rule-semicolon-tricolon",
+      "url": "https://dislop.com/rules/semicolon-tricolon.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-rhetorical-qa-cadence",
+      "title": "rule-rhetorical-qa-cadence",
+      "url": "https://dislop.com/rules/rhetorical-qa-cadence.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-comma-chain-runon",
+      "title": "rule-comma-chain-runon",
+      "url": "https://dislop.com/rules/comma-chain-runon.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-narrative-sandwich-frame",
+      "title": "rule-narrative-sandwich-frame",
+      "url": "https://dislop.com/rules/narrative-sandwich-frame.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-template-skeleton-echo",
+      "title": "rule-template-skeleton-echo",
+      "url": "https://dislop.com/rules/template-skeleton-echo.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-low-burstiness-vapor",
+      "title": "rule-low-burstiness-vapor",
+      "url": "https://dislop.com/rules/low-burstiness-vapor.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-zh-dev-jargon",
+      "title": "rule-zh-dev-jargon",
+      "url": "https://dislop.com/rules/zh-dev-jargon.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-zh-exclamation",
+      "title": "rule-zh-exclamation",
+      "url": "https://dislop.com/rules/zh-exclamation.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-zh-mega-sentence",
+      "title": "rule-zh-mega-sentence",
+      "url": "https://dislop.com/rules/zh-mega-sentence.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-unsourced-statistic",
+      "title": "rule-unsourced-statistic",
+      "url": "https://dislop.com/rules/unsourced-statistic.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-eng-pr-diff-parrot",
+      "title": "rule-eng-pr-diff-parrot",
+      "url": "https://dislop.com/rules/eng-pr-diff-parrot.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-eng-shallow-root-cause",
+      "title": "rule-eng-shallow-root-cause",
+      "url": "https://dislop.com/rules/eng-shallow-root-cause.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-eng-vague-action-item",
+      "title": "rule-eng-vague-action-item",
+      "url": "https://dislop.com/rules/eng-vague-action-item.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-reg-unsubstantiated-superlative",
+      "title": "rule-reg-unsubstantiated-superlative",
+      "url": "https://dislop.com/rules/reg-unsubstantiated-superlative.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-reg-unanchored-multiplier",
+      "title": "rule-reg-unanchored-multiplier",
+      "url": "https://dislop.com/rules/reg-unanchored-multiplier.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-zh-essay-moralizing-ending",
+      "title": "rule-zh-essay-moralizing-ending",
+      "url": "https://dislop.com/rules/zh-essay-moralizing-ending.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-en-essay-moralizing-ending",
+      "title": "rule-en-essay-moralizing-ending",
+      "url": "https://dislop.com/rules/en-essay-moralizing-ending.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-literary-negation-pivot",
+      "title": "rule-literary-negation-pivot",
+      "url": "https://dislop.com/rules/literary-negation-pivot.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-excessive-em-dash-density",
+      "title": "rule-excessive-em-dash-density",
+      "url": "https://dislop.com/rules/excessive-em-dash-density.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-zh-halfwidth-punctuation",
+      "title": "rule-zh-halfwidth-punctuation",
+      "url": "https://dislop.com/rules/zh-halfwidth-punctuation.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-literary-semicolon-tricolon",
+      "title": "rule-literary-semicolon-tricolon",
+      "url": "https://dislop.com/rules/literary-semicolon-tricolon.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-literary-rhetorical-qa",
+      "title": "rule-literary-rhetorical-qa",
+      "url": "https://dislop.com/rules/literary-rhetorical-qa.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-literary-narrative-frame",
+      "title": "rule-literary-narrative-frame",
+      "url": "https://dislop.com/rules/literary-narrative-frame.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-slide-word-wall",
+      "title": "rule-slide-word-wall",
+      "url": "https://dislop.com/rules/slide-word-wall.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-slide-bullet-overload",
+      "title": "rule-slide-bullet-overload",
+      "url": "https://dislop.com/rules/slide-bullet-overload.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-slide-autofit-shrink",
+      "title": "rule-slide-autofit-shrink",
+      "url": "https://dislop.com/rules/slide-autofit-shrink.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-slide-weak-topic-title",
+      "title": "rule-slide-weak-topic-title",
+      "url": "https://dislop.com/rules/slide-weak-topic-title.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-ui-ai-gradient",
+      "title": "rule-ui-ai-gradient",
+      "url": "https://dislop.com/rules/ui-ai-gradient.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-ui-pill-soup",
+      "title": "rule-ui-pill-soup",
+      "url": "https://dislop.com/rules/ui-pill-soup.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-ui-box-in-box",
+      "title": "rule-ui-box-in-box",
+      "url": "https://dislop.com/rules/ui-box-in-box.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-ui-prompt-echo-badge",
+      "title": "rule-ui-prompt-echo-badge",
+      "url": "https://dislop.com/rules/ui-prompt-echo-badge.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-ui-glow-blob-chrome",
+      "title": "rule-ui-glow-blob-chrome",
+      "url": "https://dislop.com/rules/ui-glow-blob-chrome.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-ui-emoji-icon-chrome",
+      "title": "rule-ui-emoji-icon-chrome",
+      "url": "https://dislop.com/rules/ui-emoji-icon-chrome.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-ui-template-card-grid",
+      "title": "rule-ui-template-card-grid",
+      "url": "https://dislop.com/rules/ui-template-card-grid.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-svg-layout-slop",
+      "title": "rule-svg-layout-slop",
+      "url": "https://dislop.com/rules/svg-layout-slop.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-image-ai-workflow-residue",
+      "title": "rule-image-ai-workflow-residue",
+      "url": "https://dislop.com/rules/image-ai-workflow-residue.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-image-ai-palette-slop",
+      "title": "rule-image-ai-palette-slop",
+      "url": "https://dislop.com/rules/image-ai-palette-slop.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-pdf-visual-layout-slop",
+      "title": "rule-pdf-visual-layout-slop",
+      "url": "https://dislop.com/rules/pdf-visual-layout-slop.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-slide-process-not-finding-title",
+      "title": "rule-slide-process-not-finding-title",
+      "url": "https://dislop.com/rules/slide-process-not-finding-title.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "rule-pptx-layout-monotony",
+      "title": "rule-pptx-layout-monotony",
+      "url": "https://dislop.com/rules/pptx-layout-monotony.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "task-business-doc",
+      "title": "task-business-doc",
+      "url": "https://dislop.com/tasks/business-doc.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "task-web-and-deck",
+      "title": "task-web-and-deck",
+      "url": "https://dislop.com/tasks/web-and-deck.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "task-editorial-writing",
+      "title": "task-editorial-writing",
+      "url": "https://dislop.com/tasks/editorial-writing.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "task-pre-release-gate",
+      "title": "task-pre-release-gate",
+      "url": "https://dislop.com/tasks/pre-release-gate.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "awesome-anti-slop-md",
+      "title": "awesome-anti-slop-md",
+      "url": "https://dislop.com/awesome/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-agent-cli-mcp-tutorial-en",
+      "title": "guide-agent-cli-mcp-tutorial-en",
+      "url": "https://dislop.com/guides/agent-cli-mcp-tutorial/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-agent-cli-mcp-tutorial-zh",
+      "title": "guide-agent-cli-mcp-tutorial-zh",
+      "url": "https://dislop.com/zh/guides/agent-cli-mcp-tutorial/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-anti-slop-skill-benchmark-en",
+      "title": "guide-anti-slop-skill-benchmark-en",
+      "url": "https://dislop.com/guides/anti-slop-skill-benchmark/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-anti-slop-skill-benchmark-zh",
+      "title": "guide-anti-slop-skill-benchmark-zh",
+      "url": "https://dislop.com/zh/guides/anti-slop-skill-benchmark/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-deslop-pptx-docx-en",
+      "title": "guide-deslop-pptx-docx-en",
+      "url": "https://dislop.com/guides/deslop-pptx-docx/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-deslop-pptx-docx-zh",
+      "title": "guide-deslop-pptx-docx-zh",
+      "url": "https://dislop.com/zh/guides/deslop-pptx-docx/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-fix-ai-slop-web-ui-en",
+      "title": "guide-fix-ai-slop-web-ui-en",
+      "url": "https://dislop.com/guides/fix-ai-slop-web-ui/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-fix-ai-slop-web-ui-zh",
+      "title": "guide-fix-ai-slop-web-ui-zh",
+      "url": "https://dislop.com/zh/guides/fix-ai-slop-web-ui/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-linter-vs-detector-vs-skill-en",
+      "title": "guide-linter-vs-detector-vs-skill-en",
+      "url": "https://dislop.com/guides/linter-vs-detector-vs-skill/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-linter-vs-detector-vs-skill-zh",
+      "title": "guide-linter-vs-detector-vs-skill-zh",
+      "url": "https://dislop.com/zh/guides/linter-vs-detector-vs-skill/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-remove-ai-slop-writing-en",
+      "title": "guide-remove-ai-slop-writing-en",
+      "url": "https://dislop.com/guides/remove-ai-slop-writing/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-remove-ai-slop-writing-zh",
+      "title": "guide-remove-ai-slop-writing-zh",
+      "url": "https://dislop.com/zh/guides/remove-ai-slop-writing/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-what-is-ai-slop-en",
+      "title": "guide-what-is-ai-slop-en",
+      "url": "https://dislop.com/guides/what-is-ai-slop/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "guide-what-is-ai-slop-zh",
+      "title": "guide-what-is-ai-slop-zh",
+      "url": "https://dislop.com/zh/guides/what-is-ai-slop/index.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "id": "roadmap-en",
+      "title": "roadmap-en",
+      "url": "https://dislop.com/roadmap.md",
+      "mediaType": "text/markdown"
+    }
+  ]
+}

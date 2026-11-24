@@ -1,0 +1,40 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://dislop.com/mcp",
+      "service-desc": [
+        {
+          "href": "https://dislop.com/.well-known/mcp/server-card.json",
+          "type": "application/json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://dislop.com/tools/mcp-sdk-api.md",
+          "type": "text/markdown"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://dislop.com/api/health",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "anchor": "https://dislop.com/api/health",
+      "service-doc": [
+        {
+          "href": "https://dislop.com/tools/mcp-sdk-api.md",
+          "type": "text/markdown"
+        }
+      ],
+      "describedby": [
+        {
+          "href": "https://dislop.com/llms.txt",
+          "type": "text/markdown"
+        }
+      ]
+    }
+  ]
+}

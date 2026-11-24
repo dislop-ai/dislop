@@ -51,6 +51,38 @@
           "digest": "sha256:7a41d6b75789fe1d0c466d27bc0395ea2ae11ca921cb62c2f0d3082082548d4c"
         }
       ]
+    },
+    {
+      "name": "deslop-docs",
+      "type": "skill-md",
+      "description": "Audit Markdown docs, READMEs, RFCs, and release notes for AI chat wrappers, clichés, and vague filler using dislop offline rules.",
+      "url": "https://dislop.com/tools/skills/deslop-docs.md",
+      "digest": "sha256:4c895d122c434f0bda96a8ea9c466e8ba13606e67d094b46a6cfd3a732ec55aa",
+      "install": "npx --yes skills add dislop-ai/dislop --skill deslop-docs"
+    },
+    {
+      "name": "deslop-slides-docx",
+      "type": "skill-md",
+      "description": "Check Word (.docx) and PowerPoint (.pptx) files offline for unrendered markdown, chat leftovers, dense slide walls, and empty process titles.",
+      "url": "https://dislop.com/tools/skills/deslop-slides-docx.md",
+      "digest": "sha256:0095a2a0a70ff77bd781739345e9f7d7ae515cf1239e76e0894b51e4a6b22752",
+      "install": "npx --yes skills add dislop-ai/dislop --skill deslop-slides-docx"
+    },
+    {
+      "name": "deslop-web-ui",
+      "type": "skill-md",
+      "description": "Inspect AI-generated HTML, CSS, JSX, and SVG pages offline for dead placeholder links, fake disabled buttons, pill soup, and default gradients.",
+      "url": "https://dislop.com/tools/skills/deslop-web-ui.md",
+      "digest": "sha256:6c4a3d0f53d6a71c68b964ec47fd1319fa28952affa7b9264a91df2f6b720ab6",
+      "install": "npx --yes skills add dislop-ai/dislop --skill deslop-web-ui"
+    },
+    {
+      "name": "deslop-verify",
+      "type": "skill-md",
+      "description": "Verify LLM-revised drafts after using Humanizer or stop-slop to catch lost metrics, dropped qualifiers, and 2nd-order slogan drift.",
+      "url": "https://dislop.com/tools/skills/deslop-verify.md",
+      "digest": "sha256:9db8ade92ed2593a203dddb86582f367ba452de39351b3fe566884d8cf1833fc",
+      "install": "npx --yes skills add dislop-ai/dislop --skill deslop-verify"
     }
   ]
 }

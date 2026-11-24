@@ -124,3 +124,9 @@
    - 去 AI 味高度依赖母语语料；若仅靠前端脚本切换界面文字，53 条中文规则百科与中文指南将失去独立可索引 URL，国内社交软件抓取分享链接时也无法展示中文标题与 `og-card-zh.png`。
 3. **根路径 `x-default` 演进方向**：
    - 自 `v0.8.4–v0.9.0` 起已正式切换为**根路径 `/`、`/guides/`、`/rules/`、`/awesome/` 默认产出纯英文静态页（`x-default`），中文整体落入 `/zh/` 子路径**，既有 `/en/*` 路径保留 `301` 兼容跳转；英文对外分享统一使用 `https://dislop.com/`，中文对外分享统一使用 `https://dislop.com/zh/`。
+
+### 6.5 Agent Readiness 协议补全与 4-Skill 横评入口（`2026-11-24`）
+
+结合外部 Agent 就绪度体检、MCP 目录质量评分与技能市场索引核验，在保持原有静态架构的前提下补全多项机器协议与 1 组高引用基准页面。边缘网关已为 `/`、`/awesome/` 与双语指南详情页提供 `Accept: text/markdown` 透明映射，同步输出 `Vary: Accept`、`Content-Signal: ai-train=no, search=yes, ai-input=yes` 与 RFC 8288 `Link` 响应头，并在 `robots.txt` 声明 `Content-Signal` 与 `Agentmap`。
+
+机器发现端点新增了 `/.well-known/api-catalog`（RFC 9727 `linkset` 指向 `/mcp` 与 `/api/health`）、`/.well-known/ai-catalog.json` 与 `<link rel="ai-catalog">`、纯英文 `/auth.md` 鉴权说明，修正了 `/.well-known/oauth-protected-resource` 根路径与 `/mcp` 子路径的 `resource` 精确匹配，并在浏览器工作台渐进注册只读 `dislop_check_draft` WebMCP 工具。技能与工具元数据方面，`/.well-known/agent-skills/index.json` 现已暴露全部 5 个技能及 `sha256` 摘要（含 4 个任务子技能镜像 `/tools/skills/*.md`），云端 MCP 全部 10 个工具也补齐了参数级 `description`。内容侧同步上线第 7 组双语指南 `anti-slop-skill-benchmark`（[EN](../../../content/guides/anti-slop-skill-benchmark.en.md) / [ZH](../../../content/guides/anti-slop-skill-benchmark.zh-CN.md)），把 `4` 款开源技能 `30` 份样本的一手字符串漏检与置信区间公开沉淀为可验证的长青参考页，配合站外社区与清单提交形成 GEO 交叉印证。

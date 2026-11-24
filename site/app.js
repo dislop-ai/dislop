@@ -275,6 +275,9 @@ const I18N = {
     "guides.g6Cat": "基础识别 · 6 分钟",
     "guides.g6Title": "AI 味长什么样",
     "guides.g6Desc": "从词面套话、二阶句式到模板网页与 PPT 的四层信号。",
+    "guides.g7Cat": "评测基准 · 7 分钟",
+    "guides.g7Title": "4 款去 AI 味 Skill 30 样本实测",
+    "guides.g7Desc": "Humanizer、stop-slop 与 Humanizer-zh 单独跑通后仍漏掉哪些硬伤。",
 
     "share.title": "推荐给同事或一起补案例和规则",
     "share.c1Title": "发给团队",
@@ -579,6 +582,9 @@ const I18N = {
     "guides.g6Cat": "Fundamentals · 6 min",
     "guides.g6Title": "What AI slop looks like",
     "guides.g6Desc": "Four layers of signals across prose, web pages, and slides.",
+    "guides.g7Cat": "Benchmarks · 7 min",
+    "guides.g7Title": "4 anti-slop skills on 30 drafts",
+    "guides.g7Desc": "Raw defects that slipped past Humanizer, stop-slop, and Humanizer-zh before gating.",
 
     "share.title": "Share with your team, or contribute a case",
     "share.c1Title": "Send it to your team",
@@ -6952,7 +6958,59 @@ function initDemoStage() {
 
 // ---------- Wire Events ----------
 
+function registerWebMcpTools() {
+  try {
+    const mc =
+      (typeof navigator !== "undefined" && navigator.modelContext) ||
+      (typeof document !== "undefined" && document.modelContext);
+    if (!mc || typeof mc.registerTool !== "function") return;
+    mc.registerTool({
+      name: "dislop_check_draft",
+      description:
+        "Run offline deterministic AI-slop checks on prose, Markdown, HTML/CSS/JSX, or SVG directly in browser memory with zero uploads.",
+      annotations: { readOnlyHint: true },
+      inputSchema: {
+        type: "object",
+        required: ["text"],
+        properties: {
+          text: { type: "string", description: "Draft text or markup to check locally" },
+          pack: {
+            type: "string",
+            description:
+              "Style pack ID (auto, business-brief, engineering-spec, regulated-comms, literary-essay, deck-and-ui, executive-deck)",
+          },
+          filename: { type: "string", description: "Optional virtual filename hint such as draft.md or page.html" },
+        },
+      },
+      async execute(args) {
+        const input = String(args?.text || "");
+        const filename = String(args?.filename || "draft.md");
+        const modality = detectModality(filename, input);
+        const packInfo = resolveWorkbenchPack(String(args?.pack || "auto"), input, modality);
+        const pack = resolveEffectivePack(packInfo.packId, PACKS_BY_ID);
+        const res = collectUnifiedOfflineAudit(input, { filename, modality, packId: packInfo.packId, pack });
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                packId: packInfo.packId,
+                modality,
+                summary: res.summary,
+                findings: res.findings,
+              }),
+            },
+          ],
+        };
+      },
+    });
+  } catch {
+    // Progressive enhancement: ignore unsupported WebMCP hosts
+  }
+}
+
 function init() {
+  registerWebMcpTools();
   const savedTheme = safeGetStorage("dislop-theme");
   const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   applyTheme(savedTheme || (prefersDark ? "dark" : "light"));

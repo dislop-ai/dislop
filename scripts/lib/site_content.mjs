@@ -834,6 +834,7 @@ ${altLinkHtml}
   <script src="${depthPrefix}lang-init.js"></script>
   <link rel="alternate" type="application/atom+xml" href="${depthPrefix}${feedPath}" title="${isEn ? "dislop Guides (EN)" : "dislop 实用指南（中文）"}">
 ${mdAltHref ? `  <link rel="alternate" type="text/markdown" href="${escapeHtml(mdAltHref)}" title="Markdown Mirror">\n` : ""}  <link rel="alternate" type="text/plain" href="${depthPrefix}llms.txt" title="LLMs Resource Index">
+  <link rel="ai-catalog" href="/.well-known/ai-catalog.json">
   <link rel="icon" type="image/svg+xml" href="${depthPrefix}assets/logo.svg">
   <link rel="stylesheet" href="${depthPrefix}styles.css">
 ${jsonLdScript}

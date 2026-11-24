@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-static-lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准） — dislop</title>
+  <meta name="description" content="同一模型下对比 humanizer、stop-slop、Humanizer-zh、lieflat 与 dislop 在 Markdown、网页组件、Word 与 PPT XML 上的 30 份实测数据。">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/zh/guides/anti-slop-skill-benchmark/">
+  <meta property="og:title" content="4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准） — dislop">
+  <meta property="og:description" content="同一模型下对比 humanizer、stop-slop、Humanizer-zh、lieflat 与 dislop 在 Markdown、网页组件、Word 与 PPT XML 上的 30 份实测数据。">
+  <meta property="og:image" content="https://dislop.com/assets/og-card-zh.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准） — dislop">
+  <meta name="twitter:description" content="同一模型下对比 humanizer、stop-slop、Humanizer-zh、lieflat 与 dislop 在 Markdown、网页组件、Word 与 PPT XML 上的 30 份实测数据。">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card-zh.png">
+  <link rel="canonical" href="https://dislop.com/zh/guides/anti-slop-skill-benchmark/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/guides/anti-slop-skill-benchmark/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/anti-slop-skill-benchmark/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/anti-slop-skill-benchmark/">
+  <script src="../../../lang-init.js"></script>
+  <link rel="alternate" type="application/atom+xml" href="../../../zh/feed.xml" title="dislop 实用指南（中文）">
+  <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../../llms.txt" title="LLMs Resource Index">
+  <link rel="ai-catalog" href="/.well-known/ai-catalog.json">
+  <link rel="icon" type="image/svg+xml" href="../../../assets/logo.svg">
+  <link rel="stylesheet" href="../../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/zh/guides/anti-slop-skill-benchmark/",
+      "url": "https://dislop.com/zh/guides/anti-slop-skill-benchmark/",
+      "headline": "4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准）",
+      "description": "同一模型下对比 humanizer、stop-slop、Humanizer-zh、lieflat 与 dislop 在 Markdown、网页组件、Word 与 PPT XML 上的 30 份实测数据。",
+      "inLanguage": "zh-CN",
+      "datePublished": "2026-11-24",
+      "dateModified": "2026-11-24",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "image": "https://dislop.com/assets/og-card-zh.png",
+      "citation": [
+        "https://github.com/blader/humanizer",
+        "https://github.com/hardikpandya/stop-slop",
+        "https://github.com/op7418/Humanizer-zh",
+        "https://github.com/vale-cli/vale",
+        "https://arxiv.org/abs/2510.22954",
+        "https://arxiv.org/abs/2311.09735"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/zh/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "实用指南",
+          "item": "https://dislop.com/zh/guides/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "4 款 Skill 30 样本实测",
+          "item": "https://dislop.com/zh/guides/anti-slop-skill-benchmark/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "为什么只装写作类去味 Skill，还是会漏掉网页死按钮和 PPT 裸星号？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "纯文字 Skill 的指令集中在散文用词和语气上，Agent 修改 HTML 属性或 Office Open XML 时很少主动排查 href=\\\"#\\\" 空链接、三层套盒边框或幻灯片里的 **Summary**: 符号。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "在 Humanizer-zh 后面再挂一道 dislop，会不会把原本写得好的人话改坏或改丢数字？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "30 份测试稿与 6 份干净人工对照稿的实测中，所有配对组在人工对照稿上均为 0 误伤，英文组事实漂移为 0。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "这组数据如何在本地复现验证？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "在仓库根目录运行 node scripts/run_ecosystem_benchmark.mjs --rescore-saved 与 python3 benchmarks/verify_ecosystem_numbers.py，可离线复算全部 180 条评分记录。"
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳至正文</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../../zh/">
+        <img src="../../../assets/logo.svg" width="30" height="30" alt="">
+        <span class="brand-wordmark">dislop</span>
+        <span class="brand-meta"><span>AI 味检查</span> · <span class="brand-ver">v0.9.0</span></span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a href="../../../zh/#workbench">工作台</a>
+        <a href="../../../zh/#surfaces">接入</a>
+        <a href="../../../zh/#cases">案例</a>
+        <a href="../../../zh/guides/" aria-current="page">指南</a>
+        <a href="../../../zh/rules/">规则</a>
+        <a href="../../../zh/awesome/">工具清单</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../../zh/#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>登录</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label">GitHub ★</span></a>
+        <a href="../../../guides/anti-slop-skill-benchmark/" data-lang-switch="en" class="ctrl-btn" aria-label="Switch to English">EN</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="切换浅深色主题">深色</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="面包屑导航">
+        <a href="../../../zh/">dislop</a> / <a href="../">实用指南</a> / <span aria-current="page">4 款 Skill 30 样本实测</span>
+      </nav>
+
+      <article>
+        <header>
+          <h1 class="lead-heading" style="max-width:30ch;">4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准）</h1>
+          <div class="article-meta">
+            <span>选型与基准</span>
+            <span>更新于 2026-11-24</span>
+            <span>7 分钟阅读</span>
+            <a href="./index.md">Markdown</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">先说结论</div>
+            <p>先交代口径偏置：第 2 节通过率由 dislop 自身规则打分。从原始输出字符串看，4 款独立 Skill 在 HTML 任务上全部留下了 href=\&quot;#\&quot; 空链接，stop-slop 在 .pptx XML 里留下了裸 <strong>Summary</strong>: 与 62.5% 缩字参数，3 款原样退回了三分号旧推销句。接入一道 dislop 复检后，英文一次过检率提升 +13.3 个百分点，中文提升 +20.0 个百分点，6 份干净人工对照稿零误伤。</p>
+          </div>
+        </header>
+
+        <div class="article-shell">
+          <div class="article-prose">
+<p><code>2026-11-23</code>，我们拉取公开仓 <code>blader/humanizer</code>（commit <code>a32f244073</code>）、<code>hardikpandya/stop-slop</code>（<code>8da1f03018</code>）、<code>op7418/Humanizer-zh</code>（<code>f4518a8eab</code>）与 <code>larashero3-dotcom/lieflat-less-ai-tone</code>（<code>fe77df00a2</code>）的完整 <code>SKILL.md</code>，在同一模型（<code>gemini-3.5-flash</code>，总花费 <code>$0.18886</code>，<code>0</code> 次长度截断）上实跑 <code>30</code> 份修改与保真对照任务。</p>
+
+<p>先说明评分偏置：第 2 节表格里的「一次全部通过率」由 <code>dislop</code> 自身的确定性规则包打分，天然贴合 <code>dislop</code> 的检查口径。因此建议优先核对第 3 节不依赖任何打分器的原始字符串事实。</p>
+
+<h2 id="1-测试方法与样本构成">1. 测试方法与样本构成</h2>
+
+<p><code>30</code> 个任务取自 <code>dislop</code> 公开测试集 <code>revision-v1.json</code>、<code>revision-hard-v2.json</code> 与 <code>skill-revision-ext-v1.json</code>（英文 <code>15</code> 份、中文 <code>15</code> 份）：</p>
+
+<ol>
+<li><strong>工作文档与随笔</strong>：技术公告、上线说明、故障复盘、随笔和首页文案，外加 <code>6</code> 份干净人工对照稿（<code>preserve</code>，中英文各 <code>3</code> 份）用来测是否过度改写。</li>
+<li><strong>办公 XML 文档</strong>：拆分成跨 Run XML 节点的 Word 文档（<code>word/document.xml</code>）和含溢出风险的 PowerPoint 幻灯片（<code>.pptx</code>）。</li>
+<li><strong>网页组件</strong>：带有多层边框、模板徽章和 <code>href=&quot;#&quot;</code> 空链接的 AI 生成 HTML 卡片。</li>
+</ol>
+
+<p>每款外部工具都在相同任务提示词下对比两档：单独加载其 <code>SKILL.md</code> 跑一遍；以及保留它第一遍生成的原输出，经离线 <code>dislop</code> 检查标出命中规则和丢失的数字或限定词后再做一轮定向修补。全部 <code>180</code> 条评分记录已由 Node（<code>node scripts/run_ecosystem_benchmark.mjs --rescore-saved</code>）与 Python（<code>python3 benchmarks/verify_ecosystem_numbers.py</code>）离线复算一致。</p>
+
+<h2 id="2-中英文-30-份样本实测数据">2. 中英文 30 份样本实测数据</h2>
+
+<h3 id="中文测试集15-份">中文测试集（<code>15</code> 份）</h3>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>测试组</th><th>无硬破绽拦截率</th><th>一次全部通过率</th><th>综合分</th><th>事实保留率</th><th>事实漂移样本数</th><th>硬伤数</th><th>套话与结构命中数</th></tr></thead><tbody>
+<tr><td>原稿基线</td><td>13/15 (86.7%)</td><td>3/15 (20.0%)</td><td>74.2</td><td>100.0%</td><td>0</td><td>5</td><td>33</td></tr>
+<tr><td>单用 <code>op7418/Humanizer-zh</code></td><td>13/15 (86.7%)</td><td>7/15 (46.7%)</td><td>89.1</td><td>100.0%</td><td>0</td><td>1</td><td>11</td></tr>
+<tr><td><code>Humanizer-zh</code> + <code>dislop</code> 复检</td><td>13/15 (86.7%)</td><td>10/15 (66.7%)</td><td>94.9</td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td>3</td></tr>
+<tr><td>单用 <code>larashero3-dotcom/lieflat</code></td><td>13/15 (86.7%)</td><td>6/15 (40.0%)</td><td>82.8</td><td>93.3%</td><td>1</td><td>1</td><td>12</td></tr>
+<tr><td><code>lieflat</code> + <code>dislop</code> 复检</td><td><strong>14/15 (93.3%)</strong></td><td>9/15 (60.0%)</td><td>95.8</td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td>3</td></tr>
+<tr><td><code>dislop</code> Skill + CLI 闭环</td><td><strong>14/15 (93.3%)</strong></td><td><strong>13/15 (86.7%)</strong></td><td><strong>97.1</strong></td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>2</strong></td></tr>
+</tbody></table></div>
+
+<h3 id="英文测试集15-份">英文测试集（<code>15</code> 份）</h3>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>测试组</th><th>无硬破绽拦截率</th><th>一次全部通过率</th><th>综合分</th><th>事实保留率</th><th>事实漂移样本数</th><th>硬伤数</th><th>套话与结构命中数</th></tr></thead><tbody>
+<tr><td>原稿基线</td><td>13/15 (86.7%)</td><td>3/15 (20.0%)</td><td>75.5</td><td>100.0%</td><td>0</td><td>5</td><td>29</td></tr>
+<tr><td>单用 <code>blader/humanizer</code></td><td>14/15 (93.3%)</td><td>12/15 (80.0%)</td><td>94.3</td><td>100.0%</td><td>0</td><td>1</td><td>6</td></tr>
+<tr><td><code>humanizer</code> + <code>dislop</code> 复检</td><td>14/15 (93.3%)</td><td><strong>14/15 (93.3%)</strong></td><td>97.3</td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td>2</td></tr>
+<tr><td>单用 <code>hardikpandya/stop-slop</code></td><td><strong>15/15 (100.0%)</strong></td><td>11/15 (73.3%)</td><td>94.9</td><td>100.0%</td><td>0</td><td>2</td><td>3</td></tr>
+<tr><td><code>stop-slop</code> + <code>dislop</code> 复检</td><td><strong>15/15 (100.0%)</strong></td><td>13/15 (86.7%)</td><td><strong>99.5</strong></td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+<tr><td><code>dislop</code> Skill + CLI 闭环</td><td>14/15 (93.3%)</td><td><strong>14/15 (93.3%)</strong></td><td>97.3</td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td>2</td></tr>
+</tbody></table></div>
+
+<p>中英文共 <code>6</code> 份干净人工对照稿在全部测试组上均保持 <code>0/6</code> 过度改写失误。</p>
+
+<h2 id="3-从原始输出核实的四类漏检事实">3. 从原始输出核实的四类漏检事实</h2>
+
+<ol>
+<li><strong>网页空链接与幻灯片 XML 残留直接漏出</strong>：<code>4</code> 款独立改写 Skill 在 HTML 任务上全部原样保留了 <code>href=&quot;#&quot;</code> 空按钮；在幻灯片 XML 上，<code>stop-slop</code> 留下了未渲染的 <code>**Summary**:</code> 符号和 <code>62.5%</code> 缩字参数。接入 <code>dislop</code> 复检后，所有组别的 <code>core</code> 硬伤清零。</li>
+</ol>
+
+<pre><code class="language-html">&lt;div class=&quot;bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent&quot;&gt;
+  &lt;span class=&quot;badge&quot;&gt;AI 驱动&lt;/span&gt;
+  &lt;h2&gt;1.2 秒查完 48 份演示文稿&lt;/h2&gt;
+  &lt;a href=&quot;#&quot;&gt;下载完整报告&lt;/a&gt;
+&lt;/div&gt;</code></pre>
+
+<ol>
+<li><strong>三分号排比与金句收尾绕过了禁词表</strong>：在取自 <code>dislop</code> 早期淘汰首页文案的测试样本上，<code>humanizer</code>、<code>Humanizer-zh</code> 与 <code>lieflat</code> 均原字不动退回（<code>3/4</code> 款）。</li>
+</ol>
+
+<pre><code class="language-text">硬伤红笔划掉；套话打个问号；你改完之后，我们再把所有文件重查一遍。它绝不代笔。笔一直在你手里。</code></pre>
+
+<ol>
+<li><strong>极端压缩把整段中文技术规范压成了空串</strong>：在 <code>rev-zh-03-tech-spec</code> 上，单用 <code>lieflat</code> 输出 <code>0</code> 字符空串（<code>8000 QPS</code> 指标全部丢失，得分 <code>0</code>），经 <code>dislop</code> 检出后修补恢复至 <code>90</code> 分。</li>
+<li><strong>验证器自纠记录（<code>v0.8.2</code> -&gt; <code>v0.8.3</code>）</strong>：首轮 <code>v0.8.2</code> 对英文同义边界改写报过 <code>3</code> 次误判（例如 <code>inside 5 seconds</code> 改为 <code>within 5 seconds</code>、<code>3600 seconds</code> 改为 <code>3600-second</code>、<code>40 million rows</code> 合并重复条目）。<code>v0.8.3</code> 补齐词法归一与去重后，英文全部组别事实漂移降至 <code>0</code>。</li>
+</ol>
+
+<h2 id="4-稳妥的组合用法与口径局限">4. 稳妥的组合用法与口径局限</h2>
+
+<p><code>Humanizer-zh</code>、<code>lieflat</code>、<code>humanizer</code> 和 <code>stop-slop</code> 适合做第一遍顺文字，不需要二选一替换。在前面保留你顺手的改写 Skill，交付前加一道本地离线检查与核对即可：</p>
+
+<pre><code class="language-bash"># 本地离线检查 Markdown、HTML/JSX/SVG、Word 与 PPT（零上传）
+npx --yes dislop check . --pack auto --lang zh --format agent
+
+# 改完对照 git HEAD 核对数字和限定词有没有丢失
+npx --yes dislop verify --git HEAD draft.md --strict</code></pre>
+
+<p><strong>口径与局限</strong>：本轮测试覆盖单模型（<code>gemini-3.5-flash</code>）的 <code>30</code> 份样本，按单语 <code>15</code> 份计算时 95% 威尔逊置信区间较宽（如 <code>14/15 = 93.3%</code> 对应 <code>[70.2%, 98.8%]</code>）；外部 <code>SKILL.md</code> 均按 <code>2026-11-23</code> 公开原版未改提示词实测。完整原始记录见 <a href="https://github.com/dislop-ai/dislop/blob/main/benchmarks/ECOSYSTEM-BENCHMARK.zh-CN.md" target="_blank" rel="noopener">ECOSYSTEM-BENCHMARK.zh-CN.md</a>。</p>
+<h2 id="faq">常见问题</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>为什么只装写作类去味 Skill，还是会漏掉网页死按钮和 PPT 裸星号？</h3>
+            <p>纯文字 Skill 的指令集中在散文用词和语气上，Agent 修改 HTML 属性或 Office Open XML 时很少主动排查 href=\&quot;#\&quot; 空链接、三层套盒边框或幻灯片里的 <strong>Summary</strong>: 符号。</p>
+          </div>
+          <div class="faq-item">
+            <h3>在 Humanizer-zh 后面再挂一道 dislop，会不会把原本写得好的人话改坏或改丢数字？</h3>
+            <p>30 份测试稿与 6 份干净人工对照稿的实测中，所有配对组在人工对照稿上均为 0 误伤，英文组事实漂移为 0。</p>
+          </div>
+          <div class="faq-item">
+            <h3>这组数据如何在本地复现验证？</h3>
+            <p>在仓库根目录运行 node scripts/run_ecosystem_benchmark.mjs --rescore-saved 与 python3 benchmarks/verify_ecosystem_numbers.py，可离线复算全部 180 条评分记录。</p>
+          </div>
+        </div>
+<h2 id="related-rules">对应的自动检查规则</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../../zh/rules/chatbot-artifact/"><code>chatbot-artifact</code> · 留在正文里的 AI 寒暄</a>
+<a class="related-link-chip" href="../../../zh/rules/ui-dead-control/"><code>ui-dead-control</code> · 点不动的假按钮或空链接</a>
+<a class="related-link-chip" href="../../../zh/rules/markdown-leak/"><code>markdown-leak</code> · 没渲染的 Markdown 符号</a>
+<a class="related-link-chip" href="../../../zh/rules/semicolon-tricolon/"><code>semicolon-tricolon</code> · 三段对称分号推销句</a>
+<a class="related-link-chip" href="../../../zh/rules/negation-pivot-frame/"><code>negation-pivot-frame</code> · “不是 A，而是 B”套句</a>
+</div>
+<h2 id="next-guides">延伸阅读</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../linter-vs-detector-vs-skill/">去 AI 味工具对比</a>
+<a class="related-link-chip" href="../agent-cli-mcp-tutorial/">Agent 与 CI 接入教程</a>
+<a class="related-link-chip" href="../deslop-pptx-docx/">PPT 与 Word 去模板味</a>
+</div>
+<h2 id="sources">参考与一手出处</h2>
+        <ul>
+          <li><a href="https://github.com/blader/humanizer" target="_blank" rel="noopener">blader/humanizer (Agent Skill based on WP:AISIGNS)</a> — 71,724 stars (2026-11-21 snapshot); translates Wikipedia's Signs of AI Writing into an agent editing skill with voice sample calibration.</li>
+          <li><a href="https://github.com/hardikpandya/stop-slop" target="_blank" rel="noopener">hardikpandya/stop-slop</a> — 19,097 stars (2026-11-21 snapshot); separates banned phrases, structural patterns, and before/after examples with a five-axis rubric.</li>
+          <li><a href="https://github.com/op7418/Humanizer-zh" target="_blank" rel="noopener">op7418/Humanizer-zh: 中文去 AI 味写作技能</a> — 23,450 星标（2026-11-21 快照）；针对中文写作里的套话、公文腔与翻译腔整理对照清单，适合作为写作前提示参考。</li>
+          <li><a href="https://github.com/vale-cli/vale" target="_blank" rel="noopener">vale-cli/vale: Syntax-aware linter for prose</a> — 6,413 stars (2026-11-21 snapshot); deterministic prose linter for Markdown, HTML, and AsciiDoc built around configurable YAML style rules.</li>
+          <li><a href="https://arxiv.org/abs/2510.22954" target="_blank" rel="noopener">Artificial Hivemind: The Open-Ended Homogeneity of Language Models (and Beyond) (NeurIPS 2025)</a> — Using the Infinity-Chat dataset, demonstrated both intra-model repetition and inter-model homogeneity across different LLM families.</li>
+          <li><a href="https://arxiv.org/abs/2311.09735" target="_blank" rel="noopener">GEO: Generative Engine Optimization (Aggarwal et al., ACM KDD 2024)</a> — Adding verifiable statistics, primary quotations, and clear inline citations raised generative-engine visibility by up to 40%, while keyword stuffing hurt.</li>
+        </ul>
+<div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../../zh/#workbench">去工作台试查 →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">复制引用（PR / 群聊）</button><code id="share-cite-payload" hidden>[4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准）](https://dislop.com/zh/guides/anti-slop-skill-benchmark/) — 同一模型下对比 humanizer、stop-slop、Humanizer-zh、lieflat 与 dislop 在 Markdown、网页组件、Word 与 PPT XML 上的 30 份实测数据。</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">投稿翻车样本</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub 收藏 ★</a>
+        </div>
+          </div>
+        <aside class="toc-rail" aria-label="本文目录">
+          <h2 class="toc-rail-title">本文目录</h2>
+          <ol>
+            <li><a href="#1-测试方法与样本构成">1. 测试方法与样本构成</a></li>
+            <li><a href="#2-中英文-30-份样本实测数据">2. 中英文 30 份样本实测数据</a></li>
+            <li><a href="#3-从原始输出核实的四类漏检事实">3. 从原始输出核实的四类漏检事实</a></li>
+            <li><a href="#4-稳妥的组合用法与口径局限">4. 稳妥的组合用法与口径局限</a></li>
+          </ol>
+        </aside>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div class="colophon-note">
+        <a class="colophon-brand" href="../../../zh/"><img src="../../../assets/logo.svg" width="20" height="20" alt="">dislop</a>
+        <span>这个页面自己也跑过 dislop check site/，0 处问题。</span>
+        <span>给 Agent 读的话，从 <a href="../../../llms.txt">/llms.txt</a> 开始。</span>
+      </div>
+      <nav class="colophon-groups" aria-label="页脚导航">
+        <div class="colophon-group">
+          <span class="colophon-group-title">资料</span>
+          <a href="../../../zh/guides/">实用指南</a>
+          <a href="../../../zh/rules/">全部规则</a>
+          <a href="../../../zh/awesome/">工具清单</a>
+          <a href="../../../llms.txt">llms.txt</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">项目</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.zh-CN.md" target="_blank" rel="noopener">路线图</a>
+          <a href="../../../methodology/brand-and-voice.md">文案基准</a>
+          <a href="../../../methodology/design-system.md">视觉规范</a>
+          <a href="../../../privacy.md">隐私与数据边界</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">外部链接</span>
+          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+          <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
+          <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
+          <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+        </div>
+      </nav>
+    </footer>
+  </div>
+  <script defer src="../../../static-ui.js"></script>
+
+</body>
+</html>

@@ -420,6 +420,8 @@ const robotsTxt = fs.readFileSync(path.join(SITE_DIR, "robots.txt"), "utf8");
 assert.ok(robotsTxt.includes("Sitemap: https://dislop.com/sitemap.xml"), "robots.txt missing Sitemap directive");
 assert.ok(robotsTxt.includes("Disallow: /api/"), "robots.txt missing Disallow: /api/");
 assert.ok(robotsTxt.includes("Disallow: /mcp"), "robots.txt missing Disallow: /mcp");
+assert.ok(robotsTxt.includes("Content-Signal: ai-train=no, search=yes, ai-input=yes"), "robots.txt missing Content-Signal directive");
+assert.ok(robotsTxt.includes("Agentmap: https://dislop.com/.well-known/ai-catalog.json"), "robots.txt missing Agentmap directive");
 
 const sitemapXml = fs.readFileSync(path.join(SITE_DIR, "sitemap.xml"), "utf8");
 assert.ok(sitemapXml.includes('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'), "sitemap.xml missing urlset xmlns");
@@ -772,12 +774,13 @@ for (const bot of ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot", "Disall
 }
 
 assert.ok(Buffer.byteLength(llmsTxt, "utf8") <= 2600, `site/llms.txt exceeds 2600-byte budget`);
+const expectedGuideCount = fs.readdirSync(guidesDir).filter((f) => f.endsWith(".en.md")).length;
 for (const feedRel of ["feed.xml", "zh/feed.xml"]) {
   const feedPath = path.join(SITE_DIR, feedRel);
   assert.ok(fs.existsSync(feedPath), `Missing Atom feed: site/${feedRel}`);
   const feedXml = fs.readFileSync(feedPath, "utf8");
   assert.ok(feedXml.includes('<feed xmlns="http://www.w3.org/2005/Atom">'), `${feedRel} missing Atom root`);
-  assert.equal((feedXml.match(/<entry>/g) || []).length, 6, `${feedRel} should list 6 guide entries`);
+  assert.equal((feedXml.match(/<entry>/g) || []).length, expectedGuideCount, `${feedRel} should list ${expectedGuideCount} guide entries`);
 }
 
 function walkHtmlFiles(dir, out = []) {
@@ -943,6 +946,30 @@ for (const refItem of mainSkillEntry.references || []) {
   const refSha = `sha256:${sha256(fs.readFileSync(path.join(ROOT, "skills", "dislop", "references", refRel), "utf8"))}`;
   assert.equal(refItem.digest, refSha, `Reference digest mismatch for ${refRel}`);
 }
+for (const subSkillName of ["deslop-docs", "deslop-slides-docx", "deslop-web-ui", "deslop-verify"]) {
+  const subEntry = (skillsIdx.skills || []).find((s) => s.name === subSkillName);
+  assert.ok(subEntry, `agent-skills/index.json missing sub-skill ${subSkillName}`);
+  const subRaw = fs.readFileSync(path.join(ROOT, "skills", subSkillName, "SKILL.md"), "utf8");
+  assert.equal(subEntry.digest, `sha256:${sha256(subRaw)}`, `Sub-skill digest mismatch for ${subSkillName}`);
+  assert.ok(fs.existsSync(path.join(SITE_DIR, "tools", "skills", `${subSkillName}.md`)), `Missing site/tools/skills/${subSkillName}.md`);
+}
+
+const apiCatalogPath = path.join(SITE_DIR, ".well-known", "api-catalog");
+assert.ok(fs.existsSync(apiCatalogPath), "Missing site/.well-known/api-catalog");
+const apiCatalog = JSON.parse(fs.readFileSync(apiCatalogPath, "utf8"));
+assert.ok(Array.isArray(apiCatalog.linkset) && apiCatalog.linkset.length >= 2, ".well-known/api-catalog missing linkset entries");
+
+const aiCatalogPath = path.join(SITE_DIR, ".well-known", "ai-catalog.json");
+assert.ok(fs.existsSync(aiCatalogPath), "Missing site/.well-known/ai-catalog.json");
+const aiCatalog = JSON.parse(fs.readFileSync(aiCatalogPath, "utf8"));
+assert.equal(aiCatalog.apiCatalog, "/.well-known/api-catalog", ".well-known/ai-catalog.json apiCatalog mismatch");
+assert.equal(aiCatalog.authDoc, "/auth.md", ".well-known/ai-catalog.json authDoc mismatch");
+assert.ok(Array.isArray(aiCatalog.resources) && aiCatalog.resources.length > 0, ".well-known/ai-catalog.json missing resources");
+
+const authMdPath = path.join(SITE_DIR, "auth.md");
+assert.ok(fs.existsSync(authMdPath), "Missing site/auth.md");
+const authMd = fs.readFileSync(authMdPath, "utf8");
+assert.ok(authMd.includes("oauth-authorization-server") && authMd.includes("dislop_check"), "site/auth.md missing OAuth / free-tool guide");
 
 assert.ok(llmsTxt.includes("npx --yes dislop check"), "site/llms.txt missing CLI Quick Start command");
 assert.ok(llmsTxt.includes("https://dislop.com/.well-known/mcp/server-card.json"), "site/llms.txt missing server-card.json link");
@@ -955,6 +982,7 @@ assert.ok(
 
 for (const homeRel of ["index.html", "zh/index.html"]) {
   const homeDoc = fs.readFileSync(path.join(SITE_DIR, homeRel), "utf8");
+  assert.ok(homeDoc.includes('rel="ai-catalog"'), `${homeRel} missing <link rel="ai-catalog">`);
   assert.ok(homeDoc.includes('id="hero-prompt"'), `${homeRel} missing #hero-prompt`);
   assert.ok(homeDoc.includes('data-copy-target="hero-prompt"'), `${homeRel} missing copy button for #hero-prompt`);
   assert.ok(homeDoc.includes("https://dislop.com/llms.txt"), `${homeRel} prompt missing llms.txt reference`);

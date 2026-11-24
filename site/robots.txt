@@ -1,4 +1,5 @@
 User-agent: *
+Content-Signal: ai-train=no, search=yes, ai-input=yes
 Allow: /
 Disallow: /api/
 Disallow: /mcp
@@ -41,4 +42,5 @@ Disallow: /mcp
 # Agent index: https://dislop.com/llms.txt
 # MCP server card: https://dislop.com/.well-known/mcp/server-card.json
 # Agent skills index: https://dislop.com/.well-known/agent-skills/index.json
+Agentmap: https://dislop.com/.well-known/ai-catalog.json
 Sitemap: https://dislop.com/sitemap.xml

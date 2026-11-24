@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" data-static-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark) — dislop</title>
+  <meta name="description" content="Live 30-task benchmark comparing humanizer, stop-slop, Humanizer-zh, lieflat, and dislop across Markdown, HTML UI cards, Word, and PowerPoint XML.">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="dislop">
+  <meta property="og:url" content="https://dislop.com/guides/anti-slop-skill-benchmark/">
+  <meta property="og:title" content="4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark) — dislop">
+  <meta property="og:description" content="Live 30-task benchmark comparing humanizer, stop-slop, Humanizer-zh, lieflat, and dislop across Markdown, HTML UI cards, Word, and PowerPoint XML.">
+  <meta property="og:image" content="https://dislop.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@dislop_ai">
+  <meta name="twitter:creator" content="@dislop_ai">
+  <meta name="twitter:title" content="4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark) — dislop">
+  <meta name="twitter:description" content="Live 30-task benchmark comparing humanizer, stop-slop, Humanizer-zh, lieflat, and dislop across Markdown, HTML UI cards, Word, and PowerPoint XML.">
+  <meta name="twitter:image" content="https://dislop.com/assets/og-card.png">
+  <link rel="canonical" href="https://dislop.com/guides/anti-slop-skill-benchmark/">
+  <link rel="alternate" hreflang="en" href="https://dislop.com/guides/anti-slop-skill-benchmark/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://dislop.com/zh/guides/anti-slop-skill-benchmark/">
+  <link rel="alternate" hreflang="x-default" href="https://dislop.com/guides/anti-slop-skill-benchmark/">
+  <script src="../../lang-init.js"></script>
+  <link rel="alternate" type="application/atom+xml" href="../../feed.xml" title="dislop Guides (EN)">
+  <link rel="alternate" type="text/markdown" href="./index.md" title="Markdown Mirror">
+  <link rel="alternate" type="text/plain" href="../../llms.txt" title="LLMs Resource Index">
+  <link rel="ai-catalog" href="/.well-known/ai-catalog.json">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dislop.com/guides/anti-slop-skill-benchmark/",
+      "url": "https://dislop.com/guides/anti-slop-skill-benchmark/",
+      "headline": "4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark)",
+      "description": "Live 30-task benchmark comparing humanizer, stop-slop, Humanizer-zh, lieflat, and dislop across Markdown, HTML UI cards, Word, and PowerPoint XML.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-24",
+      "dateModified": "2026-11-24",
+      "author": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "dislop",
+        "url": "https://dislop.com/"
+      },
+      "image": "https://dislop.com/assets/og-card.png",
+      "citation": [
+        "https://github.com/blader/humanizer",
+        "https://github.com/hardikpandya/stop-slop",
+        "https://github.com/vale-cli/vale",
+        "https://arxiv.org/abs/2510.22954",
+        "https://arxiv.org/abs/2311.09735"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "dislop",
+          "item": "https://dislop.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Guides",
+          "item": "https://dislop.com/guides/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "4-Skill 30-Task Benchmark",
+          "item": "https://dislop.com/guides/anti-slop-skill-benchmark/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why did standalone prose skills miss HTML dead links and PowerPoint XML leaks?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Prompt-only writing skills focus on prose vocabulary and sentence tone. When an agent edits HTML cards or OOXML runs, prompt rules rarely trigger on attribute strings like href=\\\"#\\\", nested card borders, or raw asterisks inside slide XML."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does running dislop after humanizer or stop-slop alter numbers or over-edit clean human drafts?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Across all 30 benchmark tasks and 6 clean human-written controls, pairing a style skill with dislop check and dislop verify kept English fact retention at 100.0% with 0 over-edit failures on the clean controls."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I reproduce or verify these numbers locally?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Clone the dislop repository and run node scripts/run_ecosystem_benchmark.mjs --rescore-saved followed by python3 benchmarks/verify_ecosystem_numbers.py to inspect all 180 scored rows offline."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="rail-shell">
+    <header class="topbar band-rule">
+      <a class="brand-lockup" href="../../">
+        <img src="../../assets/logo.svg" width="30" height="30" alt="">
+        <span class="brand-wordmark">dislop</span>
+        <span class="brand-meta"><span>AI slop linter</span> · <span class="brand-ver">v0.9.0</span></span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../../#workbench">Workbench</a>
+        <a href="../../#surfaces">Setup</a>
+        <a href="../../#cases">Cases</a>
+        <a href="../../guides/" aria-current="page">Guides</a>
+        <a href="../../rules/">Rules</a>
+        <a href="../../awesome/">Directory</a>
+      </nav>
+
+      <div class="top-controls">
+        <a href="../../#cloud-token-box" class="ctrl-btn topbar-acct-btn" data-static-acct>Sign in</a>
+        <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener" class="ctrl-btn gh-ctrl"><svg class="gh-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-ctrl-label">GitHub ★</span></a>
+        <a href="../../zh/guides/anti-slop-skill-benchmark/" data-lang-switch="zh" class="ctrl-btn" aria-label="切换为中文">中文</a>
+        <button type="button" id="theme-toggle" class="ctrl-btn" aria-label="Toggle color theme">Dark</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+    <section class="section-block">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../">dislop</a> / <a href="../">Guides</a> / <span aria-current="page">4-Skill 30-Task Benchmark</span>
+      </nav>
+
+      <article>
+        <header>
+          <h1 class="lead-heading" style="max-width:30ch;">4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark)</h1>
+          <div class="article-meta">
+            <span>Selection &amp; Benchmarks</span>
+            <span>Updated 2026-11-24</span>
+            <span>7 min read</span>
+            <a href="./index.md">Markdown</a>
+          </div>
+          <div class="answer-box">
+            <div class="answer-box-label">In short</div>
+            <p>Upfront disclosure: pass-rate scores use dislop's own deterministic packs. Across 30 drafts on gemini-3.5-flash, all four standalone Markdown skills left dead href=\&quot;#\&quot; links in HTML cards, stop-slop left raw <strong>Summary</strong>: markdown and 62.5% text shrink inside .pptx XML, and 3 of 4 returned a three-semicolon pitch verbatim. Adding one dislop check pass lifted clean passes by +13.3 pp in English and +20.0 pp in Chinese with 0 fact drift.</p>
+          </div>
+        </header>
+
+        <div class="article-shell">
+          <div class="article-prose">
+<p>On 2026-11-23, we ran the unmodified upstream <code>SKILL.md</code> prompts from four public anti-slop skills—<code>blader/humanizer</code> (<code>a32f244073</code>), <code>hardikpandya/stop-slop</code> (<code>8da1f03018</code>), <code>op7418/Humanizer-zh</code> (<code>f4518a8eab</code>), and <code>larashero3-dotcom/lieflat-less-ai-tone</code> (<code>fe77df00a2</code>)—on 30 drafts using <code>gemini-3.5-flash</code> (total run cost <code>$0.18886</code>, zero length truncations).</p>
+
+<p>We state our scoring bias upfront: the pass-rate columns below use <code>dislop</code>'s own rule packs, which reflect what <code>dislop</code> checks. For that reason, look first at the four string-verifiable defects in the raw outputs before looking at aggregate scores.</p>
+
+<h2 id="1-test-corpus-and-setup">1. Test Corpus and Setup</h2>
+
+<p>The 30 tasks span 15 English and 15 Chinese deliverables drawn from <code>dislop</code>'s public <code>revision-v1.json</code>, <code>revision-hard-v2.json</code>, and <code>skill-revision-ext-v1.json</code> suites:</p>
+
+<ol>
+<li><strong>Work docs and essays</strong>: API release notes, postmortems, technical specs, essays, and landing copy, plus 6 clean human-written controls (<code>preserve</code>, 3 EN + 3 ZH) to measure over-editing.</li>
+<li><strong>Office XML</strong>: Split-run Word (<code>word/document.xml</code>) and multi-slide PowerPoint (<code>.pptx</code>) extracts with unrendered Markdown and shrink risks.</li>
+<li><strong>Web UI</strong>: AI-generated HTML metric cards with 3-level nested borders, prompt-echo badges (<code>&quot;AI-Powered&quot;</code>), and dead <code>href=&quot;#&quot;</code> links.</li>
+</ol>
+
+<p>For each upstream skill, we tested two modes under identical task prompts: standalone <code>SKILL.md</code>, and taking that exact pass-1 output through one deterministic <code>dislop</code> check (<code>detRuleIds</code> plus lost/invented fact checks) before a single targeted fix pass. Both Node and Python verifiers (<code>node scripts/run_ecosystem_benchmark.mjs --rescore-saved</code> and <code>python3 benchmarks/verify_ecosystem_numbers.py</code>) checked 100% parity across all 180 scored rows.</p>
+
+<h2 id="2-english-and-chinese-results-30-tasks">2. English and Chinese Results (30 Tasks)</h2>
+
+<h3 id="english-track-15-tasks">English Track (<code>15</code> Tasks)</h3>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Arm</th><th>No-Veto Rate</th><th>Clean All-Clear</th><th>Composite</th><th>Fact Retention</th><th>Fact-Drift Tasks</th><th>Core Errors</th><th>Style + Pattern Hits</th></tr></thead><tbody>
+<tr><td>Raw source</td><td>13/15 (86.7%)</td><td>3/15 (20.0%)</td><td>75.5</td><td>100.0%</td><td>0</td><td>5</td><td>29</td></tr>
+<tr><td><code>blader/humanizer</code> alone</td><td>14/15 (93.3%)</td><td>12/15 (80.0%)</td><td>94.3</td><td>100.0%</td><td>0</td><td>1</td><td>6</td></tr>
+<tr><td><code>blader/humanizer</code> + <code>dislop</code> gate</td><td>14/15 (93.3%)</td><td><strong>14/15 (93.3%)</strong></td><td>97.3</td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td>2</td></tr>
+<tr><td><code>hardikpandya/stop-slop</code> alone</td><td><strong>15/15 (100.0%)</strong></td><td>11/15 (73.3%)</td><td>94.9</td><td>100.0%</td><td>0</td><td>2</td><td>3</td></tr>
+<tr><td><code>hardikpandya/stop-slop</code> + <code>dislop</code> gate</td><td><strong>15/15 (100.0%)</strong></td><td>13/15 (86.7%)</td><td><strong>99.5</strong></td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+<tr><td><code>dislop</code> Skill + CLI</td><td>14/15 (93.3%)</td><td><strong>14/15 (93.3%)</strong></td><td>97.3</td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td>2</td></tr>
+</tbody></table></div>
+
+<h3 id="chinese-track-15-tasks">Chinese Track (<code>15</code> Tasks)</h3>
+
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Arm</th><th>No-Veto Rate</th><th>Clean All-Clear</th><th>Composite</th><th>Fact Retention</th><th>Fact-Drift Tasks</th><th>Core Errors</th><th>Style + Pattern Hits</th></tr></thead><tbody>
+<tr><td>Raw source</td><td>13/15 (86.7%)</td><td>3/15 (20.0%)</td><td>74.2</td><td>100.0%</td><td>0</td><td>5</td><td>33</td></tr>
+<tr><td><code>op7418/Humanizer-zh</code> alone</td><td>13/15 (86.7%)</td><td>7/15 (46.7%)</td><td>89.1</td><td>100.0%</td><td>0</td><td>1</td><td>11</td></tr>
+<tr><td><code>Humanizer-zh</code> + <code>dislop</code> gate</td><td>13/15 (86.7%)</td><td>10/15 (66.7%)</td><td>94.9</td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td>3</td></tr>
+<tr><td><code>larashero3-dotcom/lieflat</code> alone</td><td>13/15 (86.7%)</td><td>6/15 (40.0%)</td><td>82.8</td><td>93.3%</td><td>1</td><td>1</td><td>12</td></tr>
+<tr><td><code>lieflat</code> + <code>dislop</code> gate</td><td><strong>14/15 (93.3%)</strong></td><td>9/15 (60.0%)</td><td>95.8</td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td>3</td></tr>
+<tr><td><code>dislop</code> Skill + CLI</td><td><strong>14/15 (93.3%)</strong></td><td><strong>13/15 (86.7%)</strong></td><td><strong>97.1</strong></td><td><strong>100.0%</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>2</strong></td></tr>
+</tbody></table></div>
+
+<p>All 6 clean human controls (<code>preserve</code>, 3 EN + 3 ZH) passed with <code>0/6</code> over-edit failures across every arm.</p>
+
+<h2 id="3-four-raw-string-defects-that-slipped-past-standalone-skills">3. Four Raw-String Defects That Slipped Past Standalone Skills</h2>
+
+<ol>
+<li><strong>Dead <code>href=&quot;#&quot;</code> controls and slide XML leftovers stayed untouched</strong>: Across all four standalone skills, HTML metric cards kept dead <code>&lt;a href=&quot;#&quot;&gt;</code> buttons (<code>4/4</code> arms). On <code>rev-pptx-02-en-exec-slide</code>, <code>stop-slop</code> left raw <code>**Summary**:</code> Markdown and <code>fontScale=&quot;62500&quot;</code> (<code>62.5%</code> text shrink) inside <code>.pptx</code> XML. Pairing with <code>dislop</code> cleared <code>core</code> errors to <code>0</code> across every arm.</li>
+</ol>
+
+<pre><code class="language-html">&lt;div class=&quot;border rounded-xl p-6&quot;&gt;&lt;div class=&quot;border rounded-lg p-4&quot;&gt;&lt;div class=&quot;border rounded p-3&quot;&gt;
+  &lt;span class=&quot;eyebrow&quot;&gt;AI-Powered · Zero Hallucination&lt;/span&gt;
+  &lt;h3&gt;p95 latency: 18 ms&lt;/h3&gt;
+  &lt;a href=&quot;#&quot;&gt;Open benchmark&lt;/a&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</code></pre>
+
+<ol>
+<li><strong>Three-clause semicolon pitches bypassed banned-word checklists</strong>: On <code>rev-en-02-homepage-pitch</code> (one of <code>dislop</code>'s own retired landing drafts), <code>humanizer</code>, <code>Humanizer-zh</code>, and <code>lieflat</code> returned the balanced three-semicolon pitch verbatim (<code>3/4</code> arms), while <code>stop-slop</code> kept <code>&quot;You keep the pen.&quot;</code>:</li>
+</ol>
+
+<pre><code class="language-text">Hard defects get crossed out; cliché lines get a margin query; once you edit, we check every file again. It never rewrites for you. The pen stays in your hand.</code></pre>
+
+<ol>
+<li><strong>Extreme compression dropped an entire Chinese technical spec</strong>: On <code>rev-zh-03-tech-spec</code>, standalone <code>lieflat</code> returned a zero-token empty output (<code>missing:8000 QPS</code>, score <code>0</code>). The post-edit <code>dislop</code> gate flagged the dropped number and recovered the draft to <code>90/100</code>.</li>
+<li><strong>Honest verifier fixes (<code>v0.8.2</code> -&gt; <code>v0.8.3</code>)</strong>: Our first <code>v0.8.2</code> run raised three English <code>dislop verify</code> false alarms on valid edits (<code>&quot;inside 5 seconds&quot;</code> -&gt; <code>&quot;within 5 seconds&quot;</code>, <code>&quot;3600 seconds&quot;</code> -&gt; <code>&quot;3600-second&quot;</code>, and <code>&quot;40 million rows&quot;</code> -&gt; <code>&quot;40-million-row&quot;</code>). <code>v0.8.3</code> fixed upper-bound synonym matching, hyphenated unit normalization, and duplicate span deduplication, bringing English fact-drift false alarms to <code>0</code>.</li>
+</ol>
+
+<h2 id="4-recommended-workflow-and-caveats">4. Recommended Workflow and Caveats</h2>
+
+<p>Keep whichever writing skill matches your taste for drafting, then run deterministic verification at the gate:</p>
+
+<pre><code class="language-bash"># 1. Check Markdown, HTML/JSX/SVG, DOCX, PPTX, or PDF offline (zero uploads)
+npx --yes dislop check . --pack auto --format agent
+
+# 2. Verify numbers, bounds, and qualifiers against git HEAD
+npx --yes dislop verify --git HEAD draft.md --strict</code></pre>
+
+<p><strong>Caveats</strong>: This run tests <code>30</code> tasks (<code>15</code> EN + <code>15</code> ZH) on a single model (<code>gemini-3.5-flash</code>). At <code>n = 15</code> per language, Wilson 95% confidence intervals are wide (<code>14/15 = 93.3%</code> spans <code>[70.2%, 98.8%]</code>). Upstream <code>SKILL.md</code> prompts were evaluated unmodified as published on 2026-11-23. See <a href="https://github.com/dislop-ai/dislop/blob/main/benchmarks/ECOSYSTEM-BENCHMARK.md" target="_blank" rel="noopener">ECOSYSTEM-BENCHMARK.md</a> for the raw run log.</p>
+<h2 id="faq">Frequently asked questions</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>Why did standalone prose skills miss HTML dead links and PowerPoint XML leaks?</h3>
+            <p>Prompt-only writing skills focus on prose vocabulary and sentence tone. When an agent edits HTML cards or OOXML runs, prompt rules rarely trigger on attribute strings like href=\&quot;#\&quot;, nested card borders, or raw asterisks inside slide XML.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Does running dislop after humanizer or stop-slop alter numbers or over-edit clean human drafts?</h3>
+            <p>Across all 30 benchmark tasks and 6 clean human-written controls, pairing a style skill with dislop check and dislop verify kept English fact retention at 100.0% with 0 over-edit failures on the clean controls.</p>
+          </div>
+          <div class="faq-item">
+            <h3>How can I reproduce or verify these numbers locally?</h3>
+            <p>Clone the dislop repository and run node scripts/run_ecosystem_benchmark.mjs --rescore-saved followed by python3 benchmarks/verify_ecosystem_numbers.py to inspect all 180 scored rows offline.</p>
+          </div>
+        </div>
+<h2 id="related-rules">Matching deterministic rules</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../../rules/chatbot-artifact/"><code>chatbot-artifact</code> · Chatbot greeting</a>
+<a class="related-link-chip" href="../../rules/ui-dead-control/"><code>ui-dead-control</code> · Dead placeholder link or button</a>
+<a class="related-link-chip" href="../../rules/markdown-leak/"><code>markdown-leak</code> · Raw Markdown in Office doc</a>
+<a class="related-link-chip" href="../../rules/semicolon-tricolon/"><code>semicolon-tricolon</code> · Three-part balanced semicolon pitch</a>
+<a class="related-link-chip" href="../../rules/negation-pivot-frame/"><code>negation-pivot-frame</code> · &quot;Not X, but Y&quot; slogan frame</a>
+</div>
+<h2 id="next-guides">Next guides</h2>
+<div class="related-strip">
+<a class="related-link-chip" href="../linter-vs-detector-vs-skill/">Linter vs. Detector vs. Skill</a>
+<a class="related-link-chip" href="../agent-cli-mcp-tutorial/">Agent, CLI &amp; CI Setup</a>
+<a class="related-link-chip" href="../deslop-pptx-docx/">Clean Up PPTX &amp; DOCX</a>
+</div>
+<h2 id="sources">Verified references</h2>
+        <ul>
+          <li><a href="https://github.com/blader/humanizer" target="_blank" rel="noopener">blader/humanizer (Agent Skill based on WP:AISIGNS)</a> — 71,724 stars (2026-11-21 snapshot); translates Wikipedia's Signs of AI Writing into an agent editing skill with voice sample calibration.</li>
+          <li><a href="https://github.com/hardikpandya/stop-slop" target="_blank" rel="noopener">hardikpandya/stop-slop</a> — 19,097 stars (2026-11-21 snapshot); separates banned phrases, structural patterns, and before/after examples with a five-axis rubric.</li>
+          <li><a href="https://github.com/vale-cli/vale" target="_blank" rel="noopener">vale-cli/vale: Syntax-aware linter for prose</a> — 6,413 stars (2026-11-21 snapshot); deterministic prose linter for Markdown, HTML, and AsciiDoc built around configurable YAML style rules.</li>
+          <li><a href="https://arxiv.org/abs/2510.22954" target="_blank" rel="noopener">Artificial Hivemind: The Open-Ended Homogeneity of Language Models (and Beyond) (NeurIPS 2025)</a> — Using the Infinity-Chat dataset, demonstrated both intra-model repetition and inter-model homogeneity across different LLM families.</li>
+          <li><a href="https://arxiv.org/abs/2311.09735" target="_blank" rel="noopener">GEO: Generative Engine Optimization (Aggarwal et al., ACM KDD 2024)</a> — Adding verifiable statistics, primary quotations, and clear inline citations raised generative-engine visibility by up to 40%, while keyword stuffing hurt.</li>
+        </ul>
+<div class="share-action-bar">
+          <a class="btn-primary" style="min-height:32px;padding:6px 12px;font-size:0.8rem;" href="../../#workbench">Try in workbench →</a>
+          <button type="button" class="ctrl-btn" data-copy-target="share-cite-payload">Copy PR / chat citation</button><code id="share-cite-payload" hidden>[4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark)](https://dislop.com/guides/anti-slop-skill-benchmark/) — Live 30-task benchmark comparing humanizer, stop-slop, Humanizer-zh, lieflat, and dislop across Markdown, HTML UI cards, Word, and PowerPoint XML.</code>
+          <a class="ctrl-btn" style="text-decoration:none;display:inline-flex;align-items:center;" href="https://github.com/dislop-ai/dislop/issues/new?template=slop_sample.yml" target="_blank" rel="noopener">Submit slop sample</a>
+          <a class="share-gh-link" href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">Star on GitHub ★</a>
+        </div>
+          </div>
+        <aside class="toc-rail" aria-label="On this page">
+          <h2 class="toc-rail-title">On this page</h2>
+          <ol>
+            <li><a href="#1-test-corpus-and-setup">1. Test Corpus and Setup</a></li>
+            <li><a href="#2-english-and-chinese-results-30-tasks">2. English and Chinese Results (30 Tasks)</a></li>
+            <li><a href="#3-four-raw-string-defects-that-slipped-past-standalone-skills">3. Four Raw-String Defects That Slipped Past Standalone Skills</a></li>
+            <li><a href="#4-recommended-workflow-and-caveats">4. Recommended Workflow and Caveats</a></li>
+          </ol>
+        </aside>
+        </div>
+      </article>
+    </section>
+    </main>
+
+    <footer class="colophon">
+      <div class="colophon-note">
+        <a class="colophon-brand" href="../../"><img src="../../assets/logo.svg" width="20" height="20" alt="">dislop</a>
+        <span>This site passes dislop check site/ with 0 issues.</span>
+        <span>For agents, start at <a href="../../llms.txt">/llms.txt</a>.</span>
+      </div>
+      <nav class="colophon-groups" aria-label="Footer">
+        <div class="colophon-group">
+          <span class="colophon-group-title">Resources</span>
+          <a href="../../guides/">Guides</a>
+          <a href="../../rules/">All rules</a>
+          <a href="../../awesome/">Awesome list</a>
+          <a href="../../llms.txt">llms.txt</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">Project</span>
+          <a href="https://github.com/dislop-ai/dislop/blob/main/ROADMAP.md" target="_blank" rel="noopener">Roadmap</a>
+          <a href="../../methodology/brand-and-voice.md">Voice guide</a>
+          <a href="../../methodology/design-system.md">Design tokens</a>
+          <a href="../../privacy.md">Privacy</a>
+        </div>
+        <div class="colophon-group">
+          <span class="colophon-group-title">Elsewhere</span>
+          <a href="https://github.com/dislop-ai/dislop" target="_blank" rel="noopener">GitHub (Apache-2.0)</a>
+          <a href="https://www.npmjs.com/package/dislop" target="_blank" rel="noopener">npm</a>
+          <a href="https://pypi.org/project/dislop/" target="_blank" rel="noopener">PyPI</a>
+          <a href="https://x.com/dislop_ai" target="_blank" rel="noopener">X (@dislop_ai)</a>
+        </div>
+      </nav>
+    </footer>
+  </div>
+  <script defer src="../../static-ui.js"></script>
+
+</body>
+</html>
