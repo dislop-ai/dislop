@@ -1,6 +1,6 @@
 {
   "schema": "dislop.catalog/1",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "snapshotDate": "2026-11-21",
   "baseUrl": "https://dislop.com",
   "pillars": [
@@ -75,7 +75,7 @@
         "mcp",
         "cli"
       ],
-      "sha256": "62ea4d42d8fd2c686345665d42810dde95918586d2fbf46015eea2defbf8189d"
+      "sha256": "8e6ea35a9a9445bbe71884f02d06438cfe4ea4a90c06abf8d3b2e8adc202c9db"
     },
     {
       "id": "methodology-index",
@@ -116,7 +116,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "af2a7c7c90fe1fa106e63d75a1e9c2c25807fa2831a12042a12919fe3aa02df7"
+      "sha256": "968d5f103925baf60c7ee1e71c5470add3ac04fc771fc9f6b0d59472690eb035"
     },
     {
       "id": "methodology-deletion-test",
@@ -150,7 +150,7 @@
         "mcp",
         "browser-workbench"
       ],
-      "sha256": "6d0e1142699dce6f0399cfd0b0a38fd96b0d542fe8f61ae4b20e1c4dc4d9e6a4"
+      "sha256": "e8111946119186f6ba9cd296fe742f338588f6a936ac36f422f9fe30516a09a4"
     },
     {
       "id": "methodology-anti-pattern-map",
@@ -190,7 +190,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "785fe47b7428428c6cd0306f96c76e8badd2f6ad53eaec0f184a9bcbd091d799"
+      "sha256": "d2904356005a3cc63e1828369d9f21342f5e5d51648e7f7ece9da144bbc0e1e5"
     },
     {
       "id": "methodology-positive-divergence",
@@ -224,7 +224,7 @@
         "browser-workbench",
         "skill"
       ],
-      "sha256": "c377aa4e7a3ec5d5f51276ed650d05fa08a739618cb13c531724448567df31ff"
+      "sha256": "d537bd82e243d2fabe0fde893024a7c304f2b0f0381953fb6dbc92935d21e171"
     },
     {
       "id": "methodology-product-brief",
@@ -266,7 +266,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "b0bdefa1bcea4d10e5ba534459b768f927f59d94d659c144ab3492d5febae70f"
+      "sha256": "4f5995a0cc8a447fc94d48940757a705facd51aaccbfd9cdf765c9938caba445"
     },
     {
       "id": "methodology-brand-voice",
@@ -303,7 +303,7 @@
         "browser-workbench",
         "cli"
       ],
-      "sha256": "77a66b3955d87e91fc2d868c48c7b9c61d99b6c4f485120f337a22405da4f258"
+      "sha256": "9a41e8d10f620031d893bfacd2d15c9e811649b028d4a7ee0ede1d2e3ee3876d"
     },
     {
       "id": "methodology-design-system",
@@ -334,7 +334,7 @@
         "browser-workbench",
         "cli"
       ],
-      "sha256": "5b088043f27112505308536e3808f2cf7add90792088a2a2df9d2aa7d0ec0a1a"
+      "sha256": "278cd9b3b996c75c52332fed07a0e996b1c9532b506f2cc659d2be1f12b88f3f"
     },
     {
       "id": "cases-index",
@@ -375,7 +375,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "41019eac76de3f7ecfa39e1533aa3fa679a887ee26a0e30dd7de9486856ea09d"
+      "sha256": "76c847fbf54c1206c5aafa5b6dcea1c6fb6e8d3d3bcdb6fb87fb14a8bf948183"
     },
     {
       "id": "cases-copy-contrasts",
@@ -416,7 +416,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "99530b906a37e8de4a05ad8c763e4562c6e36b6e7233d0a3f1b54d725772c583"
+      "sha256": "44a99de6ff83a6d7f63c8345490d3e23f1a4798d91633ba1e26f26b8666bacf9"
     },
     {
       "id": "cases-dogfood-audit",
@@ -448,7 +448,7 @@
         "cli",
         "browser-workbench"
       ],
-      "sha256": "09a3e8186c638a5accbff5e9938e0d2723c96c8cfe72395441a38c3e1930fd3a"
+      "sha256": "eaeb2a01c3ac8df999270b74aedcc2b2744082df8abe5381eebc2dd8c8b5ff9a"
     },
     {
       "id": "cases-ui-specimens",
@@ -477,7 +477,7 @@
       "relatedTools": [
         "browser-workbench"
       ],
-      "sha256": "854517462b95354c54c0d6615c1987d875c10173bfa906713dcef81f1510485d"
+      "sha256": "3c8f5ce54e3d63df66800ccda83e1d522772394a7225276cb0f34adb823d046b"
     },
     {
       "id": "tools-index",
@@ -520,7 +520,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "85bbdc8ec3531d899c33e6b3a633b9629baa564d2a529775c617d102783f30f4"
+      "sha256": "96f2a111a2c1cff94a4f2d2a1bab323be3cf0cb2ad7ad918a496091a20360c64"
     },
     {
       "id": "tools-skill",
@@ -562,7 +562,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "65017d026691da43d75816bc2aa6299caffb5d7b6355e037b490f5ad1dabb6bf"
+      "sha256": "26f52a09092f6a430e06f7a2364b5aaf871c64a5fa1d255c7fb2febf5023e58a"
     },
     {
       "id": "tools-skill-ref-work-docs",
@@ -903,7 +903,7 @@
         "browser-workbench",
         "skill"
       ],
-      "sha256": "d8f36cdc2a962402a3299f6185178d47d1b9a28d3e314cb2c93f8bcf15e50144"
+      "sha256": "7ad2e4452e085135720d85fcf896db114067bd44d60760d1f9113fa4408c88ab"
     },
     {
       "id": "tools-cli-hooks",
@@ -942,7 +942,7 @@
       "relatedTools": [
         "cli"
       ],
-      "sha256": "ef4aca750902e63d0a587b0fe58462740261cd7a918ca68a263b6ffedbbd2ebc"
+      "sha256": "a86ac583604b482cecef15288149ac0fa3a3c68fe09dccfd4b8a0ff9595c8433"
     },
     {
       "id": "tools-mcp-sdk-api",
@@ -983,7 +983,7 @@
         "mcp",
         "cli"
       ],
-      "sha256": "1d737acf745c283d8b6e30ad995ecce7e8d866c3f1170d689f4fb7aeca110309"
+      "sha256": "9a838ff1eac13642e5f551e301fbc4fb8e6d70bfe4865323efef7d6d92d9aea2"
     },
     {
       "id": "privacy-policy",
@@ -1010,7 +1010,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "402fd417959927e6cbdad402cd0bd4e6f389ab2c3ab12fc21b7eb92248424af6"
+      "sha256": "e12d648bc65d6aca3a22f44bff48a4adb2541adb842056287cb724ab37f981c8"
     },
     {
       "id": "pack-core",
@@ -2878,7 +2878,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "e64d0f87fe41e9c82fa9d081ef13b2b72b7ac23b0874a329ef87cad426ca7f24"
+      "sha256": "4af494ae021401942c9e970c48fe9e002c1965a0a45adee30e31890afbfd9515"
     },
     {
       "id": "task-web-and-deck",
@@ -2912,7 +2912,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "fa0027102744a27667cbca13ba0770d91ff9c1718a0c5293fb642cde6acc4f01"
+      "sha256": "901a80f7c10fb10de5903e4742c97218280d62c7a3ca803d3bc90c5f2dd0e103"
     },
     {
       "id": "task-editorial-writing",
@@ -2945,7 +2945,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "1a9f9f2e119bc318780c27b805cd4c38a99dc0c10686353c03065bea782486f7"
+      "sha256": "ad02c52a4935fe7e5188d5ef877b2a3f64d8e07e67f8fdbf69ee1377f7a64e7f"
     },
     {
       "id": "task-pre-release-gate",
@@ -2980,7 +2980,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "4b8b85ccc0804945abff702663cdef05f6193bc56de6a8b7a120702daea2a782"
+      "sha256": "982618de3273267e6ed03e4a0c45c20ccecade6778fb2a1b65b5207983b515ef"
     },
     {
       "id": "awesome-anti-slop-md",
@@ -3040,7 +3040,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "59f573d10b943a44815b0cf8e9f885d5af548c188e97c4116741ccd6650325d0"
+      "sha256": "beee6c5f03a8370b79744977049e97115fbea3220e27f8604520d877b6494c7b"
     },
     {
       "id": "guide-agent-cli-mcp-tutorial-zh",
@@ -3071,7 +3071,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "1833059c24b40ceba0a21f5450d536d956660f6a27f03a198cdae68cc4132640"
+      "sha256": "79575694fa41e6bb8a337cbabe017eae290a2d003c49fae4a14cc1aa71a2ea82"
     },
     {
       "id": "guide-deslop-pptx-docx-en",
@@ -3102,7 +3102,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "4d25fcc75ab92a6e833eba7f33f4380effee7bfb3c729cb7739dde3defe9086f"
+      "sha256": "838412e9072f44fdeb5018494bbffeac16e354304a8da30c90ff8f49afa19434"
     },
     {
       "id": "guide-deslop-pptx-docx-zh",
@@ -3133,7 +3133,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "72ceefd8ce005fde21b0f8b11898898afece034a443cfaec57040632aedfd7fa"
+      "sha256": "7b6c3cfbf463bb006fa18a038f82600acd3d789792d986c2cad1301c08a9c467"
     },
     {
       "id": "guide-fix-ai-slop-web-ui-en",
@@ -3164,7 +3164,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "83e87c66f435ab1df93ce43b297b99cfaa29fe9142178dd76c643f6af030a643"
+      "sha256": "22979c5f78f8a81e1b2d78ae61783ebbc7ea242130dd5f6a414dd3f15e5df511"
     },
     {
       "id": "guide-fix-ai-slop-web-ui-zh",
@@ -3195,7 +3195,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "63236ab1e7d467ce0115dc00c327f7cea59fc76ccc7468b4a3be7ecf7cfe12c0"
+      "sha256": "d1279e191cef4c880a18ba0f31e87931ca1a6df3222571953b09c4911948ad45"
     },
     {
       "id": "guide-linter-vs-detector-vs-skill-en",
@@ -3226,7 +3226,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "ca8bfdf9a1a862f3441fefa973aa50d264fd3f0358ea72f8be66b00e516ccaeb"
+      "sha256": "b5120f67f0d1adf03c1d28a3d62f153fba3ed0a743c57901192f87a7614a5279"
     },
     {
       "id": "guide-linter-vs-detector-vs-skill-zh",
@@ -3257,7 +3257,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "b6dc4bed3ced40a1852c035f9a19b8bfdb851621a69d08df94c2e2edaf7b797e"
+      "sha256": "847d3797f6f59fa81ae2aa7ed09be6747039245a2ac9afda74dda30b5b06d9d9"
     },
     {
       "id": "guide-remove-ai-slop-writing-en",
@@ -3288,7 +3288,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "dcdfde69f37cf69a9ec9b70d1bcfa9dc334c29f3043a75c704729a3bfa5afc1e"
+      "sha256": "66b6da52243c3b96b97d425da86aa2464f2ec63ba9a8c43f0fa1bedaa96c7bb5"
     },
     {
       "id": "guide-remove-ai-slop-writing-zh",
@@ -3319,7 +3319,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "cf7e17bc758acf16688071924e2a0464a7656ee98d5f138b0591c5dfb4c72773"
+      "sha256": "edc8547550968f12a6c1a80ef7ac5690e6137a18f18ce4c3ba11a098c432642e"
     },
     {
       "id": "guide-what-is-ai-slop-en",
@@ -3350,7 +3350,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "0c1efdaa89149a25ef47d7f71b860a9b68549adcbdaa2b96c470ba1c7fb90a05"
+      "sha256": "98d1b549c30de31ba6115b3c329b4580817db70d5c0480fd5625ab8091fef18a"
     },
     {
       "id": "guide-what-is-ai-slop-zh",
@@ -3381,7 +3381,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "0143647150fe8ff3310c1034a36ebaf99428eb74c1b9f722c0e5e0bfaec0ad69"
+      "sha256": "384510f819f7f36e350de889a63854c93b937eae57d4d1bc13508ba6175ea403"
     },
     {
       "id": "roadmap-en",
@@ -3423,7 +3423,7 @@
         "mcp",
         "skill"
       ],
-      "sha256": "a8214c59b60cd8449e8747aa2eb8ab232cf0343c14350289b8605f81f8ad8a0a"
+      "sha256": "6bc187c501ecf3222ec8d66283b879a175ab3603a435651e4ecedf0392335063"
     }
   ]
 }

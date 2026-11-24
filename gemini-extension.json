@@ -1,6 +1,6 @@
 {
   "name": "dislop",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Cutting AI slop is real productivity. Linter for AI Slop with vetted rules (7 packs, 53 rules, 65 patterns) across pure-doc Skill, offline CLI, and Official Cloud MCP.",
   "mcpServers": {
     "dislop": {

@@ -1,13 +1,13 @@
 ---
 content-type: reference-data
-version: 0.8.3
+version: 0.8.4
 ---
 
 # Cross-Modality Anti-Pattern Map
 
-`dislop` ships 65 structured anti-slop patterns across 6 dimensions in `v0.8.3` (53 built-in pack rules across 7 packs + 12 extended pattern-bank probes), plus an offline 14.6 KB Pocket ML scorer (`--ml`) for uniform-cadence vapor prose.
+`dislop` ships 65 structured anti-slop patterns across 6 dimensions in `v0.8.4` (53 built-in pack rules across 7 packs + 12 extended pattern-bank probes), plus an offline 14.6 KB Pocket ML scorer (`--ml`) for uniform-cadence vapor prose.
 
-| Category | What It Covers | Shipped `v0.8.3` Offline Coverage |
+| Category | What It Covers | Shipped `v0.8.4` Offline Coverage |
 |---|---|---|
 | **AI Delivery Artifacts** | Obvious AI leftovers (`severity: error`) | `packs/core`: stray chatbot wrappers, unfilled placeholders, raw Markdown in DOCX/PPTX, dead `href="#"` placeholder controls |
 | **Stock Lexicon & Default UI** | Filler words and default generator chrome | `en-cliche-lexicon`, `en-throat-clearing-opener`, `zh-bureaucratic-padding`, `ui-ai-gradient`, `ui-pill-soup`, `ui-box-in-box`, `ui-prompt-echo-badge`, plus pattern-bank probes `ui-glassmorphism-overuse` and `ui-accent-stripe-card` |
