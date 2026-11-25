@@ -1,67 +1,66 @@
-# Architecture (`v0.9.1`)
+# Architecture (`v1.0.0` Node.js Micro-Kernel)
 
-[简体中文](./architecture.zh-CN.md) · [Product Brief](../PRODUCT.md)
+`dislop` is a single-stack **Node.js (`>= 20.0.0`, ESM, zero external runtime dependencies)** Pluggable Editorial & Artifact Linter.
 
-`dislop` is a **Linter for AI Slop** built around one shared rule manifest format (`schema: "dislop.pack/2"`). Built to run inside your agent, CLI, and CI, with a browser workbench for manual review. It combines vetted community anti-slop rules and corpus practices to catch and fix AI delivery artifacts, prose clichés, fallback slogans, rhythm defects, and template UI, SVG, image, or slide/PDF chrome offline. It does not perform general security scanning, WCAG accessibility auditing, or generic PDF/X print preflight.
+---
 
-## 1. Three-Layer Product Form & Boundaries
+## 1. Core Architectural Principles
 
-Design principle (from [PRODUCT.md](../PRODUCT.md)): **Agent-first interface, human-owned quality**. Every capability exposes a deterministic, low-token CLI, MCP, or Skill surface first; the browser workbench and editor extensions wrap the same core for human review.
+1. **Domain-Blind Micro-Kernel vs. Pluggable Packs**:
+   - `src/kernel/` knows nothing about specific prose clichés, UI gradients, or slide buzzwords. It owns only multi-modal document coordinate parsing (`DocumentModel`), stage-gated Pack loading, immutable safety & prompt-injection invariants, the Dual Post-LLM Fact Gate, coordinate-based lossless patching, and CI exit-code arbitration.
+   - Domain rules live exclusively inside Packs organized under `packs/<scope-or-lang>/<scenario>/{pack.json,scripts/,prompts/}` (`common/*`, `en/*`, `zh/*`), local `.mjs` plugins, npm packages, or standalone `<name>.pack.md` files.
+2. **Dual-Track Taxonomy (`Defect` vs. `Suggestion`)**:
+   - **Editorial prose never fails CI**: Linguistic and layout-taste findings are `Suggestion`s (`strong | moderate | hint`) and always return **Exit Code `0`** (mapped strictly to `"note"` in SARIF).
+   - **Objective delivery bugs fail CI**: Unfilled placeholders, stray chatbot wrappers, broken local links, and raw Markdown leaked into `.docx`/`.pptx` are `Defect`s (`error | warning`). Only deterministic `scripts/` hooks can call `ctx.reportDefect(...)`, and only unresolved `Defect: error` returns **Exit Code `1`**.
+3. **Strict Pack vs. Core Boundary**:
+   - Pack `prompts/*.md` files declare **only** what patterns fire (with priority and false-positive boundaries) and plain editorial fix suggestions—never internal JSON field names.
+   - Core ([prompt-assembler.mjs](../src/kernel/prompt-assembler.mjs)) owns structured JSON mapping, clamps LLM outputs to `fixSafety: "review" | "manual"` (`never "safe"`, so `dislop fix --auto` never applies probabilistic LLM rewrites), and serializes `dislop.report/1` (`--json`), `--format agent`, `sarif`, `diff`, and `text`.
+4. **Strict Single-Language Separation**:
+   - `src/`, `packs/common/**`, `packs/en/**`, and root documentation stay strictly in English; `packs/zh/**` contains native Chinese rules, prompts, and descriptions.
+
+---
+
+## 2. Separated Pack Layout & Stage-Gated Lazy Loading
+
+Every built-in Pack under `packs/{common,en,zh}/{artifact-qa,prose,web-ui,slide-deck}/` separates metadata, deterministic code, and Markdown prompts:
 
 ```text
-Layer 1: Open-Source Pure-Markdown Skills (`skills/dislop/SKILL.md` + `deslop-docs`, `deslop-slides-docx`, `deslop-web-ui`, `deslop-verify`, `./references/*.md`, 0 scripts, 0 network)
-   └── Loads genre reference cards + scenario strategy table before drafting to prevent clichés, slogans, and register drift
-   │
-   ▼
-Layer 2: Open-Source Local CLI & Editor Plugins (`< 380 KB` tarball, 7 packs + 14.6 KB Pocket ML bundled, 0 uploads)
-   ├── `dislop check [--pack <id|auto>] [--register <name>] [--deep] [--format text|json|agent|sarif|github|md]` -> Scenario-calibrated findings + structured revision advice + 5-axis telemetry
-   ├── `dislop review`                                                   -> Opt-in BYOK or offline rubric review with quote grounding & injected scenario strategy
-   ├── `dislop verify`                                                   -> Protected fact ledger, keep terms, cadence guard, and spoken/formal register-drift checks
-   ├── `dislop patterns` / `voice` / `doctor`                            -> Extended pattern probes, personal style profile (`dislop.voice/1`), and zero-network setup audit
-   └── (Existing `--mcp` and optional `dislop model` modules remain in-repo pending real-world evaluation)
-   │
-   ▼
-Layer 3: Closed-Source Official Cloud MCP & Web Workbench (`https://dislop.com/mcp`, `/api/v1/*`)
-   └── Sign-in-gated multi-model genre review returning structured diagnostics for local agents, plus layout-preserving Office cleanup
+packs/<scope-or-lang>/<scenario>/
+├── pack.json              # Lightweight manifest (name, version, description, languages, formats)
+├── scripts/
+│   └── index.mjs          # Deterministic definePackScripts({ appliesTo, check, verifyFix })
+└── prompts/
+    └── rules.md           # Pure Markdown frontmatter + trigger criteria & fix suggestions
 ```
 
-`check` never modifies user files. It computes length-preserving masked views (`raw`, `prose`, `ui-text`) so code blocks, inline code, URLs, HTML tags, comments, and quoted specimens do not trigger prose false positives while line and Unicode codepoint column coordinates match the source 1:1.
+Loading in [pack-loader.mjs](../src/kernel/pack-loader.mjs) and [pipeline.mjs](../src/kernel/pipeline.mjs) is strictly stage-gated:
+1. **Admission (`resolveActivePacks`)**: Reads `pack.json` only. Packs whose `languages`, `formats`, or `modalities` do not match `doc` import `0` JS modules and read `0` Markdown files.
+2. **Step 3 (`runDeterministicPackChecks`)**: Imports `scripts/*.mjs` only for admitted Packs. `prompts/*.md` remain unread on `--no-llm` and default offline deterministic runs.
+3. **Step 4 (`collectPackPromptRules`)**: Reads and compiles `prompts/*.md` **only when `!config.noLlm` and an active LLM execution route is present**.
 
-## 2. Shared Engine & Runtime Parity
+---
 
-| Component | Path | Role |
-|---|---|---|
-| Shared JS Core | `src/core.mjs` | Pure ES module with zero `node:*` or DOM globals (`auditText`, `auditOoxmlEntries`, `auditImageDocument`, `auditPdfDocument`, `analyzeTextProfile`, `getScenarioStrategy`, `resolveRegister`, `verifyRevisionBundle`, `extractVoiceProfileOffline`); shared by CLI, MCP, and `site/` |
-| Extended Pattern Engine | `src/pattern-engine.mjs`, `src/dislop/pattern_engine.py`, `patterns/banks/*.json` | Multi-angle scanner executing 12 extended pattern-bank probes (`dislop patterns`, `dislop check --patterns`) with 100% Node/Python parity |
-| Bundled Pocket ML Suite | `models/pocket-slop-v1.json`, `src/pocket-model.mjs`, `src/dislop/pocket_model.py` | Zero-dependency de-lexicalized INT8 N-gram LM + calibrated 24-feature linear attribution + 45-tree shallow GBDT + 5-domain pack router (`14.6 KB` gzip / `49.0 KB` raw, `< 0.5 ms` offline, `100.0%` F1 / `0.0%` Clean FPR on `stealth-vapor-v1`) |
-| Hardware & Optional Local Models | `models/manifest.json`, `src/local-model.mjs`, `src/dislop/local_model.py` | Inspects RAM/disk budgets, manages optional `fast` (`0.6B`) / `balanced` (`1.7B`) / `quality` (`4B`) weights (`install` / SHA-256 `import` / `remove`), and runs loopback-only `deslop --local` with scenario-aware prompts and fact/unit retention guards |
-| Node Binary Reader & BYOK Review | `src/binary-node.mjs`, `src/review-client.mjs` | Zero-dependency ZIP (`zlib.inflateRawSync`), PNG/JPEG/WebP/GIF (including LZW frame metrics), and PDF parsers, plus opt-in BYOK `dislop.review/1` client with secret scrubbing, quote grounding, and scenario strategies |
-| Node CLI & MCP | `bin/dislop.mjs`, `bin/dislop-mcp.mjs` | Strict-validated offline CLI (`check [--pack <id|auto>] [--register <name>] [--rule <ids>] [-q] [--deep] [--compact] [--profile] [--ml] [--patterns] [--changed [ref]] [--staged] [--format text|json|agent|sarif|github|md]`, `verify [--register <name>]`, `review`, `doctor`, `patterns`, `voice`, `model`, `setup`, `deslop --local`, `explain`, `packs`, `catalog`, `resources`, `pack-test`, `init`), layered config (`~/.config/dislop/config.json` + `voice.json`), and local stdio MCP |
-| Python Core, CLI & MCP | `src/dislop/{engine,pattern_engine,pocket_model,local_model,review_client,cli,mcp_server}.py` | Pure Python 3.10+ stdlib implementation kept in lockstep via 66 Python `unittest` conformance, ergonomics, register, BYOK security, and engine parity tests |
-| Multi-Surface Manifests & Editor Bundles | `scripts/sync_manifests.mjs`, `plugin.json`, `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/`, `gemini-extension.json`, `integrations/{antigravity,vscode,orca,herdr,hooks}/`, `server.json`, `action.yml`, `.pre-commit-hooks.yaml` | Shared manifest generator and validator locking npm, PyPI, Official MCP Registry (`https://dislop.com/mcp`), Agent Plugins 1.0, Claude Code, Codex, Cursor, Antigravity, VS Code / Open VSX, and GitHub Action schemas |
-| Rule Manifests & Pattern Library | `packs/*/pack.json`, `patterns/dimensions/*.json`, `patterns/ai-tic-rubric.json` | 7 built-in `dislop.pack/2` manifests (`core`, `business-brief`, `engineering-spec`, `regulated-comms`, `literary-essay`, `deck-and-ui`, `executive-deck` — 53 active rules, 230 fixtures with per-register overrides) backed by 65 structured patterns across 6 dimensions & 7 angles (`53` pack-mapped + `12` extended pattern-bank rules) and the 5-layer AI-tic rubric |
-| Hosted Cloud Backend & Remote MCP | Private `dislop-cloud` (`https://dislop.com/mcp`, `/api/v1/*`) | Closed-source hosted MCP v2 service exposing 10 tools (`dislop_check`, `dislop_verify`, `dislop_rules` at 0 credits without login; OAuth 2.1 or free `dslp_*` key for 30 free monthly credits on `dislop_review`, `dislop_deslop`, `dislop_office`, `dislop_visual_review`, `dislop_voice_extract`, `dislop_voice_manage`, `dislop_account`), locale-matched sign-in (`Google`/`GitHub` OAuth + 6-digit email OTP / magic link), 5-tab Account Hub, 2-trial Office capability gate, and Stripe Payment Links backed by paid-tier Google Gemini API that does not train on user drafts |
-| Anti-Slop Benchmark (`dislop-bench v2` + `visual-design-v1`) | `benchmarks/`, `scripts/run_benchmark.mjs`, `scripts/run_visual_benchmark.mjs`, `scripts/pattern_lab.mjs` | 112 core detection samples + 154 multi-angle pattern samples + 60 visual/UI/SVG/image/PDF samples (`100.0%` P/R/F1, `0.0%` Clean FPR, `100.0%` Node/Python parity) + 18 end-to-end revision tasks (`D1=45 / D2=20 / D3=25 / D4=10`), 30-task 4-skill ecosystem benchmark (`benchmarks/ECOSYSTEM-BENCHMARK*.md`), `--eval`, and blind A/B sheet export |
-| Static Site Compiler & Content Layer | `scripts/build_site.mjs`, `scripts/lib/site_content.mjs`, `content/guides/*.md` | Zero-dependency compiler turning `src/core.mjs`, `packs/`, `skills/`, `content/guides/`, `docs/research/content-kb/sources.json`, `docs/brand*`, `ROADMAP*.md`, and `anti-slop-radar-index.json` into 183 static HTML pages (`/`, `/zh/`, `/guides/`, `/zh/guides/`, `/rules/`, `/zh/rules/`, `/awesome/`, `/zh/awesome/`, plus script-free `/en/*` and `/rules/zh-*/` redirect stubs), Atom feeds (`/feed.xml`, `/zh/feed.xml`), JSON-LD `@graph`, reciprocal `hreflang`, explicit AI-search `robots.txt`, and `awesome/README*.md` |
-| Research, Knowledge Base & Linguist Hygiene | `docs/research/`, `docs/research/content-kb/sources.json`, `.gitattributes` | Verified 90-entry Awesome Anti-Slop dataset (`dislop.radar/2`), 55 verified KB references (`dislop.kb/1`, excluded from npm/PyPI bundles via `tests/test_site.mjs`), Star growth research, and `.gitattributes` (`linguist-generated=true`) keeping primary GitHub repo language as JavaScript/Python |
+## 3. The 7-Step Execution Lifecycle (`src/kernel/pipeline.mjs`)
 
-### Applying review edits
+1. **Environment & Layered Config (`config.mjs`)**: Merges `~/.config/dislop/config.json` <- `.dislop.json` <- `.dislop.local.json` <- CLI flags, detects CI / coding-agent sandboxes (`isInteractiveHumanTty`), and checks SHA-256 `voice.json` fingerprints (`voice-profile.mjs`).
+2. **Multi-Modal `DocumentModel` (`document-model.mjs`, `ooxml-binary.mjs`)**: Parses `.md`, `.mdx`, `.txt`, `.html`, `.css`, `.jsx`, `.tsx`, `.svg`, `.docx`, `.pptx`, `.pdf`, and raster images (`.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`) into addressable segments (`[P1-S2|L4]` / `[B1-S2]`), format-specific write-back `locator` pointers, and modality signal bags (`uiSignals`, `deckSignals`, `mediaSignals`).
+3. **Deterministic Pack Checks (`pack-loader.mjs`)**: Runs `scripts/*.mjs` across active Packs in parallel (`reportDefect` + `reportSuggestion`).
+4. **Prompt Assembly, Sliding Window & Routing (`prompt-assembler.mjs`, `chunker.mjs`, `router.mjs`)**:
+   - Defaults to `routing: "local"` (`0` external uploads by default; uses Tier 3 local model or configured loopback runtime if present, otherwise prints a 1-line `stderr` upgrade hint).
+   - Opt-in `--engine auto|cloud|byok` cascades across Tier 1 Official Cloud (`cloud.mjs`), Tier 2 BYOK/Proxy (`openai-compat.mjs`, `anthropic.mjs`, `gemini.mjs` guarded by `privacy-gate.mjs` for ambient env keys), and Tier 3 Managed Local (`local-model.mjs`), chunking long documents by paragraph with `<context_readonly>[CTX-P{k}]` 1-paragraph lookbehind and 3-stage state-machine JSON recovery (`json-extract.mjs`).
+5. **Dual Post-LLM Fact & Anti-Injection Gate (`fact-gate.mjs`)**:
+   - Verifies every candidate replacement preserves all numbers, units, percentages, URLs, inline code spans, and proper nouns from `originalQuote` (without locking negation word counts).
+   - Blocks **newly fabricated or prompt-injected** URLs, inline code spans, or numbers absent from `originalQuote`.
+   - Runs `verifyFix()` from the originating Pack's `scripts/`. Any failure strips `suggestedReplacement` and downgrades `fixSafety` to `"manual"` with a `verificationNote`.
+6. **Runners & Lossless Atomic Patching (`interactive-tty.mjs`, `auto-fix.mjs`, `reporters.mjs`, `patcher.mjs`)**:
+   - Deduplicates and sorts Dual-Track (`Defect` `error -> warning` first, then `Suggestion` `strong -> moderate -> hint`), running either read-only reporters (`check`), batch safe apply (`fix --auto`), or the single-keypress TTY hunk loop (`y/n/e/p/a/A/s/u/q`).
+   - Writes accepted edits atomically via sibling temp-file rename (`--dry-run`, `--backup`), preserving `LF`/`CRLF` line endings and `.docx`/`.pptx` run properties & binary entries.
+7. **Exit Code Arbitration**: `1` iff `summary.defects.error > 0`; `0` otherwise (`2` on CLI/config/auth/file errors).
 
-For a supported text file, the JSON review carries `sourceSha256` over the exact UTF-8 input bytes. A directly applicable issue or finding carries `edit` with its one-based report position (`id`), zero-based Unicode code point offset (`start`), exact `before` text and literal `after` replacement. An empty replacement deletes the quoted text. Model advice becomes actionable only with an explicit replacement and a unique exact quote in its reviewed context. Reports created from stdin or extracted Office text carry no file edit data.
+---
 
-The Node and Python CLIs accept each other's reports. The shared Vim scratch buffer displays the review and returns the selected IDs to the caller. Both `review --interactive-apply` and `apply --review-file … --source-file …` validate the source digest and selected spans before replacing the source file atomically.
+## 4. Prompt-Injection & Supply-Chain Defenses
 
-## 3. Coverage Honesty & Exit Codes
-
-Uninspected inputs never masquerade as clean:
-
-- `0` — Completed inspection with zero findings at or above `--fail-on` (default `error`).
-- `1` — One or more findings met or exceeded `--fail-on` (or stale suppressions under `--report-unused`).
-- `2` — Invalid CLI flags, missing target path, or an explicitly requested file that could not be inspected (e.g., corrupted OOXML archive or non-UTF-8 text).
-
-## 4. Official Static Site (`dislop.com`)
-
-`site/` compiles to plain static files served over HTTPS at `https://dislop.com` (`Content-Security-Policy` locking `connect-src 'self'`, zero third-party font or analytics requests, single domain with zero subdomain split). Offline deterministic checking runs locally in browser memory with zero network calls; same-origin `/api/v1/*` and `/mcp` routes proxy to the hosted `dislop-cloud` service only when the user explicitly clicks an AI action or connects a Remote MCP client. Following the English/Global-first baseline (`PRODUCT.md`), `dislop.com` serves native English at the root `/` (`x-default`) and native Chinese under `/zh/` (keeping `301` redirects on legacy `/en/*`), with automatic `navigator.languages` routing and a one-click manual toggle while keeping all specimens, rule examples, banners, and 90 directory summaries strictly separated by language:
-
-- **For humans**: One-click "Copy for Agent" hero prompt, live 3-state Hero Proof Card, 3 shareable before/after cases (`/#cases`), zero-upload browser workbench (`/#workbench`, with instant "Paste my draft", offline `#share=v1.*` compressed fragment links + `#try=<ruleId>` deep-links, and post-test install/GitHub guidance), 5-tab Account Hub, clear 5-way usage guide (`/#surfaces`), 6 bilingual guides (`/guides/`, `/zh/guides/`), 99 rule encyclopedia pages (`/rules/`, `/zh/rules/` with edit notes & PR/chat citation copy), browser-filterable 90-entry Awesome Anti-Slop directory (`/awesome/`, `/zh/awesome/`), and share/GitHub strip (`/#share`).
-- **For external agents & crawlers**: Technical endpoints and the 53-rule table stay folded in `<details>` while remaining present in static HTML and served directly at `/.well-known/mcp/server-card.json`, `/.well-known/mcp.json`, `/.well-known/agent-skills/index.json`, `/llms.txt`, `/catalog.json`, `/index.md`, `/roadmap.md`, `/feed.xml`, `/zh/feed.xml`, `/tasks/*.md`, `/methodology/*.md`, `/cases/*.md`, `/tools/*.md`, `/packs/*.md`, `/rules/*.md`, `/awesome/index.{json,md}`, and `/llms-full.txt`; `robots.txt` explicitly allows `Googlebot`, `Bingbot`, `OAI-SearchBot`, `ChatGPT-User`, `Claude-SearchBot`, `Claude-User`, and `PerplexityBot` while blocking `/api/` and `/mcp`. Build-time assertions enforce byte budgets (`llms.txt <= 2,600 B`, `sources.json <= 80 KB`), valid links, zero leaked `fixtures.hit`, stripped HTML comments / invisible Unicode characters, and language purity (`0` Chinese characters across English root routes).
+1. **Deterministic Boundary Tag Escaping**: Target documents and lookbehind paragraphs are wrapped in fixed `<untrusted_document>` and `<context_readonly>` tags (preserving LLM prefix caching) while escaping any literal `<untrusted_document` / `<pack_rules` / `<context_readonly` substrings and XML attributes inside input text.
+2. **Untrusted Data Sandbox**: Section 1 of the Kernel System Prompt instructs the model to treat all content inside `<untrusted_document>` and `<context_readonly>` strictly as inert data under inspection—never instructions, role changes, or overrides.
+3. **LLM Trust Clamp + Deterministic Anti-Fabrication Gate**: Even if an LLM were tricked by adversarial prose, it cannot emit `Defect`s (CI cannot be DoS-broken), cannot emit `fixSafety: "safe"` (`fix --auto` ignores it), and cannot inject unverified URLs, inline code commands, or numbers past `fact-gate.mjs`.

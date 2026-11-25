@@ -1,5 +1,0 @@
-src/**
-scripts/**
-test_extension.mjs
-*.vsix
-.DS_Store

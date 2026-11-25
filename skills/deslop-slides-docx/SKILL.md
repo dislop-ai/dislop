@@ -1,19 +1,18 @@
 ---
 name: deslop-slides-docx
-description: Check Word (.docx) and PowerPoint (.pptx) files offline for unrendered markdown, chat leftovers, dense slide walls, and empty process titles.
+description: Check Word (.docx), PowerPoint (.pptx), PDF, and raster image deliverables offline for raw Markdown leaks, placeholders, and slide overflow.
 ---
 
 # deslop-slides-docx
 
-Use when preparing, inspecting, or cleaning `.docx`, `.pptx`, or PDF slide decks before sharing.
+Use when preparing, inspecting, or cleaning `.docx`, `.pptx`, `.pdf`, or image deliverables before sharing.
 
 ## Workflow
 
-1. Scan the Office document offline without uploading files:
+1. Scan the Office or slide file locally (`0` network uploads by default):
    ```bash
-   npx --yes dislop check <deck.pptx-or-doc.docx> --compact --json
+   npx --yes dislop check <deck.pptx-or-doc.docx> --format agent
    ```
-2. Fix OOXML `error` findings first: unrendered `**bold**` or `` `code` `` markup inside text runs, stray AI chat openers, and unfilled bracket placeholders.
-3. Trim slide copy density when `deck-and-ui` or `executive-deck` flags text walls, `normText` shrink-to-fit overflow, empty process titles, or identical consecutive slide layouts.
-4. Keep every metric, date, currency figure, and boundary qualifier exact while shortening sentences.
-5. Re-run `npx --yes dislop check <file>` before exporting or sending.
+2. Fix `DEFECT` items first: unrendered `**bold**` Markdown syntax leaked into OOXML runs, stray AI chat wrappers, unfilled placeholders, `normAutofit` font shrink below `80%`, and unstripped ComfyUI/A1111 workflow metadata in images.
+3. Address `SUGGESTION` items on overloaded slides (`> 120` words or `> 6` bullets) while keeping every metric, currency symbol, unit, and entity intact.
+4. Re-run `npx --yes dislop check <file> --format agent` to confirm zero `DEFECT(error,...)` items remain.

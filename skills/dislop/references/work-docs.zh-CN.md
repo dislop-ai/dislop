@@ -1,7 +1,7 @@
 # 工作简报、研发复盘与对外通告
 
 适用范围：工作简报、技术方案与故障复盘、发版说明、CLI 帮助与报错文案、邮件及对外通告。
-检查命令：`dislop check <path> --pack business-brief`（研发场景用 `engineering-spec`，合规通告用 `regulated-comms`）。
+检查命令：`dislop check <path> --format agent`（改稿后运行 `dislop verify --git HEAD <path>` 核验事实）。
 
 ## 常见问题与改法
 

@@ -1,0 +1,6 @@
+{
+  "name": "common/web-ui",
+  "version": "1.0.0",
+  "description": "Multi-modal HTML, CSS, JSX, TSX, and SVG structural & AI-template chrome checks (deterministic scripts + prompt-based UI hierarchy review).",
+  "formats": ["html", "css", "jsx", "tsx", "svg"]
+}

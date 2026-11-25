@@ -1,0 +1,7 @@
+{
+  "name": "zh/slide-deck",
+  "version": "1.0.0",
+  "description": "中文演示文稿与汇报幻灯片去 AI 味包（确定性脚本 + 提示词语义审计）：遗留配图与备注指令、八股黑话页标题、长段正文照搬上墙及悬空对比口径。",
+  "languages": ["zh"],
+  "formats": ["pptx", "pdf"]
+}

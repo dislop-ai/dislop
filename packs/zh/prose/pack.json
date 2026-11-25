@@ -1,0 +1,7 @@
+{
+  "name": "zh/prose",
+  "version": "1.0.0",
+  "description": "高克制中文去 AI 味规则包（确定性脚本 + 提示词语义审计）：仅清理零信息增量的宏大叙事空话与无需外部背景即可直述的句法套路。",
+  "languages": ["zh"],
+  "formats": ["md", "mdx", "txt", "html", "jsx", "tsx", "docx", "pptx", "pdf"]
+}

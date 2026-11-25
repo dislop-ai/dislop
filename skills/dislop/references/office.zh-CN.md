@@ -1,7 +1,7 @@
 # Word（`.docx`）与演示文稿（`.pptx`）
 
 适用范围：Word 交付方案与报告（`.docx`）、汇报幻灯片（`.pptx`）、单页大纲及 Office XML 或文档接口编辑。
-检查命令：`dislop check <file.docx-or-pptx> --pack executive-deck`（Word 报告用 `business-brief`）。
+检查命令：`dislop check <file.docx-or-pptx> --format agent`（自动挂载 `slide-deck`、`artifact-qa` 与 `prose`）。
 
 ## 常见问题与改法
 

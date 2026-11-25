@@ -1,7 +1,7 @@
 # 网页界面、前端组件与界面文案
 
 适用范围：HTML、CSS、JSX/TSX 组件、状态看板与浏览器界面文案。
-检查命令：`dislop check <dir> --pack deck-and-ui --patterns`
+检查命令：`dislop check <dir> --pack web-ui --format agent`
 
 ## 常见问题与改法
 

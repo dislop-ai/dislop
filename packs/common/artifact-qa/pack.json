@@ -1,0 +1,5 @@
+{
+  "name": "common/artifact-qa",
+  "version": "1.0.0",
+  "description": "Language-neutral structural and semantic delivery QA: placeholder tokens, leaked tool citations, broken links, raw Markdown leaks in OOXML/HTML, and uncleaned draft/option residue."
+}

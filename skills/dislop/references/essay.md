@@ -1,7 +1,7 @@
 # Essays, Columns & Narrative Non-Fiction
 
 Scope: Long-form essays, newsletters, columns, op-eds, and reported sketches.
-CLI pack: `dislop check <essay.md> --pack literary-essay --profile` (optional voice check: `dislop voice <past1.md> <past2.md>`).
+CLI check: `dislop check <essay.md> --format agent` (optional personal voice baseline: `dislop voice extract <past1.md> <past2.md>`).
 
 ## Rules & Fixes
 

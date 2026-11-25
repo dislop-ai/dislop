@@ -1,0 +1,6 @@
+{
+  "name": "en/artifact-qa",
+  "version": "1.0.0",
+  "description": "English delivery artifact QA (deterministic scripts + prompt-based audit): unreplaced copy placeholders, explicit & implicit assistant wrappers, disguised writer instructions, and pasted refusals.",
+  "languages": ["en"]
+}

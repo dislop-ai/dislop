@@ -1,0 +1,7 @@
+{
+  "name": "zh/web-ui",
+  "version": "1.0.0",
+  "description": "中文网页界面与前端落地页去 AI 味包（确定性脚本 + 提示词语义审计）：未替换组件假文、首屏提示词口号、同义反复卡片描述、啰嗦按钮文案与虚假证言。",
+  "languages": ["zh"],
+  "formats": ["html", "jsx", "tsx", "svg"]
+}

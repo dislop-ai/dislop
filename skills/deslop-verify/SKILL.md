@@ -1,21 +1,20 @@
 ---
 name: deslop-verify
-description: Verify LLM-revised drafts after using Humanizer or stop-slop to catch lost metrics, dropped qualifiers, and 2nd-order slogan drift.
+description: Verify revised drafts against original text or git HEAD to catch dropped numbers, units, URLs, code spans, proper nouns, and second-order AI slogans.
 ---
 
 # deslop-verify
 
-Use right after running a style rewrite prompt or external humanizer skill on any important draft.
+Use right after revising prose or running an external rewrite prompt on any important document.
 
 ## Workflow
 
-1. Check the revised file for leaked AI artifacts, `Not X, but Y` 2nd-order slogans, or leftover filler:
+1. Check the revised file for leftover delivery `DEFECT`s or unprompted negation slogans:
    ```bash
-   npx --yes dislop check <revised-file> --pack auto --deep --compact --json
+   npx --yes dislop check <revised-file> --format agent
    ```
-2. Verify against git HEAD or the original source file so no numbers, dates, units, URLs, or risk qualifiers (`up to`, `projected`, `only if`) were dropped or altered:
+2. Run the deterministic Fact Gate against `git HEAD` (or `<before-file> <after-file>`):
    ```bash
-   npx --yes dislop verify --git HEAD <revised-file> --strict
+   npx --yes dislop verify --git HEAD <revised-file>
    ```
-3. If the check catches new AI slogans (`negation-pivot-frame`), swallowed bounds (`up to 12 minutes` -> `5 minutes`), or stiff register drift, restore the exact source numbers and rewrite only the offending phrase.
-4. Re-run both commands until exit code is `0`.
+3. If `dislop verify` reports dropped numbers, units, URLs, inline code spans, proper nouns, or newly introduced `"not just X — it's Y"` slogans, restore the exact facts and re-verify until exit code is `0`.

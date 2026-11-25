@@ -1,9 +1,0 @@
-name = "dislop"
-version = "0.9.1"
-description = "Cutting AI slop is real productivity. Linter for AI Slop — check changed docs, slides, and web UI offline."
-
-[[actions]]
-id = "check-ai-slop"
-label = "Check AI Slop (changed files)"
-command = "npx --yes dislop check --changed HEAD --fail-on error"
-scope = "workspace"

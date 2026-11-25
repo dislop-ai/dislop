@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-if (!process.argv.includes("--mcp")) {
-  process.argv.push("--mcp");
-}
-await import("./dislop.mjs");
+import { startStdioMcpServer } from "../src/mcp/stdio-server.mjs";
+
+startStdioMcpServer();

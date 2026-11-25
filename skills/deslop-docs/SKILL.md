@@ -1,19 +1,21 @@
 ---
 name: deslop-docs
-description: Audit Markdown docs, READMEs, RFCs, and release notes for AI chat wrappers, clichés, and vague filler using dislop offline rules.
+description: Audit Markdown docs, READMEs, RFCs, and release notes for delivery Defects and editorial anti-slop Suggestions using dislop.
 ---
 
 # deslop-docs
 
-Use when drafting, cleaning, or checking Markdown documentation, technical RFCs, postmortems, READMEs, release notes, or short briefs.
+Use when drafting, cleaning, or checking Markdown documentation, technical RFCs, postmortems, READMEs, release notes, or briefs.
 
 ## Workflow
 
-1. Run an offline deterministic check before rewriting:
+1. Run a compact read-only check before rewriting:
    ```bash
-   npx --yes dislop check <path> --pack auto --deep --compact --json
+   npx --yes dislop check <path> --format agent
    ```
-2. Remove `error` artifacts first (stray chatbot greetings, citations like `[oaicite:N]`, unfilled placeholders).
-3. Rewrite flagged `warning` clichés and 2nd-order negation slogans (`"Not X, but Y"`) into plain specifics. Keep every original number, unit, date, and qualifier intact.
-4. Do not invent causes, metrics, or examples absent from the draft.
-5. Re-run `npx --yes dislop check <path> --fail-on warning` until hard errors and clichés clear.
+2. Fix objective `DEFECT` items first (stray chatbot wrappers, leaked `[oaicite:N]` citations, unfilled `[TODO]` placeholders, broken relative links).
+3. Apply `SUGGESTION` items with restraint: delete zero-information throat-clearing or macro filler, and unwrap unprompted `"Not X, but Y"` framing without inventing facts.
+4. Verify your revision kept every number, unit, URL, inline code span, and proper noun intact:
+   ```bash
+   npx --yes dislop verify --git HEAD <path>
+   ```

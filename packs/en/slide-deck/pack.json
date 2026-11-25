@@ -1,0 +1,7 @@
+{
+  "name": "en/slide-deck",
+  "version": "1.0.0",
+  "description": "English presentation and slide-deck anti-slop pack (deterministic scripts + prompt-based audit): leaked visual/speaker-note prompts, buzzword slide titles, pasted prose dumps, and unanchored comparisons.",
+  "languages": ["en"],
+  "formats": ["pptx", "pdf"]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "en/prose",
+  "version": "1.0.0",
+  "description": "High-restraint English editorial anti-slop pack: zero-information scaffolding deletions and self-contained syntactic AI tic cleanups.",
+  "languages": ["en"],
+  "formats": ["md", "mdx", "txt", "html", "jsx", "tsx", "docx", "pptx", "pdf"]
+}

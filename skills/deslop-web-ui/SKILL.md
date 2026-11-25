@@ -1,19 +1,18 @@
 ---
 name: deslop-web-ui
-description: Inspect AI-generated HTML, CSS, JSX, and SVG pages offline for dead placeholder links, fake disabled buttons, pill soup, and default gradients.
+description: Inspect HTML, CSS, JSX, TSX, and SVG files for dead placeholder links, unexplained disabled buttons, pill-badge soup, and stock neon gradients.
 ---
 
 # deslop-web-ui
 
-Use when reviewing or cleaning generated frontend components, landing pages, dashboards, or SVGs.
+Use when reviewing or cleaning frontend components, landing pages, dashboards, or SVGs.
 
 ## Workflow
 
-1. Run the offline structural and UI check:
+1. Run the multi-modal UI & artifact check:
    ```bash
-   npx --yes dislop check <ui-dir-or-file> --pack deck-and-ui --compact --json
+   npx --yes dislop check <ui-dir-or-file> --format agent
    ```
-2. Eliminate `error` UI bugs first: `<a href="#">` dead links, unimplemented placeholder buttons, `TODO` labels, and `AI-Powered` prompt-echo badges.
-3. Simplify flagged AI layout tics (`warning`): purple-pink neon gradients, pill-badge walls, 3-level nested card frames, and templated eyebrow numbers (`01 / ...`).
-4. Replace banned placeholder copy with concrete product details already in scope; do not fabricate stats or customer logos.
-5. Re-run `npx --yes dislop check <ui-dir-or-file> --fail-on warning` before committing.
+2. Fix `DEFECT` items first: empty links, `<a href="#">` placeholder links, unexplained `<button disabled>` controls, missing `<svg viewBox>`, and unrendered Markdown leaks.
+3. Review `SUGGESTION` items (`common/web-ui`): stock purple-to-pink gradients, `blur-3xl` glow orbs, and stacked `rounded-full` pill-badge soup.
+4. Re-run `npx --yes dislop check <ui-dir-or-file> --format agent` before committing.

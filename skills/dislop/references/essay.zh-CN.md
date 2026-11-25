@@ -1,7 +1,7 @@
 # 随笔、专栏与非虚构长文
 
 适用范围：个人随笔、品牌专栏、人物记事与公众号长文。
-检查命令：`dislop check <essay.md> --pack literary-essay --profile`（对照个人文风可运行 `dislop voice`）。
+检查命令：`dislop check <essay.md> --format agent`（对照个人文风可运行 `dislop voice extract <past1.md>`）。
 
 ## 常见问题与改法
 

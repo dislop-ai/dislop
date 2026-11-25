@@ -1,7 +1,7 @@
 # Word (`.docx`) & PowerPoint (`.pptx`) Decks
 
 Scope: Word proposals and reports (`.docx`), executive decks (`.pptx`), slide outlines, and Office XML or document-API edits.
-CLI pack: `dislop check <file.docx-or-pptx> --pack executive-deck` (or `business-brief` for `.docx`).
+CLI check: `dislop check <file.docx-or-pptx> --format agent` (mounts `slide-deck` + `artifact-qa` + `prose` automatically).
 
 ## Rules & Fixes
 

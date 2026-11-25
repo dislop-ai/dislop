@@ -1,7 +1,7 @@
 # Web UI, Components & Interface Copy
 
 Scope: Web pages, CSS, HTML, JSX/TSX components, dashboards, and browser interface copy.
-CLI pack: `dislop check <dir> --pack deck-and-ui --patterns`
+CLI check: `dislop check <dir> --pack web-ui --format agent`
 
 ## Rules & Fixes
 

@@ -1,7 +1,7 @@
 # Work Docs, Technical Specs & Regulated Comms
 
 Scope: READMEs, PRDs, RFCs, PR descriptions, postmortems, release notes, CLI help and error copy, emails, and regulated notices.
-CLI pack: `dislop check <path> --pack business-brief` (or `engineering-spec` / `regulated-comms`).
+CLI check: `dislop check <path> --format agent` (verify edits via `dislop verify --git HEAD <path>`).
 
 ## Rules & Fixes
 

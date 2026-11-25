@@ -1,0 +1,7 @@
+{
+  "name": "en/web-ui",
+  "version": "1.0.0",
+  "description": "English web UI and landing-page anti-slop pack (deterministic scripts + prompt-based audit): scaffold dummy strings, prompt-echo hero hype, redundant card subcopy, verbose CTAs, and synthetic social proof.",
+  "languages": ["en"],
+  "formats": ["html", "jsx", "tsx", "svg"]
+}
