@@ -217,7 +217,41 @@ test("Subcommands (init, login/logout, voice, model, packs, verify, doctor) and 
     assert.equal(docJson.cloudAuthenticated, true);
     assert.deepEqual(docJson.localModels.installed, ["qwen2.5-1.5b-instruct"]);
 
+    // Verify --help, model list, model pull, doctor, and check --engine local surface missing Ollama clearly
+    const missingOllamaEnv = {
+      DISLOP_CONFIG_DIR: cfgDir,
+      DISLOP_ASSUME_NO_OLLAMA: "1",
+      DISLOP_FORCE_NON_TTY: "1",
+    };
+    const ioHelpMissing = { ...makeMemoryIo({ cwd: root, cfgDir }), env: missingOllamaEnv };
+    assert.equal(await runCli(["--help"], ioHelpMissing), 0);
+    assert.match(ioHelpMissing.getStdout(), /Tier 3 Local LLM Prerequisite \(Ollama\)/);
+    assert.match(ioHelpMissing.getStdout(), /Ollama is MISSING on this machine/);
+
+    const ioModelListMissing = { ...makeMemoryIo({ cwd: root, cfgDir }), env: missingOllamaEnv };
+    assert.equal(await runCli(["model", "list"], ioModelListMissing), 0);
+    assert.match(ioModelListMissing.getStdout(), /Warning: Ollama is missing on this machine/);
+
+    const ioModelPullMissing = { ...makeMemoryIo({ cwd: root, cfgDir }), env: missingOllamaEnv };
+    assert.equal(await runCli(["model", "pull", "qwen2.5-1.5b-instruct"], ioModelPullMissing), 2);
+    assert.match(ioModelPullMissing.getStderr(), /Ollama is missing on this machine/);
+
+    const ioDoctorMissing = { ...makeMemoryIo({ cwd: root, cfgDir }), env: missingOllamaEnv };
+    assert.equal(await runCli(["doctor", "--json"], ioDoctorMissing), 0);
+    assert.equal(JSON.parse(ioDoctorMissing.getStdout()).localModels.ollamaInstalled, false);
+
     assert.equal(await runCli(["model", "rm", "qwen2.5-1.5b-instruct"], makeMemoryIo({ cwd: root, cfgDir })), 0);
+
+    // With .dislop.json pointing to local-ollama:11434 and Ollama missing, explicit `--engine local` exits 2 telling user Ollama is missing
+    const ioCheckLocalConfiguredMissing = { ...makeMemoryIo({ cwd: root, cfgDir }), env: missingOllamaEnv };
+    assert.equal(await runCli(["check", "author.md", "--engine", "local"], ioCheckLocalConfiguredMissing), 2);
+    assert.match(ioCheckLocalConfiguredMissing.getStderr(), /Ollama is missing on this machine/);
+
+    // Without .dislop.json or installed model, `check --engine local` falls back to deterministic (exit 0) and warns Ollama is missing
+    fs.unlinkSync(path.join(root, ".dislop.json"));
+    const ioCheckLocalMissing = { ...makeMemoryIo({ cwd: root, cfgDir }), env: missingOllamaEnv };
+    assert.equal(await runCli(["check", "author.md", "--engine", "local"], ioCheckLocalMissing), 0);
+    assert.match(ioCheckLocalMissing.getStderr(), /Ollama is missing on this machine/);
     assert.equal(await runCli(["logout"], makeMemoryIo({ cwd: root, cfgDir })), 0);
 
     // verify <before> <after>

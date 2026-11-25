@@ -25,7 +25,7 @@
   },
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "dogfood": "node ./bin/dislop.mjs check README.md --no-llm"
+    "dogfood": "node ./bin/dislop.mjs check README.md README.zh-CN.md CONTRIBUTING.md --no-llm"
   },
   "files": [
     "bin/",
@@ -34,6 +34,7 @@
     "skills/",
     "assets/logo.svg",
     "README.md",
+    "README.zh-CN.md",
     "PRODUCT.md",
     "LICENSE"
   ],

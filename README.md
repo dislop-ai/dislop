@@ -1,10 +1,12 @@
 # dislop
 
+English | [Chinese (zh-CN)](./README.zh-CN.md)
+
 **Cutting AI slop is real productivity.**
 
 `dislop` is a pluggable editorial and artifact linter built on a zero-dependency Node.js (`>= 20`) micro-kernel. It audits Markdown, plain text, HTML/CSS/JSX/TSX/SVG, Word (`.docx`), PowerPoint (`.pptx`), PDF, and raster images before publication, separating objective delivery **Defects** from non-blocking editorial **Suggestions**.
 
-See [docs/architecture.md](./docs/architecture.md) for the full kernel lifecycle and security invariants, and [docs/MIGRATION-TODO.md](./docs/MIGRATION-TODO.md) for pending repository extraction items.
+See [docs/architecture.md](./docs/architecture.md) for the full kernel lifecycle, [CONTRIBUTING.md](./CONTRIBUTING.md) for custom Pack authoring, [slop-samples/](./slop-samples/) for language-specific test samples (`en.md`, `zh-CN.md`), and [docs/MIGRATION-TODO.md](./docs/MIGRATION-TODO.md) for pending repository extraction items.
 
 ## Core Design
 
@@ -15,7 +17,7 @@ See [docs/architecture.md](./docs/architecture.md) for the full kernel lifecycle
    - **Prose never breaks CI**: Editorial anti-slop findings are `Suggestion`s (`strong | moderate | hint`) and always return **Exit Code `0`** (mapped to `"note"` in SARIF).
    - **Objective delivery bugs fail CI**: Unfilled `[TODO]` placeholders, stray chatbot wrappers, broken local links, and raw Markdown leaked into `.docx`/`.pptx` are `Defect`s (`error | warning`) emitted strictly by deterministic `scripts/` hooks. Only unresolved `Defect: error` returns **Exit Code `1`**.
 3. **Local-First Privacy with 3-Tier Semantic Upgrade**:
-   - Runs locally with zero external uploads by default (`--engine local`), using deterministic Pack scripts plus an optional Tier 3 local model (`dislop model pull`).
+   - Runs locally with zero external uploads by default (`--engine local`), using deterministic Pack scripts plus an optional Tier 3 local model (`dislop model pull`, powered by [Ollama](https://ollama.com); if Ollama is not installed, `dislop` falls back to offline deterministic rules and notes how to install it).
    - Opt into `--engine auto`, `--engine cloud` (`dislop login`), or `--engine byok` (OpenAI-compatible, Anthropic, Gemini, local proxies, Ollama/vLLM) guarded by a first-run host consent gate (`privacy-gate.mjs`).
 4. **Dual Post-LLM Fact & Anti-Injection Gate**:
    - Every proposed replacement is verified to preserve numbers, units, percentages, URLs, inline code spans, and proper nouns—while blocking fabricated numbers, injected URLs, or injected code spans and running custom `verifyFix()` hooks.
@@ -39,6 +41,319 @@ npx --yes dislop fix draft.md --auto --backup
 npx --yes dislop verify --git HEAD draft.md
 ```
 
+## Execution Tiers on `slop-samples/en.md`
+
+All outputs below were captured verbatim against [slop-samples/en.md](./slop-samples/en.md) (for Chinese anti-slop use cases on [slop-samples/zh-CN.md](./slop-samples/zh-CN.md), see [README.zh-CN.md](./README.zh-CN.md)).
+
+### Baseline: Deterministic Script Packs (`--no-llm`, 0 tokens, offline)
+
+Runs only Pack `scripts/` hooks (`prompts/` are never loaded). Catches objective delivery `DEFECT`s (`[oaicite:1]`, `[Company Name]`, `[TODO: ...]`, empty/dead links, assistant wrappers) and self-contained syntactic `SUGGESTION`s in milliseconds:
+
+```bash
+dislop check slop-samples/en.md --no-llm --format agent
+```
+
+```text
+# dislop file=slop-samples/en.md engine=deterministic defects=8 suggestions=6
+[P1-S1|L1] DEFECT(error,safe) en/artifact-qa/chatbot-artifact
+  quote: "Certainly! Here is a polished draft of your Q3 database migration postmortem."
+  reason: Conversational English assistant wrapper left in the deliverable; safe to delete.
+  fix: DELETE
+[P3-S2|L5] DEFECT(error,safe) common/artifact-qa/chatbot-citation-leak
+  quote: "[oaicite:1]"
+  reason: Internal AI search/citation token leaked into output text.
+  fix: DELETE
+[P3-S2|L5] DEFECT(error,manual) en/artifact-qa/unfilled-placeholder
+  quote: "[Company Name]"
+  reason: Unfilled English template placeholder or dummy Latin copy left in deliverable.
+  prompt: Supply the real copy in place of '[Company Name]', or delete the unfinished sentence.
+[P5-S2|L9] DEFECT(error,manual) en/artifact-qa/unfilled-placeholder
+  quote: "[TODO: confirm incident owner]"
+  reason: Unfilled developer or template token left in deliverable.
+  prompt: Replace '[TODO: confirm incident owner]' with the real value before publishing, or remove the unfinished sentence.
+[P5-S2|L9] DEFECT(error,manual) common/artifact-qa/empty-link-target
+  quote: "[on-call runbook]()"
+  reason: Link has an empty destination URL.
+  prompt: Provide a valid destination URL or unwrap the link.
+[P12-S1|L20] DEFECT(error,safe) en/artifact-qa/chatbot-artifact
+  quote: "I hope this helps!"
+  reason: Conversational English assistant wrapper left in the deliverable; safe to delete.
+  fix: DELETE
+[P12-S2|L20] DEFECT(error,safe) en/artifact-qa/chatbot-artifact
+  quote: "Let me know if you'd like any further adjustments."
+  reason: Conversational English assistant wrapper left in the deliverable; safe to delete.
+  fix: DELETE
+[P5-S2|L9] DEFECT(warning,manual) common/artifact-qa/placeholder-dead-link
+  quote: "[incident timeline](#)"
+  reason: Placeholder non-navigating link target '#'.
+  prompt: Wire a real destination URL or use a <button type="button"> control.
+[P3-S1|L5] SUGGESTION(strong,safe) en/prose/hollow-transition
+  quote: "In today's rapidly evolving digital landscape, infrastructure reliability is a top priority."
+  reason: Zero-information macro filler sentence; deleting it preserves all factual claims and causal links.
+  fix: DELETE
+[P4-S1|L7] SUGGESTION(strong,safe) en/prose/throat-clearing
+  quote: "It is worth noting that PostgreSQL p95 query latency dropped from 142ms to 18ms across 4 read replicas in `{{cluster_region}}`."
+  reason: Removes zero-information throat-clearing opener so the sentence opens directly on the claim.
+  fix: "PostgreSQL p95 query latency dropped from 142ms to 18ms across 4 read replicas in `{{cluster_region}}`."
+[P5-S1|L9] SUGGESTION(strong,review) en/prose/unprompted-negation
+  quote: "This isn't just a configuration tweak — it's a new reliability baseline for our checkout pipeline."
+  reason: Formulaic 'Not just X — it's Y' contrast shell; state the actual point directly without theatrical negation.
+  fix: "It is a new reliability baseline for our checkout pipeline."
+[P11-S1|L18] SUGGESTION(strong,safe) en/prose/hollow-transition
+  quote: "Looking ahead, the possibilities are truly endless."
+  reason: Zero-information macro filler sentence; deleting it preserves all factual claims and causal links.
+  fix: DELETE
+[P4-S2|L7] SUGGESTION(moderate,review) en/prose/rhetorical-self-qa
+  quote: "Why does this matter?"
+  reason: Removes mechanical assistant rhetorical bridge question so the answer states the point directly.
+  fix: DELETE
+[P6-S1|L11] SUGGESTION(hint,manual) en/prose/bold-lead-list-wall
+  quote: "**Faster Failover**: Automated promotion finished in 9 seconds during chaos drills."
+  reason: Four or more consecutive '**Label**: description' list items create a mechanical assistant list wall.
+  prompt: Convert uniform bold-lead bullets into direct sentences or plain list items without bold title prefixes.
+```
+
+### Tier 1: Official Cloud (`--engine cloud`)
+
+```bash
+dislop login --token dslp_...
+dislop check slop-samples/en.md --engine cloud --format agent
+```
+
+> **Status:** Official Cloud backend support for the `dislop.report/1` micro-kernel contract is currently under construction; sample output will be added once the hosted endpoint is live.
+
+### Tier 2: BYOK / OpenAI-Compatible Endpoint (`--engine byok`)
+
+Combines deterministic `DEFECT` detection with frontier semantic `SUGGESTION` analysis—catching unchosen `Option A / Option B` branches (`[P10-S1|L16]`), disguised prose placeholders (`Mention the Q3 error-budget burn rate here once SRE signs off` at `[P10-S3|L16]`), and implicit assistant handoffs (`Based on the notes you shared...` at `[P3-S2|L5]`), while the Dual Fact Gate withholds any rewrite that drops entities (`[P1-S1|L1]`):
+
+```bash
+dislop check slop-samples/en.md --engine byok --format agent
+```
+
+```text
+# dislop file=slop-samples/en.md engine=byok:gpt-6.2-astra defects=8 suggestions=14
+[P1-S1|L1] DEFECT(error,safe) en/artifact-qa/chatbot-artifact
+  quote: "Certainly! Here is a polished draft of your Q3 database migration postmortem."
+  reason: Conversational English assistant wrapper left in the deliverable; safe to delete.
+  fix: DELETE
+[P3-S2|L5] DEFECT(error,safe) common/artifact-qa/chatbot-citation-leak
+  quote: "[oaicite:1]"
+  reason: Internal AI search/citation token leaked into output text.
+  fix: DELETE
+[P3-S2|L5] DEFECT(error,manual) en/artifact-qa/unfilled-placeholder
+  quote: "[Company Name]"
+  reason: Unfilled English template placeholder or dummy Latin copy left in deliverable.
+  prompt: Supply the real copy in place of '[Company Name]', or delete the unfinished sentence.
+[P5-S2|L9] DEFECT(error,manual) en/artifact-qa/unfilled-placeholder
+  quote: "[TODO: confirm incident owner]"
+  reason: Unfilled developer or template token left in deliverable.
+  prompt: Replace '[TODO: confirm incident owner]' with the real value before publishing, or remove the unfinished sentence.
+[P5-S2|L9] DEFECT(error,manual) common/artifact-qa/empty-link-target
+  quote: "[on-call runbook]()"
+  reason: Link has an empty destination URL.
+  prompt: Provide a valid destination URL or unwrap the link.
+[P12-S1|L20] DEFECT(error,safe) en/artifact-qa/chatbot-artifact
+  quote: "I hope this helps!"
+  reason: Conversational English assistant wrapper left in the deliverable; safe to delete.
+  fix: DELETE
+[P12-S2|L20] DEFECT(error,safe) en/artifact-qa/chatbot-artifact
+  quote: "Let me know if you'd like any further adjustments."
+  reason: Conversational English assistant wrapper left in the deliverable; safe to delete.
+  fix: DELETE
+[P5-S2|L9] DEFECT(warning,manual) common/artifact-qa/placeholder-dead-link
+  quote: "[incident timeline](#)"
+  reason: Placeholder non-navigating link target '#'.
+  prompt: Wire a real destination URL or use a <button type="button"> control.
+[P1-S1|L1] SUGGESTION(strong,manual) en/artifact-qa/implicit-assistant-framing
+  quote: "Certainly! Here is a polished draft of your Q3 database migration postmortem."
+  reason: This announces delivery of a draft to its requester. The title already introduces the migration to readers.
+  note: Fact Gate withheld replacement (dropped proper noun/entity: Q3).
+[P3-S1|L5] SUGGESTION(strong,safe) en/prose/hollow-transition
+  quote: "In today's rapidly evolving digital landscape, infrastructure reliability is a top priority."
+  reason: Zero-information macro filler sentence; deleting it preserves all factual claims and causal links.
+  fix: DELETE
+[P3-S2|L5] SUGGESTION(strong,review) en/artifact-qa/implicit-assistant-framing
+  quote: "Based on the notes you shared, I have organized the key findings for [Company Name] below [oaicite:1]."
+  reason: The sentence tells the requester how their notes were used rather than reporting a finding. Removing it also removes the company placeholder and stray citation marker.
+  fix: DELETE
+[P4-S1|L7] SUGGESTION(strong,safe) en/prose/throat-clearing
+  quote: "It is worth noting that PostgreSQL p95 query latency dropped from 142ms to 18ms across 4 read replicas in `{{cluster_region}}`."
+  reason: Removes zero-information throat-clearing opener so the sentence opens directly on the claim.
+  fix: "PostgreSQL p95 query latency dropped from 142ms to 18ms across 4 read replicas in `{{cluster_region}}`."
+[P5-S1|L9] SUGGESTION(strong,review) en/prose/unprompted-negation
+  quote: "This isn't just a configuration tweak — it's a new reliability baseline for our checkout pipeline."
+  reason: Formulaic 'Not just X — it's Y' contrast shell; state the actual point directly without theatrical negation.
+  fix: "It is a new reliability baseline for our checkout pipeline."
+[P5-S2|L9] SUGGESTION(strong,manual) en/artifact-qa/disguised-placeholder-prose
+  quote: "Review the [incident timeline](#) or open the [on-call runbook]() before Friday, and assign follow-up verification to [TODO: confirm incident owner]."
+  reason: The TODO is an instruction to the writer, not an assignee. The timeline and runbook links also lack usable destinations, so readers cannot act on the Friday instruction as written.
+  prompt: Supply [incident timeline URL], [on-call runbook URL], and [confirmed incident owner] while retaining the Friday instruction.
+[P10-S1|L16] SUGGESTION(strong,manual) common/artifact-qa/unchosen-draft-options
+  quote: "Option A: Roll out pooler settings to EU shards on Tuesday."
+  reason: The Tuesday rollout and the following billing-freeze hold are competing drafts of the same next step. The text does not establish which was approved.
+  prompt: Confirm [approved EU rollout decision]. Keep the matching instruction without its option label and remove the other alternative.
+[P10-S3|L16] SUGGESTION(strong,manual) en/artifact-qa/disguised-placeholder-prose
+  quote: "Mention the Q3 error-budget burn rate here once SRE signs off."
+  reason: This tells the writer what to add after sign-off rather than giving readers a confirmed result.
+  prompt: Report [SRE-confirmed Q3 error-budget burn rate] after sign-off, or omit the reminder before publication.
+[P11-S1|L18] SUGGESTION(strong,safe) en/prose/hollow-transition
+  quote: "Looking ahead, the possibilities are truly endless."
+  reason: Zero-information macro filler sentence; deleting it preserves all factual claims and causal links.
+  fix: DELETE
+[P12-S1|L20] SUGGESTION(strong,review) en/artifact-qa/implicit-assistant-framing
+  quote: "I hope this helps!"
+  reason: This closes a conversation with the requester rather than the postmortem.
+  fix: DELETE
+[P12-S2|L20] SUGGESTION(strong,review) en/artifact-qa/implicit-assistant-framing
+  quote: "Let me know if you'd like any further adjustments."
+  reason: The offer concerns revisions to the draft, not follow-up work on the migration.
+  fix: DELETE
+[P4-S2|L7] SUGGESTION(moderate,review) en/prose/rhetorical-self-qa
+  quote: "Why does this matter?"
+  reason: Removes mechanical assistant rhetorical bridge question so the answer states the point directly.
+  fix: DELETE
+[P11-S1|L18] SUGGESTION(moderate,review) en/prose/moralizing-closer
+  quote: "Looking ahead, the possibilities are truly endless."
+  reason: The optimistic sign-off names no operational consequence or next step. The rollout decision, once confirmed, makes a more useful ending.
+  fix: DELETE
+[P6-S1|L11] SUGGESTION(hint,manual) en/prose/bold-lead-list-wall
+  quote: "**Faster Failover**: Automated promotion finished in 9 seconds during chaos drills."
+  reason: Four or more consecutive '**Label**: description' list items create a mechanical assistant list wall.
+  prompt: Convert uniform bold-lead bullets into direct sentences or plain list items without bold title prefixes.
+```
+
+### Tier 3: Managed Local Small Model (`--engine local`)
+
+> **Prerequisite — [Ollama](https://ollama.com):** Tier 3 local semantic checks (`--engine local` LLM mode and `dislop model pull`) require **Ollama** installed and running locally (`http://127.0.0.1:11434/v1`). `dislop --help`, `dislop doctor`, `dislop model`, and `dislop check --engine local` automatically detect whether Ollama is missing or stopped and show installation instructions when needed.
+
+Runs completely on-device via Ollama with zero external network traffic. Even when an ultra-small 1.5B model (`qwen2.5:1.5b`) produces noisy rule classifications on bullet items, `dislop` confines all LLM items strictly to `SUGGESTION` and downgrades unverified rewrites to `manual` so `dislop fix --auto` never corrupts technical metrics (use `qwen2.5-7b-instruct` for tighter local precision):
+
+```bash
+# Install and start Ollama (macOS Homebrew example; see https://ollama.com for Linux/Windows)
+brew install ollama
+ollama serve &
+
+# Pull and register a Tier 3 model, then run local checks
+dislop model pull qwen2.5-1.5b-instruct
+dislop check slop-samples/en.md --engine local --format agent
+```
+
+```text
+# dislop file=slop-samples/en.md engine=local:qwen2.5:1.5b defects=8 suggestions=20
+[P1-S1|L1] DEFECT(error,safe) en/artifact-qa/chatbot-artifact
+  quote: "Certainly! Here is a polished draft of your Q3 database migration postmortem."
+  reason: Conversational English assistant wrapper left in the deliverable; safe to delete.
+  fix: DELETE
+[P3-S2|L5] DEFECT(error,safe) common/artifact-qa/chatbot-citation-leak
+  quote: "[oaicite:1]"
+  reason: Internal AI search/citation token leaked into output text.
+  fix: DELETE
+[P3-S2|L5] DEFECT(error,manual) en/artifact-qa/unfilled-placeholder
+  quote: "[Company Name]"
+  reason: Unfilled English template placeholder or dummy Latin copy left in deliverable.
+  prompt: Supply the real copy in place of '[Company Name]', or delete the unfinished sentence.
+[P5-S2|L9] DEFECT(error,manual) en/artifact-qa/unfilled-placeholder
+  quote: "[TODO: confirm incident owner]"
+  reason: Unfilled developer or template token left in deliverable.
+  prompt: Replace '[TODO: confirm incident owner]' with the real value before publishing, or remove the unfinished sentence.
+[P5-S2|L9] DEFECT(error,manual) common/artifact-qa/empty-link-target
+  quote: "[on-call runbook]()"
+  reason: Link has an empty destination URL.
+  prompt: Provide a valid destination URL or unwrap the link.
+[P12-S1|L20] DEFECT(error,safe) en/artifact-qa/chatbot-artifact
+  quote: "I hope this helps!"
+  reason: Conversational English assistant wrapper left in the deliverable; safe to delete.
+  fix: DELETE
+[P12-S2|L20] DEFECT(error,safe) en/artifact-qa/chatbot-artifact
+  quote: "Let me know if you'd like any further adjustments."
+  reason: Conversational English assistant wrapper left in the deliverable; safe to delete.
+  fix: DELETE
+[P5-S2|L9] DEFECT(warning,manual) common/artifact-qa/placeholder-dead-link
+  quote: "[incident timeline](#)"
+  reason: Placeholder non-navigating link target '#'.
+  prompt: Wire a real destination URL or use a <button type="button"> control.
+[P1-S1|L1] SUGGESTION(strong,review) common/artifact-qa/unchosen-draft-options
+  quote: "Certainly!"
+  reason: The phrase 'Certainly!' is redundant and does not add any value to the document.
+  fix: DELETE
+[P2-S1|L3] SUGGESTION(strong,manual) common/artifact-qa/meta-editing-note
+  quote: "Q3 Storage Tier Migration Notes"
+  reason: The note is a placeholder for future editorial work and does not belong in the published document.
+  prompt: Remove the stray editorial meta-note.
+[P3-S1|L5] SUGGESTION(strong,safe) en/prose/hollow-transition
+  quote: "In today's rapidly evolving digital landscape, infrastructure reliability is a top priority."
+  reason: Zero-information macro filler sentence; deleting it preserves all factual claims and causal links.
+  fix: DELETE
+[P3-S1|L5] SUGGESTION(strong,manual) en/artifact-qa/implicit-assistant-framing
+  quote: "In today's rapidly evolving digital landscape, infrastructure reliability is a top priority."
+  reason: The sentence is a placeholder for future editorial work and does not belong in the published document.
+  prompt: Remove the assistant handoff sentence.
+[P4-S1|L7] SUGGESTION(strong,safe) en/prose/throat-clearing
+  quote: "It is worth noting that PostgreSQL p95 query latency dropped from 142ms to 18ms across 4 read replicas in `{{cluster_region}}`."
+  reason: Removes zero-information throat-clearing opener so the sentence opens directly on the claim.
+  fix: "PostgreSQL p95 query latency dropped from 142ms to 18ms across 4 read replicas in `{{cluster_region}}`."
+[P4-S1|L7] SUGGESTION(strong,manual) en/artifact-qa/disguised-placeholder-prose
+  quote: "It is worth noting that PostgreSQL p95 query latency dropped from 142ms to 18ms across 4 read replicas in `{{cluster_region}}`."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Replace the placeholder with the confirmed figure or link.
+[P5-S1|L9] SUGGESTION(strong,review) en/prose/unprompted-negation
+  quote: "This isn't just a configuration tweak — it's a new reliability baseline for our checkout pipeline."
+  reason: Formulaic 'Not just X — it's Y' contrast shell; state the actual point directly without theatrical negation.
+  fix: "It is a new reliability baseline for our checkout pipeline."
+[P5-S1|L9] SUGGESTION(strong,manual) en/artifact-qa/synthetic-example-entity
+  quote: "This isn't just a configuration tweak — it's a new reliability baseline for our checkout pipeline."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Replace the placeholder with the real organization or contact details.
+[P6-S1|L11] SUGGESTION(strong,manual) en/prose/unprompted-negation
+  quote: "**Faster Failover**: Automated promotion finished in 9 seconds during chaos drills."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Replace the placeholder with the confirmed figure or link.
+[P7-S1|L12] SUGGESTION(strong,manual) en/prose/hollow-transition
+  quote: "**Lower Memory**: Worker nodes stayed below 4.2GB RSS at peak load."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Replace the filler sentence with the concrete claim.
+[P8-S1|L13] SUGGESTION(strong,manual) en/prose/throat-clearing
+  quote: "**Cleaner Telemetry**: Slow-query logs now sample queries above 50ms."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Replace the filler sentence with the concrete claim.
+[P9-S1|L14] SUGGESTION(strong,manual) en/prose/moralizing-closer
+  quote: "**Simpler Rollbacks**: Snapshot restore scripts run from a single CLI flag."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Replace the filler sentence with the concrete claim.
+[P11-S1|L18] SUGGESTION(strong,safe) en/prose/hollow-transition
+  quote: "Looking ahead, the possibilities are truly endless."
+  reason: Zero-information macro filler sentence; deleting it preserves all factual claims and causal links.
+  fix: DELETE
+[P4-S2|L7] SUGGESTION(moderate,review) en/prose/rhetorical-self-qa
+  quote: "Why does this matter?"
+  reason: Removes mechanical assistant rhetorical bridge question so the answer states the point directly.
+  fix: DELETE
+[P6-S1|L11] SUGGESTION(hint,manual) en/prose/bold-lead-list-wall
+  quote: "**Faster Failover**: Automated promotion finished in 9 seconds during chaos drills."
+  reason: Four or more consecutive '**Label**: description' list items create a mechanical assistant list wall.
+  prompt: Convert uniform bold-lead bullets into direct sentences or plain list items without bold title prefixes.
+[P10-S1|L16] SUGGESTION(hint,manual) en/prose/rhetorical-self-qa
+  quote: "Option A: Roll out pooler settings to EU shards on Tuesday."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Merge the artificial question-and-answer pair into a single direct statement.
+[P10-S2|L16] SUGGESTION(hint,manual) en/prose/rhetorical-self-qa
+  quote: "/ Option B: Hold EU rollout until after the billing freeze."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Merge the artificial question-and-answer pair into a single direct statement.
+[P10-S3|L16] SUGGESTION(hint,manual) en/prose/rhetorical-self-qa
+  quote: "Mention the Q3 error-budget burn rate here once SRE signs off."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Merge the artificial question-and-answer pair into a single direct statement.
+[P11-S1|L18] SUGGESTION(hint,manual) en/prose/rhetorical-self-qa
+  quote: "Looking ahead, the possibilities are truly endless."
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Merge the artificial question-and-answer pair into a single direct statement.
+[P12-S1|L20] SUGGESTION(hint,manual) en/prose/rhetorical-self-qa
+  quote: "I hope this helps!"
+  reason: The placeholder is a reminder to the writer and does not belong in the published document.
+  prompt: Merge the artificial question-and-answer pair into a single direct statement.
+```
+
 ## CLI Reference
 
 ```text
@@ -50,9 +365,9 @@ dislop init [--global] [--voice <glob>]     Initialize .dislop.json or ~/.config
 dislop login [--token <dslp_*>]             Save Official Cloud credentials
 dislop logout                               Remove Official Cloud credentials
 dislop voice <extract|show|clear> [files]   Manage personal voice profile (voice.json)
-dislop model <list|pull|rm> [name]          Manage Tier 3 local models
+dislop model <list|pull|rm> [name]          Manage Tier 3 local models (requires Ollama)
 dislop packs [--json]                       List built-in multi-level Packs
-dislop doctor [--json]                      Diagnose active routing tier, auth, config, and Packs
+dislop doctor [--json]                      Diagnose active routing tier, Ollama status, auth, config, and Packs
 dislop mcp                                  Start local stdio MCP server (also `dislop-mcp`)
 ```
 
@@ -84,37 +399,9 @@ dislop mcp                                  Start local stdio MCP server (also `
 }
 ```
 
-## Authoring Custom Packs
+## Contributing & Custom Packs
 
-### Separated Pack Directory (`pack.json` + `scripts/` + `prompts/`)
-
-- `pack.json`: declares `name`, `version`, `description`, `languages`, and `formats`.
-- `scripts/index.mjs`: exports `definePackScripts({ check, verifyFix })` from `dislop/sdk` (loaded lazily in Step 3 / Step 5).
-- `prompts/rules.md`: declares trigger conditions, false-positive boundaries, and fix suggestions in pure Markdown (loaded lazily in Step 4 only when an LLM engine is active).
-
-### Single-File Zero-Code Markdown Pack (`academic-en.pack.md`)
-
-```markdown
----
-name: academic-en
-languages: [en]
-formats: [md, txt, docx]
-rules:
-  - id: throat-clearing
-    priority: strong
-  - id: vague-attribution
-    priority: moderate
----
-
-1. **throat-clearing**: Fires when a paragraph opens with a meta-announcement ("In this section, we will discuss...") whose scope is already established by the heading. Fix suggestion: remove the meta-announcement and open directly on the claim.
-2. **vague-attribution**: Fires on unanchored authority claims ("Studies have shown", "Many experts argue") lacking a named source. Fix suggestion: cite the specific study, author, or empirical dataset.
-```
-
-Run it directly:
-
-```bash
-dislop check paper.md --pack ./academic-en.pack.md --engine byok
-```
+To build custom Packs (separated `pack.json` + `scripts/` + `prompts/`, single-file `<name>.pack.md` Markdown Packs, or programmatic `definePack()` plugins), see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 

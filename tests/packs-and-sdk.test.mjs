@@ -265,7 +265,7 @@ test("Strict single-language separation across all pack.json, scripts/*.mjs, and
   scanDirNoCjk("packs/common");
   scanDirNoCjk("packs/en");
 
-  for (const topDoc of ["README.md", "PRODUCT.md", "AGENTS.md", "docs/MIGRATION-TODO.md"]) {
+  for (const topDoc of ["README.md", "CONTRIBUTING.md", "PRODUCT.md", "AGENTS.md", "docs/MIGRATION-TODO.md"]) {
     const content = fs.readFileSync(path.join(REPO_ROOT, topDoc), "utf8");
     assert.equal(cjkRe.test(content), false, `${topDoc} must remain strictly English`);
   }

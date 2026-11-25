@@ -32,7 +32,11 @@ export function runAutoFixOnDocumentResult(docResult, { dryRun = false, backup =
     replacement: item.actionType === "delete" ? "" : item.suggestedReplacement,
   }));
 
-  const patchRes = patchDocumentOnDisk(doc, patches, { dryRun, backup });
+  const patchRes = patchDocumentOnDisk(doc, patches, {
+    dryRun,
+    backup,
+    displayPath: report.file,
+  });
 
   if (patchRes.modified && !dryRun) {
     const appliedIds = new Set(safeItems.map((i) => i.id));

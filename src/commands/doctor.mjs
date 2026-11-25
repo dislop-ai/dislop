@@ -1,7 +1,10 @@
 import fs from "node:fs";
 import { isInteractiveHumanTty, resolveLayeredConfig } from "../kernel/config.mjs";
 import { listBuiltinPackIds } from "../kernel/pack-loader.mjs";
-import { readInstalledModelsManifest } from "../runtime/providers/local-model.mjs";
+import {
+  detectOllamaBinary,
+  readInstalledModelsManifest,
+} from "../runtime/providers/local-model.mjs";
 import {
   loadCloudCredentials,
   resolveExecutionRoute,
@@ -25,6 +28,7 @@ export async function runDoctorCommand(_positionals, flags, io = {}) {
   const cloudCreds = loadCloudCredentials(config.credentialsPath);
   const tier2Candidate = resolveTier2ProviderCandidate(config, env);
   const modelsManifest = readInstalledModelsManifest(config.modelsDir);
+  const ollama = detectOllamaBinary(env);
   const builtinPacks = listBuiltinPackIds();
 
   // Resolve route non-interactively so `doctor` never triggers consent prompts
@@ -56,6 +60,8 @@ export async function runDoctorCommand(_positionals, flags, io = {}) {
         }
       : null,
     localModels: {
+      ollamaInstalled: ollama.installed,
+      ollamaBinary: ollama.binaryPath,
       activeModel: modelsManifest.activeModel,
       installed: Object.keys(modelsManifest.installed),
     },
@@ -87,12 +93,15 @@ export async function runDoctorCommand(_positionals, flags, io = {}) {
   stdout.write(
     `  Approved Hosts   : ${diagnosis.approvedHosts.length > 0 ? diagnosis.approvedHosts.join(", ") : "(none)"}\n`,
   );
+  const ollamaStatusText = diagnosis.localModels.ollamaInstalled
+    ? `Ollama: ${diagnosis.localModels.ollamaBinary}`
+    : "Ollama: MISSING — install from https://ollama.com";
   stdout.write(
     `  Local Tier 3     : ${
       diagnosis.localModels.installed.length > 0
         ? diagnosis.localModels.installed.join(", ")
         : "none installed (run 'dislop model pull')"
-    }\n`,
+    } (${ollamaStatusText})\n`,
   );
   stdout.write(`  Voice Profile    : ${diagnosis.voiceCachePresent ? "cached" : "not configured"}\n`);
   stdout.write(`  Built-in Packs   : ${diagnosis.builtinPacks.join(", ")}\n`);

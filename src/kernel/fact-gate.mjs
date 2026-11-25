@@ -8,6 +8,8 @@ const SENTENCE_INITIAL_STOPWORDS = new Set([
   "After",
   "Although",
   "Also",
+  "Assign",
+  "Based",
   "Because",
   "Before",
   "Beyond",

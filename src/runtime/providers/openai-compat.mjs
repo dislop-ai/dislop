@@ -70,12 +70,19 @@ export async function invokeOpenAiCompatProvider({
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetchImpl(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      });
+      let res;
+      try {
+        res = await fetchImpl(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+      } catch (netErr) {
+        throw new Error(
+          `Unable to reach provider '${provider.name}' at ${url} (${netErr?.cause?.code || netErr.message})`,
+        );
+      }
 
       if (res.status === 401 || res.status === 403) {
         const err = new Error(`Provider '${provider.name}' rejected API key (HTTP ${res.status})`);

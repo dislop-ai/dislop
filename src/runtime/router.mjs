@@ -4,7 +4,12 @@ import { checkPrivacyConsent, isLoopbackHostname, extractHostname } from "./priv
 import { invokeAnthropicProvider } from "./providers/anthropic.mjs";
 import { invokeCloudProvider } from "./providers/cloud.mjs";
 import { invokeGeminiProvider } from "./providers/gemini.mjs";
-import { invokeLocalModelProvider, resolveInstalledLocalModel } from "./providers/local-model.mjs";
+import {
+  OLLAMA_INSTALL_HINT,
+  detectOllamaBinary,
+  invokeLocalModelProvider,
+  resolveInstalledLocalModel,
+} from "./providers/local-model.mjs";
 import { invokeOpenAiCompatProvider } from "./providers/openai-compat.mjs";
 
 const AMBIENT_ENV_CANDIDATES = [
@@ -38,7 +43,7 @@ const AMBIENT_ENV_CANDIDATES = [
 ];
 
 export const UPGRADE_TIER_HINT =
-  "💡 Running local checks only. For deeper semantic de-slopping, run 'dislop login' (Cloud), pass '--engine auto' / '--engine byok', or run 'dislop model pull'.";
+  "💡 Running local deterministic checks only. For deeper semantic de-slopping, run 'dislop login' (Cloud), pass '--engine auto' / '--engine byok', or run 'dislop model pull' (requires Ollama: https://ollama.com).";
 
 export function loadCloudCredentials(credentialsPath) {
   if (!fs.existsSync(credentialsPath)) return null;
@@ -215,21 +220,42 @@ export async function resolveExecutionRoute({
       engineLabel: `local:${localModel.model}`,
       maxInputTokens: localModel.maxInputTokens || 8000,
       fallbackOnConnRefused: !config.explicitEngine,
-      execute: (payload) => invokeLocalModelProvider({ localModel, payload, fetchImpl }),
+      execute: (payload) => invokeLocalModelProvider({ localModel, payload, fetchImpl, env }),
     };
   }
 
   // Also allow loopback provider configured in `config.providers` when routing === "local"
   const maybeLoopback = resolveTier2ProviderCandidate(config, env);
   if (maybeLoopback && isLoopbackHostname(extractHostname(maybeLoopback.baseUrl))) {
+    if (String(maybeLoopback.baseUrl).includes(":11434") || /ollama/i.test(maybeLoopback.name)) {
+      return {
+        tier: "local",
+        engineLabel: `local:${maybeLoopback.model}`,
+        maxInputTokens: maybeLoopback.maxInputTokens || 8000,
+        fallbackOnConnRefused: !config.explicitEngine,
+        execute: (payload) =>
+          invokeLocalModelProvider({ localModel: maybeLoopback, payload, fetchImpl, env }),
+      };
+    }
     return buildTier2Route(maybeLoopback, fetchImpl, "local");
+  }
+
+  const ollama = detectOllamaBinary(env);
+  let fallbackHint = UPGRADE_TIER_HINT;
+  if (config.explicitEngine && mode === "local") {
+    fallbackHint = ollama.installed
+      ? "💡 No Tier 3 local model installed yet. Running deterministic Script Packs only — start 'ollama serve' and run 'dislop model pull qwen2.5-1.5b-instruct' to enable local LLM checks."
+      : `💡 Ollama is missing on this machine (required for Tier 3 '--engine local' LLM checks). Running deterministic Script Packs only — ${OLLAMA_INSTALL_HINT}`;
+  } else if (!ollama.installed) {
+    fallbackHint =
+      "💡 Running local deterministic checks only (Ollama is not installed for Tier 3 local LLM). For deeper semantic de-slopping, run 'dislop login' (Cloud), pass '--engine auto' / '--engine byok', or install Ollama (https://ollama.com) and run 'dislop model pull'.";
   }
 
   return {
     tier: "none",
     engineLabel: "deterministic",
     maxInputTokens: 0,
-    hint: UPGRADE_TIER_HINT,
+    hint: fallbackHint,
     execute: null,
   };
 }

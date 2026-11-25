@@ -262,12 +262,13 @@ export function renderUnifiedDiff(filePath, beforeText, afterText) {
 /**
  * Apply patches to `doc.filePath` (supporting `--dry-run` and `--backup` atomic temp-file rename).
  */
-export function patchDocumentOnDisk(doc, patches, { dryRun = false, backup = false } = {}) {
+export function patchDocumentOnDisk(doc, patches, { dryRun = false, backup = false, displayPath = null } = {}) {
   if (!patches || patches.length === 0) {
     return { modified: false, diff: "" };
   }
 
   const filePath = doc.filePath;
+  const diffLabel = (displayPath || filePath).replace(/^\/+/, "");
   if (doc.format === "docx" || doc.format === "pptx") {
     const origBuf = fs.readFileSync(filePath);
     const nextBuf = applyPatchesToOoxmlBuffer(origBuf, doc, patches);
@@ -277,7 +278,7 @@ export function patchDocumentOnDisk(doc, patches, { dryRun = false, backup = fal
     const diffSummary = patches
       .map(
         (p) =>
-          `--- a/${filePath} [${p.targetId || "ooxml"}]\n+++ b/${filePath} [${p.targetId || "ooxml"}]\n-${p.originalQuote || ""}\n+${p.replacement || "(deleted)"}`,
+          `--- a/${diffLabel} [${p.targetId || "ooxml"}]\n+++ b/${diffLabel} [${p.targetId || "ooxml"}]\n-${p.originalQuote || ""}\n+${p.replacement || "(deleted)"}`,
       )
       .join("\n");
     if (!dryRun) {
@@ -292,7 +293,7 @@ export function patchDocumentOnDisk(doc, patches, { dryRun = false, backup = fal
     return { modified: false, diff: "" };
   }
 
-  const diff = renderUnifiedDiff(filePath, origText, nextText);
+  const diff = renderUnifiedDiff(diffLabel, origText, nextText);
   if (!dryRun) {
     atomicWriteBuffer(filePath, Buffer.from(nextText, "utf8"), { backup });
   }

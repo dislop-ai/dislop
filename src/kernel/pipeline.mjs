@@ -215,7 +215,9 @@ export async function runDocumentPipeline({
               throw new DislopConfigError(err.message);
             }
             engineUsed = "deterministic";
-            routeHint = "💡 Local LLM runtime unreachable; showing deterministic checks only.";
+            routeHint = err?.ollamaMissing
+              ? "💡 Ollama is missing on this machine; showing deterministic checks only. Install Ollama (https://ollama.com) for Tier 3 local LLM checks."
+              : "💡 Local Ollama runtime unreachable (is 'ollama serve' running?); showing deterministic checks only.";
             llmItems = [];
             break;
           }

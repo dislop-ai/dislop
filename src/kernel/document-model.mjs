@@ -160,7 +160,7 @@ export function splitParagraphIntoSentences(slice) {
     if (ch === "\u3002" || ch === "\uff01" || ch === "\uff1f") {
       if (ch === "\uff01") {
         const leadInZh = slice.slice(sentStart, i).trim();
-        if (/^(?:\u597d\u7684|\u5f53\u7136|\u6ca1\u95ee\u9898)$/.test(leadInZh) && i + 1 < len) {
+        if (/^(?:\u597d\u7684|\u5f53\u7136|\u5f53\u7136\u53ef\u4ee5|\u6ca1\u95ee\u9898)$/.test(leadInZh) && i + 1 < len) {
           continue;
         }
       }

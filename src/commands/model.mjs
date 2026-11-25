@@ -3,6 +3,8 @@ import path from "node:path";
 import { DislopConfigError, getDislopHomeDir, writeJsonFileSecure } from "../kernel/config.mjs";
 import {
   LOCAL_MODEL_CATALOG,
+  OLLAMA_INSTALL_HINT,
+  detectOllamaBinary,
   readInstalledModelsManifest,
 } from "../runtime/providers/local-model.mjs";
 
@@ -17,6 +19,7 @@ export async function runModelCommand(positionals, flags, io = {}) {
   const modelsDir = path.join(getDislopHomeDir(env), "models");
   const manifestPath = path.join(modelsDir, "manifest.json");
   const manifest = readInstalledModelsManifest(modelsDir);
+  const ollama = detectOllamaBinary(env);
 
   if (action === "list") {
     const installedNames = Object.keys(manifest.installed);
@@ -24,6 +27,8 @@ export async function runModelCommand(positionals, flags, io = {}) {
       stdout.write(
         `${JSON.stringify(
           {
+            ollamaInstalled: ollama.installed,
+            ollamaBinary: ollama.binaryPath,
             activeModel: manifest.activeModel,
             installed: manifest.installed,
             catalog: LOCAL_MODEL_CATALOG,
@@ -35,15 +40,21 @@ export async function runModelCommand(positionals, flags, io = {}) {
       return 0;
     }
 
-    stdout.write("Tier 3 Local Model Catalog:\n");
+    stdout.write("Tier 3 Local Model Catalog (powered by Ollama — https://ollama.com):\n");
     for (const [id, spec] of Object.entries(LOCAL_MODEL_CATALOG)) {
       const isInstalled = Boolean(manifest.installed[id]);
       const isActive = manifest.activeModel === id;
       const badge = isActive ? "[active]" : isInstalled ? "[installed]" : "[available]";
       stdout.write(`  - ${id} (${spec.sizeLabel}) ${badge} — ${spec.description}\n`);
     }
-    if (installedNames.length === 0) {
-      stdout.write("\nRun 'dislop model pull qwen2.5-1.5b-instruct' to enable Tier 3 local semantic checks.\n");
+    if (!ollama.installed) {
+      stdout.write(
+        `\nWarning: Ollama is missing on this machine (required for Tier 3 local models).\n  ${OLLAMA_INSTALL_HINT}\n`,
+      );
+    } else if (installedNames.length === 0) {
+      stdout.write(
+        `\nOllama detected (${ollama.binaryPath}). Start 'ollama serve' and run 'dislop model pull qwen2.5-1.5b-instruct' to enable Tier 3 local semantic checks.\n`,
+      );
     }
     return 0;
   }
@@ -58,18 +69,26 @@ export async function runModelCommand(positionals, flags, io = {}) {
       description: "Custom local model",
     };
 
-    const baseUrl = flags.endpoint || env.DISLOP_LOCAL_MODEL_URL || "http://127.0.0.1:11434/v1";
+    const customEndpoint = flags.endpoint || env.DISLOP_LOCAL_MODEL_URL || null;
+    const baseUrl = customEndpoint || "http://127.0.0.1:11434/v1";
 
-    // Attempt `ollama pull` when ollama CLI is present and not running in offline/mock test mode
+    // Require Ollama CLI unless running against a custom endpoint or in offline unit test mode
     if (!env.DISLOP_SKIP_OLLAMA_PULL) {
-      try {
-        const probe = spawnSync("ollama", ["--version"], { stdio: "ignore" });
-        if (probe.status === 0) {
-          stderr.write(`Pulling '${catalogEntry.ollamaTag}' via local Ollama...\n`);
-          spawnSync("ollama", ["pull", catalogEntry.ollamaTag], { stdio: "inherit" });
+      if (!ollama.installed && !customEndpoint) {
+        throw new DislopConfigError(
+          `Ollama is missing on this machine (required by 'dislop model pull'). ${OLLAMA_INSTALL_HINT}`,
+        );
+      }
+      if (ollama.installed) {
+        stderr.write(`Pulling '${catalogEntry.ollamaTag}' via local Ollama (${ollama.binaryPath})...\n`);
+        const pullRes = spawnSync(ollama.binaryPath, ["pull", catalogEntry.ollamaTag], {
+          stdio: "inherit",
+        });
+        if (pullRes.status !== 0) {
+          throw new DislopConfigError(
+            `Ollama failed to pull '${catalogEntry.ollamaTag}'. Ensure 'ollama serve' (or the Ollama app) is running, then retry.`,
+          );
         }
-      } catch {
-        // ollama binary not installed; register manifest entry pointing to loopback endpoint
       }
     }
 

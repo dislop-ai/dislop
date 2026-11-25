@@ -9,10 +9,17 @@ import { runVerifyCommand } from "./commands/verify.mjs";
 import { runVoiceCommand } from "./commands/voice.mjs";
 import { DislopConfigError } from "./kernel/config.mjs";
 import { startStdioMcpServer } from "./mcp/stdio-server.mjs";
+import { detectOllamaBinary } from "./runtime/providers/local-model.mjs";
 
 export const CLI_VERSION = "1.0.0";
 
-const HELP_TEXT = `dislop v${CLI_VERSION} — Pluggable Editorial & Artifact Linter (Node.js Micro-Kernel)
+export function buildHelpText(env = process.env) {
+  const ollama = detectOllamaBinary(env);
+  const ollamaStatusLine = ollama.installed
+    ? `  Status: Ollama detected (${ollama.binaryPath}).`
+    : "  Status: Ollama is MISSING on this machine — install from https://ollama.com (e.g., 'brew install ollama') before using Tier 3 local LLM checks or 'dislop model pull'.";
+
+  return `dislop v${CLI_VERSION} — Pluggable Editorial & Artifact Linter (Node.js Micro-Kernel)
 
 Usage:
   dislop check <files/globs...> [options]     Read-only Dual-Track audit (Defects & Suggestions)
@@ -23,9 +30,9 @@ Usage:
   dislop login [--token <dslp_*>]             Save Official Cloud credentials (~/.config/dislop/credentials.json)
   dislop logout                               Remove saved Official Cloud credentials
   dislop voice <extract|show|clear> [files]   Manage personal voice baseline (voice.json)
-  dislop model <list|pull|rm> [name]          Manage Tier 3 local models (~/.config/dislop/models/)
+  dislop model <list|pull|rm> [name]          Manage Tier 3 local models (requires Ollama)
   dislop packs [--json]                       List built-in multi-level Packs
-  dislop doctor [--json]                      Inspect active routing tier, auth, config, and Packs
+  dislop doctor [--json]                      Inspect active routing tier, Ollama status, auth, config, and Packs
   dislop mcp                                  Start local stdio MCP server for coding & office agents
 
 Options (check / fix):
@@ -36,7 +43,7 @@ Options (check / fix):
   --no-llm                                    Run deterministic Script Packs (pack.check) only
   --voice <files/globs...>                    Align review with hand-written voice reference files
   --level <strong|moderate|hint|all>          Filter Suggestion priority threshold (default: all)
-  --engine <local|auto|cloud|byok>            Routing tier (default: local; zero network upload unless opted in)
+  --engine <local|auto|cloud|byok>            Routing tier (default: local; Tier 3 local LLM requires Ollama)
   --provider <name>                           Select named provider from config.json
   --dry-run                                   Preview unified diff without modifying files on disk
   --backup                                    Create <file>.bak before atomic write
@@ -44,11 +51,18 @@ Options (check / fix):
   --help, -h                                  Show this help message
   --version, -v                               Print version
 
+Tier 3 Local LLM Prerequisite (Ollama):
+  Tier 3 local semantic checks ('--engine local' & 'dislop model pull') require Ollama (https://ollama.com).
+  Without Ollama or an installed local model, default 'local' routing runs offline deterministic Packs only.
+  Setup: install Ollama ('brew install ollama'), start 'ollama serve', then run 'dislop model pull'.
+${ollamaStatusLine}
+
 Exit Codes:
   0  Pass (zero unresolved Defect: error items; prose Suggestions never fail CI)
   1  Unresolved Defect: error found (or Fact Gate failure in 'dislop verify')
-  2  CLI usage, configuration, auth, or unreadable file error
+  2  CLI usage, configuration, auth, missing Ollama on 'model pull', or unreadable file error
 `;
+}
 
 function splitCommaValues(values) {
   if (!values) return [];
@@ -128,7 +142,7 @@ export async function runCli(argv = process.argv.slice(2), io = {}) {
     }
 
     if (values.help || positionals.length === 0) {
-      stdout.write(HELP_TEXT);
+      stdout.write(buildHelpText(io.env || process.env));
       return positionals.length === 0 && !values.help ? 2 : 0;
     }
 
