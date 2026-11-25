@@ -430,6 +430,7 @@ const INDEXNOW_KEY = "d1510ba4e8f74c92a6d38b1e5f0c7a49";
 const indexNowKeyFile = path.join(SITE_DIR, `${INDEXNOW_KEY}.txt`);
 assert.ok(fs.existsSync(indexNowKeyFile), `Missing IndexNow key file site/${INDEXNOW_KEY}.txt`);
 assert.equal(fs.readFileSync(indexNowKeyFile, "utf8").trim(), INDEXNOW_KEY, "IndexNow verification key content mismatch");
+assert.ok(fs.readFileSync(path.join(SITE_DIR, "index.html"), "utf8").includes('name="msvalidate.01" content="98E6B00BCC69ADFB1682F3437E8C6F87"'), "site/index.html missing Bing msvalidate.01 verification tag");
 assert.ok(fs.existsSync(path.join(SITE_DIR, "assets", "logo-400.png")), "Missing site/assets/logo-400.png");
 
 const sitemapXml = fs.readFileSync(path.join(SITE_DIR, "sitemap.xml"), "utf8");
