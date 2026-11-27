@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dislop demo trailer renderer</title>
+  <link rel="icon" href="data:,">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #14171a;
+      color: #f4f5f3;
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid #252b33;
+      background: #1b2026;
+    }
+    h1 { margin: 0; font-size: 16px; font-weight: 600; }
+    button {
+      padding: 7px 14px;
+      border: 1px solid #3b434e;
+      border-radius: 6px;
+      background: #252b33;
+      color: #f4f5f3;
+      cursor: pointer;
+      font: inherit;
+    }
+    button:hover { background: #2f3742; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    #status { margin-left: auto; font-family: ui-monospace, monospace; color: #98a2b3; }
+    main { padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    canvas { width: min(100%, 1120px); height: auto; border: 1px solid #252b33; background: #14171a; }
+    .controls { display: flex; align-items: center; gap: 12px; width: min(100%, 1120px); }
+    input[type="range"] { flex: 1; }
+    code { font-family: ui-monospace, monospace; color: #d0d7de; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>dislop 20s 1080p demo trailer</h1>
+    <button id="btn-render">Render 1080p MP4</button>
+    <button id="btn-download" disabled>Download MP4</button>
+    <span id="status">Ready · 600 frames @ 30fps</span>
+  </header>
+  <main>
+    <canvas id="preview" width="1920" height="1080"></canvas>
+    <div class="controls">
+      <label for="scrub">Frame</label>
+      <input id="scrub" type="range" min="0" max="599" value="0">
+      <code id="frame-label">0 / 599 (0.00s)</code>
+    </div>
+  </main>
+  <script type="module">
+    import { W, H, FPS, TOTAL_FRAMES } from "./storyboard.mjs";
+    import { drawFrame, renderTrailerMp4 } from "./renderer.mjs";
+
+    const canvas = document.getElementById("preview");
+    const ctx = canvas.getContext("2d");
+    const scrub = document.getElementById("scrub");
+    const frameLabel = document.getElementById("frame-label");
+    const status = document.getElementById("status");
+    const btnRender = document.getElementById("btn-render");
+    const btnDownload = document.getElementById("btn-download");
+
+    let lastBlob = null;
+
+    function preview(i) {
+      const idx = Math.max(0, Math.min(TOTAL_FRAMES - 1, Number(i) || 0));
+      scrub.value = String(idx);
+      frameLabel.textContent = `${idx} / ${TOTAL_FRAMES - 1} (${(idx / FPS).toFixed(2)}s)`;
+      drawFrame(ctx, idx);
+    }
+
+    scrub.addEventListener("input", () => preview(scrub.value));
+
+    async function render() {
+      btnRender.disabled = true;
+      btnDownload.disabled = true;
+      status.textContent = "Encoding H.264...";
+      const t0 = performance.now();
+      try {
+        lastBlob = await renderTrailerMp4({
+          onProgress(done, total) {
+            status.textContent = `Encoding ${done} / ${total} frames`;
+          },
+        });
+        const ms = Math.round(performance.now() - t0);
+        const kb = Math.round(lastBlob.size / 1024);
+        status.textContent = `Done · ${kb} KB in ${ms} ms`;
+        btnDownload.disabled = false;
+        return lastBlob;
+      } catch (err) {
+        status.textContent = `Error: ${err.message}`;
+        throw err;
+      } finally {
+        btnRender.disabled = false;
+      }
+    }
+
+    btnRender.addEventListener("click", render);
+    btnDownload.addEventListener("click", () => {
+      if (!lastBlob) return;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(lastBlob);
+      a.download = "dislop-demo-1080p.mp4";
+      a.click();
+    });
+
+    preview(0);
+    window.__dislopTrailer = { preview, render, width: W, height: H, fps: FPS, totalFrames: TOTAL_FRAMES };
+  </script>
+</body>
+</html>
