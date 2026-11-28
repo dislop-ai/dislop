@@ -86,7 +86,7 @@ const I18N = {
 
     "cases.title": "删掉热词之后，哪些写法读着还像 AI",
     "cases.desc":
-      "删掉“抓手”“赋能”这类热词之后，模型常换成“不是 A，而是 B”的反转口号，或者写出检查报 0 处问题、读起来仍像推销稿的句子。每组都能在工作台里直接试。",
+      "删掉空话和自嗨黑话之后，模型常换成“不是 A，而是 B”的反转口号，或者写出检查报 0 处问题、读起来仍像推销稿的句子。每组都能在工作台里直接试。",
     "cases.readAll": "看全部对照案例（.md）→",
 
     "demos.title": "命令行、网页、PPT 与 PR 门禁实录",
@@ -670,32 +670,32 @@ const I18N = {
 
 const HERO_PROOF_BY_LANG = {
   zh: {
-    filename: "launch-note.md",
+    filename: "release-notes.md",
     modality: "markdown",
     pack: "business-brief",
-    bad: "好的，以下是修改后的上线说明。值得注意的是，本次改造以队列分级为重要抓手，全面赋能一线运维团队，故障恢复时间最多 45 秒。",
-    trap: "队列分级已经落地，故障恢复时间最多 45 秒。这不是一次简单的升级，而是一场效率革命。",
-    good: "这次改造给队列分了级，一线运维团队的故障恢复时间最多 45 秒。",
+    bad: "商品搜索改成了增量索引，改价、上下架最多 30 秒生效，以前要等凌晨 3 点的全量重建。类目调整仍走夜间重建。这将显著提升上新效率，持续优化交互体验。如果您还有其他问题，请随时告诉我。",
+    trap: "商品搜索改成了增量索引，改价、上下架最多 30 秒生效，以前要等凌晨 3 点的全量重建。类目调整仍走夜间重建。这不是一次简单的提速，而是运营节奏的重新定义。",
+    good: "商品搜索改成了增量索引，改价、上下架最多 30 秒生效，以前要等凌晨 3 点的全量重建。类目调整仍走夜间重建。",
     badNotes: [
-      { kind: "error", label: "硬伤：", text: "开头留着 AI 寒暄，删掉就行。" },
-      { kind: "warn", label: "提醒：", text: "“值得注意的是”“抓手”“全面赋能”都是空话，可以直接说做了什么。" },
+      { kind: "error", label: "硬伤：", text: "结尾留着 AI 助手的客套收尾，整句删掉。" },
+      { kind: "warn", label: "提醒：", text: "“显著提升”“持续优化”这类黑话没说出任何新改动，前两句已经讲清了，整句删掉。" },
     ],
-    trapVerdict: "没通过：旧套词删掉了，但换上了“不是……而是……”这种二阶 AI 腔。",
-    goodVerdict: "0 处问题。寒暄和空话都清掉了，句子直接说清改动和结果。",
+    trapVerdict: "没通过：客套话和黑话删了，却新添了一句“不是……而是……”的反转口号，原稿里没有这句。",
+    goodVerdict: "0 处问题。只留改了什么、30 秒生效和类目调整仍走夜间重建，比原稿短了 40%。",
   },
   en: {
-    filename: "launch-note.md",
+    filename: "release-notes.md",
     modality: "markdown",
     pack: "business-brief",
-    bad: "Certainly! Here is the launch note. It's worth noting that CSV exports are a game-changer: they finish in up to 12 minutes for workspaces above 500,000 rows.",
-    trap: "CSV exports finish in up to 12 minutes for workspaces above 500,000 rows. This isn't just an upgrade — it's a new standard.",
-    good: "CSV exports finish in up to 12 minutes for workspaces above 500,000 rows.",
+    bad: "Failed webhook deliveries now retry up to 8 times over 24 hours with exponential backoff. If the last attempt fails, events wait in a dead-letter queue for 14 days. This release leverages a robust, seamless pipeline to streamline recovery and elevate resilience across your stack. [insert docs link]",
+    trap: "Failed webhook deliveries now retry up to 8 times over 24 hours with exponential backoff. If the last attempt fails, events wait in a dead-letter queue for 14 days. This isn't just a retry policy — it's peace of mind.",
+    good: "Failed webhook deliveries now retry up to 8 times over 24 hours with exponential backoff. If the last attempt fails, events wait in a dead-letter queue for 14 days.",
     badNotes: [
-      { kind: "error", label: "Hard bug: ", text: "Stray chat reply on line one. Delete it." },
-      { kind: "warn", label: "Warning: ", text: "Filler opener and hype noun ('game-changer'). Say what changed instead." },
+      { kind: "error", label: "Hard bug: ", text: "Unfilled docs placeholder at the end. Add the link or delete the token." },
+      { kind: "warn", label: "Warning: ", text: "Stacked stock phrasing like 'seamless' adds zero facts. The first two sentences already state what changed." },
     ],
-    trapVerdict: "Rejected: the buzzwords are gone, but a 'Not X, but Y' slogan took their place.",
-    goodVerdict: "0 issues. Chat wrapper and stock phrasing removed.",
+    trapVerdict: "Rejected: the filler and placeholder are gone, but a 'Not just X — it's Y' slogan took their place.",
+    goodVerdict: "0 issues. The hype sentence and blank placeholder are cut, and all three numbers stay intact.",
   },
 };
 
@@ -715,12 +715,12 @@ const SPECIMENS_BY_LANG = {
         "",
         "压测延迟数据见【待补充】。",
         "",
-        "值得注意的是，本次改造以工单分级为重要抓手，全面赋能一线客服团队形成服务闭环，将首响时间压缩至最多 45 秒。",
+        "本次改造重塑了工单调度链路，显著提升处理效率，持续优化一线客服协同体验，将首响时间压缩至最多 45 秒。",
       ].join("\n"),
       trap: [
         "压测延迟待压测签字后补齐。",
         "",
-        "本次改造给工单分了级，一线客服首响时间压缩至最多 45 秒。这不是普通优化，而是行业标杆。",
+        "本次改造给工单分了级，一线客服首响时间压缩至最多 45 秒。这不是一次普通的派单优化，而是服务标准线的整体重构。",
       ].join("\n"),
       good: [
         "压测延迟待压测签字后补齐。",
@@ -913,11 +913,11 @@ const SPECIMENS_BY_LANG = {
       filename: "launch-note.md",
       modality: "markdown",
       bad: [
-        "Certainly! Here is the Q3 update.",
+        "Certainly! Here is the release brief.",
         "",
         "p95 latency is [insert p95 latency].",
         "",
-        "It is worth noting that CSV exports take up to 12 minutes for accounts above 500,000 rows. This is a game-changer that isn't just faster — it's a paradigm shift.",
+        "This release leverages a seamless, robust export pipeline to streamline large jobs and elevate reliability — finishing CSV exports in up to 12 minutes for accounts above 500,000 rows.",
       ].join("\n"),
       trap: [
         "p95 latency is pending load-test sign-off.",
