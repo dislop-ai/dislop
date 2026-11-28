@@ -1,6 +1,6 @@
 {
   "name": "dislop",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Pluggable Editorial & Artifact Linter (Node.js Micro-Kernel) — Dual-track Defect & Suggestion engine with local-first 3-Tier LLM routing, Fact Gate, interactive hunk review, and MCP.",
   "license": "Apache-2.0",
   "homepage": "https://dislop.com",

@@ -370,6 +370,8 @@ Shared repo `.dislop.json` files are isolated under untrusted linter rules (`rou
 }
 ```
 
+A `packs` list inside `overrides` replaces the scenario packs for matching files, while `common/artifact-qa` and the matching `en/artifact-qa` or `zh/artifact-qa` stay enabled (use `extraPacks` to append packs without replacing). Scans from a parent directory, `--changed`, and `--since` skip `.dislop/`; validate project packs with `dislop packs lint .dislop/<name>.pack.md`.
+
 User config (`~/.config/dislop/config.json`) holds credentials & providers:
 
 ```json

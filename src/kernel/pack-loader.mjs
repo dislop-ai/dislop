@@ -666,8 +666,14 @@ export async function resolveActivePacks(
       : defaultPackSpecifiersForDoc(doc, packsRoot).map((spec) => ({ spec, origin: "default" }));
 
   if (packOrigin !== "cli" && packSpecifiers && packSpecifiers.length > 0) {
-    if (!requested.some((r) => r.spec === "common/artifact-qa")) {
-      requested = [{ spec: "common/artifact-qa", origin: "default" }, ...requested];
+    const qaDefaults = defaultPackSpecifiersForDoc(doc, packsRoot).filter((s) =>
+      s.endsWith("/artifact-qa"),
+    );
+    const missingQa = qaDefaults
+      .filter((s) => !requested.some((r) => r.spec === s))
+      .map((spec) => ({ spec, origin: "default" }));
+    if (missingQa.length > 0) {
+      requested = [...missingQa, ...requested];
     }
   }
   if (extraPackSpecifiers && extraPackSpecifiers.length > 0) {

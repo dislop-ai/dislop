@@ -1,9 +1,9 @@
 ---
 content-type: reference-data
-version: 1.1.1
+version: 1.1.2
 ---
 
-# CLI, Git Diff, Hooks & CI (`v1.1.1`)
+# CLI, Git Diff, Hooks & CI (`v1.1.2`)
 
 ## Node.js 20+ Micro-Kernel (Shipped, Zero Dependencies)
 

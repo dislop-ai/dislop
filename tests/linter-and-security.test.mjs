@@ -637,3 +637,262 @@ test("PDF /URI extraction, local-path-leak (with ~/ & /Users/<name>/ immunity), 
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("v1.1.2 precision fixes: override artifact-qa parity, .dislop skip, attribute-aware disabled buttons, status-glyph immunity, clean local-path quotes, bold-lead code labels & doctor telemetry", async () => {
+  const { root, cfgDir } = makeWorkspace("dislop-v112-");
+  try {
+    // 1. Project override setting `packs: ["prose"]` still preserves `${lang}/artifact-qa` alongside `common/artifact-qa`
+    const ovDir = path.join(root, "ov-proj");
+    fs.mkdirSync(path.join(ovDir, ".dislop"), { recursive: true });
+    fs.writeFileSync(
+      path.join(ovDir, ".dislop.json"),
+      JSON.stringify({
+        routing: "local",
+        extraPacks: ["./.dislop/team.pack.md"],
+        overrides: [{ files: ["**/*.md"], packs: ["prose"] }],
+      }),
+      "utf8",
+    );
+    fs.writeFileSync(
+      path.join(ovDir, ".dislop", "rules.json"),
+      JSON.stringify({
+        rules: [{ id: "no-internal-tag", kind: "defect", severity: "error", terms: ["INTERNAL_ONLY"] }],
+      }),
+      "utf8",
+    );
+    fs.writeFileSync(
+      path.join(ovDir, ".dislop", "team.pack.md"),
+      "---\nname: local/team\nversion: 1.0.0\ndescription: Custom team notes\nrules:\n  - id: team-clarity\n    priority: hint\n---\n\n1. **team-clarity**: Keep setup steps concrete.\n",
+      "utf8",
+    );
+    fs.writeFileSync(
+      path.join(ovDir, "en-draft.md"),
+      "I hope this helps!\n\nSee [Company Name] for details.\n",
+      "utf8",
+    );
+    fs.writeFileSync(
+      path.join(ovDir, "zh-draft.md"),
+      "\u4e2d\u6587\u6d4b\u8bd5\u6587\u6863\u6b63\u6587\u3002\n\n\u5e0c\u671b\u4ee5\u4e0a\u5185\u5bb9\u5bf9\u60a8\u6709\u6240\u5e2e\u52a9\uff01\n",
+      "utf8",
+    );
+
+    const ioEnOv = makeIo({ cwd: ovDir, cfgDir });
+    assert.equal(await runCli(["check", "en-draft.md", "--no-llm", "--json"], ioEnOv), 1);
+    const enOvRep = JSON.parse(ioEnOv.getStdout());
+    assert.ok(enOvRep.mountedPacks.includes("common/artifact-qa"));
+    assert.ok(enOvRep.mountedPacks.includes("en/artifact-qa"));
+    assert.ok(enOvRep.mountedPacks.includes("en/prose"));
+    assert.ok(enOvRep.items.some((i) => i.ruleId === "en/artifact-qa/chatbot-artifact"));
+    assert.ok(enOvRep.items.some((i) => i.ruleId === "en/artifact-qa/unfilled-placeholder"));
+
+    const ioZhOv = makeIo({ cwd: ovDir, cfgDir });
+    assert.equal(await runCli(["check", "zh-draft.md", "--no-llm", "--json"], ioZhOv), 1);
+    const zhOvRep = JSON.parse(ioZhOv.getStdout());
+    assert.ok(zhOvRep.mountedPacks.includes("common/artifact-qa"));
+    assert.ok(zhOvRep.mountedPacks.includes("zh/artifact-qa"));
+    assert.ok(zhOvRep.mountedPacks.includes("zh/prose"));
+    assert.ok(zhOvRep.items.some((i) => i.ruleId === "zh/artifact-qa/chatbot-artifact"));
+
+    // Explicit CLI `--pack common/artifact-qa` is NOT overwritten by project override `packs: ["prose"]`
+    const ioCliExact = makeIo({ cwd: ovDir, cfgDir });
+    assert.equal(await runCli(["check", "en-draft.md", "--pack", "common/artifact-qa", "--no-llm", "--json"], ioCliExact), 0);
+    const cliExactRep = JSON.parse(ioCliExact.getStdout());
+    assert.deepEqual(cliExactRep.mountedPacks, ["common/artifact-qa", "local/team"]);
+
+    // Untrusted override setting `packs: ["./evil.mjs"]` cannot inherit `"cli"` trust when CLI sets `--pack`
+    const evilOvDir = path.join(root, "evil-ov-proj");
+    fs.mkdirSync(evilOvDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(evilOvDir, ".dislop.json"),
+      JSON.stringify({
+        routing: "local",
+        overrides: [{ files: ["**/*.md"], packs: ["./evil.mjs"] }],
+      }),
+      "utf8",
+    );
+    fs.writeFileSync(path.join(evilOvDir, "evil.mjs"), "export default {};\n", "utf8");
+    fs.writeFileSync(path.join(evilOvDir, "note.md"), "Plain technical release note.\n", "utf8");
+    const ioEvilCli = makeIo({ cwd: evilOvDir, cfgDir });
+    assert.equal(await runCli(["check", "note.md", "--pack", "common/artifact-qa", "--no-llm", "--json"], ioEvilCli), 0);
+    assert.deepEqual(JSON.parse(ioEvilCli.getStdout()).mountedPacks, ["common/artifact-qa"]);
+
+    // 2. Directory walk AND git `--changed` skip `.dislop/`
+    const ioDirWalk = makeIo({ cwd: ovDir, cfgDir });
+    await runCli(["check", ".", "--no-llm", "--json"], ioDirWalk);
+    const dirReports = JSON.parse(ioDirWalk.getStdout());
+    assert.equal(dirReports.some((r) => r.file.includes(".dislop")), false);
+
+    execFileSync("git", ["init"], { cwd: ovDir, stdio: "ignore" });
+    execFileSync("git", ["config", "user.email", "ci@example.com"], { cwd: ovDir, stdio: "ignore" });
+    execFileSync("git", ["config", "user.name", "CI"], { cwd: ovDir, stdio: "ignore" });
+    execFileSync("git", ["add", "en-draft.md", ".dislop.json"], { cwd: ovDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "init"], { cwd: ovDir, stdio: "ignore" });
+    const ioGitChanged = makeIo({ cwd: ovDir, cfgDir });
+    await runCli(["check", "--changed", "--no-llm", "--json"], ioGitChanged);
+    const parsedChanged = JSON.parse(ioGitChanged.getStdout());
+    const changedReports = Array.isArray(parsedChanged) ? parsedChanged : [parsedChanged];
+    assert.equal(changedReports.some((r) => r.file.includes("zh-draft.md")), true);
+    assert.equal(changedReports.some((r) => r.file.includes(".dislop")), false);
+
+    // Doctor exposes overridesCount, declarativeRulesCount & extraPacks
+    const ioDoctor = makeIo({ cwd: ovDir, cfgDir });
+    assert.equal(await runCli(["doctor", "--json"], ioDoctor), 0);
+    const docJson = JSON.parse(ioDoctor.getStdout());
+    assert.equal(docJson.overridesCount, 1);
+    assert.equal(docJson.declarativeRulesCount, 1);
+    assert.deepEqual(docJson.extraPacks, ["./.dislop/team.pack.md"]);
+
+    // 3. Attribute-aware `unexplained-disabled-button` across HTML and JSX/TSX
+    const jsxPath = path.join(root, "ButtonPanel.tsx");
+    fs.writeFileSync(
+      jsxPath,
+      [
+        "export function ButtonPanel({ isSaving, isDisabled, onSave, isOff, a, b, set }: any) {",
+        "  return (",
+        "    <div>",
+        "      <Button className=\"disabled:opacity-50\" onClick={onSave}>Dynamic Class</Button>",
+        "      <Button aria-disabled=\"true\" onClick={onSave}>Aria Disabled</Button>",
+        "      <Button disabled={isSaving || isDisabled} onClick={onSave}>Saving</Button>",
+        "      <Button disabled={isOff && (a > b)} onClick={onSave}>Complex Expr</Button>",
+        "      <Icon /><button disabled>After Self-Closing</button>",
+        "      <Button onClick={() => set({ a: 1 })} disabled>Nested Obj Dead</Button>",
+        "      <button disabled onClick={onSave}>Static JSX Dead</button>",
+        "      <button disabled={true}>Literal True Dead</button>",
+        "    </div>",
+        "  );",
+        "}",
+      ].join("\n"),
+      "utf8",
+    );
+    const ioJsx = makeIo({ cwd: root, cfgDir });
+    await runCli(["check", jsxPath, "--no-llm", "--json"], ioJsx);
+    const jsxBtns = JSON.parse(ioJsx.getStdout()).items.filter(
+      (i) => i.ruleId === "common/web-ui/unexplained-disabled-button",
+    );
+    assert.equal(jsxBtns.length, 4);
+    assert.ok(jsxBtns.some((i) => i.originalQuote.includes("After Self-Closing")));
+    assert.ok(jsxBtns.some((i) => i.originalQuote.includes("Nested Obj Dead")));
+    assert.ok(jsxBtns.some((i) => i.originalQuote.includes("Static JSX Dead")));
+    assert.ok(jsxBtns.some((i) => i.originalQuote.includes("Literal True Dead")));
+
+    const htmlBtnPath = path.join(root, "buttons.html");
+    fs.writeFileSync(
+      htmlBtnPath,
+      [
+        "<html><body>",
+        "<p>\u0130stanbul</p>",
+        "<button class=\"btn disabled\">Styled Token</button>",
+        "<button class=\"btn\" :disabled=\"busy\">Alpine</button>",
+        "<button class=\"btn\" [disabled]=\"busy\">Angular</button>",
+        "<button data-next=\"step2\" disabled>Wizard Next</button>",
+        "<button data-step=\"2\" disabled>Unwired Data Step</button>",
+        "<button onclick=\"run()\" disabled>Inline Handler</button>",
+        "<button DISABLED>Upper Dead HTML</button>",
+        "<button disabled>True Dead HTML</button>",
+        "<script>document.querySelectorAll('[data-next]').forEach(() => {}); const s = 'data-step-label';</script>",
+        "</body></html>",
+      ].join("\n"),
+      "utf8",
+    );
+    const ioHtmlBtn = makeIo({ cwd: root, cfgDir });
+    await runCli(["check", htmlBtnPath, "--no-llm", "--json"], ioHtmlBtn);
+    const htmlBtns = JSON.parse(ioHtmlBtn.getStdout()).items.filter(
+      (i) => i.ruleId === "common/web-ui/unexplained-disabled-button",
+    );
+    assert.equal(htmlBtns.length, 3);
+    assert.ok(htmlBtns.some((i) => i.originalQuote.includes("Unwired Data Step")));
+    assert.ok(htmlBtns.some((i) => i.originalQuote.includes("Upper Dead HTML")));
+    assert.ok(htmlBtns.some((i) => i.originalQuote.includes("True Dead HTML")));
+
+    // 4. `emoji-feature-grid` skips status glyphs and table cells (including nested <p>, <h3>, <li>), keeps decorative emoji clusters
+    const statusHtml = path.join(root, "status.html");
+    fs.writeFileSync(
+      statusHtml,
+      [
+        "<html><body>",
+        "<h3>\u2713 First check passed</h3>",
+        "<h3>\u2715 Second check failed</h3>",
+        "<h3>\u26a0 Third check warning</h3>",
+        "<table><tr><td><h3>\ud83d\ude80 Cell heading</h3></td><td><ul><li>\u2728 Cell list</li></ul></td><td><p>\u26a1 Cell para</p></td></tr></table>",
+        "</body></html>",
+      ].join("\n"),
+      "utf8",
+    );
+    const ioStatusHtml = makeIo({ cwd: root, cfgDir });
+    await runCli(["check", statusHtml, "--no-llm", "--json"], ioStatusHtml);
+    assert.equal(
+      JSON.parse(ioStatusHtml.getStdout()).items.some((i) => i.ruleId.endsWith("/emoji-feature-grid")),
+      false,
+    );
+
+    const decoHtml = path.join(root, "deco.html");
+    fs.writeFileSync(
+      decoHtml,
+      [
+        "<html><body>",
+        "<h3>\ud83d\ude80 Fast Builds</h3>",
+        "<h3>\u2728 Smart Sync</h3>",
+        "<h3>\u26a1 Zero Config</h3>",
+        "</body></html>",
+      ].join("\n"),
+      "utf8",
+    );
+    const ioDecoHtml = makeIo({ cwd: root, cfgDir });
+    await runCli(["check", decoHtml, "--no-llm", "--json"], ioDecoHtml);
+    assert.equal(
+      JSON.parse(ioDecoHtml.getStdout()).items.some((i) => i.ruleId === "en/web-ui/emoji-feature-grid"),
+      true,
+    );
+
+    // 5. `local-path-leak` stops cleanly before backticks/CJK punctuation & uses exact-path dedupe (doesn't swallow prefix leaks)
+    const leakQuotePath = path.join(root, "leak-quote.md");
+    fs.writeFileSync(
+      leakQuotePath,
+      "Check `/Users/alice/work/app/`\uff0c\u7136\u540e\u7ee7\u7eed /Users/bob/docs/spec.md\u3002\n\n[Full](/home/alice/report-2026.pdf) and /home/alice/report.\n",
+      "utf8",
+    );
+    const ioLeakQuote = makeIo({ cwd: root, cfgDir });
+    await runCli(["check", leakQuotePath, "--no-llm", "--json"], ioLeakQuote);
+    const leakQuotes = JSON.parse(ioLeakQuote.getStdout()).items.filter(
+      (i) => i.ruleId === "common/artifact-qa/local-path-leak",
+    );
+    assert.equal(leakQuotes.length, 4);
+    assert.equal(leakQuotes[0].originalQuote, "/Users/alice/work/app/");
+    assert.ok(leakQuotes.some((i) => i.originalQuote === "/home/alice/report"));
+
+    // Doctor text output sanitizes C0 and C1 control characters in extraPacks
+    const ctrlDir = path.join(root, "ctrl-proj");
+    fs.mkdirSync(ctrlDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(ctrlDir, ".dislop.json"),
+      JSON.stringify({ routing: "local", extraPacks: ["en/prose\u001b[31m\u009b31m"] }),
+      "utf8",
+    );
+    const ioCtrlDoc = makeIo({ cwd: ctrlDir, cfgDir });
+    assert.equal(await runCli(["doctor"], ioCtrlDoc), 0);
+    assert.equal(ioCtrlDoc.getStdout().includes("\u001b"), false);
+    assert.equal(ioCtrlDoc.getStdout().includes("\u009b"), false);
+    assert.ok(ioCtrlDoc.getStdout().includes("en/prose?[31m?31m"));
+
+    // 6. `en/prose/bold-lead-list-wall` skips inline-code / `--flag` bold labels
+    const cliListPath = path.join(root, "cli-glossary.md");
+    fs.writeFileSync(
+      cliListPath,
+      [
+        "- **`--no-llm`**: Run offline deterministic checks only.",
+        "- **`--fail-on`**: Control CI exit code threshold.",
+        "- **`--changed`**: Check uncommitted git workspace changes.",
+        "- **`--format`**: Select text, json, agent, diff, or sarif.",
+      ].join("\n"),
+      "utf8",
+    );
+    const ioCliList = makeIo({ cwd: root, cfgDir });
+    await runCli(["check", cliListPath, "--no-llm", "--json"], ioCliList);
+    assert.equal(
+      JSON.parse(ioCliList.getStdout()).items.some((i) => i.ruleId === "en/prose/bold-lead-list-wall"),
+      false,
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});

@@ -6,6 +6,7 @@ import { detectFormatFromPath } from "./document-model.mjs";
 
 const DEFAULT_IGNORED_DIRS = new Set([
   ".git",
+  ".dislop",
   "node_modules",
   "dist",
   "build",
@@ -287,6 +288,12 @@ export function discoverChangedFiles({
     // Confine symlinked targets inside the canonical git repository root
     if (relFromRoot.startsWith("..") || path.isAbsolute(relFromRoot)) continue;
     if (!detectFormatFromPath(abs)) continue;
+    if (
+      rel.replace(/\\/g, "/").split("/").includes(".dislop") ||
+      relFromRoot.split("/").includes(".dislop")
+    ) {
+      continue;
+    }
     const relFromIgnore = path.relative(ignoreRoot, realAbs).replace(/\\/g, "/");
     if (isIgnored(relFromIgnore, false) || isIgnored(relFromRoot, false)) continue;
     resolved.add(abs);

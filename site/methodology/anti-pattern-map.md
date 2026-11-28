@@ -1,13 +1,13 @@
 ---
 content-type: reference-data
-version: 1.1.1
+version: 1.1.2
 ---
 
 # Cross-Modality Anti-Pattern Map
 
-`dislop` (`v1.1.1`) runs `11` stage-gated modular Packs organized by scope/language and deliverable modality (`common/*`, `en/*`, `zh/*`), separating deterministic `Defect` guards (`scripts/*.mjs`, CI blocking) from high-restraint editorial `Suggestion` probes and prompts (`prompts/*.md`, never fail CI).
+`dislop` (`v1.1.2`) runs `11` stage-gated modular Packs organized by scope/language and deliverable modality (`common/*`, `en/*`, `zh/*`), separating deterministic `Defect` guards (`scripts/*.mjs`, CI blocking) from high-restraint editorial `Suggestion` probes and prompts (`prompts/*.md`, never fail CI).
 
-| Category | What It Covers | Shipped `v1.1.1` Offline Coverage |
+| Category | What It Covers | Shipped `v1.1.2` Offline Coverage |
 |---|---|---|
 | **Artifact QA (`common/artifact-qa`, `en/artifact-qa`, `zh/artifact-qa`)** | Objective delivery defects (`Defect: error | warning`) | Unfilled placeholders, stray chatbot wrappers & AI search citation tokens, local user home paths, unrendered Markdown syntax in `.docx`/`.pptx`/`.html`, dead `href="#"` controls, and shrunk OOXML `normAutofit` fonts |
 | **Prose Craft (`en/prose`, `zh/prose`)** | Zero-information filler & syntactic AI shells (`Suggestion`) | Throat-clearing preambles, stock cliché lexicons, `"Not X, but Y"` contrast pivots, balanced three-clause semicolon pitches, rhetorical Q&A hooks, macro-trend openers, moralizing endings, and custom `.dislop/rules.json` term guards |

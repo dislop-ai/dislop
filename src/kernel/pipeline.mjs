@@ -200,9 +200,9 @@ function resolvePerFileSettings(filePath, cwd, config) {
       routing = ov.routing;
       overrideLocal = ov.routing === "local";
     }
-    if (ov.packs !== undefined) {
+    if (ov.packs !== undefined && packOrigin !== "cli") {
       packs = ov.packs;
-      if (packOrigin !== "cli") packOrigin = ov.origin || "project";
+      packOrigin = ov.origin || "project";
     }
     if (ov.extraPacks !== undefined) {
       for (const ep of ov.extraPacks) {

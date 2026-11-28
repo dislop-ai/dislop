@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: zh
 updated: 2026-11-23
-version: 1.1.1
+version: 1.1.2
 ---
 
 # 把去 AI 味检查接进 Claude Code、Codex、Cursor 与 CI：Skill / CLI / MCP 教程
@@ -72,7 +72,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: dislop-ai/dislop@v1.1.1
+      - uses: dislop-ai/dislop@v1.1.2
         with:
           since: origin/${{ github.base_ref }}
           fail-on: error

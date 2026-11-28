@@ -16,6 +16,10 @@ import {
 } from "../runtime/router.mjs";
 import { isWorklogActive } from "../runtime/worklog.mjs";
 
+function sanitizeTerminalText(val) {
+  return String(val || "").replace(/[\x00-\x1f\x7f-\x9f]/g, "?");
+}
+
 /**
  * `dislop doctor [--json]` — zero-network diagnostic snapshot of config, active tier, auth, voice, and Packs.
  */
@@ -80,6 +84,9 @@ export async function runDoctorCommand(_positionals, flags, io = {}) {
       retentionDays: config.worklog.retentionDays,
     },
     configuredPacks: config.packs || ["(auto by document format & language)"],
+    extraPacks: config.extraPacks || [],
+    overridesCount: (config.overrides || []).length,
+    declarativeRulesCount: (config.declarativeRules || []).length,
     builtinPacks,
   };
 
@@ -125,6 +132,9 @@ export async function runDoctorCommand(_positionals, flags, io = {}) {
           ? "disabled in CI"
           : "disabled (local opt-in only)"
     }\n`,
+  );
+  stdout.write(
+    `  Project Rules    : ${diagnosis.overridesCount} override(s), ${diagnosis.declarativeRulesCount} declarative rule(s), extraPacks=${diagnosis.extraPacks.map(sanitizeTerminalText).join(", ") || "(none)"}\n`,
   );
   stdout.write(`  Built-in Packs   : ${diagnosis.builtinPacks.join(", ")}\n`);
 

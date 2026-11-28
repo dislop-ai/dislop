@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: zh
 updated: 2026-11-23
-version: 1.1.1
+version: 1.1.2
 ---
 
 # 什么是 AI 味：从词面套话、二阶句式到模板网页与 PPT 的识别图谱

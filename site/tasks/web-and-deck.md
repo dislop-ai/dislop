@@ -1,7 +1,7 @@
 ---
 content-type: reference-data
 task: web-and-deck
-version: 1.1.1
+version: 1.1.2
 ---
 
 # Task Bundle: Web UI, SVG & Slide Decks

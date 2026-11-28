@@ -407,6 +407,8 @@ dislop mcp                                  启动本地 stdio MCP 服务（亦�
 }
 ```
 
+`overrides` 中的 `packs` 会替换匹配文件的场景规则包，但 `common/artifact-qa` 与对应语言的 `en/artifact-qa` 或 `zh/artifact-qa` 始终保留（仅需追加时请用 `extraPacks`）。从父目录扫描以及 `--changed`、`--since` 均会自动跳过 `.dislop/`；校验项目自带规则包请运行 `dislop packs lint .dislop/<name>.pack.md`。
+
 个人配置（`~/.config/dislop/config.json`）：
 
 ```json

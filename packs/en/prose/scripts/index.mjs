@@ -251,7 +251,8 @@ export default definePackScripts({
       }
 
       if (seg.id.endsWith("-S1") && (seg.blockKind === "list-item" || !seg.blockKind)) {
-        if (/^\*\*[^*\n]{2,40}\*\*\s*[:—-]/.test(text)) {
+        const boldLabel = text.match(/^\*\*([^*\n]{2,40})\*\*\s*[:\u2014-]/);
+        if (boldLabel && !/`|--/.test(boldLabel[1])) {
           consecutiveBoldListItems += 1;
           if (consecutiveBoldListItems === 1) boldWallAnchorSeg = seg;
           if (consecutiveBoldListItems === 4 && boldWallAnchorSeg) {

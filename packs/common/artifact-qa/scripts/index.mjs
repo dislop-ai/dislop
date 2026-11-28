@@ -12,7 +12,20 @@ const CITATION_ARTIFACT_RE =
   /(?::contentReference\[oaicite:\d+\](?:\{[^}]*\})?|\[(?:oaicite|turn\d+search\d+|citation):\s*[^\]]+\])/i;
 
 const LOCAL_HOME_PATH_RE =
-  /(?:file:\/\/\/(?:Users|home|private\/var|[A-Za-z]:)[^\s)"'<>]*|\/(?:Users|home)\/[A-Za-z0-9._-]+\/[^\s)"'<>]*|[A-Za-z]:\\+Users\\[A-Za-z0-9._-]+\\+[^\s)"'<>]*)/;
+  /(?:file:\/\/\/(?:Users|home|private\/var|[A-Za-z]:)[^\s)"'<>`\uFF0C\u3002\u3001\uFF09\uFF1B\uFF1A\u3011\u300D\u300F]*|\/(?:Users|home)\/[A-Za-z0-9._-]+\/[^\s)"'<>`\uFF0C\u3002\u3001\uFF09\uFF1B\uFF1A\u3011\u300D\u300F]*|[A-Za-z]:\\+Users\\[A-Za-z0-9._-]+\\+[^\s)"'<>`\uFF0C\u3002\u3001\uFF09\uFF1B\uFF1A\u3011\u300D\u300F]*)/;
+
+const TRAILING_PATH_PUNCT = new Set([
+  ".", ",", ";", ":", "!", "?", "*", "]", "}",
+  "\u2019", "\u201D", "\uFF01", "\uFF1F", "\u300B",
+]);
+
+function trimTrailingPathPunct(str) {
+  let end = str.length;
+  while (end > 0 && TRAILING_PATH_PUNCT.has(str[end - 1])) {
+    end -= 1;
+  }
+  return str.slice(0, end);
+}
 
 function safeDecodeUriComponent(raw) {
   try {
@@ -57,6 +70,7 @@ export default definePackScripts({
       doc.format,
     );
     const reportedLeaks = new Set();
+    const reportedPaths = new Set();
 
     for (const seg of doc.segments) {
       const proseOnly = maskInlineCode(seg.text);
@@ -164,6 +178,7 @@ export default definePackScripts({
         const leakKey = `${link.segmentId || "doc"}:${url}`;
         if (!reportedLeaks.has(leakKey)) {
           reportedLeaks.add(leakKey);
+          reportedPaths.add(url);
           ctx.reportDefect({
             ruleId: "local-path-leak",
             severity: isRenderedArtifact ? "error" : "warning",
@@ -180,26 +195,28 @@ export default definePackScripts({
       }
     }
 
+    const globalLeakRe = new RegExp(LOCAL_HOME_PATH_RE.source, "g");
     for (const seg of doc.segments || []) {
-      const m = seg.text.match(LOCAL_HOME_PATH_RE);
-      if (!m) continue;
-      const leakKey = `${seg.id}:${m[0]}`;
-      const alreadyFromLink = Array.from(reportedLeaks).some(
-        (k) => k.startsWith(`${seg.id}:`) || k.includes(m[0]),
-      );
-      if (alreadyFromLink || reportedLeaks.has(leakKey)) continue;
-      reportedLeaks.add(leakKey);
-      ctx.reportDefect({
-        ruleId: "local-path-leak",
-        severity: isRenderedArtifact ? "error" : "warning",
-        targetId: seg.id,
-        line: seg.line,
-        originalQuote: m[0],
-        fixSafety: "manual",
-        actionType: "prompt",
-        reason: `Personal or local machine filesystem path leaked in content ('${m[0]}').`,
-        rewritePrompt: "Replace concrete local user path with a relative path, env placeholder, or public URL.",
-      });
+      for (const m of seg.text.matchAll(globalLeakRe)) {
+        const leakedPath = trimTrailingPathPunct(m[0]);
+        if (!leakedPath) continue;
+        const leakKey = `${seg.id}:${leakedPath}`;
+        const alreadyFromLink = reportedPaths.has(leakedPath) || reportedLeaks.has(`${seg.id}:${leakedPath}`);
+        if (alreadyFromLink || reportedLeaks.has(leakKey)) continue;
+        reportedLeaks.add(leakKey);
+        reportedPaths.add(leakedPath);
+        ctx.reportDefect({
+          ruleId: "local-path-leak",
+          severity: isRenderedArtifact ? "error" : "warning",
+          targetId: seg.id,
+          line: seg.line,
+          originalQuote: leakedPath,
+          fixSafety: "manual",
+          actionType: "prompt",
+          reason: `Personal or local machine filesystem path leaked in content ('${leakedPath}').`,
+          rewritePrompt: "Replace concrete local user path with a relative path, env placeholder, or public URL.",
+        });
+      }
     }
 
     for (const leak of doc.artifacts.rawFormattingLeaks || []) {

@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: en
 updated: 2026-11-23
-version: 1.1.1
+version: 1.1.2
 ---
 
 # Cleaning Up AI-Generated PowerPoint Decks and Word Docs (PPTX / DOCX / PDF)

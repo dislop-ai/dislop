@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 1.1.1
+version: 1.1.2
 snapshot: 2026-11-26
 ---
 
@@ -22,11 +22,11 @@ A pluggable editorial and artifact linter built on a zero-dependency Node.js (`>
 
 | Target | Formats / Scope | Status |
 |---|---|---|
-| Writing, Specs, RFCs & Copy | `.md`, `.mdx`, `.txt` (`common/artifact-qa`, `en/prose`, `zh/prose`, custom `.dislop/rules.json`) | LIVE `v1.1.1` |
-| Word, PowerPoint & Slides | `.docx`, `.pptx`, landscape `.pdf` (OOXML lossless patching, XObject PDF expansion, layout monotony & type scale) | LIVE `v1.1.1` |
-| Web UI, SVG & Images | `.html`, `.css`, `.jsx`, `.tsx`, `.svg`, `.png`, `.jpg`, `.webp` (`data-dislop-ignore`, dead controls, workflow residue) | LIVE `v1.1.1` |
-| Config, Overrides & Fact Gate | Walk-up `.dislop.json` `overrides`, `dislop fix`, `dislop verify`, `dislop packs lint` | LIVE `v1.1.1` |
-| Local & Semantic Routing | 3-Tier `local` (Ollama `dislop model pull`), `byok`, `cloud` (`dislop login`), plus `dislop voice` | LIVE `v1.1.1` |
+| Writing, Specs, RFCs & Copy | `.md`, `.mdx`, `.txt` (`common/artifact-qa`, `en/prose`, `zh/prose`, custom `.dislop/rules.json`) | LIVE `v1.1.2` |
+| Word, PowerPoint & Slides | `.docx`, `.pptx`, landscape `.pdf` (OOXML lossless patching, XObject PDF expansion, layout monotony & type scale) | LIVE `v1.1.2` |
+| Web UI, SVG & Images | `.html`, `.css`, `.jsx`, `.tsx`, `.svg`, `.png`, `.jpg`, `.webp` (`data-dislop-ignore`, dead controls, workflow residue) | LIVE `v1.1.2` |
+| Config, Overrides & Fact Gate | Walk-up `.dislop.json` `overrides`, `dislop fix`, `dislop verify`, `dislop packs lint` | LIVE `v1.1.2` |
+| Local & Semantic Routing | 3-Tier `local` (Ollama `dislop model pull`), `byok`, `cloud` (`dislop login`), plus `dislop voice` | LIVE `v1.1.2` |
 | Git Diffs & PRs | `--changed`, `--since <ref>`, `action.yml`, & SARIF 2.1.0 | LIVE (diff check) · Roadmap (code AST) |
 
 ## Rule Layers

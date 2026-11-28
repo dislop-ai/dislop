@@ -1,6 +1,6 @@
 ---
 name: dislop
-version: 1.1.1
+version: 1.1.2
 description: "Use when drafting or revising text or deliverables a person will read: README, docs, PR descriptions, release notes, RFCs, postmortems, CLI help/errors, emails, essays, web pages and UI copy (HTML/CSS/JSX/SVG), or Word and PowerPoint files. Removes AI-sounding phrasing, chatbot leftovers, placeholders, and template layouts without changing facts."
 ---
 

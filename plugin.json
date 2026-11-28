@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "dislop",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Cutting AI slop is real productivity. Pluggable editorial and artifact linter (11 modular Packs across docs, web UI, slides, and Office) via pure-doc Skill, offline CLI, local stdio MCP, and Official Cloud MCP.",
   "author": {
     "name": "dislop-ai",

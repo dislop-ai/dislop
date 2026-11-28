@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 1.1.1
+version: 1.1.2
 snapshot: 2026-11-26
 ---
 
@@ -8,13 +8,13 @@ snapshot: 2026-11-26
 
 [简体中文](./roadmap.zh-CN.md) · [Product Brief](./methodology/product-brief.md)
 
-Last updated: `2026-11-26` · Current baseline: `v1.1.1` (Node.js Micro-Kernel Linter · `dislop.com` live)
+Last updated: `2026-11-26` · Current baseline: `v1.1.2` (Node.js Micro-Kernel Linter · `dislop.com` live)
 
 This roadmap tracks what `dislop` ships today, how we expand from coding agents and CI pipelines to office agents and human writers, and the open design questions we decide together in [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) or [Issues](https://github.com/dislop-ai/dislop/issues).
 
 ---
 
-## 1. Where We Are (`v1.1.1` Shipped)
+## 1. Where We Are (`v1.1.2` Shipped)
 
 | Area | Shipped today | Key files |
 |---|---|---|

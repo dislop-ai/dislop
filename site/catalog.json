@@ -1,7 +1,7 @@
 {
   "schema": "dislop.catalog/1",
-  "version": "1.1.1",
-  "snapshotDate": "2026-11-26",
+  "version": "1.1.2",
+  "snapshotDate": "2026-11-28",
   "baseUrl": "https://dislop.com",
   "pillars": [
     "methodology",
@@ -26,7 +26,7 @@
     "llmsFullTxt": {
       "path": "/llms-full.txt",
       "bytes": 36759,
-      "approxTokens": 9190
+      "approxTokens": 9189
     },
     "awesomeJson": {
       "path": "/awesome/index.json",
@@ -78,7 +78,7 @@
         "mcp",
         "cli"
       ],
-      "sha256": "e6b49fd79bd20193d903c71829294b8b039beaf3a45342749b45747f3f29091b"
+      "sha256": "8c51be59f8ff4491509fd69dff8cb1bb1190204a5e99dff2bfa01585319bd550"
     },
     {
       "id": "methodology-index",
@@ -119,7 +119,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "77d17cada45d65950bf63134e6013726fb1a42aa98db27fa57128649f88828a2"
+      "sha256": "cc1114d8926eee2ac6d398edbd90dd13aa7ef96665862cf428563224ccb63c8b"
     },
     {
       "id": "methodology-deletion-test",
@@ -146,14 +146,14 @@
         "literary-essay"
       ],
       "bytes": 1755,
-      "approxTokens": 439,
+      "approxTokens": 438,
       "relatedTools": [
         "skill",
         "cli",
         "mcp",
         "browser-workbench"
       ],
-      "sha256": "78df89ad3c1ba4da504c19b36a30267aec39e2a22bce05107fd2be0a3587fe79"
+      "sha256": "a1f1f68a8da9cbd9aa73849f6ece76f74a4d08ae240365299a2ec5a5ed7c9640"
     },
     {
       "id": "methodology-anti-pattern-map",
@@ -188,12 +188,12 @@
         "executive-deck"
       ],
       "bytes": 2038,
-      "approxTokens": 510,
+      "approxTokens": 509,
       "relatedTools": [
         "cli",
         "mcp"
       ],
-      "sha256": "f21bbe33dd52e9561cc3e134cf052572095e54202555488300b27d252bd5383b"
+      "sha256": "323f759baca5a3652abd5778c1d7075cb319d82b3ddef8bcb5e2f5e5f9ba63e4"
     },
     {
       "id": "methodology-positive-divergence",
@@ -222,12 +222,12 @@
         "deck-and-ui"
       ],
       "bytes": 1947,
-      "approxTokens": 487,
+      "approxTokens": 486,
       "relatedTools": [
         "browser-workbench",
         "skill"
       ],
-      "sha256": "215fd72dc3e7ca41d0f82a1b742fc80b3e679baac2f538d5a15e8549be778d84"
+      "sha256": "77df878ffab5f1c3a4e41549efbcd8317d64cc56cd60b80f15bba340a7732410"
     },
     {
       "id": "methodology-product-brief",
@@ -261,7 +261,7 @@
         "executive-deck"
       ],
       "bytes": 2790,
-      "approxTokens": 698,
+      "approxTokens": 697,
       "relatedTools": [
         "browser-workbench",
         "skill",
@@ -269,7 +269,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "6d080a82476230b1a10c436c97f8e284d3a964325e53fd4909daef6b84254c61"
+      "sha256": "441a18552a92474c82ca4c3115bbeed653d94244fa7cc756c94773c357c16cc5"
     },
     {
       "id": "methodology-brand-voice",
@@ -300,13 +300,13 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 10432,
-      "approxTokens": 2608,
+      "bytes": 10491,
+      "approxTokens": 2622,
       "relatedTools": [
         "browser-workbench",
         "cli"
       ],
-      "sha256": "41744a23d8bf3db7f3a325e6d538da84e3c0c27eafea7a94d09ee2b2017739d9"
+      "sha256": "15cb23f3daf8d3b0e6d21c07330f4927676fbd764c64e722ddf9f21d467c4a27"
     },
     {
       "id": "methodology-design-system",
@@ -337,7 +337,7 @@
         "browser-workbench",
         "cli"
       ],
-      "sha256": "17284d35ef542f83332ae759ea0170175ef9b5516ecada8f17bd021fc2a025f5"
+      "sha256": "8a1b7ff7905b18082c698ea7f63fcdf46c4f0ab105f2907f6be27fe63b6cbf1c"
     },
     {
       "id": "cases-index",
@@ -378,7 +378,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "33b9d901ef16ab6196c66c00416d2651fbb07a17d717d1dea28de469d6ceaee3"
+      "sha256": "dcfafaa760dcde7454284562127e867b42f4815c9b10ed73071d4d13d634fc05"
     },
     {
       "id": "cases-copy-contrasts",
@@ -413,13 +413,13 @@
         "executive-deck"
       ],
       "bytes": 11087,
-      "approxTokens": 2772,
+      "approxTokens": 2771,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp"
       ],
-      "sha256": "3274ca7f8e7aa26a3085dc400e92611fc8cfc4034f56d686a36ed22a6b3536fa"
+      "sha256": "02761ebd0658e837b5f4434288d6e4c3ff373b05df27cac93e0e9a6e6c165764"
     },
     {
       "id": "cases-dogfood-audit",
@@ -451,7 +451,7 @@
         "cli",
         "browser-workbench"
       ],
-      "sha256": "faa171d5a498997e4fe2f4baecf6b45caea635989a494cc7b1c64b4bcc83d5e6"
+      "sha256": "a99a77c709f5e1c02299d39c28fd7f564c970ae0bfa9601ed5e7f5f3caf973c5"
     },
     {
       "id": "cases-ui-specimens",
@@ -480,7 +480,7 @@
       "relatedTools": [
         "browser-workbench"
       ],
-      "sha256": "cd7d3919213bda8ed6b17dfcecf1aeefdd2bceb207150d8b71a6732c0807e0f7"
+      "sha256": "8e782f8f5b4a497e1d673f4521abb8083ba42b8cae57b1845cef1fc7abec1942"
     },
     {
       "id": "tools-index",
@@ -514,7 +514,7 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 3641,
+      "bytes": 3640,
       "approxTokens": 910,
       "relatedTools": [
         "browser-workbench",
@@ -523,7 +523,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "7f694989fcabe56363e2cc427d57fe02391f43536605ae645d507715abc7aba1"
+      "sha256": "cfaf1ff75c45a8391796d2492b7c7851395073d19337b2e95d1661391a4027fe"
     },
     {
       "id": "tools-skill",
@@ -565,7 +565,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "1613c9df20873d1f4d0a30c2713aaf74749dda35d0ba51374e274102e94f6bcf"
+      "sha256": "3c4e00207ba211b8e0b9b028f49d4c3c8ed483fe5ccb28e2da4f767a9e4a35dc"
     },
     {
       "id": "tools-skill-ref-work-docs",
@@ -603,7 +603,7 @@
         "skill",
         "cli"
       ],
-      "sha256": "fa901d8b39f9a674250a8556ad3128c151e2748aeb2b7a5d542be799312924a5"
+      "sha256": "fa6d5a4b76906696e8599539437fda9998c49c13becce9b9f749fa5adc542e5e"
     },
     {
       "id": "tools-skill-ref-work-docs.zh-CN",
@@ -636,12 +636,12 @@
         "executive-deck"
       ],
       "bytes": 2935,
-      "approxTokens": 734,
+      "approxTokens": 733,
       "relatedTools": [
         "skill",
         "cli"
       ],
-      "sha256": "0398407d1c0bc53db36453351af31d0d823b9cbc467dc39a70246fe495b90283"
+      "sha256": "9d77aea0b3cf1aa814274e54735f6ba59e47e381790c67dbc31dfe4d1330b0b6"
     },
     {
       "id": "tools-skill-ref-essay",
@@ -679,7 +679,7 @@
         "skill",
         "cli"
       ],
-      "sha256": "6e999138e4e117749d5be49713cb411c47b348915b4d22277d7184fa172b593a"
+      "sha256": "4d67cc30248dd912d825b840a194bf380c50ebf454365b083226c4ab384e49d6"
     },
     {
       "id": "tools-skill-ref-essay.zh-CN",
@@ -717,7 +717,7 @@
         "skill",
         "cli"
       ],
-      "sha256": "45b6a377fadfe7876ed9d0b90e1151be914ba7f75e5b4d37bc7535e52d315ce6"
+      "sha256": "25b7eef66e3888676d86f23897d0b9dd85ead4a36998608408d256c9b2c08822"
     },
     {
       "id": "tools-skill-ref-office",
@@ -755,7 +755,7 @@
         "skill",
         "cli"
       ],
-      "sha256": "017921ebf1bf151290c96ae4fd04258164bdb47f11ccff0caa29f878759586e2"
+      "sha256": "d480fc10b6aef73dc44beefea5525b30a12cb09d7c77139278cc822af40b7b1a"
     },
     {
       "id": "tools-skill-ref-office.zh-CN",
@@ -788,12 +788,12 @@
         "executive-deck"
       ],
       "bytes": 2718,
-      "approxTokens": 680,
+      "approxTokens": 679,
       "relatedTools": [
         "skill",
         "cli"
       ],
-      "sha256": "2fbd193afe775782390a9a2cfe3369fc9730cb6a644b2e6835c044aa3ee2ff6a"
+      "sha256": "5e54035ecee5a3e15562c2b14aa090da1f730ef7f509d161bb31635b82a78986"
     },
     {
       "id": "tools-skill-ref-web-ui",
@@ -826,12 +826,12 @@
         "executive-deck"
       ],
       "bytes": 2719,
-      "approxTokens": 680,
+      "approxTokens": 679,
       "relatedTools": [
         "skill",
         "cli"
       ],
-      "sha256": "e6e3b3fe90fec7732aa1a525892174fe014baf6f0dc8cec613bc82900459fd52"
+      "sha256": "937689c36775f74b8d432723235bf576c5991b399219fe670977a7edfbe97781"
     },
     {
       "id": "tools-skill-ref-web-ui.zh-CN",
@@ -864,12 +864,12 @@
         "executive-deck"
       ],
       "bytes": 2783,
-      "approxTokens": 696,
+      "approxTokens": 695,
       "relatedTools": [
         "skill",
         "cli"
       ],
-      "sha256": "7a41d6b75789fe1d0c466d27bc0395ea2ae11ca921cb62c2f0d3082082548d4c"
+      "sha256": "4066eaba6370fef49748c53b068e19627a4e4bac35aeb3d1aa80b481fed656ba"
     },
     {
       "id": "tools-prompts",
@@ -901,12 +901,12 @@
         "executive-deck"
       ],
       "bytes": 1574,
-      "approxTokens": 394,
+      "approxTokens": 393,
       "relatedTools": [
         "browser-workbench",
         "skill"
       ],
-      "sha256": "d51da184b8895a815948d5865c22ea90ad862017742f9559cee50351e074c825"
+      "sha256": "b306741e86a575d680dad33d8085c3aa980a9489c047a19c5e84e7f75bab30c9"
     },
     {
       "id": "tools-cli-hooks",
@@ -941,11 +941,11 @@
         "executive-deck"
       ],
       "bytes": 2635,
-      "approxTokens": 659,
+      "approxTokens": 658,
       "relatedTools": [
         "cli"
       ],
-      "sha256": "5a822f0e8d55df4ec421e02c29679d4ac6b06be3e855098b04f3c3c7a9feece3"
+      "sha256": "6446ef8f9bc741bee06876c0cb1ca4565305ae5ed2eacef7d15c306bba15df6e"
     },
     {
       "id": "tools-mcp-sdk-api",
@@ -986,7 +986,7 @@
         "mcp",
         "cli"
       ],
-      "sha256": "1f141dffb38c7962b0d0debbdbec4ff013c22bd1074cad8b8460befc5424aa81"
+      "sha256": "81196fd743821b5d8f3a0c875730a8c3ee76b7b11395b6ad585c05b21a84e10e"
     },
     {
       "id": "privacy-policy",
@@ -1013,7 +1013,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "cfd3963727902d142114e70e71110c5ee058ab3d278726ed40faecd54a36fe04"
+      "sha256": "ff273b0fb1e9ac0dc78710a1f5300846970acf6249c4ea92405e9c03d07877cb"
     },
     {
       "id": "pack-core",
@@ -1076,7 +1076,7 @@
         "business-brief"
       ],
       "bytes": 21243,
-      "approxTokens": 5311,
+      "approxTokens": 5310,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1106,7 +1106,7 @@
         "engineering-spec"
       ],
       "bytes": 3387,
-      "approxTokens": 847,
+      "approxTokens": 846,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1138,7 +1138,7 @@
         "regulated-comms"
       ],
       "bytes": 2574,
-      "approxTokens": 644,
+      "approxTokens": 643,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1169,7 +1169,7 @@
         "literary-essay"
       ],
       "bytes": 8195,
-      "approxTokens": 2049,
+      "approxTokens": 2048,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1268,7 +1268,7 @@
         "core"
       ],
       "bytes": 999,
-      "approxTokens": 250,
+      "approxTokens": 249,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1302,7 +1302,7 @@
         "core"
       ],
       "bytes": 1030,
-      "approxTokens": 258,
+      "approxTokens": 257,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1486,7 +1486,7 @@
         "business-brief"
       ],
       "bytes": 1239,
-      "approxTokens": 310,
+      "approxTokens": 309,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1549,7 +1549,7 @@
         "business-brief"
       ],
       "bytes": 1147,
-      "approxTokens": 287,
+      "approxTokens": 286,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1610,7 +1610,7 @@
         "business-brief"
       ],
       "bytes": 1254,
-      "approxTokens": 314,
+      "approxTokens": 313,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1737,7 +1737,7 @@
         "business-brief"
       ],
       "bytes": 1230,
-      "approxTokens": 308,
+      "approxTokens": 307,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1890,7 +1890,7 @@
         "business-brief"
       ],
       "bytes": 1150,
-      "approxTokens": 288,
+      "approxTokens": 287,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -1952,7 +1952,7 @@
         "business-brief"
       ],
       "bytes": 1278,
-      "approxTokens": 320,
+      "approxTokens": 319,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2073,7 +2073,7 @@
         "regulated-comms"
       ],
       "bytes": 1286,
-      "approxTokens": 322,
+      "approxTokens": 321,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2135,7 +2135,7 @@
         "literary-essay"
       ],
       "bytes": 1206,
-      "approxTokens": 302,
+      "approxTokens": 301,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2165,7 +2165,7 @@
         "literary-essay"
       ],
       "bytes": 1102,
-      "approxTokens": 276,
+      "approxTokens": 275,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2227,7 +2227,7 @@
         "literary-essay"
       ],
       "bytes": 1214,
-      "approxTokens": 304,
+      "approxTokens": 303,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2257,7 +2257,7 @@
         "literary-essay"
       ],
       "bytes": 1115,
-      "approxTokens": 279,
+      "approxTokens": 278,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2379,7 +2379,7 @@
         "deck-and-ui"
       ],
       "bytes": 1251,
-      "approxTokens": 313,
+      "approxTokens": 312,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2495,7 +2495,7 @@
         "deck-and-ui"
       ],
       "bytes": 1151,
-      "approxTokens": 288,
+      "approxTokens": 287,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2614,7 +2614,7 @@
         "deck-and-ui"
       ],
       "bytes": 1262,
-      "approxTokens": 316,
+      "approxTokens": 315,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2644,7 +2644,7 @@
         "deck-and-ui"
       ],
       "bytes": 1119,
-      "approxTokens": 280,
+      "approxTokens": 279,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2757,7 +2757,7 @@
         "deck-and-ui"
       ],
       "bytes": 1315,
-      "approxTokens": 329,
+      "approxTokens": 328,
       "relatedTools": [
         "browser-workbench",
         "cli",
@@ -2881,7 +2881,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "a693fcea455ea0b0b6d67dab7031706c95c9ef536e88b0239532fb7c59af43fc"
+      "sha256": "41b43a58e5c774f9371759a4623c733128fe732071601b8a71eefa1271e4b2fb"
     },
     {
       "id": "task-web-and-deck",
@@ -2915,7 +2915,7 @@
         "cli",
         "mcp"
       ],
-      "sha256": "4a8128f452e7218e0492e46606bdf53b9c5cc58dafa66bead6c27dc66c6549f7"
+      "sha256": "1aebd52cd92776ea733a2fa64c4741df5cfd30926ce73e0a9c172fbc299e02da"
     },
     {
       "id": "task-editorial-writing",
@@ -2941,14 +2941,14 @@
         "literary-essay"
       ],
       "bytes": 3438,
-      "approxTokens": 860,
+      "approxTokens": 859,
       "relatedTools": [
         "browser-workbench",
         "skill",
         "cli",
         "mcp"
       ],
-      "sha256": "fc087a6958c27b40b03d79b780fd617e2560b677fe8d13f8c38c5c3bf4f8b6e1"
+      "sha256": "4efbcbec61a1a127fee49c0aecc8d85b5fbc7c5ba910573043f2b01f3a208ce8"
     },
     {
       "id": "task-pre-release-gate",
@@ -2978,12 +2978,12 @@
         "core"
       ],
       "bytes": 1371,
-      "approxTokens": 343,
+      "approxTokens": 342,
       "relatedTools": [
         "cli",
         "mcp"
       ],
-      "sha256": "7cbf8e86d30f8ad7e65ff7ce7d0c8c3a7aed79fb70efe68b9d9f1edfc456c525"
+      "sha256": "c11cae3dc438d8430cff86f4a6c4b45a6ca97dbac48c544db1a3bd8955083bb3"
     },
     {
       "id": "awesome-anti-slop-md",
@@ -3043,7 +3043,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "99a9042c755aa7b6da2f96c2a40d1c9ee0f7e87d7fc9d652afb64d3e2fdcb52a"
+      "sha256": "1bf6a2d71e5f96b969fc458c9ecc31d5f1dd9e41c0aafe8f9b49647d43854845"
     },
     {
       "id": "guide-agent-cli-mcp-tutorial-zh",
@@ -3068,13 +3068,13 @@
         "core"
       ],
       "bytes": 6003,
-      "approxTokens": 1501,
+      "approxTokens": 1500,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "a09a65eb7a6e0fca2f8894c64b5170e36d8db1f10be3a2e65179dcbeabb01b7e"
+      "sha256": "0cdc9879d0c7b47f57d7a76c39ac25b9fbef2f847eb08d46db4918c06e31f507"
     },
     {
       "id": "guide-anti-slop-skill-benchmark-en",
@@ -3105,7 +3105,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "4b801923fd346910a6e05543924638484ffa79f0c07c773bb985d2b6e442391e"
+      "sha256": "945de76e93fe85237076b270fe0fafc2746871f5e3fd6fede42067ab865259fb"
     },
     {
       "id": "guide-anti-slop-skill-benchmark-zh",
@@ -3130,13 +3130,13 @@
         "core"
       ],
       "bytes": 8927,
-      "approxTokens": 2232,
+      "approxTokens": 2231,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "2242ec91a5c5d5fba5fe2e37bb1455e5a53a5e45c96d8242af3b6e369f085bbf"
+      "sha256": "3fa90b08553cddc66526994da1132cc73fa9161690ff51204f09066ee01a1628"
     },
     {
       "id": "guide-deslop-pptx-docx-en",
@@ -3167,7 +3167,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "93b2a0597957852bdd128ec13d3529c179573de1f336bf28dc3f62abf8784f5a"
+      "sha256": "e95003398a8663bdb62c486b6f5378be69c77ff54c3e2b7d22d1d1f947d0a765"
     },
     {
       "id": "guide-deslop-pptx-docx-zh",
@@ -3192,13 +3192,13 @@
         "core"
       ],
       "bytes": 7191,
-      "approxTokens": 1798,
+      "approxTokens": 1797,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "4249696230a0fe045d19869eb9d2c73dc20952f77a738a9b0a40928730197e47"
+      "sha256": "12aca063b27923934cc832ae8fae8f97fe69c5c8a403d346ab459c326ec81de4"
     },
     {
       "id": "guide-fix-ai-slop-web-ui-en",
@@ -3223,13 +3223,13 @@
         "core"
       ],
       "bytes": 6375,
-      "approxTokens": 1594,
+      "approxTokens": 1593,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "54e7657e7a63fe64ca6a0b5c540e4396cc6adc49d897d84f484905b990688f1e"
+      "sha256": "70ee1ddfc4bec571f2a9c0f81fee1ddb443cfb2206b019e60cd4d60b7d6f9f4a"
     },
     {
       "id": "guide-fix-ai-slop-web-ui-zh",
@@ -3254,13 +3254,13 @@
         "core"
       ],
       "bytes": 6558,
-      "approxTokens": 1640,
+      "approxTokens": 1639,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "b8efaa1b0a9fb6b8328ff3413e2db2f7d0e5a3d6d3c5156db95e0e4b5b5b0a34"
+      "sha256": "8f04eca02cbb0e3c0e104c4bf3311edb936a5003f8b07001c755aeaa3936c230"
     },
     {
       "id": "guide-linter-vs-detector-vs-skill-en",
@@ -3291,7 +3291,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "948c00bff6ec0418e6b286e0844b3bff53dc15b80771ec14f4b080268d9c15be"
+      "sha256": "ed7fa4264e234c6ad3150b64fb7fec6bea6006a8a3aa1a2b867f0fad680a0efd"
     },
     {
       "id": "guide-linter-vs-detector-vs-skill-zh",
@@ -3316,13 +3316,13 @@
         "core"
       ],
       "bytes": 6771,
-      "approxTokens": 1693,
+      "approxTokens": 1692,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "ebf4ca56d79bb6ef415e39b4e039bef7fc61f9f3276b6b3fb59fe9f18202d07d"
+      "sha256": "9486f602937af6f7bb89f3399d57f110a56f79faaeb7c98e334846ebb1119a6a"
     },
     {
       "id": "guide-remove-ai-slop-writing-en",
@@ -3353,7 +3353,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "7ec731f03cf684289dfd7ae4b71bf1f2b135b4dcc3e3f589d69ce8df7c612434"
+      "sha256": "308691f0bed379ef7d701f0b13f3dc972dd8169e2b73f8bbeca76ccb6cbcb927"
     },
     {
       "id": "guide-remove-ai-slop-writing-zh",
@@ -3384,7 +3384,7 @@
         "skill",
         "mcp"
       ],
-      "sha256": "0d312f67545a95def20b20fe8be25f1b3a28dead7426703dc944d8b10d6ed3b3"
+      "sha256": "f8a388b6509f2932f881ddb72f9d23c4036388fd3d785096207ea5d0b79ffcd8"
     },
     {
       "id": "guide-what-is-ai-slop-en",
@@ -3409,13 +3409,13 @@
         "core"
       ],
       "bytes": 7582,
-      "approxTokens": 1896,
+      "approxTokens": 1895,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "4164bb9a8098982de10fb8cc3c02c40d0c961abd40f490f8345f258617dba44c"
+      "sha256": "2c3827044009735604e6f7394f07e288054b6dfe2608e93508b8c8c208f6916e"
     },
     {
       "id": "guide-what-is-ai-slop-zh",
@@ -3440,13 +3440,13 @@
         "core"
       ],
       "bytes": 7654,
-      "approxTokens": 1914,
+      "approxTokens": 1913,
       "relatedTools": [
         "cli",
         "skill",
         "mcp"
       ],
-      "sha256": "7fa4118258d842b882bb1cd58a07e62b8d06a8167a69cabc5a2d4e6adfea2f6d"
+      "sha256": "9e3b6aa671113304e31da970d51d8037dff3c137bc4f7f6a73047b83ef256a18"
     },
     {
       "id": "roadmap-en",
@@ -3480,15 +3480,15 @@
         "deck-and-ui",
         "executive-deck"
       ],
-      "bytes": 12534,
-      "approxTokens": 3134,
+      "bytes": 12640,
+      "approxTokens": 3160,
       "relatedTools": [
         "browser-workbench",
         "cli",
         "mcp",
         "skill"
       ],
-      "sha256": "cacc7c227364ed04dee6c1049335573251a84328bd12b9695fe21ad8cb5c6a28"
+      "sha256": "16b68c2c22ac244f7b2a175138c03d62a81891585d4b3f989074bd61018ab062"
     }
   ]
 }

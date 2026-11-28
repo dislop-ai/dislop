@@ -21,6 +21,7 @@ export default definePackScripts({
     for (const seg of doc.segments) {
       const text = seg.text.trim();
       const masked = maskInlineCode(text);
+      const isStatusGlyph = /^[\u2713-\u2718\u26A0\u2610-\u2612]/u.test(text);
 
       if (ZH_PLACEHOLDER_UI_COPY.test(masked)) {
         ctx.reportDefect({
@@ -65,7 +66,13 @@ export default definePackScripts({
         });
       }
 
-      if (ZH_LEADING_EMOJI_RE.test(text) && text.length <= 36) {
+      if (
+        seg.blockKind !== "table-cell" &&
+        !seg.inTableCell &&
+        !isStatusGlyph &&
+        ZH_LEADING_EMOJI_RE.test(text) &&
+        text.length <= 36
+      ) {
         emojiPrefixedSegs.push(seg);
       }
     }

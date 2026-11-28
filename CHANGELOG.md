@@ -4,6 +4,20 @@ All notable changes to `dislop` are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-11-28
+
+### Fixed
+- **Override `artifact-qa` Parity (`src/kernel/pack-loader.mjs`, `src/kernel/pipeline.mjs`)**: Per-glob `overrides` that set `packs` now keep the matching `en/artifact-qa` or `zh/artifact-qa` pack alongside `common/artifact-qa`, while explicit `--pack` on the CLI takes precedence over override `packs` (any configured `extraPacks` still append). Repos using `packs` in `overrides` can opt out per rule under `rules` (for example, `"en/artifact-qa/chatbot-artifact": "off"`).
+- **`.dislop/` Discovery Exclusion (`src/kernel/file-discovery.mjs`)**: Parent-directory scans (`dislop check .`), parent globs, `--changed`, and `--since` now skip `.dislop/` directories so project `*.pack.md` files are not linted as prose; pass `.dislop/<file>.pack.md` directly or run `dislop packs lint <file.pack.md>` to check them.
+- **Attribute-Aware Disabled-Button Check (`src/kernel/document-model.mjs`)**: `common/web-ui/unexplained-disabled-button` now matches genuine `disabled` attributes only—ignoring Tailwind `disabled:` variants, `aria-disabled`, Angular `[disabled]`, Alpine `:disabled`, `disabled` class tokens, JSX `disabled={expr}` bindings, HTML inline click handlers, and `data-*` attributes wired in `<script>`. Static `<button disabled>` and `disabled={true}` without `title`, `aria-label`, `aria-describedby`, or loading labels remain flagged.
+- **Status-Glyph & Table-Cell Immunity in `emoji-feature-grid`**: `en/web-ui` and `zh/web-ui` now skip `table-cell` segments and standard UI checklist/warning glyphs (`\u2713`–`\u2718`, `\u26A0`, `\u2610`–`\u2612`) while continuing to catch decorative emoji clusters.
+- **Clean `local-path-leak` Quote Boundaries**: `common/artifact-qa/local-path-leak` now stops before trailing backticks, sentence punctuation, and full-width CJK punctuation.
+- **Inline-Code Bold Labels in `en/prose/bold-lead-list-wall`**: Exempted list items whose bold prefix label contains inline code or a `--flag`.
+
+### Added
+- **Project Config Visibility in `dislop doctor`**: Added `overridesCount`, `declarativeRulesCount`, and `extraPacks` to both text and `--json` diagnostic output.
+- **Browser Demo Trailer Generator (`scripts/demo-trailer/`)**: Added a zero-dependency Canvas 2D + WebCodecs 1080p MP4 trailer renderer for repository showcase assets (excluded from the npm package).
+
 ## [1.1.1] - 2026-11-26
 
 ### Added

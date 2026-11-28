@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 1.1.1
+version: 1.1.2
 ---
 
 # dislop Tools & Usage Options
@@ -27,5 +27,5 @@ Pick the lightest surface that fits your workflow:
 | Local & 3-Tier Semantic Routing | Live | Default `--engine local` keeps drafts on-machine (optionally add Ollama via `dislop model pull`), or explicitly opt into `--engine byok` or `--engine cloud` (`dislop login`). |
 | Official Cloud MCP | Live | Connect `https://dislop.com/mcp` for 0-credit `dislop_check`, `dislop_verify`, and `dislop_rules` without login, or sign in (OAuth 2.1 / free key from [`/#pricing`](https://dislop.com/#pricing)) for 30 free monthly credits on `dislop_review`, `dislop_deslop`, `dislop_office`, and `dislop_visual_review`. |
 | Claude, Codex, Cursor & Gemini Plugins | Live | Claude: `/plugin marketplace add dislop-ai/dislop`; Codex: `codex plugin marketplace add dislop-ai/dislop`; Gemini CLI: `gemini extensions install https://github.com/dislop-ai/dislop`. |
-| GitHub Action & pre-commit | Live | Gate modified PR lines with `uses: dislop-ai/dislop@v1.1.1` (`action.yml` with `since` & `fail-on`) or `.pre-commit-hooks.yaml`. |
+| GitHub Action & pre-commit | Live | Gate changed PR files with `uses: dislop-ai/dislop@v1.1.2` (`action.yml` with `since` & `fail-on`) or `.pre-commit-hooks.yaml`. |
 | Cloud MCP, HTTP API & `dislop/sdk` | Live | See [`/tools/mcp-sdk-api.md`](./mcp-sdk-api.md) for Official Cloud HTTP MCP, HTTP API, local stdio MCP, and programmatic `definePack()` / `createLinter()`. |

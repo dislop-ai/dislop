@@ -85,7 +85,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: dislop-ai/dislop@v1.1.1
+      - uses: dislop-ai/dislop@v1.1.2
         with:
           since: origin/${{ github.base_ref }}
           fail-on: error

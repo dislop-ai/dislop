@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: zh
 updated: 2026-11-23
-version: 1.1.1
+version: 1.1.2
 ---
 
 # AI 生成的 PPT 和 Word 怎么去模板味：字墙、自动缩字和伪结论标题排查教程

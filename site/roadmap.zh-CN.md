@@ -1,6 +1,6 @@
 ---
 content-type: reference-data
-version: 1.1.1
+version: 1.1.2
 snapshot: 2026-11-26
 ---
 
@@ -8,13 +8,13 @@ snapshot: 2026-11-26
 
 [English](./roadmap.md) · [产品定义](./methodology/product-brief.md)
 
-最后更新：`2026-11-26` · 当前基线：`v1.1.1`（Node.js 微内核 Linter · `dislop.com` 已上线）
+最后更新：`2026-11-26` · 当前基线：`v1.1.2`（Node.js 微内核 Linter · `dislop.com` 已上线）
 
 这份路线图记录 `dislop` 目前已经交付的能力、从编码 Agent / CI 向办公 Agent 与日常写作者扩展的节奏，以及欢迎一起在 [GitHub Discussions](https://github.com/dislop-ai/dislop/discussions) 或 [Issue](https://github.com/dislop-ai/dislop/issues) 讨论的开放问题。
 
 ---
 
-## 1. 当前进度（`v1.1.1` 已落地）
+## 1. 当前进度（`v1.1.2` 已落地）
 
 | 模块 | 现已实现 | 核心目录 |
 |---|---|---|

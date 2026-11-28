@@ -588,6 +588,143 @@ function parseLengthPx(rawVal) {
   return m ? Number(m[1]) : null;
 }
 
+function parseButtonAttributes(attrs) {
+  const list = [];
+  let i = 0;
+  const len = attrs.length;
+  while (i < len) {
+    while (i < len && /\s/.test(attrs[i])) i += 1;
+    if (i >= len || attrs[i] === "/") break;
+    const nameStart = i;
+    while (i < len && !/[\s=/>]/.test(attrs[i])) i += 1;
+    const name = attrs.slice(nameStart, i);
+    if (!name) {
+      i += 1;
+      continue;
+    }
+    while (i < len && /\s/.test(attrs[i])) i += 1;
+    let rawValue = null;
+    if (i < len && attrs[i] === "=") {
+      i += 1;
+      while (i < len && /\s/.test(attrs[i])) i += 1;
+      if (i < len && (attrs[i] === '"' || attrs[i] === "'")) {
+        const q = attrs[i];
+        const vStart = i;
+        i += 1;
+        while (i < len && attrs[i] !== q) {
+          if (attrs[i] === "\\" && i + 1 < len) i += 2;
+          else i += 1;
+        }
+        if (i < len) i += 1;
+        rawValue = attrs.slice(vStart, i);
+      } else if (i < len && attrs[i] === "{") {
+        const vStart = i;
+        let depth = 0;
+        let innerQ = null;
+        while (i < len) {
+          const ch = attrs[i];
+          if (innerQ) {
+            if (ch === "\\" && i + 1 < len) {
+              i += 2;
+              continue;
+            }
+            if (ch === innerQ) innerQ = null;
+          } else {
+            if (ch === '"' || ch === "'" || ch === "`") innerQ = ch;
+            else if (ch === "{") depth += 1;
+            else if (ch === "}") {
+              depth -= 1;
+              if (depth === 0) {
+                i += 1;
+                break;
+              }
+            }
+          }
+          i += 1;
+        }
+        rawValue = attrs.slice(vStart, i);
+      } else {
+        const vStart = i;
+        while (i < len && !/[\s>]/.test(attrs[i])) i += 1;
+        rawValue = attrs.slice(vStart, i);
+      }
+    }
+    list.push({ name, lowerName: name.toLowerCase(), rawValue });
+  }
+  return list;
+}
+
+function unquoteAttrValue(rawValue) {
+  if (!rawValue) return "";
+  if (
+    (rawValue.startsWith('"') && rawValue.endsWith('"')) ||
+    (rawValue.startsWith("'") && rawValue.endsWith("'"))
+  ) {
+    return rawValue.slice(1, -1);
+  }
+  return rawValue;
+}
+
+function extractButtonElements(rawSource) {
+  const buttons = [];
+  const openRe = /<button(?=[\s>/])/gi;
+  const closeRe = /<\/button>/gi;
+  let noMoreClose = false;
+  let openMatch;
+  while ((openMatch = openRe.exec(rawSource)) !== null) {
+    const start = openMatch.index;
+    let i = start + 7;
+    let quote = null;
+    let braceDepth = 0;
+    let tagEnd = -1;
+    while (i < rawSource.length) {
+      const ch = rawSource[i];
+      if (quote) {
+        if (ch === "\\" && i + 1 < rawSource.length) {
+          i += 2;
+          continue;
+        }
+        if (ch === quote) quote = null;
+      } else {
+        if (ch === '"' || ch === "'" || ch === "`") quote = ch;
+        else if (ch === "{") braceDepth += 1;
+        else if (ch === "}" && braceDepth > 0) braceDepth -= 1;
+        else if (ch === ">" && braceDepth === 0) {
+          tagEnd = i;
+          break;
+        }
+      }
+      i += 1;
+    }
+    if (tagEnd === -1) break;
+    const attrs = rawSource.slice(start + 7, tagEnd);
+    if (attrs.trimEnd().endsWith("/")) {
+      openRe.lastIndex = tagEnd + 1;
+      continue;
+    }
+    if (noMoreClose) {
+      openRe.lastIndex = tagEnd + 1;
+      continue;
+    }
+    closeRe.lastIndex = tagEnd + 1;
+    const closeMatch = closeRe.exec(rawSource);
+    if (!closeMatch) {
+      noMoreClose = true;
+      openRe.lastIndex = tagEnd + 1;
+      continue;
+    }
+    const closeIdx = closeMatch.index;
+    buttons.push({
+      attrs,
+      innerHtml: rawSource.slice(tagEnd + 1, closeIdx),
+      fullText: rawSource.slice(start, closeIdx + 9),
+      offset: start,
+    });
+    openRe.lastIndex = closeIdx + 9;
+  }
+  return buttons;
+}
+
 function collectUiSignals(rawSource, format, scriptText = "") {
   const purplePinkGradients = [];
   const glowBlobs = [];
@@ -644,23 +781,49 @@ function collectUiSignals(rawSource, format, scriptText = "") {
     pillBadges.push({ text: m[0], offset: m.index });
   }
 
-  const btnRe = /<button\b([^>]*\bdisabled\b[^>]*)>([\s\S]*?)<\/button>/gi;
-  while ((m = btnRe.exec(rawSource)) !== null) {
-    const attrs = m[1];
-    if (/\b(?:title|aria-label|aria-describedby)=/i.test(attrs)) continue;
-    const innerText = m[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  for (const btn of extractButtonElements(rawSource)) {
+    const attrList = parseButtonAttributes(btn.attrs);
+    if (
+      attrList.some(
+        (a) => a.lowerName === "title" || a.lowerName === "aria-label" || a.lowerName === "aria-describedby",
+      )
+    ) {
+      continue;
+    }
+    const disabledAttr = attrList.find((a) => a.lowerName === "disabled");
+    if (!disabledAttr) continue;
+    if (disabledAttr.rawValue && disabledAttr.rawValue.startsWith("{") && disabledAttr.rawValue.endsWith("}")) {
+      if (disabledAttr.rawValue.slice(1, -1).trim() !== "true") continue;
+    }
+    if (
+      format === "html" &&
+      attrList.some((a) => a.lowerName === "onclick" || a.lowerName === "@click" || a.lowerName === "v-on:click")
+    ) {
+      continue;
+    }
+    const innerText = btn.innerHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     const isLoadingLabel =
       /(?:\.\.\.|\u2026|\b(?:loading|pending|preparing|initializing|saving|submitting|connecting|please wait)\b|\u51c6\u5907\u4e2d|\u52a0\u8f7d\u4e2d|\u5904\u7406\u4e2d|\u751f\u6210\u4e2d|\u8bf7\u7a0d\u5019)/i.test(
         innerText,
       );
     if (isLoadingLabel) continue;
-    const idMatch = attrs.match(/\bid\s*=\s*(?:"([A-Za-z0-9_-]+)"|'([A-Za-z0-9_-]+)')/i);
-    const btnId = idMatch ? idMatch[1] || idMatch[2] : "";
+    const idAttr = attrList.find((a) => a.lowerName === "id");
+    const btnId = idAttr ? unquoteAttrValue(idAttr.rawValue) : "";
     if (btnId && scriptText) {
       const escId = btnId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       if (new RegExp(`\\b${escId}\\b`).test(scriptText)) continue;
     }
-    disabledButtonsWithoutTitle.push({ text: m[0], offset: m.index });
+    if (
+      scriptText &&
+      attrList.some((a) => {
+        if (!a.lowerName.startsWith("data-")) return false;
+        const escData = a.lowerName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        return new RegExp(`(?<![A-Za-z0-9_-])${escData}(?![A-Za-z0-9_-])`).test(scriptText);
+      })
+    ) {
+      continue;
+    }
+    disabledButtonsWithoutTitle.push({ text: btn.fullText, offset: btn.offset });
   }
 
   if (format === "svg" && /<svg\b/i.test(rawSource)) {
@@ -807,6 +970,7 @@ function collectHtmlProseBlocks(rawText, proseMask) {
           innerStart: popped.innerStart,
           innerEnd,
           rawInner,
+          inTableCell: stack.some((s) => s.tag === "td" || s.tag === "th"),
         });
         break;
       }
@@ -964,6 +1128,7 @@ function parseMarkupOrStylesheet(rawText, filePath, format) {
     else if (blk.tag === "li") blockKind = "list-item";
     else if (blk.tag === "td" || blk.tag === "th") blockKind = "table-cell";
     else if (blk.tag === "button" || blk.tag === "label" || blk.tag === "a") blockKind = "ui-control";
+    const inTableCell = blk.tag === "td" || blk.tag === "th" || Boolean(blk.inTableCell);
 
     for (const piece of pieces) {
       const cleanSlice = piece.text;
@@ -999,6 +1164,7 @@ function parseMarkupOrStylesheet(rawText, filePath, format) {
           id,
           paragraphId: blockId,
           blockKind,
+          ...(inTableCell ? { inTableCell: true } : {}),
           line,
           text: sp.text,
           locator,

@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: zh
 updated: 2026-11-24
-version: 1.1.1
+version: 1.1.2
 ---
 
 # 4 款去 AI 味 Skill 跑 30 份真实稿件的实测记录（2026 基准）

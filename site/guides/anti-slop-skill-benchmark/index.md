@@ -2,7 +2,7 @@
 content-type: reference-data
 lang: en
 updated: 2026-11-24
-version: 1.1.1
+version: 1.1.2
 ---
 
 # 4 Anti-Slop Agent Skills Tested on 30 Real Drafts (2026 Benchmark)
