@@ -217,13 +217,12 @@
           </div>
         </div>
 
-        <!-- Right column: live 3-state proof on a galley slip -->
-        <div class="hero-proof" aria-label="Three-state editing example">
+        <!-- Right column: live before/after proof on a galley slip -->
+        <div class="hero-proof" aria-label="Before and after editing example">
           <div class="hero-proof-head">
             <div class="mode-tabs" id="hero-proof-tabs" role="tablist" aria-label="Switch example version">
-              <button type="button" id="hp-tab-bad" role="tab" aria-selected="true" aria-controls="hero-proof-slip" tabindex="0" class="ctrl-btn is-active" data-hero-state="bad" data-i18n="hp.tabBad">Original</button>
-              <button type="button" id="hp-tab-trap" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="trap" data-i18n="hp.tabTrap">Still sounds like AI</button>
-              <button type="button" id="hp-tab-good" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="good" data-i18n="hp.tabGood">Cleaned up</button>
+              <button type="button" id="hp-tab-bad" role="tab" aria-selected="true" aria-controls="hero-proof-slip" tabindex="0" class="ctrl-btn is-active" data-hero-state="bad" data-i18n="hp.tabBad">Before</button>
+              <button type="button" id="hp-tab-good" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="good" data-i18n="hp.tabGood">After</button>
             </div>
           </div>
 
@@ -232,13 +231,13 @@
             <!-- dislop-quote-start -->
             <div class="hero-proof-stage" id="hero-proof-stage" aria-live="polite">
               <!-- dislop-ignore-next-line unfilled-placeholder -- intentional before-edit hero proof specimen -->
-              Failed webhook deliveries now retry up to 8 times over 24 hours with exponential backoff. If the last attempt fails, events wait in a dead-letter queue for 14 days. This release <span class="mark-span mark-warn">leverages a robust, seamless pipeline to streamline recovery and elevate resilience</span> across your stack. <span class="mark-span mark-error">[insert docs link]</span>
+              This release <span class="mark-span mark-warn">leverages a robust, seamless pipeline to streamline</span> webhook recovery, retrying failed deliveries up to 8 times over 24 hours with exponential backoff before routing unrecovered events to a 14-day dead-letter queue. <span class="mark-span mark-warn">This isn't just a retry policy — it's peace of mind</span>. <span class="mark-span mark-error">[insert docs link]</span>
             </div>
             <!-- dislop-quote-end -->
             <div id="hero-proof-feedback">
               <ul class="hero-proof-notes">
                 <li><span class="hero-note-dot is-error"></span><span><strong>Hard bug: </strong>Unfilled docs placeholder at the end. Add the link or delete the token.</span></li>
-                <li><span class="hero-note-dot is-warn"></span><span><strong>Warning: </strong>Stacked stock phrasing like 'seamless' adds zero facts. The first two sentences already state what changed.</span></li>
+                <li><span class="hero-note-dot is-warn"></span><span><strong>Warning: </strong>Stacked buzzwords like 'seamless' and a 'Not just X — it's Y' closer bury the actual change. State the retry rule directly.</span></li>
               </ul>
             </div>
           </div>

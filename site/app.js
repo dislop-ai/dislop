@@ -78,9 +78,9 @@ const I18N = {
     "lead.cta": "在工作台试一段 ↓",
     "lead.installBtn": "装进 Agent 或编辑器",
 
-    "hp.tabBad": "原稿",
+    "hp.tabBad": "改前",
     "hp.tabTrap": "换了种 AI 味",
-    "hp.tabGood": "改干净了",
+    "hp.tabGood": "改后",
     "hp.meta": "用同一个检查引擎实时跑的",
     "hp.openWb": "在下面工作台打开 ↓",
 
@@ -385,9 +385,9 @@ const I18N = {
     "lead.cta": "Try it in the workbench ↓",
     "lead.installBtn": "Add to your agent or editor",
 
-    "hp.tabBad": "Original",
+    "hp.tabBad": "Before",
     "hp.tabTrap": "Still sounds like AI",
-    "hp.tabGood": "Cleaned up",
+    "hp.tabGood": "After",
     "hp.meta": "Running live on the same linter engine",
     "hp.openWb": "Open in workbench ↓",
 
@@ -673,29 +673,29 @@ const HERO_PROOF_BY_LANG = {
     filename: "release-notes.md",
     modality: "markdown",
     pack: "business-brief",
-    bad: "商品搜索改成了增量索引，改价、上下架最多 30 秒生效，以前要等凌晨 3 点的全量重建。类目调整仍走夜间重建。这将显著提升上新效率，持续优化交互体验。如果您还有其他问题，请随时告诉我。",
-    trap: "商品搜索改成了增量索引，改价、上下架最多 30 秒生效，以前要等凌晨 3 点的全量重建。类目调整仍走夜间重建。这不是一次简单的提速，而是运营节奏的重新定义。",
-    good: "商品搜索改成了增量索引，改价、上下架最多 30 秒生效，以前要等凌晨 3 点的全量重建。类目调整仍走夜间重建。",
+    bad: "本次升级重构了搜索底层逻辑，以增量索引把改价和上下架从凌晨 3 点全量重建压到最多 30 秒生效，显著提升上新效率、持续优化交互体验，类目调整暂走夜间重建。这不是一次简单的提速，而是运营节奏的重塑。详见【待补充】。",
+    trap: "商品搜索已切到增量索引，改价和上下架不用再苦等凌晨 3 点全量重建，最多 30 秒生效（类目调整仍走夜间重建）。这不是一次简单的提速，而是运营节奏的重塑。",
+    good: "商品搜索改成了增量索引：改价和上下架最多 30 秒生效，不用再等凌晨 3 点全量重建；类目调整仍走夜间重建。",
     badNotes: [
-      { kind: "error", label: "硬伤：", text: "结尾留着 AI 助手的客套收尾，整句删掉。" },
-      { kind: "warn", label: "提醒：", text: "“显著提升”“持续优化”这类黑话没说出任何新改动，前两句已经讲清了，整句删掉。" },
+      { kind: "error", label: "硬伤：", text: "末尾还留着没填完的占位符，发版前补上链接或直接删掉。" },
+      { kind: "warn", label: "提醒：", text: "把改动埋进了黑话自嗨、空泛吹捧和“不是……而是……”口号里，全段拆成直白人话。" },
     ],
-    trapVerdict: "没通过：客套话和黑话删了，却新添了一句“不是……而是……”的反转口号，原稿里没有这句。",
-    goodVerdict: "0 处问题。只留改了什么、30 秒生效和类目调整仍走夜间重建，比原稿短了 40%。",
+    trapVerdict: "没通过：黑话和占位符删了，却留着“不是……而是……”的反转口号。",
+    goodVerdict: "0 处问题。字数砍掉一半，黑话、口号和占位符全清掉，30 秒、凌晨 3 点和例外规则一个没丢。",
   },
   en: {
     filename: "release-notes.md",
     modality: "markdown",
     pack: "business-brief",
-    bad: "Failed webhook deliveries now retry up to 8 times over 24 hours with exponential backoff. If the last attempt fails, events wait in a dead-letter queue for 14 days. This release leverages a robust, seamless pipeline to streamline recovery and elevate resilience across your stack. [insert docs link]",
-    trap: "Failed webhook deliveries now retry up to 8 times over 24 hours with exponential backoff. If the last attempt fails, events wait in a dead-letter queue for 14 days. This isn't just a retry policy — it's peace of mind.",
-    good: "Failed webhook deliveries now retry up to 8 times over 24 hours with exponential backoff. If the last attempt fails, events wait in a dead-letter queue for 14 days.",
+    bad: "This release leverages a robust, seamless pipeline to streamline webhook recovery, retrying failed deliveries up to 8 times over 24 hours with exponential backoff before routing unrecovered events to a 14-day dead-letter queue. This isn't just a retry policy — it's peace of mind. [insert docs link]",
+    trap: "Failed webhook deliveries now retry up to 8 times over 24 hours with exponential backoff, and events that still fail wait in a dead-letter queue for 14 days. This isn't just a retry policy — it's peace of mind.",
+    good: "Failed webhook deliveries retry up to 8 times over 24 hours with exponential backoff. If the last attempt fails, they stay in a dead-letter queue for 14 days.",
     badNotes: [
       { kind: "error", label: "Hard bug: ", text: "Unfilled docs placeholder at the end. Add the link or delete the token." },
-      { kind: "warn", label: "Warning: ", text: "Stacked stock phrasing like 'seamless' adds zero facts. The first two sentences already state what changed." },
+      { kind: "warn", label: "Warning: ", text: "Stacked buzzwords like 'seamless' and a 'Not just X — it's Y' closer bury the actual change. State the retry rule directly." },
     ],
-    trapVerdict: "Rejected: the filler and placeholder are gone, but a 'Not just X — it's Y' slogan took their place.",
-    goodVerdict: "0 issues. The hype sentence and blank placeholder are cut, and all three numbers stay intact.",
+    trapVerdict: "Rejected: the buzzwords and placeholder are gone, but a 'Not just X — it's Y' slogan took their place.",
+    goodVerdict: "0 issues. Cut nearly in half into two plain sentences, with 8 retries, 24 hours, and 14 days intact.",
   },
 };
 
@@ -7064,7 +7064,7 @@ function init() {
     applyI18n(true);
   });
 
-  // Hero 3-state Proof Card tabs (roving tabindex + arrow keys)
+  // Hero 2-state Proof Card tabs (roving tabindex + arrow keys)
   const heroTabsRail = document.getElementById("hero-proof-tabs");
   const heroTabs = heroTabsRail ? Array.from(heroTabsRail.querySelectorAll("[data-hero-state]")) : [];
   heroTabs.forEach((btn) => {

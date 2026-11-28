@@ -217,13 +217,12 @@
           </div>
         </div>
 
-        <!-- Right column: live 3-state proof on a galley slip -->
-        <div class="hero-proof" aria-label="Three-state editing example">
+        <!-- Right column: live before/after proof on a galley slip -->
+        <div class="hero-proof" aria-label="改前与改后对照示例">
           <div class="hero-proof-head">
             <div class="mode-tabs" id="hero-proof-tabs" role="tablist" aria-label="Switch example version">
-              <button type="button" id="hp-tab-bad" role="tab" aria-selected="true" aria-controls="hero-proof-slip" tabindex="0" class="ctrl-btn is-active" data-hero-state="bad" data-i18n="hp.tabBad">原稿</button>
-              <button type="button" id="hp-tab-trap" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="trap" data-i18n="hp.tabTrap">换了种 AI 味</button>
-              <button type="button" id="hp-tab-good" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="good" data-i18n="hp.tabGood">改干净了</button>
+              <button type="button" id="hp-tab-bad" role="tab" aria-selected="true" aria-controls="hero-proof-slip" tabindex="0" class="ctrl-btn is-active" data-hero-state="bad" data-i18n="hp.tabBad">改前</button>
+              <button type="button" id="hp-tab-good" role="tab" aria-selected="false" aria-controls="hero-proof-slip" tabindex="-1" class="ctrl-btn" data-hero-state="good" data-i18n="hp.tabGood">改后</button>
             </div>
           </div>
 
@@ -231,14 +230,14 @@
             <div class="hero-slip-head" aria-hidden="true"><span>release-notes.md</span><span>business-brief</span></div>
             <!-- dislop-quote-start -->
             <div class="hero-proof-stage" id="hero-proof-stage" aria-live="polite">
-              <!-- dislop-ignore-next-line chatbot-artifact -- intentional before-edit hero proof specimen -->
-              商品搜索改成了增量索引，改价、上下架最多 30 秒生效，以前要等凌晨 3 点的全量重建。类目调整仍走夜间重建。这将<span class="mark-span mark-warn">显著提升上新效率，持续优化交互体验</span>。<span class="mark-span mark-error">如果您还有其他问题，请随时告诉我。</span>
+              <!-- dislop-ignore-next-line unfilled-placeholder -- intentional before-edit hero proof specimen -->
+              本次升级重构了搜索<span class="mark-span mark-warn">底层逻辑</span>，以增量索引把改价和上下架从凌晨 3 点全量重建压到最多 30 秒生效，<span class="mark-span mark-warn">显著提升上新效率、持续优化交互体验</span>，类目调整暂走夜间重建。<span class="mark-span mark-warn">这不是一次简单的提速，而是运营节奏的重塑</span>。详见<span class="mark-span mark-error">【待补充】</span>。
             </div>
             <!-- dislop-quote-end -->
             <div id="hero-proof-feedback">
               <ul class="hero-proof-notes">
-                <li><span class="hero-note-dot is-error"></span><span><strong>硬伤：</strong>结尾留着 AI 助手的客套收尾，整句删掉。</span></li>
-                <li><span class="hero-note-dot is-warn"></span><span><strong>提醒：</strong>“显著提升”“持续优化”这类黑话没说出任何新改动，前两句已经讲清了，整句删掉。</span></li>
+                <li><span class="hero-note-dot is-error"></span><span><strong>硬伤：</strong>末尾还留着没填完的占位符，发版前补上链接或直接删掉。</span></li>
+                <li><span class="hero-note-dot is-warn"></span><span><strong>提醒：</strong>把改动埋进了黑话自嗨、空泛吹捧和“不是……而是……”口号里，全段拆成直白人话。</span></li>
               </ul>
             </div>
           </div>
